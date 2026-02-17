@@ -1,0 +1,813 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sản Phẩm - ShipperShop</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/mobile.css">
+    <link rel="preload" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+    <noscript><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"></noscript>
+    <style>
+        .shop-container {
+            display: grid;
+            grid-template-columns: 280px 1fr;
+            gap: 30px;
+            padding: 40px 0;
+        }
+
+        .sidebar {
+            background: var(--white);
+            border-radius: 15px;
+            padding: 25px;
+            height: fit-content;
+            position: sticky;
+            top: 100px;
+        }
+
+        .filter-section {
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid var(--gray-light);
+        }
+
+        .filter-section:last-child {
+            border-bottom: none;
+        }
+
+        .filter-title {
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 15px;
+            color: var(--dark);
+        }
+
+        .filter-option {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 12px;
+            cursor: pointer;
+        }
+
+        .filter-option input[type="checkbox"],
+        .filter-option input[type="radio"] {
+            width: 18px;
+            height: 18px;
+            cursor: pointer;
+        }
+
+        .filter-option label {
+            cursor: pointer;
+            flex: 1;
+        }
+
+        .price-range {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .price-input {
+            flex: 1;
+            padding: 8px;
+            border: 1px solid var(--gray-light);
+            border-radius: 5px;
+        }
+
+        .apply-filter-btn {
+            width: 100%;
+            padding: 10px;
+            background: var(--primary);
+            color: var(--white);
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            margin-top: 15px;
+        }
+
+        .shop-header {
+            background: var(--white);
+            padding: 20px;
+            border-radius: 15px;
+            margin-bottom: 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .results-count {
+            color: var(--gray);
+        }
+
+        .shop-controls {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+        }
+
+        .view-toggle {
+            display: flex;
+            gap: 5px;
+        }
+
+        .view-btn {
+            width: 40px;
+            height: 40px;
+            border: 1px solid var(--gray-light);
+            background: var(--white);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--gray);
+        }
+
+        .view-btn.active {
+            background: var(--primary);
+            color: var(--white);
+            border-color: var(--primary);
+        }
+
+        .sort-select {
+            padding: 10px 15px;
+            border: 1px solid var(--gray-light);
+            border-radius: 8px;
+            background: var(--white);
+            cursor: pointer;
+        }
+
+        .pagination {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-top: 40px;
+        }
+
+        .page-btn {
+            width: 40px;
+            height: 40px;
+            border: 1px solid var(--gray-light);
+            background: var(--white);
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+        }
+
+        .page-btn.active {
+            background: var(--primary);
+            color: var(--white);
+            border-color: var(--primary);
+        }
+
+        .no-results {
+            text-align: center;
+            padding: 60px 20px;
+            color: var(--gray);
+        }
+
+        .no-results i {
+            font-size: 64px;
+            margin-bottom: 20px;
+            opacity: 0.3;
+        }
+
+        @media (max-width: 992px) {
+            .shop-container {
+                grid-template-columns: 1fr;
+            }
+            .sidebar {
+                display: none;
+                position: fixed;
+                bottom: 0;
+                left: 0;
+                right: 0;
+                z-index: 600;
+                background: #fff;
+                border-radius: 20px 20px 0 0;
+                max-height: 80vh;
+                overflow-y: auto;
+                padding-bottom: 80px;
+                box-shadow: 0 -4px 24px rgba(0,0,0,.2);
+                transition: transform .3s;
+            }
+            .sidebar.open { display: block; }
+            .sidebar-overlay {
+                display: none;
+                position: fixed;
+                inset: 0;
+                background: rgba(0,0,0,.4);
+                z-index: 590;
+            }
+            .sidebar-overlay.open { display: block; }
+            .mobile-filter-bar {
+                display: flex;
+                gap: 8px;
+                padding: 8px 12px;
+                overflow-x: auto;
+                background: #fff;
+                border-bottom: 1px solid #eee;
+                scrollbar-width: none;
+                -webkit-overflow-scrolling: touch;
+            }
+            .mobile-filter-bar::-webkit-scrollbar { display: none; }
+            .mfb-btn {
+                display: flex;
+                align-items: center;
+                gap: 6px;
+                padding: 8px 14px;
+                border: 1.5px solid #ddd;
+                border-radius: 20px;
+                font-size: 13px;
+                font-weight: 600;
+                white-space: nowrap;
+                background: none;
+                cursor: pointer;
+                color: #333;
+                flex-shrink: 0;
+            }
+            .mfb-btn.active { border-color: #EE4D2D; color: #EE4D2D; background: #FFF3EF; }
+            .products-grid { grid-template-columns: repeat(2,1fr) !important; gap: 10px !important; }
+        }
+    </style>
+</head>
+<body>
+    <!-- HEADER (same as index.html) -->
+    <header>
+        <div class="header-top">
+            <div class="container">
+                <div class="d-flex justify-between align-center">
+                    <div class="header-top-left">
+                        <span>📞 Hotline: 1900-6868</span>
+                        <span style="margin-left: 20px;">📧 <a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="d9aaaca9a9b6abad99aab1b0a9a9bcabaab1b6a9f7afb7">[email&#160;protected]</a></span>
+                    </div>
+                    <div class="header-top-right">
+                        <a href="#" style="margin-right: 15px;">Trợ giúp</a>
+                        <a href="#">Tải App</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="header-main">
+            <div class="container">
+                <div class="header-content">
+                    <a href="index.html" class="logo">🛒 SHIPPER<span>SHOP</span></a>
+
+                    <div class="search-bar">
+                        <input type="text" id="searchInput" placeholder="Tìm kiếm sản phẩm...">
+                        <button type="button" onclick="searchProducts()"><i class="fas fa-search"></i></button>
+                    </div>
+
+                    <div class="header-actions">
+                        <a href="cart.html" class="header-btn">
+                            <i class="fas fa-shopping-cart"></i>
+                            <span>Giỏ hàng</span>
+                            <span class="cart-badge" id="cartCount">0</span>
+                        </a>
+                        <a href="login.html" class="header-btn" id="authBtn">
+                            <i class="fas fa-user"></i>
+                            <span>Đăng nhập</span>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <nav>
+            <div class="container">
+                <ul class="nav-menu">
+                    <li><a href="index.html">Trang chủ</a></li>
+                    <li><a href="shop.html" class="active">Sản phẩm</a></li>
+                    <li><a href="community.html">Cộng đồng</a></li>
+                    <li><a href="wallet.html">Ví tiền</a></li>
+                    <li><a href="#flash-sale">Flash Sale</a></li>
+                </ul>
+            </div>
+        </nav>
+    </header>
+
+    <!-- SHOP CONTENT -->
+    <div class="container">
+        <!-- MOBILE FILTER BAR -->
+<div class="mobile-filter-bar" id="mobileFilterBar" style="display:none">
+  <button class="mfb-btn" onclick="openMobileFilter()"><i class="fas fa-sliders"></i> Bộ lọc</button>
+  <button class="mfb-btn" id="sortBtnMobile" onclick="cycleMobileSort()"><i class="fas fa-sort"></i> Sắp xếp</button>
+  <button class="mfb-btn" onclick="setMobileCat('dien-thoai')">📱 Điện thoại</button>
+  <button class="mfb-btn" onclick="setMobileCat('laptop')">💻 Laptop</button>
+  <button class="mfb-btn" onclick="setMobileCat('thoi-trang')">👗 Thời trang</button>
+  <button class="mfb-btn" onclick="setMobileCat('my-pham')">💄 Mỹ phẩm</button>
+  <button class="mfb-btn" onclick="setMobileCat('')">🛍 Tất cả</button>
+</div>
+<div class="sidebar-overlay" id="sidebarOverlay" onclick="closeMobileFilter()"></div>
+<div class="shop-container">
+            <!-- SIDEBAR FILTERS -->
+            <aside class="sidebar" id="shopSidebar">
+    <div style="display:none;padding:12px 16px;border-bottom:1px solid #eee;display:flex;justify-content:space-between;align-items:center" id="sidebarHeader" class="mobile-sidebar-header">
+      <h3 style="font-size:16px;font-weight:700">Bộ lọc</h3>
+      <button onclick="closeMobileFilter()" style="background:none;border:none;font-size:22px;cursor:pointer;color:#666">×</button>
+    </div>
+                <h3 style="margin-bottom: 25px; font-size: 20px;">🔍 Bộ lọc</h3>
+
+                <!-- Category Filter -->
+                <div class="filter-section">
+                    <h4 class="filter-title">Danh mục</h4>
+                    <div class="filter-option">
+                        <input type="radio" name="category" id="cat-all" value="" checked>
+                        <label for="cat-all">Tất cả</label>
+                    </div>
+                    <div class="filter-option">
+                        <input type="radio" name="category" id="cat-phone" value="dien-thoai">
+                        <label for="cat-phone">📱 Điện thoại</label>
+                    </div>
+                    <div class="filter-option">
+                        <input type="radio" name="category" id="cat-laptop" value="laptop">
+                        <label for="cat-laptop">💻 Laptop</label>
+                    </div>
+                    <div class="filter-option">
+                        <input type="radio" name="category" id="cat-fashion" value="thoi-trang">
+                        <label for="cat-fashion">👕 Thời trang</label>
+                    </div>
+                    <div class="filter-option">
+                        <input type="radio" name="category" id="cat-beauty" value="my-pham">
+                        <label for="cat-beauty">💄 Mỹ phẩm</label>
+                    </div>
+                    <div class="filter-option">
+                        <input type="radio" name="category" id="cat-home" value="gia-dung">
+                        <label for="cat-home">🏠 Gia dụng</label>
+                    </div>
+                </div>
+
+                <!-- Price Filter -->
+                <div class="filter-section">
+                    <h4 class="filter-title">Khoảng giá</h4>
+                    <div class="filter-option">
+                        <input type="radio" name="price" id="price-all" value="" checked>
+                        <label for="price-all">Tất cả</label>
+                    </div>
+                    <div class="filter-option">
+                        <input type="radio" name="price" id="price-1" value="0-500000">
+                        <label for="price-1">Dưới 500K</label>
+                    </div>
+                    <div class="filter-option">
+                        <input type="radio" name="price" id="price-2" value="500000-2000000">
+                        <label for="price-2">500K - 2 triệu</label>
+                    </div>
+                    <div class="filter-option">
+                        <input type="radio" name="price" id="price-3" value="2000000-10000000">
+                        <label for="price-3">2 triệu - 10 triệu</label>
+                    </div>
+                    <div class="filter-option">
+                        <input type="radio" name="price" id="price-4" value="10000000-30000000">
+                        <label for="price-4">10 triệu - 30 triệu</label>
+                    </div>
+                    <div class="filter-option">
+                        <input type="radio" name="price" id="price-5" value="30000000-999999999">
+                        <label for="price-5">Trên 30 triệu</label>
+                    </div>
+                </div>
+
+                <!-- Rating Filter -->
+                <div class="filter-section">
+                    <h4 class="filter-title">Đánh giá</h4>
+                    <div class="filter-option">
+                        <input type="checkbox" id="rating-5" value="5">
+                        <label for="rating-5">⭐⭐⭐⭐⭐</label>
+                    </div>
+                    <div class="filter-option">
+                        <input type="checkbox" id="rating-4" value="4">
+                        <label for="rating-4">⭐⭐⭐⭐ trở lên</label>
+                    </div>
+                    <div class="filter-option">
+                        <input type="checkbox" id="rating-3" value="3">
+                        <label for="rating-3">⭐⭐⭐ trở lên</label>
+                    </div>
+                </div>
+
+                <!-- Sale Filter -->
+                <div class="filter-section">
+                    <h4 class="filter-title">Khuyến mãi</h4>
+                    <div class="filter-option">
+                        <input type="checkbox" id="on-sale">
+                        <label for="on-sale">🔥 Đang giảm giá</label>
+                    </div>
+                    <div class="filter-option">
+                        <input type="checkbox" id="free-ship">
+                        <label for="free-ship">🚚 Freeship</label>
+                    </div>
+                </div>
+
+                <button class="apply-filter-btn" onclick="applyFilters()">
+                    Áp dụng lọc
+                </button>
+                <button class="apply-filter-btn" onclick="resetFilters()" style="background: var(--gray-light); color: var(--dark); margin-top: 10px;">
+                    Xóa lọc
+                </button>
+            </aside>
+
+            <!-- MAIN CONTENT -->
+            <main>
+                <!-- Shop Header -->
+                <div class="shop-header">
+                    <div class="results-count" id="resultsCount">
+                        Hiển thị <strong>1-12</strong> trong <strong>48</strong> sản phẩm
+                    </div>
+
+                    <div class="shop-controls">
+                        <div class="view-toggle">
+                            <button class="view-btn active" onclick="setView('grid')">
+                                <i class="fas fa-th"></i>
+                            </button>
+                            <button class="view-btn" onclick="setView('list')">
+                                <i class="fas fa-list"></i>
+                            </button>
+                        </div>
+
+                        <select class="sort-select" id="sortSelect" onchange="sortProducts()">
+                            <option value="featured">Nổi bật</option>
+                            <option value="newest">Mới nhất</option>
+                            <option value="price-asc">Giá: Thấp → Cao</option>
+                            <option value="price-desc">Giá: Cao → Thấp</option>
+                            <option value="rating">Đánh giá cao</option>
+                            <option value="popular">Bán chạy</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Products Grid -->
+                <div class="products-grid" id="productsGrid">
+                    <!-- Products will be loaded here by JavaScript -->
+                </div>
+
+                <!-- Pagination -->
+                <div class="pagination" id="pagination">
+                    <!-- Pagination will be loaded here -->
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <!-- FOOTER -->
+    <footer style="background: var(--dark); color: white; padding: 60px 0 20px; margin-top: 60px;">
+        <div class="container">
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 40px;">
+                <div>
+                    <h3 style="margin-bottom: 20px;">🛒 SHIPPERSHOP</h3>
+                    <p style="color: rgba(255,255,255,0.7);">Nền tảng mua sắm #1</p>
+                </div>
+                <div>
+                    <h4 style="margin-bottom: 20px;">Liên hệ</h4>
+                    <p style="color: rgba(255,255,255,0.7);">📞 1900-6868</p>
+                    <p style="color: rgba(255,255,255,0.7);">📧 <a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="ddaea8adadb2afa99daeb5b4adadb8afaeb5b2adf3abb3">[email&#160;protected]</a></p>
+                </div>
+            </div>
+            <div style="border-top: 1px solid rgba(255,255,255,0.1); margin-top: 40px; padding-top: 20px; text-align: center;">
+                <p style="color: rgba(255,255,255,0.5);">&copy; 2024 ShipperShop</p>
+            </div>
+        </div>
+    </footer>
+
+    <script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script src="js/shop.js"></script>
+    <script>
+        // ==========================================
+        // SHOP PAGE JAVASCRIPT
+        // ==========================================
+
+        let currentPage = 1;
+        let itemsPerPage = 12;
+        let filteredProducts = [];
+        let currentFilters = {
+            category: '',
+            priceRange: '',
+            rating: [],
+            onSale: false,
+            freeShip: false,
+            search: ''
+        };
+
+        // Get URL parameters
+        function getUrlParams() {
+            const params = new URLSearchParams(window.location.search);
+            return {
+                category: params.get('category') || '',
+                search: params.get('search') || '',
+                sale: params.get('sale') === 'true'
+            };
+        }
+
+        // Initialize page
+        function init() {
+            const params = getUrlParams();
+            
+            if (params.category) {
+                currentFilters.category = params.category;
+                document.querySelector(`input[value="${params.category}"]`).checked = true;
+            }
+            
+            if (params.search) {
+                currentFilters.search = params.search;
+                document.getElementById('searchInput').value = params.search;
+            }
+
+            if (params.sale) {
+                currentFilters.onSale = true;
+                document.getElementById('on-sale').checked = true;
+            }
+
+            applyFilters();
+        }
+
+        // Apply filters
+        function applyFilters() {
+            // Get category
+            const categoryRadio = document.querySelector('input[name="category"]:checked');
+            currentFilters.category = categoryRadio ? categoryRadio.value : '';
+
+            // Get price range
+            const priceRadio = document.querySelector('input[name="price"]:checked');
+            currentFilters.priceRange = priceRadio ? priceRadio.value : '';
+
+            // Get rating
+            currentFilters.rating = Array.from(document.querySelectorAll('input[id^="rating-"]:checked'))
+                .map(cb => parseInt(cb.value));
+
+            // Get sale/ship
+            currentFilters.onSale = document.getElementById('on-sale').checked;
+            currentFilters.freeShip = document.getElementById('free-ship').checked;
+
+            filterProducts();
+        }
+
+        // Reset filters
+        function resetFilters() {
+            document.querySelectorAll('input[type="radio"]').forEach(radio => {
+                if (radio.id === 'cat-all' || radio.id === 'price-all') {
+                    radio.checked = true;
+                } else {
+                    radio.checked = false;
+                }
+            });
+
+            document.querySelectorAll('input[type="checkbox"]').forEach(cb => {
+                cb.checked = false;
+            });
+
+            currentFilters = {
+                category: '',
+                priceRange: '',
+                rating: [],
+                onSale: false,
+                freeShip: false,
+                search: ''
+            };
+
+            filterProducts();
+        }
+
+        // Filter products
+        function filterProducts() {
+            filteredProducts = PRODUCTS.filter(product => {
+                // Category filter
+                if (currentFilters.category && product.category !== currentFilters.category) {
+                    return false;
+                }
+
+                // Price filter
+                if (currentFilters.priceRange) {
+                    const [min, max] = currentFilters.priceRange.split('-').map(Number);
+                    if (product.salePrice < min || product.salePrice > max) {
+                        return false;
+                    }
+                }
+
+                // Rating filter
+                if (currentFilters.rating.length > 0) {
+                    const minRating = Math.min(...currentFilters.rating);
+                    if (product.rating < minRating) {
+                        return false;
+                    }
+                }
+
+                // On sale filter
+                if (currentFilters.onSale && product.price === product.salePrice) {
+                    return false;
+                }
+
+                // Search filter
+                if (currentFilters.search) {
+                    const query = currentFilters.search.toLowerCase();
+                    if (!product.name.toLowerCase().includes(query) &&
+                        !product.categoryName.toLowerCase().includes(query)) {
+                        return false;
+                    }
+                }
+
+                return true;
+            });
+
+            currentPage = 1;
+            renderProducts();
+            renderPagination();
+        }
+
+        // Sort products
+        function sortProducts() {
+            const sortValue = document.getElementById('sortSelect').value;
+
+            switch(sortValue) {
+                case 'price-asc':
+                    filteredProducts.sort((a, b) => a.salePrice - b.salePrice);
+                    break;
+                case 'price-desc':
+                    filteredProducts.sort((a, b) => b.salePrice - a.salePrice);
+                    break;
+                case 'rating':
+                    filteredProducts.sort((a, b) => b.rating - a.rating);
+                    break;
+                case 'popular':
+                    filteredProducts.sort((a, b) => b.reviews - a.reviews);
+                    break;
+                case 'newest':
+                    filteredProducts.sort((a, b) => b.id - a.id);
+                    break;
+                default: // featured
+                    filteredProducts.sort((a, b) => (b.featured ? 1 : 0) - (a.featured ? 1 : 0));
+            }
+
+            renderProducts();
+        }
+
+        // Render products
+        function renderProducts() {
+            const container = document.getElementById('productsGrid');
+            const start = (currentPage - 1) * itemsPerPage;
+            const end = start + itemsPerPage;
+            const pageProducts = filteredProducts.slice(start, end);
+
+            if (pageProducts.length === 0) {
+                container.innerHTML = `
+                    <div class="no-results" style="grid-column: 1/-1;">
+                        <i class="fas fa-search"></i>
+                        <h3>Không tìm thấy sản phẩm</h3>
+                        <p>Thử thay đổi bộ lọc hoặc tìm kiếm khác</p>
+                    </div>
+                `;
+            } else {
+                container.innerHTML = pageProducts.map(createProductCard).join('');
+            }
+
+            // Update results count
+            const total = filteredProducts.length;
+            const showing = Math.min(end, total);
+            document.getElementById('resultsCount').innerHTML = 
+                `Hiển thị <strong>${start + 1}-${showing}</strong> trong <strong>${total}</strong> sản phẩm`;
+
+            // Scroll to top
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        // Render pagination
+        function renderPagination() {
+            const container = document.getElementById('pagination');
+            const totalPages = Math.ceil(filteredProducts.length / itemsPerPage);
+
+            if (totalPages <= 1) {
+                container.innerHTML = '';
+                return;
+            }
+
+            let html = '';
+
+            // Previous button
+            html += `<button class="page-btn" onclick="changePage(${currentPage - 1})" ${currentPage === 1 ? 'disabled' : ''}>
+                <i class="fas fa-chevron-left"></i>
+            </button>`;
+
+            // Page numbers
+            for (let i = 1; i <= totalPages; i++) {
+                if (i === 1 || i === totalPages || (i >= currentPage - 1 && i <= currentPage + 1)) {
+                    html += `<button class="page-btn ${i === currentPage ? 'active' : ''}" onclick="changePage(${i})">
+                        ${i}
+                    </button>`;
+                } else if (i === currentPage - 2 || i === currentPage + 2) {
+                    html += '<span style="padding: 0 5px;">...</span>';
+                }
+            }
+
+            // Next button
+            html += `<button class="page-btn" onclick="changePage(${currentPage + 1})" ${currentPage === totalPages ? 'disabled' : ''}>
+                <i class="fas fa-chevron-right"></i>
+            </button>`;
+
+            container.innerHTML = html;
+        }
+
+        // Change page
+        function changePage(page) {
+            const totalPages = Math.ceil(filteredProducts.length / itemsPerPage);
+            if (page < 1 || page > totalPages) return;
+            currentPage = page;
+            renderProducts();
+            renderPagination();
+        }
+
+        // Set view mode
+        function setView(mode) {
+            const grid = document.getElementById('productsGrid');
+            const btns = document.querySelectorAll('.view-btn');
+            
+            btns.forEach(btn => btn.classList.remove('active'));
+
+            event.currentTarget.classList.add('active');
+            if (mode === 'list') {
+                grid.classList.add('list-view');
+            } else {
+                grid.classList.remove('list-view');
+            }
+        }
+
+        // Search
+        function searchProducts() {
+            const q = document.getElementById('searchInput').value.trim();
+            if (q) window.location.href = 'shop.html?search=' + encodeURIComponent(q);
+        }
+
+        // DOMContentLoaded
+        document.addEventListener('DOMContentLoaded', function() {
+            // Init products
+            filterProducts();
+            renderProducts();
+            renderPagination();
+
+            // Check URL params
+            const params = new URLSearchParams(window.location.search);
+            const cat = params.get('category');
+            const search = params.get('search');
+
+            if (cat) {
+                document.getElementById('categoryFilter').value = cat;
+                filterProducts();
+                renderProducts();
+                renderPagination();
+            }
+            if (search) {
+                document.getElementById('searchFilter').value = search;
+                document.getElementById('searchInput').value = search;
+                filterProducts();
+                renderProducts();
+                renderPagination();
+            }
+
+            // Cart count
+            const cart = JSON.parse(localStorage.getItem('cart') || '[]');
+            const cc = document.getElementById('cartCount');
+            if (cc) cc.textContent = cart.reduce((s, i) => s + (i.quantity || 1), 0);
+
+            // Auth
+            const user = JSON.parse(localStorage.getItem('user') || 'null');
+            const ab = document.getElementById('authBtn');
+            if (user && ab) {
+                ab.innerHTML = '<i class="fas fa-user-circle"></i><span>' + user.fullname + '</span>';
+                ab.href = 'profile.html';
+            }
+
+            // Search enter
+            const si = document.getElementById('searchInput');
+            if (si) si.addEventListener('keypress', e => {
+                if (e.key === 'Enter') searchProducts();
+            });
+        });
+    </script>
+  <!-- MOBILE BOTTOM NAV -->
+  <nav id="mobileBottomNav" role="navigation" aria-label="Mobile navigation">
+    <a href="index.html"     class="mnav-item" data-page="index.html">
+      <i class="fas fa-home"></i><span>Trang chủ</span>
+    </a>
+    <a href="shop.html"      class="mnav-item" data-page="shop.html" style="position:relative">
+      <i class="fas fa-store"></i>
+      <span class="mnav-badge" id="navCartBadge" style="display:none">0</span>
+      <span>Mua sắm</span>
+    </a>
+    <button class="mnav-item mnav-fab-wrap" onclick="handleFab()" aria-label="Hành động nhanh">
+      <div class="mnav-fab"><i class="fas fa-search" id="fabIcon"></i></div>
+    </button>
+    <a href="community.html" class="mnav-item" data-page="community.html">
+      <i class="fas fa-users"></i><span>Cộng đồng</span>
+    </a>
+    <a href="profile.html"   class="mnav-item" data-page="profile.html" id="navProfileItem">
+      <i class="fas fa-user" id="navProfileIcon"></i><span id="navProfileName">Tài khoản</span>
+    </a>
+  </nav>
+  <button id="backToTop" onclick="scrollToTop()" aria-label="Lên đầu trang">
+    <i class="fas fa-chevron-up"></i>
+  </button>
+  <div id="pullIndicator" aria-hidden="true">
+    <i class="fas fa-rotate-right"></i>
+    <span>Kéo xuống để làm mới</span>
+  </div>
+  <script src="js/mobile.js"></script>
+</body>
+</html>

@@ -1,0 +1,285 @@
+<?php
+session_start();
+/**
+ * ============================================
+ * POSTS API
+ * ============================================
+ * 
+ * Endpoints:
+ * GET /api/posts.php - Get all posts (with pagination)
+ * GET /api/posts.php?id=1 - Get single post
+ * POST /api/posts.php - Create new post
+ * PUT /api/posts.php - Update post
+ * DELETE /api/posts.php?id=1 - Delete post
+ */
+
+define('APP_ACCESS', true);
+
+require_once __DIR__ . '/../includes/config.php';
+require_once __DIR__ . '/../includes/db.php';
+require_once __DIR__ . '/../includes/functions.php';
+
+// Set CORS headers
+setCorsHeaders();
+
+// Get database
+$db = db();
+
+// Get request method
+$method = getRequestMethod();
+
+// ============================================
+// GET POSTS
+// ============================================
+
+if ($method === 'GET') {
+    
+    // Get single post
+    if (isset($_GET['id'])) {
+        $postId = intval($_GET['id']);
+        
+        $sql = "SELECT 
+                    p.*,
+                    u.fullname as user_name,
+                    u.avatar as user_avatar,
+                    (SELECT COUNT(*) FROM post_likes WHERE post_id = p.id) as likes_count,
+                    (SELECT COUNT(*) FROM comments WHERE post_id = p.id AND status = 'active') as comments_count
+                FROM posts p
+                LEFT JOIN users u ON p.user_id = u.id
+                WHERE p.id = ? AND p.status = 'active'";
+        
+        $post = $db->fetchOne($sql, [$postId]);
+        
+        if (!$post) {
+            error('Bài viết không tồn tại', 404);
+        }
+        
+        // Check if current user liked this post
+        if (isLoggedIn()) {
+            $userId = getCurrentUserId();
+            $liked = $db->fetchOne(
+                "SELECT id FROM post_likes WHERE post_id = ? AND user_id = ?",
+                [$postId, $userId]
+            );
+            $post['user_liked'] = $liked ? true : false;
+        } else {
+            $post['user_liked'] = false;
+        }
+        
+        success('Success', $post);
+    }
+    
+    // Get all posts
+    $page = isset($_GET['page']) ? max(1, intval($_GET['page'])) : 1;
+    $limit = isset($_GET['limit']) ? min(intval($_GET['limit']), 50) : 20;
+    
+    // Build WHERE clause
+    $where = ["p.status = 'active'"];
+    $params = [];
+    
+    // Filter by user
+    if (!empty($_GET['user_id'])) {
+        $where[] = "p.user_id = ?";
+        $params[] = intval($_GET['user_id']);
+    }
+    
+    // Filter by hashtag
+    if (!empty($_GET['hashtag'])) {
+        $hashtag = sanitize($_GET['hashtag']);
+        $where[] = "p.content LIKE ?";
+        $params[] = "%#$hashtag%";
+    }
+    
+    // Search
+    if (!empty($_GET['search'])) {
+        $search = sanitize($_GET['search']);
+        $where[] = "p.content LIKE ?";
+        $params[] = "%$search%";
+    }
+    
+    $whereClause = implode(' AND ', $where);
+    
+    // Count total
+    $total = $db->fetchColumn(
+        "SELECT COUNT(*) FROM posts p WHERE $whereClause",
+        $params
+    );
+    
+    $pagination = paginate($total, $page, $limit);
+    
+    // Get posts
+    $sql = "SELECT 
+                p.*,
+                u.fullname as user_name,
+                u.avatar as user_avatar,
+                (SELECT COUNT(*) FROM post_likes WHERE post_id = p.id) as likes_count,
+                (SELECT COUNT(*) FROM comments WHERE post_id = p.id AND status = 'active') as comments_count
+            FROM posts p
+            LEFT JOIN users u ON p.user_id = u.id
+            WHERE $whereClause
+            ORDER BY p.created_at DESC
+            LIMIT {$pagination['per_page']} OFFSET {$pagination['offset']}";
+    
+    $posts = $db->fetchAll($sql, $params);
+    
+    // Check if current user liked each post
+    if (isLoggedIn()) {
+        $userId = getCurrentUserId();
+        
+        foreach ($posts as &$post) {
+            $liked = $db->fetchOne(
+                "SELECT id FROM post_likes WHERE post_id = ? AND user_id = ?",
+                [$post['id'], $userId]
+            );
+            $post['user_liked'] = $liked ? true : false;
+        }
+    } else {
+        foreach ($posts as &$post) {
+            $post['user_liked'] = false;
+        }
+    }
+    
+    success('Success', $posts);
+}
+
+// ============================================
+// CREATE POST
+// ============================================
+
+if ($method === 'POST') {
+    requireAuth();
+    
+    $userId = getCurrentUserId();
+    
+    // Handle multipart/form-data (for image upload)
+    $content = isset($_POST['content']) ? sanitize($_POST['content']) : '';
+    $imageUrl = null;
+    
+    // Validate content
+    if (empty($content) && empty($_FILES['image'])) {
+        error('Vui lòng nhập nội dung hoặc chọn ảnh');
+    }
+    
+    // Upload image if provided
+    if (!empty($_FILES['image']) && $_FILES['image']['error'] === UPLOAD_ERR_OK) {
+        $uploadResult = uploadFile($_FILES['image'], 'posts');
+        
+        if ($uploadResult['success']) {
+            $imageUrl = $uploadResult['url'];
+        } else {
+            error($uploadResult['message']);
+        }
+    }
+    
+    try {
+        // Create post
+        $postId = $db->insert('posts', [
+            'user_id' => $userId,
+            'content' => $content,
+            'image_url' => $imageUrl,
+            'status' => 'active'
+        ]);
+        
+        // Extract and save hashtags (optional feature)
+        preg_match_all('/#(\w+)/', $content, $hashtags);
+        if (!empty($hashtags[1])) {
+            foreach (array_unique($hashtags[1]) as $tag) {
+                $db->insert('hashtags', [
+                    'tag' => strtolower($tag),
+                    'post_id' => $postId,
+                    'created_at' => date('Y-m-d H:i:s')
+                ]);
+            }
+        }
+        
+        success('Đăng bài thành công!', [
+            'post_id' => $postId,
+            'image_url' => $imageUrl
+        ]);
+        
+    } catch (Exception $e) {
+        if (DEBUG_MODE) {
+            error('Đăng bài thất bại: ' . $e->getMessage(), 500);
+        } else {
+            error('Đăng bài thất bại. Vui lòng thử lại', 500);
+        }
+    }
+}
+
+// ============================================
+// UPDATE POST
+// ============================================
+
+if ($method === 'PUT') {
+    requireAuth();
+    
+    $input = getJsonInput();
+    $postId = intval($input['post_id'] ?? 0);
+    $userId = getCurrentUserId();
+    
+    if ($postId <= 0) {
+        error('Post ID không hợp lệ');
+    }
+    
+    // Check ownership
+    $post = $db->fetchOne("SELECT * FROM posts WHERE id = ? AND user_id = ?", [$postId, $userId]);
+    
+    if (!$post) {
+        error('Bạn không có quyền sửa bài viết này', 403);
+    }
+    
+    // Update content
+    if (isset($input['content'])) {
+        $db->update('posts',
+            ['content' => sanitize($input['content'])],
+            'id = ?',
+            [$postId]
+        );
+    }
+    
+    success('Cập nhật bài viết thành công');
+}
+
+// ============================================
+// DELETE POST
+// ============================================
+
+if ($method === 'DELETE') {
+    requireAuth();
+    
+    $postId = intval($_GET['id'] ?? 0);
+    $userId = getCurrentUserId();
+    
+    if ($postId <= 0) {
+        error('Post ID không hợp lệ');
+    }
+    
+    // Check ownership or admin
+    $post = $db->fetchOne("SELECT * FROM posts WHERE id = ?", [$postId]);
+    
+    if (!$post) {
+        error('Bài viết không tồn tại', 404);
+    }
+    
+    if ($post['user_id'] != $userId && !isAdmin()) {
+        error('Bạn không có quyền xóa bài viết này', 403);
+    }
+    
+    // Soft delete
+    $db->update('posts',
+        ['status' => 'deleted'],
+        'id = ?',
+        [$postId]
+    );
+    
+    // Delete image if exists
+    if ($post['image_url']) {
+        $imagePath = str_replace(SITE_URL . '/uploads/', '', $post['image_url']);
+        deleteFile($imagePath);
+    }
+    
+    success('Xóa bài viết thành công');
+}
+
+// Method not allowed
+error('Method not allowed', 405);

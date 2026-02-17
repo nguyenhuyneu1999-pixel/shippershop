@@ -1,0 +1,754 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard - ShipperShop</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/mobile.css">
+    <link rel="preload" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+    <noscript><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"></noscript>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #f5f6fa;
+        }
+
+        .admin-container {
+            display: flex;
+            min-height: 100vh;
+        }
+
+        /* SIDEBAR */
+        .admin-sidebar {
+            width: 260px;
+            background: linear-gradient(180deg, var(--primary) 0%, var(--primary-dark) 100%);
+            color: white;
+            position: fixed;
+            height: 100vh;
+            overflow-y: auto;
+        }
+
+        .admin-logo {
+            padding: 30px 20px;
+            font-size: 24px;
+            font-weight: bold;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .admin-menu {
+            list-style: none;
+            padding: 20px 0;
+        }
+
+        .admin-menu li a {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            padding: 15px 25px;
+            color: rgba(255,255,255,0.8);
+            transition: all 0.3s;
+        }
+
+        .admin-menu li a:hover,
+        .admin-menu li a.active {
+            background: rgba(255,255,255,0.1);
+            color: white;
+        }
+
+        .admin-menu li a i {
+            width: 20px;
+        }
+
+        /* MAIN CONTENT */
+        .admin-main {
+            flex: 1;
+            margin-left: 260px;
+            padding: 30px;
+        }
+
+        .admin-header {
+            background: white;
+            padding: 20px 30px;
+            border-radius: 15px;
+            margin-bottom: 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        }
+
+        .admin-title {
+            font-size: 28px;
+            font-weight: 600;
+        }
+
+        .admin-user {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .user-avatar {
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            background: var(--primary);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+        }
+
+        /* STATS GRID */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 25px;
+            margin-bottom: 30px;
+        }
+
+        .stat-card {
+            background: white;
+            padding: 25px;
+            border-radius: 15px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .stat-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 4px;
+            height: 100%;
+        }
+
+        .stat-card.revenue::before { background: var(--success); }
+        .stat-card.orders::before { background: var(--primary); }
+        .stat-card.users::before { background: var(--info); }
+        .stat-card.products::before { background: var(--warning); }
+
+        .stat-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 15px;
+        }
+
+        .stat-label {
+            color: var(--gray);
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        .stat-icon {
+            width: 50px;
+            height: 50px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+        }
+
+        .stat-card.revenue .stat-icon {
+            background: rgba(0, 200, 81, 0.1);
+            color: var(--success);
+        }
+
+        .stat-card.orders .stat-icon {
+            background: rgba(238, 77, 45, 0.1);
+            color: var(--primary);
+        }
+
+        .stat-card.users .stat-icon {
+            background: rgba(0, 122, 255, 0.1);
+            color: var(--info);
+        }
+
+        .stat-card.products .stat-icon {
+            background: rgba(255, 185, 0, 0.1);
+            color: var(--warning);
+        }
+
+        .stat-value {
+            font-size: 32px;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        .stat-change {
+            font-size: 13px;
+            color: var(--success);
+        }
+
+        .stat-change.negative {
+            color: var(--danger);
+        }
+
+        /* TABLES */
+        .admin-section {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 25px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        }
+
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #f0f0f0;
+        }
+
+        .section-title {
+            font-size: 20px;
+            font-weight: 600;
+        }
+
+        .btn-primary {
+            padding: 10px 20px;
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+        }
+
+        .admin-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .admin-table th {
+            text-align: left;
+            padding: 12px;
+            background: #f8f9fa;
+            font-weight: 600;
+            font-size: 13px;
+            color: var(--gray);
+            border-bottom: 2px solid #e9ecef;
+        }
+
+        .admin-table td {
+            padding: 15px 12px;
+            border-bottom: 1px solid #f0f0f0;
+        }
+
+        .admin-table tr:hover {
+            background: #f8f9fa;
+        }
+
+        .badge {
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .badge.pending {
+            background: rgba(255, 185, 0, 0.1);
+            color: var(--warning);
+        }
+
+        .badge.completed {
+            background: rgba(0, 200, 81, 0.1);
+            color: var(--success);
+        }
+
+        .badge.processing {
+            background: rgba(0, 122, 255, 0.1);
+            color: var(--info);
+        }
+
+        .badge.cancelled {
+            background: rgba(255, 59, 48, 0.1);
+            color: var(--danger);
+        }
+
+        .action-btn {
+            padding: 6px 12px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 12px;
+            margin-right: 5px;
+        }
+
+        .action-btn.view {
+            background: rgba(0, 122, 255, 0.1);
+            color: var(--info);
+        }
+
+        .action-btn.approve {
+            background: rgba(0, 200, 81, 0.1);
+            color: var(--success);
+        }
+
+        .action-btn.reject {
+            background: rgba(255, 59, 48, 0.1);
+            color: var(--danger);
+        }
+
+        /* QUICK ACTIONS */
+        .quick-actions {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-top: 30px;
+        }
+
+        .quick-action-card {
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            border: 2px solid #f0f0f0;
+        }
+
+        .quick-action-card:hover {
+            border-color: var(--primary);
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(238, 77, 45, 0.2);
+        }
+
+        .quick-action-icon {
+            font-size: 32px;
+            margin-bottom: 10px;
+            color: var(--primary);
+        }
+
+        @media (max-width: 992px) {
+            .admin-sidebar {
+                width: 70px;
+            }
+
+            .admin-menu li a span {
+                display: none;
+            }
+
+            .admin-logo {
+                text-align: center;
+                font-size: 18px;
+            }
+
+            .admin-main {
+                margin-left: 70px;
+            }
+
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="admin-container">
+        <!-- SIDEBAR -->
+        <aside class="admin-sidebar">
+            <div class="admin-logo">
+                🛒 ADMIN
+            </div>
+
+            <ul class="admin-menu">
+                <li><a href="admin.html" class="active">
+                    <i class="fas fa-home"></i>
+                    <span>Dashboard</span>
+                </a></li>
+                <li><a href="admin-orders.html">
+                    <i class="fas fa-shopping-bag"></i>
+                    <span>Đơn hàng</span>
+                </a></li>
+                <li><a href="admin-wallet.html">
+                    <i class="fas fa-wallet"></i>
+                    <span>Ví & Thanh toán</span>
+                </a></li>
+                <li><a href="#" onclick="alert('Coming soon')">
+                    <i class="fas fa-box"></i>
+                    <span>Sản phẩm</span>
+                </a></li>
+                <li><a href="#" onclick="alert('Coming soon')">
+                    <i class="fas fa-users"></i>
+                    <span>Người dùng</span>
+                </a></li>
+                <li><a href="#" onclick="alert('Coming soon')">
+                    <i class="fas fa-comment"></i>
+                    <span>Bài viết</span>
+                </a></li>
+                <li><a href="#" onclick="alert('Coming soon')">
+                    <i class="fas fa-chart-bar"></i>
+                    <span>Báo cáo</span>
+                </a></li>
+                <li><a href="#" onclick="alert('Coming soon')">
+                    <i class="fas fa-cog"></i>
+                    <span>Cài đặt</span>
+                </a></li>
+                <li><a href="index.html">
+                    <i class="fas fa-arrow-left"></i>
+                    <span>Về trang chủ</span>
+                </a></li>
+            </ul>
+        </aside>
+
+        <!-- MAIN CONTENT -->
+        <main class="admin-main">
+            <!-- HEADER -->
+            <div class="admin-header">
+                <h1 class="admin-title">Dashboard</h1>
+                <div class="admin-user">
+                    <div>
+                        <div style="font-weight: 600;" id="adminName">Admin</div>
+                        <div style="font-size: 13px; color: var(--gray);">Administrator</div>
+                    </div>
+                    <div class="user-avatar" id="adminAvatar">A</div>
+                </div>
+            </div>
+
+            <!-- STATS -->
+            <div class="stats-grid">
+                <div class="stat-card revenue">
+                    <div class="stat-header">
+                        <div>
+                            <div class="stat-label">Doanh thu hôm nay</div>
+                            <div class="stat-value" id="todayRevenue">0₫</div>
+                            <div class="stat-change">
+                                <i class="fas fa-arrow-up"></i> +12% so với hôm qua
+                            </div>
+                        </div>
+                        <div class="stat-icon">
+                            <i class="fas fa-dollar-sign"></i>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="stat-card orders">
+                    <div class="stat-header">
+                        <div>
+                            <div class="stat-label">Đơn hàng mới</div>
+                            <div class="stat-value" id="newOrders">0</div>
+                            <div class="stat-change">
+                                <i class="fas fa-arrow-up"></i> +8% so với hôm qua
+                            </div>
+                        </div>
+                        <div class="stat-icon">
+                            <i class="fas fa-shopping-cart"></i>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="stat-card users">
+                    <div class="stat-header">
+                        <div>
+                            <div class="stat-label">Người dùng mới</div>
+                            <div class="stat-value" id="newUsers">0</div>
+                            <div class="stat-change">
+                                <i class="fas fa-arrow-up"></i> +5% so với hôm qua
+                            </div>
+                        </div>
+                        <div class="stat-icon">
+                            <i class="fas fa-users"></i>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="stat-card products">
+                    <div class="stat-header">
+                        <div>
+                            <div class="stat-label">Chờ duyệt</div>
+                            <div class="stat-value" id="pendingItems">0</div>
+                            <div class="stat-change negative">
+                                <i class="fas fa-clock"></i> Cần xử lý
+                            </div>
+                        </div>
+                        <div class="stat-icon">
+                            <i class="fas fa-exclamation-circle"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- RECENT ORDERS -->
+            <div class="admin-section">
+                <div class="section-header">
+                    <h2 class="section-title">Đơn hàng gần đây</h2>
+                    <button class="btn-primary" onclick="window.location.href='admin-orders.html'">
+                        Xem tất cả
+                    </button>
+                </div>
+
+                <table class="admin-table" id="recentOrdersTable">
+                    <thead>
+                        <tr>
+                            <th>Mã đơn</th>
+                            <th>Khách hàng</th>
+                            <th>Sản phẩm</th>
+                            <th>Tổng tiền</th>
+                            <th>Trạng thái</th>
+                            <th>Thao tác</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td colspan="6" style="text-align: center; padding: 40px; color: var(--gray);">
+                                Đang tải...
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- PENDING WALLET REQUESTS -->
+            <div class="admin-section">
+                <div class="section-header">
+                    <h2 class="section-title">Yêu cầu nạp/rút tiền</h2>
+                    <button class="btn-primary" onclick="window.location.href='admin-wallet.html'">
+                        Xem tất cả
+                    </button>
+                </div>
+
+                <table class="admin-table" id="pendingWalletTable">
+                    <thead>
+                        <tr>
+                            <th>Người dùng</th>
+                            <th>Loại</th>
+                            <th>Số tiền</th>
+                            <th>Thời gian</th>
+                            <th>Thao tác</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td colspan="5" style="text-align: center; padding: 40px; color: var(--gray);">
+                                Đang tải...
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- QUICK ACTIONS -->
+            <div class="quick-actions">
+                <div class="quick-action-card" onclick="window.location.href='admin-orders.html'">
+                    <div class="quick-action-icon">📦</div>
+                    <div style="font-weight: 600;">Quản lý đơn hàng</div>
+                </div>
+                <div class="quick-action-card" onclick="window.location.href='admin-wallet.html'">
+                    <div class="quick-action-icon">💰</div>
+                    <div style="font-weight: 600;">Duyệt thanh toán</div>
+                </div>
+                <div class="quick-action-card" onclick="alert('Coming soon')">
+                    <div class="quick-action-icon">📝</div>
+                    <div style="font-weight: 600;">Thêm sản phẩm</div>
+                </div>
+                <div class="quick-action-card" onclick="alert('Coming soon')">
+                    <div class="quick-action-icon">📊</div>
+                    <div style="font-weight: 600;">Xem báo cáo</div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script src="js/shop.js"></script>
+    <script>
+        // ==========================================
+        // ADMIN DASHBOARD JAVASCRIPT
+        // ==========================================
+
+        let currentAdmin = null;
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            checkAdminAuth();
+            loadDashboardStats();
+            loadRecentOrders();
+            loadPendingWallet();
+        });
+
+        // Check admin authentication
+        function checkAdminAuth() {
+            const user = JSON.parse(localStorage.getItem('user') || 'null');
+            
+            if (!user || user.role !== 'admin') {
+                alert('⛔ Bạn không có quyền truy cập trang này!\n\nChỉ Admin mới được phép.');
+                window.location.href = 'index.html';
+                return;
+            }
+
+            currentAdmin = user;
+            
+            // Display admin info
+            document.getElementById('adminName').textContent = user.fullname || 'Admin';
+            const avatar = user.fullname ? user.fullname.charAt(0).toUpperCase() : 'A';
+            document.getElementById('adminAvatar').textContent = avatar;
+        }
+
+        // Load dashboard stats
+        async function loadDashboardStats() {
+            try {
+                const response = await fetch('/api/admin.php?action=dashboard_stats', {
+                    headers: {
+                        'Authorization': 'Bearer ' + localStorage.getItem('token')
+                    }
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    const stats = data.data;
+                    
+                    document.getElementById('todayRevenue').textContent = formatCurrency(stats.today_revenue || 0);
+                    document.getElementById('newOrders').textContent = stats.new_orders || 0;
+                    document.getElementById('newUsers').textContent = stats.new_users || 0;
+                    document.getElementById('pendingItems').textContent = stats.pending_items || 0;
+                }
+            } catch (error) {
+                console.error('Load stats error:', error);
+            }
+        }
+
+        // Load recent orders
+        async function loadRecentOrders() {
+            try {
+                const response = await fetch('/api/admin.php?action=recent_orders&limit=5', {
+                    headers: {
+                        'Authorization': 'Bearer ' + localStorage.getItem('token')
+                    }
+                });
+
+                const data = await response.json();
+
+                if (data.success && data.data.length > 0) {
+                    const tbody = document.querySelector('#recentOrdersTable tbody');
+                    tbody.innerHTML = data.data.map(order => `
+                        <tr>
+                            <td><strong>#${order.order_number}</strong></td>
+                            <td>${order.shipping_name}</td>
+                            <td>${order.items_count || 0} sản phẩm</td>
+                            <td><strong>${formatCurrency(order.total)}</strong></td>
+                            <td><span class="badge ${order.status}">${getOrderStatus(order.status)}</span></td>
+                            <td>
+                                <button class="action-btn view" onclick="viewOrder(${order.id})">
+                                    <i class="fas fa-eye"></i> Xem
+                                </button>
+                            </td>
+                        </tr>
+                    `).join('');
+                } else {
+                    document.querySelector('#recentOrdersTable tbody').innerHTML = `
+                        <tr><td colspan="6" style="text-align: center; padding: 40px;">Chưa có đơn hàng</td></tr>
+                    `;
+                }
+            } catch (error) {
+                console.error('Load orders error:', error);
+            }
+        }
+
+        // Load pending wallet requests
+        async function loadPendingWallet() {
+            try {
+                const response = await fetch('/api/admin.php?action=pending_wallet&limit=5', {
+                    headers: {
+                        'Authorization': 'Bearer ' + localStorage.getItem('token')
+                    }
+                });
+
+                const data = await response.json();
+
+                if (data.success && data.data.length > 0) {
+                    const tbody = document.querySelector('#pendingWalletTable tbody');
+                    tbody.innerHTML = data.data.map(tx => `
+                        <tr>
+                            <td>${tx.user_name || 'Unknown'}</td>
+                            <td>
+                                <span class="badge ${tx.type === 'deposit' ? 'completed' : 'pending'}">
+                                    ${tx.type === 'deposit' ? '💰 Nạp tiền' : '💸 Rút tiền'}
+                                </span>
+                            </td>
+                            <td><strong>${formatCurrency(tx.amount)}</strong></td>
+                            <td>${formatDateTime(tx.created_at)}</td>
+                            <td>
+                                <button class="action-btn view" onclick="viewWalletRequest(${tx.id})">
+                                    <i class="fas fa-eye"></i> Xem
+                                </button>
+                            </td>
+                        </tr>
+                    `).join('');
+                } else {
+                    document.querySelector('#pendingWalletTable tbody').innerHTML = `
+                        <tr><td colspan="5" style="text-align: center; padding: 40px;">Không có yêu cầu chờ xử lý</td></tr>
+                    `;
+                }
+            } catch (error) {
+                console.error('Load wallet error:', error);
+            }
+        }
+
+        // Helper functions
+        function getOrderStatus(status) {
+            const statuses = {
+                'pending': 'Chờ xác nhận',
+                'confirmed': 'Đã xác nhận',
+                'processing': 'Đang xử lý',
+                'shipping': 'Đang giao',
+                'completed': 'Hoàn thành',
+                'cancelled': 'Đã hủy'
+            };
+            return statuses[status] || status;
+        }
+
+        function viewOrder(orderId) {
+            window.location.href = `admin-orders.html?id=${orderId}`;
+        }
+
+        function viewWalletRequest(txId) {
+            window.location.href = `admin-wallet.html?id=${txId}`;
+        }
+    </script>
+    <script src="js/mobile.js"></script>
+
+  <!-- MOBILE BOTTOM NAV - rendered in HTML, no JS injection -->
+  <nav id="mobileBottomNav" role="navigation" aria-label="Mobile navigation">
+    <a href="index.html"     class="mnav-item" data-page="index.html">
+      <i class="fas fa-home"></i><span>Trang chủ</span>
+    </a>
+    <a href="shop.html"      class="mnav-item" data-page="shop.html">
+      <i class="fas fa-store"></i>
+      <span class="mnav-badge" id="navCartBadge" style="display:none">0</span>
+      <span>Mua sắm</span>
+    </a>
+    <button class="mnav-item mnav-fab-wrap" onclick="handleFab()" aria-label="Hành động nhanh">
+      <div class="mnav-fab"><i class="fas fa-search" id="fabIcon"></i></div>
+    </button>
+    <a href="community.html" class="mnav-item" data-page="community.html">
+      <i class="fas fa-users"></i><span>Cộng đồng</span>
+    </a>
+    <a href="profile.html"   class="mnav-item" data-page="profile.html" id="navProfileItem">
+      <i class="fas fa-user" id="navProfileIcon"></i><span id="navProfileName">Tài khoản</span>
+    </a>
+  </nav>
+
+  <!-- BACK TO TOP -->
+  <button id="backToTop" onclick="scrollToTop()" aria-label="Lên đầu trang">
+    <i class="fas fa-chevron-up"></i>
+  </button>
+
+  <!-- PULL TO REFRESH INDICATOR -->
+  <div id="pullIndicator" aria-hidden="true">
+    <i class="fas fa-rotate-right"></i>
+    <span>Kéo xuống để làm mới</span>
+  </div>
+
+</body>
+</html>
