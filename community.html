@@ -162,6 +162,7 @@ body{background:var(--bg);font-family:-apple-system,BlinkMacSystemFont,'Segoe UI
 </style>
     <link rel="stylesheet" href="css/modal-fix.css">
     <link rel="stylesheet" href="css/modal-fix.css">
+    <link rel="stylesheet" href="fix-modal-mobile.css">
 </head>
 <body>
 <nav class="top-nav">
@@ -525,7 +526,7 @@ async function submitPost(){
   if(!ct){toast('Nhập nội dung bài viết!','warning');return;}
   const btn=document.getElementById('subBtn');btn.disabled=true;btn.textContent='Đang đăng...';
   try{
-    const r=await fetch('/api/posts.php',{method:'POST',headers:{'Content-Type':'application/json'},credentials:'include',body:JSON.stringify({content:ct,type:ptype,title:document.getElementById('mTitle2').value.trim()||null,province:document.getElementById('mProv').value||null,is_anonymous:document.getElementById('mAnon').checked?1:0,video_url:document.getElementById('mVideo').value.trim()||null,images:imgs.length?imgs:null})});
+    const r=await fetch('/api/posts.php',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+localStorage.getItem('token')},credentials:'include',body:JSON.stringify({content:ct,type:ptype,title:document.getElementById('mTitle2').value.trim()||null,province:document.getElementById('mProv').value||null,is_anonymous:document.getElementById('mAnon').checked?1:0,video_url:document.getElementById('mVideo').value.trim()||null,images:imgs.length?imgs:null})});
     const d=await r.json();
     if(d.success){toast('🎉 Đăng bài thành công!','success');closeModal();setTimeout(()=>loadPosts(),600);}
     else toast(d.message||'Lỗi','error');
