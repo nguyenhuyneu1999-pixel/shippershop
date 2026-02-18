@@ -5,9 +5,9 @@ function getAuthUserId() {
     
     if (preg_match('/Bearer\s+(.+)/', $authHeader, $matches)) {
         $token = $matches[1];
-        $userData = verifyCsrfToken($token); // Dùng hàm có sẵn
+        $userData = verifyCsrfToken($token);
         
-        if ($userData && isset($userData['id'])) {
+        if ($userData && is_array($userData) && isset($userData['id'])) {
             return $userData['id'];
         }
     }
