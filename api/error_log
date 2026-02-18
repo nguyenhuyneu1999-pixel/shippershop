@@ -836,3 +836,699 @@ SQL: SELECT
             WHERE p.status = 'active'
             ORDER BY p.created_at DESC
             LIMIT 5 OFFSET 0
+[18-Feb-2026 09:00:57 Asia/Ho_Chi_Minh] Query error: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'nhshiw2j_shippershop.post_likes' doesn't exist
+SQL: SELECT 
+                p.*,
+                u.fullname as user_name,
+                u.avatar as user_avatar,
+                (SELECT COUNT(*) FROM post_likes WHERE post_id = p.id) as likes_count,
+                (SELECT COUNT(*) FROM comments WHERE post_id = p.id AND status = 'active') as comments_count
+            FROM posts p
+            LEFT JOIN users u ON p.user_id = u.id
+            WHERE p.status = 'active'
+            ORDER BY p.created_at DESC
+            LIMIT 15 OFFSET 0
+[18-Feb-2026 09:00:57 Asia/Ho_Chi_Minh] Query error: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'nhshiw2j_shippershop.post_likes' doesn't exist
+SQL: SELECT 
+                p.*,
+                u.fullname as user_name,
+                u.avatar as user_avatar,
+                (SELECT COUNT(*) FROM post_likes WHERE post_id = p.id) as likes_count,
+                (SELECT COUNT(*) FROM comments WHERE post_id = p.id AND status = 'active') as comments_count
+            FROM posts p
+            LEFT JOIN users u ON p.user_id = u.id
+            WHERE p.status = 'active'
+            ORDER BY p.created_at DESC
+            LIMIT 5 OFFSET 0
+[18-Feb-2026 09:00:58 Asia/Ho_Chi_Minh] Query error: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'nhshiw2j_shippershop.post_likes' doesn't exist
+SQL: SELECT 
+                p.*,
+                u.fullname as user_name,
+                u.avatar as user_avatar,
+                (SELECT COUNT(*) FROM post_likes WHERE post_id = p.id) as likes_count,
+                (SELECT COUNT(*) FROM comments WHERE post_id = p.id AND status = 'active') as comments_count
+            FROM posts p
+            LEFT JOIN users u ON p.user_id = u.id
+            WHERE p.status = 'active'
+            ORDER BY p.created_at DESC
+            LIMIT 15 OFFSET 0
+[18-Feb-2026 09:00:58 Asia/Ho_Chi_Minh] Query error: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'nhshiw2j_shippershop.post_likes' doesn't exist
+SQL: SELECT 
+                p.*,
+                u.fullname as user_name,
+                u.avatar as user_avatar,
+                (SELECT COUNT(*) FROM post_likes WHERE post_id = p.id) as likes_count,
+                (SELECT COUNT(*) FROM comments WHERE post_id = p.id AND status = 'active') as comments_count
+            FROM posts p
+            LEFT JOIN users u ON p.user_id = u.id
+            WHERE p.status = 'active'
+            ORDER BY p.created_at DESC
+            LIMIT 5 OFFSET 0
+[18-Feb-2026 09:00:59 Asia/Ho_Chi_Minh] Query error: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'nhshiw2j_shippershop.post_likes' doesn't exist
+SQL: SELECT 
+                p.*,
+                u.fullname as user_name,
+                u.avatar as user_avatar,
+                (SELECT COUNT(*) FROM post_likes WHERE post_id = p.id) as likes_count,
+                (SELECT COUNT(*) FROM comments WHERE post_id = p.id AND status = 'active') as comments_count
+            FROM posts p
+            LEFT JOIN users u ON p.user_id = u.id
+            WHERE p.status = 'active'
+            ORDER BY p.created_at DESC
+            LIMIT 15 OFFSET 0
+[18-Feb-2026 09:00:59 Asia/Ho_Chi_Minh] Query error: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'nhshiw2j_shippershop.post_likes' doesn't exist
+SQL: SELECT 
+                p.*,
+                u.fullname as user_name,
+                u.avatar as user_avatar,
+                (SELECT COUNT(*) FROM post_likes WHERE post_id = p.id) as likes_count,
+                (SELECT COUNT(*) FROM comments WHERE post_id = p.id AND status = 'active') as comments_count
+            FROM posts p
+            LEFT JOIN users u ON p.user_id = u.id
+            WHERE p.status = 'active'
+            ORDER BY p.created_at DESC
+            LIMIT 5 OFFSET 0
+[18-Feb-2026 09:01:05 Asia/Ho_Chi_Minh] Query error: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'nhshiw2j_shippershop.post_likes' doesn't exist
+SQL: SELECT 
+                p.*,
+                u.fullname as user_name,
+                u.avatar as user_avatar,
+                (SELECT COUNT(*) FROM post_likes WHERE post_id = p.id) as likes_count,
+                (SELECT COUNT(*) FROM comments WHERE post_id = p.id AND status = 'active') as comments_count
+            FROM posts p
+            LEFT JOIN users u ON p.user_id = u.id
+            WHERE p.status = 'active'
+            ORDER BY p.created_at DESC
+            LIMIT 15 OFFSET 0
+[18-Feb-2026 09:01:05 Asia/Ho_Chi_Minh] Query error: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'nhshiw2j_shippershop.post_likes' doesn't exist
+SQL: SELECT 
+                p.*,
+                u.fullname as user_name,
+                u.avatar as user_avatar,
+                (SELECT COUNT(*) FROM post_likes WHERE post_id = p.id) as likes_count,
+                (SELECT COUNT(*) FROM comments WHERE post_id = p.id AND status = 'active') as comments_count
+            FROM posts p
+            LEFT JOIN users u ON p.user_id = u.id
+            WHERE p.status = 'active'
+            ORDER BY p.created_at DESC
+            LIMIT 5 OFFSET 0
+[18-Feb-2026 09:01:50 Asia/Ho_Chi_Minh] Query error: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'nhshiw2j_shippershop.post_likes' doesn't exist
+SQL: SELECT 
+                p.*,
+                u.fullname as user_name,
+                u.avatar as user_avatar,
+                (SELECT COUNT(*) FROM post_likes WHERE post_id = p.id) as likes_count,
+                (SELECT COUNT(*) FROM comments WHERE post_id = p.id AND status = 'active') as comments_count
+            FROM posts p
+            LEFT JOIN users u ON p.user_id = u.id
+            WHERE p.status = 'active'
+            ORDER BY p.created_at DESC
+            LIMIT 15 OFFSET 0
+[18-Feb-2026 09:01:50 Asia/Ho_Chi_Minh] Query error: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'nhshiw2j_shippershop.post_likes' doesn't exist
+SQL: SELECT 
+                p.*,
+                u.fullname as user_name,
+                u.avatar as user_avatar,
+                (SELECT COUNT(*) FROM post_likes WHERE post_id = p.id) as likes_count,
+                (SELECT COUNT(*) FROM comments WHERE post_id = p.id AND status = 'active') as comments_count
+            FROM posts p
+            LEFT JOIN users u ON p.user_id = u.id
+            WHERE p.status = 'active'
+            ORDER BY p.created_at DESC
+            LIMIT 5 OFFSET 0
+[18-Feb-2026 09:01:54 Asia/Ho_Chi_Minh] Query error: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'nhshiw2j_shippershop.post_likes' doesn't exist
+SQL: SELECT 
+                p.*,
+                u.fullname as user_name,
+                u.avatar as user_avatar,
+                (SELECT COUNT(*) FROM post_likes WHERE post_id = p.id) as likes_count,
+                (SELECT COUNT(*) FROM comments WHERE post_id = p.id AND status = 'active') as comments_count
+            FROM posts p
+            LEFT JOIN users u ON p.user_id = u.id
+            WHERE p.status = 'active'
+            ORDER BY p.created_at DESC
+            LIMIT 15 OFFSET 0
+[18-Feb-2026 09:01:54 Asia/Ho_Chi_Minh] Query error: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'nhshiw2j_shippershop.post_likes' doesn't exist
+SQL: SELECT 
+                p.*,
+                u.fullname as user_name,
+                u.avatar as user_avatar,
+                (SELECT COUNT(*) FROM post_likes WHERE post_id = p.id) as likes_count,
+                (SELECT COUNT(*) FROM comments WHERE post_id = p.id AND status = 'active') as comments_count
+            FROM posts p
+            LEFT JOIN users u ON p.user_id = u.id
+            WHERE p.status = 'active'
+            ORDER BY p.created_at DESC
+            LIMIT 5 OFFSET 0
+[18-Feb-2026 09:08:28 Asia/Ho_Chi_Minh] Query error: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'nhshiw2j_shippershop.post_likes' doesn't exist
+SQL: SELECT 
+                p.*,
+                u.fullname as user_name,
+                u.avatar as user_avatar,
+                (SELECT COUNT(*) FROM post_likes WHERE post_id = p.id) as likes_count,
+                (SELECT COUNT(*) FROM comments WHERE post_id = p.id AND status = 'active') as comments_count
+            FROM posts p
+            LEFT JOIN users u ON p.user_id = u.id
+            WHERE p.status = 'active'
+            ORDER BY p.created_at DESC
+            LIMIT 15 OFFSET 0
+[18-Feb-2026 09:08:28 Asia/Ho_Chi_Minh] Query error: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'nhshiw2j_shippershop.post_likes' doesn't exist
+SQL: SELECT 
+                p.*,
+                u.fullname as user_name,
+                u.avatar as user_avatar,
+                (SELECT COUNT(*) FROM post_likes WHERE post_id = p.id) as likes_count,
+                (SELECT COUNT(*) FROM comments WHERE post_id = p.id AND status = 'active') as comments_count
+            FROM posts p
+            LEFT JOIN users u ON p.user_id = u.id
+            WHERE p.status = 'active'
+            ORDER BY p.created_at DESC
+            LIMIT 5 OFFSET 0
+[18-Feb-2026 09:08:31 Asia/Ho_Chi_Minh] Query error: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'nhshiw2j_shippershop.post_likes' doesn't exist
+SQL: SELECT 
+                p.*,
+                u.fullname as user_name,
+                u.avatar as user_avatar,
+                (SELECT COUNT(*) FROM post_likes WHERE post_id = p.id) as likes_count,
+                (SELECT COUNT(*) FROM comments WHERE post_id = p.id AND status = 'active') as comments_count
+            FROM posts p
+            LEFT JOIN users u ON p.user_id = u.id
+            WHERE p.status = 'active'
+            ORDER BY p.created_at DESC
+            LIMIT 15 OFFSET 0
+[18-Feb-2026 09:08:31 Asia/Ho_Chi_Minh] Query error: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'nhshiw2j_shippershop.post_likes' doesn't exist
+SQL: SELECT 
+                p.*,
+                u.fullname as user_name,
+                u.avatar as user_avatar,
+                (SELECT COUNT(*) FROM post_likes WHERE post_id = p.id) as likes_count,
+                (SELECT COUNT(*) FROM comments WHERE post_id = p.id AND status = 'active') as comments_count
+            FROM posts p
+            LEFT JOIN users u ON p.user_id = u.id
+            WHERE p.status = 'active'
+            ORDER BY p.created_at DESC
+            LIMIT 5 OFFSET 0
+[18-Feb-2026 09:08:32 Asia/Ho_Chi_Minh] Query error: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'nhshiw2j_shippershop.post_likes' doesn't exist
+SQL: SELECT 
+                p.*,
+                u.fullname as user_name,
+                u.avatar as user_avatar,
+                (SELECT COUNT(*) FROM post_likes WHERE post_id = p.id) as likes_count,
+                (SELECT COUNT(*) FROM comments WHERE post_id = p.id AND status = 'active') as comments_count
+            FROM posts p
+            LEFT JOIN users u ON p.user_id = u.id
+            WHERE p.status = 'active'
+            ORDER BY p.created_at DESC
+            LIMIT 15 OFFSET 0
+[18-Feb-2026 09:08:32 Asia/Ho_Chi_Minh] Query error: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'nhshiw2j_shippershop.post_likes' doesn't exist
+SQL: SELECT 
+                p.*,
+                u.fullname as user_name,
+                u.avatar as user_avatar,
+                (SELECT COUNT(*) FROM post_likes WHERE post_id = p.id) as likes_count,
+                (SELECT COUNT(*) FROM comments WHERE post_id = p.id AND status = 'active') as comments_count
+            FROM posts p
+            LEFT JOIN users u ON p.user_id = u.id
+            WHERE p.status = 'active'
+            ORDER BY p.created_at DESC
+            LIMIT 5 OFFSET 0
+[18-Feb-2026 09:40:38 Asia/Ho_Chi_Minh] Query error: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'nhshiw2j_shippershop.post_likes' doesn't exist
+SQL: SELECT 
+                p.*,
+                u.fullname as user_name,
+                u.avatar as user_avatar,
+                (SELECT COUNT(*) FROM post_likes WHERE post_id = p.id) as likes_count,
+                (SELECT COUNT(*) FROM comments WHERE post_id = p.id AND status = 'active') as comments_count
+            FROM posts p
+            LEFT JOIN users u ON p.user_id = u.id
+            WHERE p.status = 'active'
+            ORDER BY p.created_at DESC
+            LIMIT 5 OFFSET 0
+[18-Feb-2026 09:40:38 Asia/Ho_Chi_Minh] Query error: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'nhshiw2j_shippershop.post_likes' doesn't exist
+SQL: SELECT 
+                p.*,
+                u.fullname as user_name,
+                u.avatar as user_avatar,
+                (SELECT COUNT(*) FROM post_likes WHERE post_id = p.id) as likes_count,
+                (SELECT COUNT(*) FROM comments WHERE post_id = p.id AND status = 'active') as comments_count
+            FROM posts p
+            LEFT JOIN users u ON p.user_id = u.id
+            WHERE p.status = 'active'
+            ORDER BY p.created_at DESC
+            LIMIT 15 OFFSET 0
+[18-Feb-2026 09:40:45 Asia/Ho_Chi_Minh] Query error: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'nhshiw2j_shippershop.post_likes' doesn't exist
+SQL: SELECT 
+                p.*,
+                u.fullname as user_name,
+                u.avatar as user_avatar,
+                (SELECT COUNT(*) FROM post_likes WHERE post_id = p.id) as likes_count,
+                (SELECT COUNT(*) FROM comments WHERE post_id = p.id AND status = 'active') as comments_count
+            FROM posts p
+            LEFT JOIN users u ON p.user_id = u.id
+            WHERE p.status = 'active'
+            ORDER BY p.created_at DESC
+            LIMIT 15 OFFSET 0
+[18-Feb-2026 09:40:45 Asia/Ho_Chi_Minh] Query error: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'nhshiw2j_shippershop.post_likes' doesn't exist
+SQL: SELECT 
+                p.*,
+                u.fullname as user_name,
+                u.avatar as user_avatar,
+                (SELECT COUNT(*) FROM post_likes WHERE post_id = p.id) as likes_count,
+                (SELECT COUNT(*) FROM comments WHERE post_id = p.id AND status = 'active') as comments_count
+            FROM posts p
+            LEFT JOIN users u ON p.user_id = u.id
+            WHERE p.status = 'active'
+            ORDER BY p.created_at DESC
+            LIMIT 5 OFFSET 0
+[18-Feb-2026 09:44:42 Asia/Ho_Chi_Minh] Query error: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'nhshiw2j_shippershop.post_likes' doesn't exist
+SQL: SELECT 
+                p.*,
+                u.fullname as user_name,
+                u.avatar as user_avatar,
+                (SELECT COUNT(*) FROM post_likes WHERE post_id = p.id) as likes_count,
+                (SELECT COUNT(*) FROM comments WHERE post_id = p.id AND status = 'active') as comments_count
+            FROM posts p
+            LEFT JOIN users u ON p.user_id = u.id
+            WHERE p.status = 'active'
+            ORDER BY p.created_at DESC
+            LIMIT 15 OFFSET 0
+[18-Feb-2026 09:44:42 Asia/Ho_Chi_Minh] Query error: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'nhshiw2j_shippershop.post_likes' doesn't exist
+SQL: SELECT 
+                p.*,
+                u.fullname as user_name,
+                u.avatar as user_avatar,
+                (SELECT COUNT(*) FROM post_likes WHERE post_id = p.id) as likes_count,
+                (SELECT COUNT(*) FROM comments WHERE post_id = p.id AND status = 'active') as comments_count
+            FROM posts p
+            LEFT JOIN users u ON p.user_id = u.id
+            WHERE p.status = 'active'
+            ORDER BY p.created_at DESC
+            LIMIT 5 OFFSET 0
+[18-Feb-2026 09:44:43 Asia/Ho_Chi_Minh] Query error: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'nhshiw2j_shippershop.post_likes' doesn't exist
+SQL: SELECT 
+                p.*,
+                u.fullname as user_name,
+                u.avatar as user_avatar,
+                (SELECT COUNT(*) FROM post_likes WHERE post_id = p.id) as likes_count,
+                (SELECT COUNT(*) FROM comments WHERE post_id = p.id AND status = 'active') as comments_count
+            FROM posts p
+            LEFT JOIN users u ON p.user_id = u.id
+            WHERE p.status = 'active'
+            ORDER BY p.created_at DESC
+            LIMIT 15 OFFSET 0
+[18-Feb-2026 09:44:43 Asia/Ho_Chi_Minh] Query error: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'nhshiw2j_shippershop.post_likes' doesn't exist
+SQL: SELECT 
+                p.*,
+                u.fullname as user_name,
+                u.avatar as user_avatar,
+                (SELECT COUNT(*) FROM post_likes WHERE post_id = p.id) as likes_count,
+                (SELECT COUNT(*) FROM comments WHERE post_id = p.id AND status = 'active') as comments_count
+            FROM posts p
+            LEFT JOIN users u ON p.user_id = u.id
+            WHERE p.status = 'active'
+            ORDER BY p.created_at DESC
+            LIMIT 5 OFFSET 0
+[18-Feb-2026 09:44:44 Asia/Ho_Chi_Minh] Query error: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'nhshiw2j_shippershop.post_likes' doesn't exist
+SQL: SELECT 
+                p.*,
+                u.fullname as user_name,
+                u.avatar as user_avatar,
+                (SELECT COUNT(*) FROM post_likes WHERE post_id = p.id) as likes_count,
+                (SELECT COUNT(*) FROM comments WHERE post_id = p.id AND status = 'active') as comments_count
+            FROM posts p
+            LEFT JOIN users u ON p.user_id = u.id
+            WHERE p.status = 'active'
+            ORDER BY p.created_at DESC
+            LIMIT 15 OFFSET 0
+[18-Feb-2026 09:44:44 Asia/Ho_Chi_Minh] Query error: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'nhshiw2j_shippershop.post_likes' doesn't exist
+SQL: SELECT 
+                p.*,
+                u.fullname as user_name,
+                u.avatar as user_avatar,
+                (SELECT COUNT(*) FROM post_likes WHERE post_id = p.id) as likes_count,
+                (SELECT COUNT(*) FROM comments WHERE post_id = p.id AND status = 'active') as comments_count
+            FROM posts p
+            LEFT JOIN users u ON p.user_id = u.id
+            WHERE p.status = 'active'
+            ORDER BY p.created_at DESC
+            LIMIT 5 OFFSET 0
+[18-Feb-2026 09:44:44 Asia/Ho_Chi_Minh] Query error: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'nhshiw2j_shippershop.post_likes' doesn't exist
+SQL: SELECT 
+                p.*,
+                u.fullname as user_name,
+                u.avatar as user_avatar,
+                (SELECT COUNT(*) FROM post_likes WHERE post_id = p.id) as likes_count,
+                (SELECT COUNT(*) FROM comments WHERE post_id = p.id AND status = 'active') as comments_count
+            FROM posts p
+            LEFT JOIN users u ON p.user_id = u.id
+            WHERE p.status = 'active'
+            ORDER BY p.created_at DESC
+            LIMIT 15 OFFSET 0
+[18-Feb-2026 09:44:44 Asia/Ho_Chi_Minh] Query error: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'nhshiw2j_shippershop.post_likes' doesn't exist
+SQL: SELECT 
+                p.*,
+                u.fullname as user_name,
+                u.avatar as user_avatar,
+                (SELECT COUNT(*) FROM post_likes WHERE post_id = p.id) as likes_count,
+                (SELECT COUNT(*) FROM comments WHERE post_id = p.id AND status = 'active') as comments_count
+            FROM posts p
+            LEFT JOIN users u ON p.user_id = u.id
+            WHERE p.status = 'active'
+            ORDER BY p.created_at DESC
+            LIMIT 5 OFFSET 0
+[18-Feb-2026 09:44:47 Asia/Ho_Chi_Minh] Query error: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'nhshiw2j_shippershop.post_likes' doesn't exist
+SQL: SELECT 
+                p.*,
+                u.fullname as user_name,
+                u.avatar as user_avatar,
+                (SELECT COUNT(*) FROM post_likes WHERE post_id = p.id) as likes_count,
+                (SELECT COUNT(*) FROM comments WHERE post_id = p.id AND status = 'active') as comments_count
+            FROM posts p
+            LEFT JOIN users u ON p.user_id = u.id
+            WHERE p.status = 'active'
+            ORDER BY p.created_at DESC
+            LIMIT 15 OFFSET 0
+[18-Feb-2026 09:44:47 Asia/Ho_Chi_Minh] Query error: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'nhshiw2j_shippershop.post_likes' doesn't exist
+SQL: SELECT 
+                p.*,
+                u.fullname as user_name,
+                u.avatar as user_avatar,
+                (SELECT COUNT(*) FROM post_likes WHERE post_id = p.id) as likes_count,
+                (SELECT COUNT(*) FROM comments WHERE post_id = p.id AND status = 'active') as comments_count
+            FROM posts p
+            LEFT JOIN users u ON p.user_id = u.id
+            WHERE p.status = 'active'
+            ORDER BY p.created_at DESC
+            LIMIT 5 OFFSET 0
+[18-Feb-2026 09:48:44 Asia/Ho_Chi_Minh] Query error: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'nhshiw2j_shippershop.post_likes' doesn't exist
+SQL: SELECT 
+                p.*,
+                u.fullname as user_name,
+                u.avatar as user_avatar,
+                (SELECT COUNT(*) FROM post_likes WHERE post_id = p.id) as likes_count,
+                (SELECT COUNT(*) FROM comments WHERE post_id = p.id AND status = 'active') as comments_count
+            FROM posts p
+            LEFT JOIN users u ON p.user_id = u.id
+            WHERE p.status = 'active'
+            ORDER BY p.created_at DESC
+            LIMIT 15 OFFSET 0
+[18-Feb-2026 09:48:44 Asia/Ho_Chi_Minh] Query error: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'nhshiw2j_shippershop.post_likes' doesn't exist
+SQL: SELECT 
+                p.*,
+                u.fullname as user_name,
+                u.avatar as user_avatar,
+                (SELECT COUNT(*) FROM post_likes WHERE post_id = p.id) as likes_count,
+                (SELECT COUNT(*) FROM comments WHERE post_id = p.id AND status = 'active') as comments_count
+            FROM posts p
+            LEFT JOIN users u ON p.user_id = u.id
+            WHERE p.status = 'active'
+            ORDER BY p.created_at DESC
+            LIMIT 5 OFFSET 0
+[18-Feb-2026 09:48:50 Asia/Ho_Chi_Minh] Query error: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'nhshiw2j_shippershop.post_likes' doesn't exist
+SQL: SELECT 
+                p.*,
+                u.fullname as user_name,
+                u.avatar as user_avatar,
+                (SELECT COUNT(*) FROM post_likes WHERE post_id = p.id) as likes_count,
+                (SELECT COUNT(*) FROM comments WHERE post_id = p.id AND status = 'active') as comments_count
+            FROM posts p
+            LEFT JOIN users u ON p.user_id = u.id
+            WHERE p.status = 'active'
+            ORDER BY p.created_at DESC
+            LIMIT 15 OFFSET 0
+[18-Feb-2026 09:48:50 Asia/Ho_Chi_Minh] Query error: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'nhshiw2j_shippershop.post_likes' doesn't exist
+SQL: SELECT 
+                p.*,
+                u.fullname as user_name,
+                u.avatar as user_avatar,
+                (SELECT COUNT(*) FROM post_likes WHERE post_id = p.id) as likes_count,
+                (SELECT COUNT(*) FROM comments WHERE post_id = p.id AND status = 'active') as comments_count
+            FROM posts p
+            LEFT JOIN users u ON p.user_id = u.id
+            WHERE p.status = 'active'
+            ORDER BY p.created_at DESC
+            LIMIT 5 OFFSET 0
+[18-Feb-2026 09:48:55 Asia/Ho_Chi_Minh] Query error: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'nhshiw2j_shippershop.post_likes' doesn't exist
+SQL: SELECT 
+                p.*,
+                u.fullname as user_name,
+                u.avatar as user_avatar,
+                (SELECT COUNT(*) FROM post_likes WHERE post_id = p.id) as likes_count,
+                (SELECT COUNT(*) FROM comments WHERE post_id = p.id AND status = 'active') as comments_count
+            FROM posts p
+            LEFT JOIN users u ON p.user_id = u.id
+            WHERE p.status = 'active'
+            ORDER BY p.created_at DESC
+            LIMIT 15 OFFSET 0
+[18-Feb-2026 09:48:55 Asia/Ho_Chi_Minh] Query error: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'nhshiw2j_shippershop.post_likes' doesn't exist
+SQL: SELECT 
+                p.*,
+                u.fullname as user_name,
+                u.avatar as user_avatar,
+                (SELECT COUNT(*) FROM post_likes WHERE post_id = p.id) as likes_count,
+                (SELECT COUNT(*) FROM comments WHERE post_id = p.id AND status = 'active') as comments_count
+            FROM posts p
+            LEFT JOIN users u ON p.user_id = u.id
+            WHERE p.status = 'active'
+            ORDER BY p.created_at DESC
+            LIMIT 5 OFFSET 0
+[18-Feb-2026 09:49:22 Asia/Ho_Chi_Minh] Query error: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'nhshiw2j_shippershop.post_likes' doesn't exist
+SQL: SELECT 
+                p.*,
+                u.fullname as user_name,
+                u.avatar as user_avatar,
+                (SELECT COUNT(*) FROM post_likes WHERE post_id = p.id) as likes_count,
+                (SELECT COUNT(*) FROM comments WHERE post_id = p.id AND status = 'active') as comments_count
+            FROM posts p
+            LEFT JOIN users u ON p.user_id = u.id
+            WHERE p.status = 'active'
+            ORDER BY p.created_at DESC
+            LIMIT 15 OFFSET 0
+[18-Feb-2026 09:49:22 Asia/Ho_Chi_Minh] Query error: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'nhshiw2j_shippershop.post_likes' doesn't exist
+SQL: SELECT 
+                p.*,
+                u.fullname as user_name,
+                u.avatar as user_avatar,
+                (SELECT COUNT(*) FROM post_likes WHERE post_id = p.id) as likes_count,
+                (SELECT COUNT(*) FROM comments WHERE post_id = p.id AND status = 'active') as comments_count
+            FROM posts p
+            LEFT JOIN users u ON p.user_id = u.id
+            WHERE p.status = 'active'
+            ORDER BY p.created_at DESC
+            LIMIT 5 OFFSET 0
+[18-Feb-2026 09:49:49 Asia/Ho_Chi_Minh] Query error: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'nhshiw2j_shippershop.post_likes' doesn't exist
+SQL: SELECT 
+                p.*,
+                u.fullname as user_name,
+                u.avatar as user_avatar,
+                (SELECT COUNT(*) FROM post_likes WHERE post_id = p.id) as likes_count,
+                (SELECT COUNT(*) FROM comments WHERE post_id = p.id AND status = 'active') as comments_count
+            FROM posts p
+            LEFT JOIN users u ON p.user_id = u.id
+            WHERE p.status = 'active'
+            ORDER BY p.created_at DESC
+            LIMIT 15 OFFSET 0
+[18-Feb-2026 09:49:49 Asia/Ho_Chi_Minh] Query error: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'nhshiw2j_shippershop.post_likes' doesn't exist
+SQL: SELECT 
+                p.*,
+                u.fullname as user_name,
+                u.avatar as user_avatar,
+                (SELECT COUNT(*) FROM post_likes WHERE post_id = p.id) as likes_count,
+                (SELECT COUNT(*) FROM comments WHERE post_id = p.id AND status = 'active') as comments_count
+            FROM posts p
+            LEFT JOIN users u ON p.user_id = u.id
+            WHERE p.status = 'active'
+            ORDER BY p.created_at DESC
+            LIMIT 5 OFFSET 0
+[18-Feb-2026 09:59:17 Asia/Ho_Chi_Minh] Query error: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'nhshiw2j_shippershop.post_likes' doesn't exist
+SQL: SELECT 
+                p.*,
+                u.fullname as user_name,
+                u.avatar as user_avatar,
+                (SELECT COUNT(*) FROM post_likes WHERE post_id = p.id) as likes_count,
+                (SELECT COUNT(*) FROM comments WHERE post_id = p.id AND status = 'active') as comments_count
+            FROM posts p
+            LEFT JOIN users u ON p.user_id = u.id
+            WHERE p.status = 'active'
+            ORDER BY p.created_at DESC
+            LIMIT 15 OFFSET 0
+[18-Feb-2026 09:59:17 Asia/Ho_Chi_Minh] Query error: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'nhshiw2j_shippershop.post_likes' doesn't exist
+SQL: SELECT 
+                p.*,
+                u.fullname as user_name,
+                u.avatar as user_avatar,
+                (SELECT COUNT(*) FROM post_likes WHERE post_id = p.id) as likes_count,
+                (SELECT COUNT(*) FROM comments WHERE post_id = p.id AND status = 'active') as comments_count
+            FROM posts p
+            LEFT JOIN users u ON p.user_id = u.id
+            WHERE p.status = 'active'
+            ORDER BY p.created_at DESC
+            LIMIT 5 OFFSET 0
+[18-Feb-2026 09:59:32 Asia/Ho_Chi_Minh] Query error: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'nhshiw2j_shippershop.post_likes' doesn't exist
+SQL: SELECT 
+                p.*,
+                u.fullname as user_name,
+                u.avatar as user_avatar,
+                (SELECT COUNT(*) FROM post_likes WHERE post_id = p.id) as likes_count,
+                (SELECT COUNT(*) FROM comments WHERE post_id = p.id AND status = 'active') as comments_count
+            FROM posts p
+            LEFT JOIN users u ON p.user_id = u.id
+            WHERE p.status = 'active'
+            ORDER BY p.created_at DESC
+            LIMIT 15 OFFSET 0
+[18-Feb-2026 09:59:32 Asia/Ho_Chi_Minh] Query error: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'nhshiw2j_shippershop.post_likes' doesn't exist
+SQL: SELECT 
+                p.*,
+                u.fullname as user_name,
+                u.avatar as user_avatar,
+                (SELECT COUNT(*) FROM post_likes WHERE post_id = p.id) as likes_count,
+                (SELECT COUNT(*) FROM comments WHERE post_id = p.id AND status = 'active') as comments_count
+            FROM posts p
+            LEFT JOIN users u ON p.user_id = u.id
+            WHERE p.status = 'active'
+            ORDER BY p.created_at DESC
+            LIMIT 5 OFFSET 0
+[18-Feb-2026 10:01:36 Asia/Ho_Chi_Minh] Query error: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'nhshiw2j_shippershop.post_likes' doesn't exist
+SQL: SELECT 
+                p.*,
+                u.fullname as user_name,
+                u.avatar as user_avatar,
+                (SELECT COUNT(*) FROM post_likes WHERE post_id = p.id) as likes_count,
+                (SELECT COUNT(*) FROM comments WHERE post_id = p.id AND status = 'active') as comments_count
+            FROM posts p
+            LEFT JOIN users u ON p.user_id = u.id
+            WHERE p.status = 'active'
+            ORDER BY p.created_at DESC
+            LIMIT 15 OFFSET 0
+[18-Feb-2026 10:01:36 Asia/Ho_Chi_Minh] Query error: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'nhshiw2j_shippershop.post_likes' doesn't exist
+SQL: SELECT 
+                p.*,
+                u.fullname as user_name,
+                u.avatar as user_avatar,
+                (SELECT COUNT(*) FROM post_likes WHERE post_id = p.id) as likes_count,
+                (SELECT COUNT(*) FROM comments WHERE post_id = p.id AND status = 'active') as comments_count
+            FROM posts p
+            LEFT JOIN users u ON p.user_id = u.id
+            WHERE p.status = 'active'
+            ORDER BY p.created_at DESC
+            LIMIT 5 OFFSET 0
+[18-Feb-2026 10:01:52 Asia/Ho_Chi_Minh] Query error: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'nhshiw2j_shippershop.post_likes' doesn't exist
+SQL: SELECT 
+                p.*,
+                u.fullname as user_name,
+                u.avatar as user_avatar,
+                (SELECT COUNT(*) FROM post_likes WHERE post_id = p.id) as likes_count,
+                (SELECT COUNT(*) FROM comments WHERE post_id = p.id AND status = 'active') as comments_count
+            FROM posts p
+            LEFT JOIN users u ON p.user_id = u.id
+            WHERE p.status = 'active'
+            ORDER BY p.created_at DESC
+            LIMIT 15 OFFSET 0
+[18-Feb-2026 10:01:52 Asia/Ho_Chi_Minh] Query error: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'nhshiw2j_shippershop.post_likes' doesn't exist
+SQL: SELECT 
+                p.*,
+                u.fullname as user_name,
+                u.avatar as user_avatar,
+                (SELECT COUNT(*) FROM post_likes WHERE post_id = p.id) as likes_count,
+                (SELECT COUNT(*) FROM comments WHERE post_id = p.id AND status = 'active') as comments_count
+            FROM posts p
+            LEFT JOIN users u ON p.user_id = u.id
+            WHERE p.status = 'active'
+            ORDER BY p.created_at DESC
+            LIMIT 5 OFFSET 0
+[18-Feb-2026 10:02:02 Asia/Ho_Chi_Minh] Query error: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'nhshiw2j_shippershop.post_likes' doesn't exist
+SQL: SELECT 
+                p.*,
+                u.fullname as user_name,
+                u.avatar as user_avatar,
+                (SELECT COUNT(*) FROM post_likes WHERE post_id = p.id) as likes_count,
+                (SELECT COUNT(*) FROM comments WHERE post_id = p.id AND status = 'active') as comments_count
+            FROM posts p
+            LEFT JOIN users u ON p.user_id = u.id
+            WHERE p.status = 'active'
+            ORDER BY p.created_at DESC
+            LIMIT 15 OFFSET 0
+[18-Feb-2026 10:02:02 Asia/Ho_Chi_Minh] Query error: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'nhshiw2j_shippershop.post_likes' doesn't exist
+SQL: SELECT 
+                p.*,
+                u.fullname as user_name,
+                u.avatar as user_avatar,
+                (SELECT COUNT(*) FROM post_likes WHERE post_id = p.id) as likes_count,
+                (SELECT COUNT(*) FROM comments WHERE post_id = p.id AND status = 'active') as comments_count
+            FROM posts p
+            LEFT JOIN users u ON p.user_id = u.id
+            WHERE p.status = 'active'
+            ORDER BY p.created_at DESC
+            LIMIT 5 OFFSET 0
+[18-Feb-2026 14:36:38 Asia/Ho_Chi_Minh] Query error: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'nhshiw2j_shippershop.post_likes' doesn't exist
+SQL: SELECT 
+                p.*,
+                u.fullname as user_name,
+                u.avatar as user_avatar,
+                (SELECT COUNT(*) FROM post_likes WHERE post_id = p.id) as likes_count,
+                (SELECT COUNT(*) FROM comments WHERE post_id = p.id AND status = 'active') as comments_count
+            FROM posts p
+            LEFT JOIN users u ON p.user_id = u.id
+            WHERE p.status = 'active'
+            ORDER BY p.created_at DESC
+            LIMIT 15 OFFSET 0
+[18-Feb-2026 14:36:42 Asia/Ho_Chi_Minh] Query error: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'nhshiw2j_shippershop.post_likes' doesn't exist
+SQL: SELECT 
+                p.*,
+                u.fullname as user_name,
+                u.avatar as user_avatar,
+                (SELECT COUNT(*) FROM post_likes WHERE post_id = p.id) as likes_count,
+                (SELECT COUNT(*) FROM comments WHERE post_id = p.id AND status = 'active') as comments_count
+            FROM posts p
+            LEFT JOIN users u ON p.user_id = u.id
+            WHERE p.status = 'active'
+            ORDER BY p.created_at DESC
+            LIMIT 5 OFFSET 0
+[18-Feb-2026 21:59:17 Asia/Ho_Chi_Minh] Query error: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'nhshiw2j_shippershop.post_likes' doesn't exist
+SQL: SELECT 
+                p.*,
+                u.fullname as user_name,
+                u.avatar as user_avatar,
+                (SELECT COUNT(*) FROM post_likes WHERE post_id = p.id) as likes_count,
+                (SELECT COUNT(*) FROM comments WHERE post_id = p.id AND status = 'active') as comments_count
+            FROM posts p
+            LEFT JOIN users u ON p.user_id = u.id
+            WHERE p.status = 'active'
+            ORDER BY p.created_at DESC
+            LIMIT 5 OFFSET 0
+[18-Feb-2026 21:59:17 Asia/Ho_Chi_Minh] Query error: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'nhshiw2j_shippershop.post_likes' doesn't exist
+SQL: SELECT 
+                p.*,
+                u.fullname as user_name,
+                u.avatar as user_avatar,
+                (SELECT COUNT(*) FROM post_likes WHERE post_id = p.id) as likes_count,
+                (SELECT COUNT(*) FROM comments WHERE post_id = p.id AND status = 'active') as comments_count
+            FROM posts p
+            LEFT JOIN users u ON p.user_id = u.id
+            WHERE p.status = 'active'
+            ORDER BY p.created_at DESC
+            LIMIT 15 OFFSET 0
+[19-Feb-2026 02:38:52 Asia/Ho_Chi_Minh] Query error: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'nhshiw2j_shippershop.post_likes' doesn't exist
+SQL: SELECT 
+                p.*,
+                u.fullname as user_name,
+                u.avatar as user_avatar,
+                (SELECT COUNT(*) FROM post_likes WHERE post_id = p.id) as likes_count,
+                (SELECT COUNT(*) FROM comments WHERE post_id = p.id AND status = 'active') as comments_count
+            FROM posts p
+            LEFT JOIN users u ON p.user_id = u.id
+            WHERE p.status = 'active'
+            ORDER BY p.created_at DESC
+            LIMIT 5 OFFSET 0
+[19-Feb-2026 02:38:52 Asia/Ho_Chi_Minh] Query error: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'nhshiw2j_shippershop.post_likes' doesn't exist
+SQL: SELECT 
+                p.*,
+                u.fullname as user_name,
+                u.avatar as user_avatar,
+                (SELECT COUNT(*) FROM post_likes WHERE post_id = p.id) as likes_count,
+                (SELECT COUNT(*) FROM comments WHERE post_id = p.id AND status = 'active') as comments_count
+            FROM posts p
+            LEFT JOIN users u ON p.user_id = u.id
+            WHERE p.status = 'active'
+            ORDER BY p.created_at DESC
+            LIMIT 15 OFFSET 0
