@@ -1,7 +1,9 @@
 <?php
 function getAuthUserId() {
+    file_put_contents("/home/nhshiw2j/public_html/auth-debug.log", date("Y-m-d H:i:s") . " - Function called\n", FILE_APPEND);
     if (isset($_SESSION['user_id']) && !empty($_SESSION['user_id'])) {
         return $_SESSION['user_id'];
+    file_put_contents("/home/nhshiw2j/public_html/auth-debug.log", "Headers: " . print_r($headers, true) . "\n", FILE_APPEND);
     }
     
     $headers = getallheaders();
