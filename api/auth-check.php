@@ -1,22 +1,26 @@
 <?php
 function getAuthUserId() {
-    // Debug log
-    file_put_contents('/home/nhshiw2j/public_html/auth-debug.log', date('Y-m-d H:i:s') . " - Auth check started\n", FILE_APPEND);
+    // System dùng session, không phải JWT
+    // Check session user_id
+    if (isset($_SESSION['user_id']) && !empty($_SESSION['user_id'])) {
+        return $_SESSION['user_id'];
+    }
     
+    // Fallback: decode token từ localStorage (simple base64)
     $headers = getallheaders();
     $authHeader = $headers['Authorization'] ?? '';
     
-    file_put_contents('/home/nhshiw2j/public_html/auth-debug.log', "Auth header: $authHeader\n", FILE_APPEND);
-    
     if (preg_match('/Bearer\s+(.+)/', $authHeader, $matches)) {
         $token = $matches[1];
-        file_put_contents('/home/nhshiw2j/public_html/auth-debug.log', "Token found: $token\n", FILE_APPEND);
-        
-        $userData = verifyCsrfToken($token);
-        file_put_contents('/home/nhshiw2j/public_html/auth-debug.log', "Verify result: " . print_r($userData, true) . "\n", FILE_APPEND);
-        
-        if ($userData && is_array($userData) && isset($userData['id'])) {
-            return $userData['id'];
+        // Try decode as simple JWT
+        $parts = explode('.', $token);
+        if (count($parts) === 3) {
+            $payload = json_decode(base64_decode($parts[1]), true);
+            if ($payload && isset($payload['id'])) {
+                // Set session for future requests
+                $_SESSION['user_id'] = $payload['id'];
+                return $payload['id'];
+            }
         }
     }
     
