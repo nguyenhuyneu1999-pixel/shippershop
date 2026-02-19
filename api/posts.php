@@ -172,6 +172,9 @@ if ($method === 'POST') {
     }
     
     try {
+    // Check authentication
+    require_once __DIR__ . "/auth-check.php";
+    $userId = getAuthUserId();
         // Create post
         $postId = $db->insert('posts', [
             'user_id' => $userId,
