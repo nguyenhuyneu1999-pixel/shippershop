@@ -11,6 +11,11 @@
  * POST /api/social.php?action=follow - Follow/unfollow user
  * GET /api/social.php?action=followers&user_id=1 - Get followers
  * GET /api/social.php?action=following&user_id=1 - Get following
+ * GET /api/social.php?action=feed - Get feed
+ * POST /api/social.php?action=save - Save post
+ * GET /api/social.php?action=saved_posts - Get saved posts
+ * GET /api/social.php?action=stats&user_id=1 - Get user stats
+ * DELETE /api/social.php?action=delete_comment&comment_id=1 - Delete comment
  */
 
 define('APP_ACCESS', true);
@@ -142,7 +147,7 @@ if ($action === 'comments') {
         error('Post ID không hợp lệ');
     }
     
-    // Get comments
+    // Get comments with user info
     $sql = "SELECT 
                 c.*,
                 u.fullname as user_name,
@@ -153,6 +158,11 @@ if ($action === 'comments') {
             ORDER BY c.created_at ASC";
     
     $comments = $db->fetchAll($sql, [$postId]);
+    
+    // Nếu không có bình luận, trả về mảng rỗng
+    if (empty($comments)) {
+        success('Success', []);
+    }
     
     success('Success', $comments);
 }
