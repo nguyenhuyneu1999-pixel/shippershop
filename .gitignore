@@ -1,0 +1,29 @@
+# Backups
+*.bak
+*.bak.*
+*.broken*
+*.pre-rewrite
+*.tar.gz
+
+# Debug/temp
+debug-*.txt
+debug-*.html
+auth-debug.log
+api/error_log
+api/deploy.log
+api/fx.php
+fix-*.sh
+
+# Uploads (too large for git)
+uploads/videos/
+uploads/messages/
+uploads/avatars/
+
+# Keep upload dirs structure
+!uploads/videos/.gitkeep
+!uploads/messages/.gitkeep
+!uploads/avatars/.gitkeep
+
+# OS files
+.DS_Store
+Thumbs.db
