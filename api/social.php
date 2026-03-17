@@ -492,3 +492,26 @@ if ($action === 'saved_posts') {
 
 // Invalid action
 error('Invalid action', 400);
+
+
+// LIKE COMMENT
+if ($action === 'like_comment') {
+    $uid = getCurrentUserId();
+    if (!$uid) { echo json_encode(['success'=>false,'message'=>'Login required']); exit; }
+    $input = json_decode(file_get_contents('php://input'), true);
+    $cid = intval($input['comment_id'] ?? 0);
+    if (!$cid) { echo json_encode(['success'=>false,'message'=>'Missing comment_id']); exit; }
+    $db = db();
+    $exists = $db->fetchOne("SELECT id FROM comment_likes WHERE comment_id=? AND user_id=?", [$cid, $uid]);
+    if ($exists) {
+        $db->query("DELETE FROM comment_likes WHERE comment_id=? AND user_id=?", [$cid, $uid]);
+        $db->query("UPDATE post_comments SET likes_count = GREATEST(0, likes_count - 1) WHERE id=?", [$cid]);
+        $count = $db->fetchOne("SELECT likes_count FROM post_comments WHERE id=?", [$cid])['likes_count'] ?? 0;
+        echo json_encode(['success'=>true,'data'=>['liked'=>false,'count'=>intval($count)]]); exit;
+    } else {
+        $db->query("INSERT INTO comment_likes (comment_id, user_id) VALUES (?, ?)", [$cid, $uid]);
+        $db->query("UPDATE post_comments SET likes_count = likes_count + 1 WHERE id=?", [$cid]);
+        $count = $db->fetchOne("SELECT likes_count FROM post_comments WHERE id=?", [$cid])['likes_count'] ?? 0;
+        echo json_encode(['success'=>true,'data'=>['liked'=>true,'count'=>intval($count)]]); exit;
+    }
+}

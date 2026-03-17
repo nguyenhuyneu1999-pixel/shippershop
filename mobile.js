@@ -79,31 +79,6 @@ function injectBottomNav() {
   };
 }
 
-// ========================
-// BACK TO TOP
-// ========================
-function injectBackToTop() {
-  if (document.getElementById('backToTop')) return;
-  const btn = document.createElement('button');
-  btn.id = 'backToTop';
-  btn.innerHTML = '<i class="fas fa-chevron-up"></i>';
-  btn.title = 'Lên đầu trang';
-  btn.onclick = () => window.scrollTo({ top: 0, behavior: 'smooth' });
-  document.body.appendChild(btn);
-
-  let lastScroll = 0;
-  window.addEventListener('scroll', () => {
-    const st = window.scrollY;
-    btn.classList.toggle('visible', st > 300);
-    // Hide/show bottom nav on scroll
-    const nav = document.getElementById('mobileBottomNav');
-    if (nav) {
-      if (st > lastScroll + 60 && st > 200) nav.style.transform = 'translateY(100%)';
-      else if (lastScroll > st + 10) nav.style.transform = '';
-    }
-    lastScroll = st;
-  }, { passive: true });
-}
 
 // ========================
 // UPDATE CART BADGE IN NAV
@@ -286,7 +261,7 @@ function makeFlashSaleScrollable() {
 function init() {
   injectRippleCSS();
   injectBottomNav();
-  injectBackToTop();
+  
   setupPullToRefresh();
   lazyLoadImages();
   enhanceSearch();

@@ -1,0 +1,918 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="theme-color" content="#ffffff">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ShipperShop - Trang chủ</title>
+<link rel="stylesheet" href="css/style.css">
+<link rel="stylesheet" href="mobile.css">
+<link rel="preload" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+    <noscript><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"></noscript>
+<style>
+:root{--primary:#EE4D2D;--primary-dark:#D73211;--orange-light:#FFF3EF;--up:#FF4500;--down:#7193FF;--bg:#DAE0E6;--card:#FFF;--border:#EDEFF1;--text:#1C1C1C;--muted:#878A8C;}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{background:var(--bg);font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;color:var(--text);min-height:100vh;}
+.s-tag{padding:8px 14px;border-radius:20px;border:1px solid #ddd;background:#fff;font-size:13px;cursor:pointer;display:flex;align-items:center;gap:6px;transition:.15s;}.s-tag:hover{background:#f0f0f0;border-color:#999;}
+.tab-bar{display:flex;background:#fff;position:fixed;top:58px;left:0;right:0;z-index:99;padding:0;border-bottom:1px solid #f0f0f0;}
+.tab-item{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:0;padding:6px 0;font-size:9px;color:var(--muted);text-decoration:none;border-bottom:3px solid transparent;transition:.15s;position:relative;}.tab-item span{display:none;}@media(min-width:769px){.tab-item span{display:block;}}
+.tab-item.active{color:var(--primary);border-bottom-color:var(--primary);}
+.tab-item:hover{background:#f8f8f8;}
+.tab-item i{font-size:22px;}
+.tab-item{position:relative;}
+.tab-badge{position:absolute;top:2px;right:calc(50% - 18px);background:#EE4D2D;color:#fff;font-size:9px;min-width:16px;height:16px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-weight:700;padding:0 4px;}
+.top-nav{background:#fff;position:fixed;top:0;left:0;right:0;z-index:100;padding:8px 10px;display:flex;align-items:center;gap:8px;}
+.nav-logo{font-size:20px;font-weight:800;color:var(--primary);text-decoration:none;display:flex;align-items:center;gap:6px;white-space:nowrap;flex-shrink:0;}
+.nav-search{flex:1;min-width:0;max-width:660px;position:relative;}
+.nav-search input{width:100%;padding:8px 16px 8px 40px;border:1px solid var(--border);border-radius:20px;font-size:14px;background:#f6f7f8;outline:none;}
+.nav-search input:focus{border-color:var(--primary);background:#fff;}
+.nav-search i{position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--muted);}
+.nav-actions{display:flex;gap:8px;align-items:center;margin-left:auto;}
+.nav-btn{padding:6px 16px;border-radius:20px;font-size:13px;font-weight:700;cursor:pointer;border:2px solid var(--primary);background:none;color:var(--primary);}
+.nav-btn.filled{background:var(--primary);color:#fff;}
+.nav-user-wrap{display:flex;align-items:center;gap:8px;font-size:14px;font-weight:600;cursor:pointer;padding:6px 10px;border-radius:4px;}
+.nav-user-wrap:hover{background:#f6f7f8;}
+.main-layout{max-width:1200px;margin:0 auto;padding:20px 16px;display:grid;grid-template-columns:220px 1fr 310px;gap:24px;}
+@media(max-width:1100px){.main-layout{grid-template-columns:1fr 300px;}.left-sidebar{display:none;}}
+@media(max-width:768px){.main-layout{grid-template-columns:1fr;padding:0;gap:0;}.main-layout>*{min-width:0;}.right-sidebar{display:none;}.tab-bar{top:58px;}body{padding-top:100px;}.create-box{display:none;}}
+.sidebar-card{background:var(--card);border:1px solid var(--border);border-radius:4px;overflow:hidden;margin-bottom:16px;}
+.sidebar-title{padding:10px 12px;font-size:12px;font-weight:700;text-transform:uppercase;color:var(--muted);border-bottom:1px solid var(--border);}
+.sidebar-item{display:flex;align-items:center;gap:10px;padding:9px 12px;font-size:14px;font-weight:500;cursor:pointer;text-decoration:none;color:var(--text);transition:.15s;}
+.sidebar-item:hover,.sidebar-item.active{background:var(--border);}
+.sidebar-item i{width:20px;text-align:center;font-size:16px;}
+.province-search{padding:8px 12px;}
+.province-search input{width:100%;padding:6px 10px;border:1px solid var(--border);border-radius:4px;font-size:13px;outline:none;}
+.province-list{max-height:200px;overflow-y:auto;}
+.province-item{padding:7px 12px;font-size:13px;cursor:pointer;}
+.province-item:hover,.province-item.active{background:var(--orange-light);color:var(--primary);font-weight:600;}
+.feed-header{background:var(--card);border:none;border-radius:0;padding:6px 0;display:flex;gap:0;align-items:center;margin-bottom:0;flex-wrap:nowrap;border-bottom:1px solid #ececec;}
+.sort-btn{display:flex;align-items:center;justify-content:center;gap:4px;padding:8px 0;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;border:none;background:none;color:var(--muted);flex:1;white-space:nowrap;}
+.sort-btn:hover,.sort-btn.active{background:var(--border);color:var(--text);}
+.create-box{display:none!important;}
+.create-input{flex:1;padding:8px 12px;border:1px solid var(--border);border-radius:4px;font-size:14px;cursor:pointer;background:#f6f7f8;outline:none;}
+.create-input:hover{border-color:var(--primary);}
+.icon-btn{width:36px;height:36px;border:1px solid var(--border);border-radius:4px;background:none;cursor:pointer;font-size:16px;color:var(--muted);display:flex;align-items:center;justify-content:center;}
+.icon-btn:hover{border-color:var(--primary);color:var(--primary);}
+.post-card{background:var(--card);border:none;border-radius:0;margin-bottom:0;display:flex;transition:.1s;overflow:hidden;border-bottom:1px solid #ececec;}
+.post-card:hover{background:#fafafa;}
+.vote-col{width:40px;background:#f8f9fa;display:flex;flex-direction:column;align-items:center;padding:8px 4px;gap:2px;flex-shrink:0;}
+.vote-btn{width:24px;height:24px;border:none;background:none;cursor:pointer;border-radius:2px;display:flex;align-items:center;justify-content:center;font-size:18px;color:var(--muted);line-height:1;}
+.vote-btn.voted-up{color:var(--up);}
+.vote-btn.voted-down{color:var(--down);}
+.vote-btn:hover{background:rgba(0,0,0,.05);}
+.vote-score{font-size:12px;font-weight:700;color:var(--muted);}
+.vote-score.pos{color:var(--up);}
+.vote-score.neg{color:var(--down);}
+.post-body{flex:1;padding:8px;min-width:0;}
+.post-meta{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--muted);margin-bottom:6px;flex-wrap:wrap;position:relative;}
+.post-dots{background:none;border:none;color:var(--muted);cursor:pointer;font-size:16px;padding:4px 8px;margin-left:auto;border-radius:4px;}.post-dots:hover{background:var(--border);}
+.post-menu{position:absolute;right:8px;top:36px;background:#fff;border-radius:8px;box-shadow:0 2px 12px rgba(0,0,0,.15);z-index:50;min-width:160px;padding:4px 0;}
+.post-menu div{padding:10px 14px;font-size:13px;cursor:pointer;display:flex;align-items:center;gap:8px;}.post-menu div:hover{background:#f5f5f5;}
+.post-meta{position:relative;}
+
+.avatar-sm{width:20px;height:20px;border-radius:50%;object-fit:cover;background:var(--primary);color:#fff;font-size:10px;display:inline-flex;align-items:center;justify-content:center;font-weight:700;flex-shrink:0;}
+.post-author{font-weight:600;color:var(--text);cursor:pointer;}
+.post-author:hover{text-decoration:underline;}
+.province-badge{background:var(--orange-light);color:var(--primary);padding:1px 7px;border-radius:20px;font-size:11px;font-weight:600;cursor:pointer;}
+.anon-badge{background:#f0f0f0;color:#555;padding:1px 7px;border-radius:20px;font-size:11px;}
+.type-badge{padding:2px 8px;border-radius:20px;font-size:11px;font-weight:700;}
+.b-confession{background:#FFE4E1;color:#DC143C;}
+.b-review{background:#E3F2FD;color:#1565C0;}
+.b-question{background:#E8F5E9;color:#2E7D32;}
+.b-tip{background:#FFF8E1;color:#F57F17;}
+.b-discussion{background:#F3E5F5;color:#6A1B9A;}
+.post-title{font-size:18px;font-weight:700;margin-bottom:6px;line-height:1.3;}
+.post-content{font-size:14px;line-height:1.6;color:#333;word-break:break-word;white-space:pre-wrap;max-height:300px;overflow:hidden;position:relative;}
+.post-content.full{max-height:none;}
+.post-content:not(.full)::after{content:'';position:absolute;bottom:0;left:0;right:0;height:60px;background:linear-gradient(transparent,#fff);}
+.show-more{font-size:13px;color:var(--primary);cursor:pointer;font-weight:600;margin-top:2px;display:inline-block;}
+.post-images{display:flex;gap:6px;margin-top:8px;flex-wrap:wrap;}
+.post-img{max-width:100%;max-height:512px;border-radius:4px;object-fit:contain;cursor:pointer;}
+.post-img.multi{max-width:calc(50% - 3px);max-height:300px;object-fit:cover;}
+.post-actions{display:flex;align-items:center;gap:4px;margin-top:8px;flex-wrap:wrap;}
+.act-btn{display:flex;align-items:center;gap:5px;padding:6px 8px;border:none;background:none;cursor:pointer;font-size:12px;font-weight:700;color:var(--muted);border-radius:2px;}
+.act-btn:hover{background:var(--border);color:var(--text);}
+.act-btn.saved{color:var(--primary);}
+.cmt-section{border-top:1px solid var(--border);padding:8px;margin-top:8px;display:none;}
+.cmt-section.open{display:block;}
+.cmt-form{display:flex;gap:8px;margin-bottom:12px;align-items:flex-start;}
+.cmt-form textarea{flex:1;padding:8px;border:1px solid var(--border);border-radius:4px;font-size:13px;resize:vertical;min-height:60px;font-family:inherit;outline:none;}
+.cmt-form textarea:focus{border-color:var(--primary);}
+.cmt-send{padding:6px 14px;background:var(--primary);color:#fff;border:none;border-radius:4px;font-size:13px;font-weight:700;cursor:pointer;white-space:nowrap;}
+.cmt-item{display:flex;gap:8px;padding:4px 0;}
+.cmt-body{flex:1;min-width:0;}
+.cmt-bubble{background:#f0f2f5;border-radius:18px;padding:8px 12px;display:inline-block;max-width:100%;}
+.cmt-author{font-weight:700;font-size:13px;}
+.cmt-text{font-size:14px;line-height:1.4;margin-top:1px;}
+.cmt-meta{display:flex;gap:12px;padding:2px 12px;font-size:12px;color:var(--muted);}
+.cmt-meta a{color:var(--muted);text-decoration:none;font-weight:600;cursor:pointer;}
+.cmt-meta a:hover{text-decoration:underline;}
+.cmt-meta a.liked{color:var(--primary);font-weight:700;}
+.cmt-time{color:var(--muted);}
+.replies{margin-top:4px;padding-left:8px;border-left:2px solid #e4e6eb;}
+.cmt-act:hover{color:var(--text);}
+.replies{margin-top:6px;padding-left:16px;border-left:2px solid var(--border);}
+.load-more{width:100%;padding:10px;background:var(--border);border:none;border-radius:0;font-size:14px;font-weight:700;cursor:pointer;margin-top:4px;}
+.community-banner{background:linear-gradient(135deg,var(--primary),var(--primary-dark));color:#fff;padding:16px;border-radius:4px 4px 0 0;}
+.community-banner h3{font-size:16px;font-weight:700;margin-bottom:4px;}
+.community-banner p{font-size:13px;opacity:.9;}
+.stats-grid{padding:12px;background:#fff;border:1px solid var(--border);border-top:none;display:grid;grid-template-columns:1fr 1fr;gap:8px;}
+.stat{text-align:center;}
+.stat-n{font-size:18px;font-weight:700;color:var(--primary);}
+.stat-l{font-size:11px;color:var(--muted);margin-top:2px;}
+.rules-box{background:#fff;border:1px solid var(--border);border-top:none;border-radius:0 0 4px 4px;}
+.rule{padding:8px 12px;border-bottom:1px solid var(--border);font-size:13px;}
+.rule:last-child{border:none;}
+.trending-box{background:#fff;border:1px solid var(--border);border-radius:4px;margin-top:16px;}
+.trend-item{padding:8px 12px;border-bottom:1px solid var(--border);cursor:pointer;}
+.trend-item:hover{background:#f6f7f8;}
+.trend-item:last-child{border:none;}
+.trend-title{font-size:13px;font-weight:600;line-height:1.3;margin-bottom:3px;}
+.trend-meta{font-size:11px;color:var(--muted);}
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:1000;display:none;align-items:center;justify-content:center;padding:16px;}
+.modal-overlay.open{display:flex;}
+.modal{background:#fff;border-radius:8px;width:100%;max-width:700px;display:flex;flex-direction:column;max-height:90vh;}
+.modal-head{background:var(--primary);color:#fff;padding:14px 20px;display:flex;align-items:center;justify-content:space-between;border-radius:8px 8px 0 0;}
+.modal-head h2{font-size:16px;font-weight:700;}
+.modal-x{background:none;border:none;color:#fff;font-size:24px;cursor:pointer;line-height:1;}
+.modal-body{padding:20px;overflow-y:auto;flex:1;min-height:0;-webkit-overflow-scrolling:touch;}
+.type-tabs{display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap;}
+.type-tab{padding:7px 14px;border:2px solid var(--border);border-radius:20px;font-size:13px;font-weight:700;cursor:pointer;background:none;color:var(--muted);}
+.type-tab.active{border-color:var(--primary);color:var(--primary);background:var(--orange-light);}
+.f-row{margin-bottom:14px;}
+.f-row label{display:block;font-size:13px;font-weight:700;margin-bottom:6px;color:var(--muted);}
+.f-row input,.f-row textarea,.f-row select{width:100%;padding:10px 12px;border:1px solid var(--border);border-radius:4px;font-size:14px;font-family:inherit;outline:none;}
+.f-row input:focus,.f-row textarea:focus,.f-row select:focus{border-color:var(--primary);}
+.f-row textarea{min-height:140px;resize:vertical;}
+.anon-check{display:flex;align-items:center;gap:8px;font-size:13px;cursor:pointer;}
+.anon-check input{width:16px;height:16px;accent-color:var(--primary);}
+.sub-btn{width:100%;padding:12px;background:var(--primary);color:#fff;border:none;border-radius:4px;font-size:15px;font-weight:700;cursor:pointer;margin-top:8px;}
+.sub-btn:hover{background:var(--primary-dark);}
+.sub-btn:disabled{opacity:.6;cursor:not-allowed;}
+.conf-note{background:#fff3cd;border-radius:4px;padding:10px;font-size:13px;margin-bottom:12px;display:none;}
+.char-cnt{font-size:12px;color:var(--muted);text-align:right;margin-top:3px;}
+.post-video{width:100%;border-radius:8px;margin:8px 0;max-height:500px;}.post-video{width:100%;border-radius:8px;margin:8px 0;max-height:500px;}.img-previews{display:flex;gap:6px;flex-wrap:wrap;margin-top:6px;}
+.img-prev{width:72px;height:72px;object-fit:cover;border-radius:4px;}
+.img-lightbox{position:fixed;inset:0;background:rgba(0,0,0,.9);z-index:2000;display:none;align-items:center;justify-content:center;}
+.img-lightbox.open{display:flex;}
+.img-lightbox img{max-width:90vw;max-height:90vh;object-fit:contain;}
+.lb-close{position:absolute;top:16px;right:16px;background:none;border:none;color:#fff;font-size:32px;cursor:pointer;}
+.share-drop{position:absolute;background:#fff;border:1px solid var(--border);border-radius:8px;padding:8px 0;z-index:200;box-shadow:0 4px 16px rgba(0,0,0,.15);min-width:200px;right:0;top:100%;}
+.share-opt{display:flex;align-items:center;gap:10px;padding:9px 16px;font-size:13px;cursor:pointer;}
+.share-opt:hover{background:#f6f7f8;}
+.share-opt i{width:20px;text-align:center;}
+.toast{position:fixed;bottom:20px;right:20px;background:#333;color:#fff;padding:12px 20px;border-radius:8px;font-size:14px;z-index:3000;transform:translateY(100px);opacity:0;transition:.3s;pointer-events:none;}
+.toast.show{transform:none;opacity:1;}
+.toast.success{background:#2E7D32;}
+.toast.error{background:#C62828;}
+.toast.warning{background:#E65100;}
+.empty{text-align:center;padding:60px 20px;color:var(--muted);}
+.empty i{font-size:48px;display:block;margin-bottom:12px;color:#ccc;}
+.spin{animation:spin 1s linear infinite;}
+@keyframes spin{to{transform:rotate(360deg);}}
+.no-wrap{white-space:nowrap;}
+@media(max-width:768px){.modal-overlay{align-items:flex-end!important;padding:0!important;padding-bottom:60px!important;}.modal{max-height:calc(100vh - 120px);display:flex;flex-direction:column;border-radius:12px 12px 0 0!important;}.modal-head{flex-shrink:0;}.modal-body{flex:1;overflow-y:auto;padding:16px!important;-webkit-overflow-scrolling:touch;min-height:0;}.modal>div:last-child{flex-shrink:0;padding:12px 16px!important;background:#fff;border-top:1px solid #eee;}}
+</style>
+
+<style id="masterFix">
+html,body{max-width:100vw!important;overflow-x:hidden!important;}
+#mobileBottomNav{left:0!important;right:0!important;width:100%!important;}
+#mobileBottomNav .mnav-fab{width:44px!important;height:44px!important;font-size:18px!important;margin-top:-18px!important;box-shadow:0 3px 10px rgba(238,77,45,.4)!important;}
+.post-card{margin-bottom:0!important;}
+#feed{background:#fff!important;}
+.post-actions{gap:4px!important;}
+.sort-btn{gap:4px!important;}
+.main-layout,.main-layout>*{max-width:100vw!important;}
+</style>
+</head>
+<body>
+<nav class="top-nav">
+  <a href="index.html" class="nav-logo"><i class="fa-solid fa-truck-fast"></i><span class="no-wrap">ShipperShop</span></a>
+  <div class="nav-search">
+    <i class="fas fa-search"></i>
+    <input id="q" type="text" placeholder="Tìm kiếm bài viết, #hashtag..." onkeydown="if(event.key==='Enter')search()" onfocus="openSearch()" readonly>
+  </div>
+  <div class="nav-actions" id="navArea"></div>
+</nav>
+
+<div id="searchOverlay" style="display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.4);z-index:500" onclick="closeSearch()">
+  <div style="background:#fff;max-width:600px;margin:0 auto;max-height:85vh;overflow-y:auto;border-radius:0 0 16px 16px;padding:0" onclick="event.stopPropagation()">
+    <div style="padding:12px 16px;display:flex;align-items:center;gap:10px;border-bottom:1px solid #eee;position:sticky;top:0;background:#fff;z-index:1">
+      <button onclick="closeSearch()" style="background:none;border:none;font-size:18px;cursor:pointer;padding:4px"><i class="fas fa-arrow-left"></i></button>
+      <div style="flex:1;position:relative"><i class="fas fa-search" style="position:absolute;left:12px;top:50%;transform:translateY(-50%);color:#999;font-size:14px"></i><input id="sInput" type="text" placeholder="Tìm kiếm trên ShipperShop..." style="width:100%;padding:10px 12px 10px 38px;border:1px solid #ddd;border-radius:24px;font-size:14px;outline:none" oninput="liveSearch(this.value)" onkeydown="if(event.key==='Enter'){doSearch(this.value);closeSearch();}"></div>
+    </div>
+
+    <div id="searchContent">
+      <div style="padding:14px 16px 8px;font-weight:700;font-size:15px;color:#333">Danh mục</div>
+      <div style="display:flex;flex-wrap:wrap;gap:8px;padding:0 16px 12px">
+        <button class="s-tag" onclick="filterSearch('all')"><i class="fas fa-fire" style="color:#ff4500"></i> Tất cả</button>
+        <button class="s-tag" onclick="filterSearch('post')"><i class="fas fa-pen" style="color:#0079d3"></i> Bài viết</button>
+        <button class="s-tag" onclick="filterSearch('question')"><i class="fas fa-question" style="color:#ff585b"></i> Hỏi đáp</button>
+        <button class="s-tag" onclick="filterSearch('discussion')"><i class="fas fa-comments" style="color:#46d160"></i> Thảo luận</button>
+        <button class="s-tag" onclick="filterSearch('confession')"><i class="fas fa-mask" style="color:#888"></i> Confession</button>
+        <button class="s-tag" onclick="filterSearch('review')"><i class="fas fa-star" style="color:#ffb000"></i> Review</button>
+        <button class="s-tag" onclick="filterSearch('tip')"><i class="fas fa-lightbulb" style="color:#0dd3bb"></i> Mẹo</button>
+      </div>
+
+      <div style="padding:14px 16px 8px;font-weight:700;font-size:15px;color:#333">Đơn vị vận chuyển</div>
+      <div style="display:flex;flex-wrap:wrap;gap:8px;padding:0 16px 12px">
+        <button class="s-tag" onclick="filterShip('GHTK')"><span style="color:#00b14f;font-weight:700">GHTK</span></button>
+        <button class="s-tag" onclick="filterShip('GHN')"><span style="color:#ff6600;font-weight:700">GHN</span></button>
+        <button class="s-tag" onclick="filterShip('J&T')"><span style="color:#d32f2f;font-weight:700">J&T</span></button>
+        <button class="s-tag" onclick="filterShip('SPX')"><span style="color:#EE4D2D;font-weight:700">SPX</span></button>
+        <button class="s-tag" onclick="filterShip('Viettel Post')"><span style="color:#e21a1a;font-weight:700">Viettel Post</span></button>
+        <button class="s-tag" onclick="filterShip('Ninja Van')"><span style="color:#c41230;font-weight:700">Ninja Van</span></button>
+        <button class="s-tag" onclick="filterShip('Grab')"><span style="color:#00b14f;font-weight:700">Grab</span></button>
+        <button class="s-tag" onclick="filterShip('Be')"><span style="color:#5bc500;font-weight:700">Be</span></button>
+        <button class="s-tag" onclick="filterShip('Gojek')"><span style="color:#00aa13;font-weight:700">Gojek</span></button>
+      </div>
+
+      <div style="padding:14px 16px 8px;font-weight:700;font-size:15px;color:#333">Khu vực</div>
+      <div style="display:flex;flex-wrap:wrap;gap:8px;padding:0 16px 16px" id="sProvinces">
+        <button class="s-tag" onclick="filterProv('Hồ Chí Minh')">TP.HCM</button>
+        <button class="s-tag" onclick="filterProv('Hà Nội')">Hà Nội</button>
+        <button class="s-tag" onclick="filterProv('Đà Nẵng')">Đà Nẵng</button>
+        <button class="s-tag" onclick="filterProv('Cần Thơ')">Cần Thơ</button>
+        <button class="s-tag" onclick="filterProv('Bình Dương')">Bình Dương</button>
+        <button class="s-tag" onclick="filterProv('Đồng Nai')">Đồng Nai</button>
+        <button class="s-tag" onclick="filterProv('Hải Phòng')">Hải Phòng</button>
+      </div>
+
+      <div id="sResults"></div>
+    </div>
+  </div>
+</div>
+
+
+<div class="tab-bar">
+  <a href="index.html" class="tab-item active"><i class="fas fa-newspaper"></i><span>Bài viết</span></a>
+  <a href="#" class="tab-item" onclick="fType('tip');return false"><i class="fas fa-road"></i><span>Giao thông</span></a>
+  <a href="groups.html" class="tab-item"><i class="fas fa-users-rectangle"></i><span>Hội nhóm</span></a>
+  <a href="#" class="tab-item" id="tabNotif" onclick="toggleNotifPage();return false"><i class="fas fa-bell"></i><span>Thông báo</span><span class="tab-badge" id="tabNotifBadge" style="display:none"></span></a>
+</div>
+<div class="main-layout">
+<aside class="left-sidebar">
+  <div class="sidebar-card">
+    <div class="sidebar-title">Chủ đề</div>
+    <span class="sidebar-item active" id="t-all" onclick="fType('all')"><i class="fas fa-fire"></i>Tất cả</span>
+    <span class="sidebar-item" id="t-confession" onclick="fType('confession')"><i class="fas fa-mask"></i>Confession ẩn danh</span>
+    <span class="sidebar-item" id="t-review" onclick="fType('review')"><i class="fas fa-star"></i>Review sản phẩm</span>
+    <span class="sidebar-item" id="t-tip" onclick="fType('tip')"><i class="fas fa-lightbulb"></i>Mẹo hay</span>
+    <span class="sidebar-item" id="t-question" onclick="fType('question')"><i class="fas fa-question-circle"></i>Hỏi đáp</span>
+    <span class="sidebar-item" id="t-discussion" onclick="fType('discussion')"><i class="fas fa-comments"></i>Thảo luận</span>
+  </div>
+  <div class="sidebar-card">
+    <div class="sidebar-title">Lọc theo tỉnh/thành phố</div>
+    <div class="province-search"><input type="text" id="pSearch" placeholder="Tìm tỉnh thành..." oninput="renderProvinces(this.value)"></div>
+    <div class="province-list" id="pList"></div>
+  </div>
+</aside>
+
+<main>
+  <div class="create-box">
+    <div id="cAvatar" class="avatar-sm" style="width:32px;height:32px;font-size:14px;flex-shrink:0">?</div>
+    <input class="create-input" type="text" placeholder="Bạn đang nghĩ gì? Click để đăng bài..." readonly onclick="openModal('post')">
+    <button class="icon-btn" title="Đăng ảnh/video" onclick="openModal('post')"><i class="fas fa-image"></i></button>
+    <button class="icon-btn" title="Confession" onclick="openModal('confession')"><i class="fas fa-mask"></i></button>
+    <button class="icon-btn" title="Hỏi đáp" onclick="openModal('question')"><i class="fas fa-question"></i></button>
+  </div>
+  <div class="feed-header">
+    <button class="sort-btn active" id="s-hot" onclick="setSort('hot',this)"><i class="fas fa-fire-flame-curved" style="color:#ff4500"></i> Hot</button>
+    <button class="sort-btn" id="s-new" onclick="setSort('new',this)"><i class="fas fa-certificate" style="color:#0dd3bb"></i> Mới</button>
+    <button class="sort-btn" id="s-top" onclick="setSort('top',this)"><i class="fas fa-arrow-trend-up" style="color:#ffb000"></i> Xu hướng</button>
+    <button class="sort-btn" id="s-rising" onclick="setSort('rising',this)"><i class="fas fa-user-check" style="color:#ff585b"></i> Theo dõi</button>
+    
+  </div>
+  <div id="feed" style="background:#fff"><div class="empty"><i class="fas fa-spinner spin"></i><p>Đang tải...</p></div></div>
+  <button class="load-more" id="loadMoreBtn" onclick="loadMore()" style="display:none">⬇ Tải thêm bài viết</button>
+</main>
+
+<aside class="right-sidebar">
+  <div class="community-banner">
+    <h3><i class="fas fa-users"></i> Cộng đồng ShipperShop</h3>
+    <p>Chia sẻ · Mua sắm · Kết nối 63 tỉnh thành!</p>
+  </div>
+  <div class="stats-grid">
+    <div class="stat"><div class="stat-n" id="stM">--</div><div class="stat-l">Thành viên</div></div>
+    <div class="stat"><div class="stat-n" id="stO" style="color:#46d160">--</div><div class="stat-l">Online</div></div>
+    <div class="stat"><div class="stat-n" id="stP">--</div><div class="stat-l">Bài viết</div></div>
+    <div class="stat"><div class="stat-n" id="stT">--</div><div class="stat-l">Hôm nay</div></div>
+  </div>
+  <div class="rules-box">
+    <div class="sidebar-title" style="padding:10px 12px">📋 Nội quy</div>
+    <div class="rule">1. Tôn trọng lẫn nhau</div>
+    <div class="rule">2. Không spam, không quảng cáo tràn lan</div>
+    <div class="rule">3. Confession ẩn danh — không xúc phạm cá nhân</div>
+    <div class="rule">4. Review phải có trải nghiệm thực tế</div>
+    <div class="rule">5. Nội dung phải liên quan mua sắm / tiêu dùng</div>
+  </div>
+  <div class="trending-box" id="trendBox">
+    <div class="sidebar-title" style="padding:10px 12px">🔥 Đang thịnh hành</div>
+    <div class="empty" style="padding:20px"><i class="fas fa-spinner spin"></i></div>
+  </div>
+</aside>
+</div>
+
+<!-- MODAL TẠO BÀI -->
+<div class="modal-overlay" id="modal">
+<div class="modal">
+  <div class="modal-head"><h2 id="mTitle"><i class="fas fa-pen"></i> Tạo bài viết</h2><button class="modal-x" onclick="closeModal()">×</button></div>
+  <div class="modal-body">
+    <div class="type-tabs" id="typeTabs">
+      <button class="type-tab active" onclick="setPType('post',this)">📝 Bài viết</button>
+      <button class="type-tab" onclick="setPType('review',this)">⭐ Review</button>
+      <button class="type-tab" onclick="setPType('question',this)">❓ Hỏi đáp</button>
+      <button class="type-tab" onclick="setPType('tip',this)">💡 Mẹo</button>
+      <button class="type-tab" onclick="setPType('discussion',this)">💬 Thảo luận</button>
+      <button class="type-tab" onclick="setPType('confession',this)">🎭 Confession</button>
+    </div>
+    <div id="confNote" class="conf-note">🎭 <strong>Confession:</strong> Bài sẽ đăng ẩn danh hoàn toàn. Vẫn cần tuân thủ nội quy!</div>
+    <div class="f-row"><label>Tiêu đề (tuỳ chọn)</label><input id="mTitle2" type="text" placeholder="Tiêu đề bài viết..." maxlength="300"></div>
+    <div class="f-row">
+      <label>Nội dung <span style="color:red">*</span></label>
+      <textarea id="mContent" placeholder="Chia sẻ trải nghiệm của bạn..." oninput="cCnt()"></textarea>
+      <div class="char-cnt"><span id="cnt">0</span>/5000</div>
+    </div>
+    <div class="f-row"><label>Tỉnh/Thành phố (tuỳ chọn)</label><select id="mProv"><option value="">-- Toàn quốc --</option></select></div>
+    <div class="f-row"><label>Ảnh (tối đa 4 ảnh)</label><input type="file" id="mImgs" accept="image/*" multiple onchange="prevImgs(this)"><div class="img-previews" id="mImgPrev"></div></div>
+    <div class="f-row"><label><i class="fas fa-video"></i> Video</label><input id="mVideoFile" type="file" accept="video/mp4,video/quicktime,video/*" style="font-size:13px"><input id="mVideo" type="url" placeholder="Hoặc dán link YouTube/TikTok..." style="margin-top:6px"></div>
+    <div class="f-row"><label class="anon-check"><input type="checkbox" id="mAnon"> Đăng ẩn danh <span style="color:var(--muted);font-size:11px">(tên sẽ bị ẩn)</span></label></div>
+  </div>
+  <div style="padding:12px 20px;border-top:1px solid #eee;background:#fff;border-radius:0 0 8px 8px;flex-shrink:0"><button class="sub-btn" id="subBtn" onclick="submitPost()"><i class="fas fa-paper-plane"></i> Đăng bài</button></div>
+</div>
+</div>
+
+<!-- IMAGE LIGHTBOX -->
+<div class="img-lightbox" id="lb" onclick="closeLb()">
+  <button class="lb-close">×</button>
+  <img id="lbImg" src="" alt="">
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const PROVINCES=["An Giang","Bà Rịa - Vũng Tàu","Bắc Giang","Bắc Kạn","Bạc Liêu","Bắc Ninh","Bến Tre","Bình Định","Bình Dương","Bình Phước","Bình Thuận","Cà Mau","Cần Thơ","Cao Bằng","Đà Nẵng","Đắk Lắk","Đắk Nông","Điện Biên","Đồng Nai","Đồng Tháp","Gia Lai","Hà Giang","Hà Nam","Hà Nội","Hà Tĩnh","Hải Dương","Hải Phòng","Hậu Giang","Hòa Bình","Hưng Yên","Khánh Hòa","Kiên Giang","Kon Tum","Lai Châu","Lâm Đồng","Lạng Sơn","Lào Cai","Long An","Nam Định","Nghệ An","Ninh Bình","Ninh Thuận","Phú Thọ","Phú Yên","Quảng Bình","Quảng Nam","Quảng Ngãi","Quảng Ninh","Quảng Trị","Sóc Trăng","Sơn La","Tây Ninh","Thái Bình","Thái Nguyên","Thanh Hóa","Thừa Thiên Huế","Tiền Giang","TP. Hồ Chí Minh","Trà Vinh","Tuyên Quang","Vĩnh Long","Vĩnh Phúc","Yên Bái"];
+let CU=null,sort='hot',type='all',prov=null,page=1,totalPg=1,imgs=[],ptype='post';
+
+document.addEventListener('DOMContentLoaded',()=>{
+  CU=JSON.parse(localStorage.getItem('user')||'null');
+  renderNav(); renderProvinces(); loadPosts(); loadTrend();
+  const sel=document.getElementById('mProv');
+  PROVINCES.forEach(p=>{const o=document.createElement('option');o.value=p;o.textContent=p;sel.appendChild(o);});
+  document.getElementById('stM').textContent=Math.floor(Math.random()*3000+1000).toLocaleString();
+  document.getElementById('stO').textContent=Math.floor(Math.random()*500+100);
+});
+
+function renderNav(){
+  const a=document.getElementById('navArea');
+  if(CU){
+    const av=CU.avatar?`<img src="${CU.avatar}" style="width:32px;height:32px;border-radius:50%;object-fit:cover">`:`<div class="avatar-sm" style="width:32px;height:32px;font-size:14px">${CU.fullname[0].toUpperCase()}</div>`;
+    a.innerHTML=`<a href="messages.html" style="width:40px;height:40px;border-radius:50%;background:#f0f2f5;display:flex;align-items:center;justify-content:center;color:#333;text-decoration:none"><i class="fas fa-comment-dots" style="font-size:18px"></i></a>`;
+    const ca=document.getElementById('cAvatar');if(!ca)return;
+    if(CU.avatar) ca.outerHTML=`<img src="${CU.avatar}" style="width:32px;height:32px;border-radius:50%;object-fit:cover;flex-shrink:0">`;
+    else ca.textContent=CU.fullname[0].toUpperCase();
+  } else {
+    a.innerHTML=`<button class="nav-btn" onclick="location='login.html'">Đăng nhập</button><button class="nav-btn filled" onclick="location='register.html'">Đăng ký</button>`;
+  }
+}
+
+function renderProvinces(f=''){
+  const L=document.getElementById('pList');
+  L.innerHTML=`<div class="province-item${!prov?' active':''}" onclick="setProv(null,this)">🇻🇳 Toàn quốc</div>`;
+  PROVINCES.filter(p=>!f||p.toLowerCase().includes(f.toLowerCase())).forEach(p=>{
+    const d=document.createElement('div');
+    d.className='province-item'+(prov===p?' active':'');
+    d.textContent=p; d.onclick=()=>setProv(p,d); L.appendChild(d);
+  });
+}
+function setProv(p,el){ prov=p; page=1; document.querySelectorAll('.province-item').forEach(i=>i.classList.remove('active')); el.classList.add('active'); loadPosts(); }
+
+async function loadPosts(append=false){
+  if(!append){ document.getElementById('feed').innerHTML='<div class="empty"><i class="fas fa-spinner spin"></i><p style="margin-top:8px">Đang tải...</p></div>'; page=1; }
+  let url=`/api/posts.php?sort=${sort}&page=${page}&limit=15`;
+  if(type&&type!=='all') url+=`&type=${type}`;
+  if(prov) url+=`&province=${encodeURIComponent(prov)}`;
+  const q=document.getElementById('q').value.trim();
+  if(q) url+=`&search=${encodeURIComponent(q)}`;
+  try{
+    const r=await fetch(url,{credentials:'include'});
+    const d=await r.json();
+    if(d.success){
+      totalPg=d.data.total_pages||1;
+      document.getElementById('stP').textContent=d.data.total||0;
+      document.getElementById('stT').textContent=Math.floor((d.data.total||0)*0.15+Math.random()*20);
+      document.getElementById('loadMoreBtn').style.display=page<totalPg?'block':'none';
+      if(append) d.data.posts.forEach(p=>document.getElementById('feed').insertAdjacentHTML('beforeend',mkPost(p)));
+      else{
+        if(!d.data.posts.length) document.getElementById('feed').innerHTML='<div class="empty"><i class="fas fa-ghost"></i><p>Chưa có bài viết nào!</p><p style="font-size:13px;margin-top:6px">Hãy là người đầu tiên đăng bài 🎉</p></div>';
+        else document.getElementById('feed').innerHTML=d.data.posts.map(mkPost).join('');
+      }
+    }
+  }catch(e){ document.getElementById('feed').innerHTML='<div class="empty"><i class="fas fa-wifi"></i><p>Lỗi kết nối API</p></div>'; }
+}
+function loadMore(){ page++; loadPosts(true); }
+function search(){ page=1; loadPosts(); }
+function fType(t){ type=t; page=1; document.querySelectorAll('[id^="t-"]').forEach(i=>i.classList.remove('active')); const el=document.getElementById('t-'+t); if(el)el.classList.add('active'); loadPosts(); }
+function setSort(s,btn){ sort=s; page=1; document.querySelectorAll('.sort-btn').forEach(b=>b.classList.remove('active')); btn.classList.add('active'); loadPosts(); }
+
+function tryParse(s){try{return JSON.parse(s);}catch{return null;}}
+function ytEmbed(u){const m=u.match(/(?:v=|youtu\.be\/)([a-zA-Z0-9_-]{11})/);return m?`https://www.youtube.com/embed/${m[1]}`:u;}
+
+// vote function moved to reddit-mkpost.js
+// saveP function moved to reddit-mkpost.js as savePost
+function togShare(e,pid){
+  e.stopPropagation();
+  document.querySelectorAll('.share-drop').forEach(d=>d.remove());
+  const url=location.origin+'/community.html?post='+pid;
+  const el=e.currentTarget;
+  el.style.position='relative';
+  const drop=document.createElement('div');
+  drop.className='share-drop';
+  drop.innerHTML=`
+    <div class="share-opt" onclick="cpLink('${url}',${pid})"><i class="fas fa-link" style="color:#666"></i>Sao chép liên kết</div>
+    <div class="share-opt" onclick="window.open('https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}','_blank');shr(${pid})"><i class="fab fa-facebook" style="color:#1877F2"></i>Facebook</div>
+    <div class="share-opt" onclick="window.open('https://twitter.com/intent/tweet?url=${encodeURIComponent(url)}','_blank');shr(${pid})"><i class="fab fa-x-twitter"></i>Twitter/X</div>
+    <div class="share-opt" onclick="navigator.share&&navigator.share({url:'${url}',title:'ShipperShop'});shr(${pid})"><i class="fas fa-ellipsis" style="color:#666"></i>Khác...</div>`;
+  el.appendChild(drop);
+  setTimeout(()=>document.addEventListener('click',()=>drop.remove(),{once:true}),10);
+}
+function cpLink(u,pid){navigator.clipboard.writeText(u).then(()=>toast('Đã sao chép!','success'));shr(pid);}
+async function shr(pid){try{await fetch('/api/posts.php?action=share',{method:'POST',headers:{'Content-Type':'application/json'},credentials:'include',body:JSON.stringify({post_id:pid})});}catch{}}
+
+function togCmt(pid){
+  const b=document.getElementById('C'+pid);
+  if(b.classList.contains('open')){b.classList.remove('open');return;}
+  b.classList.add('open'); loadCmts(pid);
+}
+async function loadCmts(pid){
+  const b=document.getElementById('C'+pid);
+  b.innerHTML='<div style="padding:12px;text-align:center;color:var(--muted)"><i class="fas fa-spinner spin"></i></div>';
+  try{
+    const r=await fetch(`/api/posts.php?action=comments&post_id=${pid}`,{credentials:'include'});
+    const d=await r.json();
+    if(d.success){
+      let h=`<div class="cmt-form"><span class="avatar-sm" style="width:28px;height:28px;font-size:12px;flex-shrink:0">${CU?CU.fullname[0].toUpperCase():'?'}</span><textarea id="ct${pid}" placeholder="${CU?'Viết bình luận...':'Đăng nhập để bình luận'}" ${!CU?'disabled':''}></textarea><button class="cmt-send" onclick="sendCmt(${pid})">Gửi</button></div>`;
+      const flat=d.data||[];
+      const map={},top=[];
+      flat.forEach(c=>{c.replies=[];map[c.id]=c;});
+      flat.forEach(c=>{if(c.parent_id&&c.parent_id>0&&map[c.parent_id]){map[c.parent_id].replies.push(c);}else{top.push(c);}});
+      if(!top.length) h+='<p style="text-align:center;color:var(--muted);font-size:13px;padding:12px">Chưa có bình luận nào</p>';
+      else h+=top.map(c=>mkCmt(c,pid)).join('');
+      b.innerHTML=h;
+    }
+  }catch{b.innerHTML='<p style="color:red;padding:8px;font-size:13px">Lỗi tải comments</p>';}
+}
+function mkCmt(c,pid,depth=0){
+  const sz=depth>0?26:32;
+  const av=c.user_avatar?`<img src="${c.user_avatar}" style="width:${sz}px;height:${sz}px;border-radius:50%;object-fit:cover;flex-shrink:0" onerror="this.outerHTML='<div style=\'width:${sz}px;height:${sz}px;border-radius:50%;background:#e4e6eb;display:flex;align-items:center;justify-content:center;font-size:${depth>0?10:12}px;font-weight:700;flex-shrink:0\'>${(c.user_name||'?')[0]}</div>'">`:`<div style="width:${sz}px;height:${sz}px;border-radius:50%;background:#e4e6eb;display:flex;align-items:center;justify-content:center;font-size:${depth>0?10:12}px;font-weight:700;flex-shrink:0">${(c.user_name||'?')[0].toUpperCase()}</div>`;
+  const liked=c.user_vote==='up'||c.user_liked;
+  const lkCnt=c.likes_count||0;
+  const reps=c.replies&&c.replies.length?`<div class="replies">${c.replies.map(r=>mkCmt(r,pid,depth+1)).join('')}</div>`:'';
+  return `<div class="cmt-item">
+    <a href="user.html?id=${c.user_id}" style="flex-shrink:0;text-decoration:none">${av}</a>
+    <div class="cmt-body">
+      <div class="cmt-bubble">
+        <a href="user.html?id=${c.user_id}" class="cmt-author" style="text-decoration:none;color:inherit">${esc(c.user_name||'Ẩn danh')}</a>
+        <div class="cmt-text">${esc(c.content)}</div>
+      </div>
+      <div class="cmt-meta">
+        <span class="cmt-time">${ago(c.created_at)}</span>
+        <a class="${liked?'liked':''}" onclick="likeCmt(${c.id},this);return false">${liked?'Đã thích':'Thích'}${lkCnt>0?' · '+lkCnt:''}</a>
+        <a onclick="showRpl(${c.id},${pid});return false">Trả lời</a>
+      </div>
+      <div id="rbox${c.id}"></div>
+      ${reps}
+    </div>
+  </div>`;
+}
+
+async function likeCmt(cid,btn){
+  if(!CU){toast('Đăng nhập để thích!','warning');return;}
+  try{
+    const r=await fetch('/api/posts.php?action=vote_comment',{method:'POST',headers:{'Content-Type':'application/json'},credentials:'include',body:JSON.stringify({comment_id:cid,vote_type:'up'})});
+    const d=await r.json();
+    if(d.success){
+      const liked=d.data.user_vote==='up';
+      btn.className=liked?'liked':'';
+      btn.textContent=(liked?'Đã thích':'Thích')+(d.data.score>0?' · '+d.data.score:'');
+    }
+  }catch(e){toast('Lỗi','error');}
+}
+
+function showRpl(cid,pid){
+  if(!CU){toast('Đăng nhập để trả lời!','warning');return;}
+  document.getElementById('rbox'+cid).innerHTML=`<div style="display:flex;gap:6px;margin-top:6px"><textarea id="rt${cid}" style="flex:1;padding:6px;border:1px solid var(--border);border-radius:4px;font-size:13px;min-height:48px;resize:vertical;font-family:inherit;outline:none" placeholder="Trả lời..."></textarea><button class="cmt-send" style="height:fit-content" onclick="sendRpl(${cid},${pid})">Gửi</button></div>`;
+  setTimeout(()=>document.getElementById('rt'+cid).focus(),50);
+}
+async function sendRpl(cid,pid){
+  const ta=document.getElementById('rt'+cid); const ct=ta.value.trim(); if(!ct) return;
+  try{const r=await fetch('/api/posts.php?action=comment',{method:'POST',headers:{'Content-Type':'application/json'},credentials:'include',body:JSON.stringify({post_id:pid,parent_id:cid,content:ct})});const d=await r.json();if(d.success){toast('Đã trả lời!','success');loadCmts(pid);}else toast(d.message,'error');}catch{toast('Lỗi','error');}
+}
+async function vCmt(cid,type,btn){
+  if(!CU){toast('Đăng nhập để vote!','warning');return;}
+  try{const r=await fetch('/api/posts.php?action=vote_comment',{method:'POST',headers:{'Content-Type':'application/json'},credentials:'include',body:JSON.stringify({comment_id:cid,vote_type:'up'})});const d=await r.json();if(d.success){const liked=d.data.user_vote==='up';btn.className=liked?'liked':'';btn.textContent=(liked?'Đã thích':'Thích')+(d.data.score>0?' · '+d.data.score:'');}}catch{}
+}
+async function sendCmt(pid){
+  if(!CU){toast('Đăng nhập để bình luận!','warning');return;}
+  const ta=document.getElementById('ct'+pid); const ct=ta.value.trim(); if(!ct){toast('Nhập nội dung!','warning');return;}
+  try{const r=await fetch('/api/posts.php?action=comment',{method:'POST',headers:{'Content-Type':'application/json'},credentials:'include',body:JSON.stringify({post_id:pid,content:ct})});const d=await r.json();if(d.success){toast('Đã bình luận!','success');ta.value='';const nc=document.getElementById('nc'+pid);if(nc)nc.textContent=parseInt(nc.textContent)+1;loadCmts(pid);}else toast(d.message,'error');}catch{toast('Lỗi kết nối','error');}
+}
+async function delP(pid){
+  if(!confirm('Xóa bài viết này?')) return;
+  try{const r=await fetch('/api/posts.php?action=delete',{method:'POST',headers:{'Content-Type':'application/json'},credentials:'include',body:JSON.stringify({post_id:pid})});const d=await r.json();if(d.success){document.getElementById('P'+pid).remove();toast('Đã xóa','success');}else toast(d.message,'error');}catch{toast('Lỗi','error');}
+}
+
+async function loadTrend(){
+  try{const r=await fetch('/api/posts.php?sort=top&limit=5');const d=await r.json();if(d.success&&d.data.posts.length){document.getElementById('trendBox').innerHTML='<div class="sidebar-title" style="padding:10px 12px">🔥 Đang thịnh hành</div>'+d.data.posts.map(p=>`<div class="trend-item" onclick="scrollTo2(${p.id})"><div class="trend-title">${esc((p.title||p.content).substring(0,80))}${(p.title||p.content).length>80?'...':''}</div><div class="trend-meta">▲${fN(p.score||0)} · ${fN(p.comments_count||0)} bình luận</div></div>`).join('');}}catch{}
+}
+function scrollTo2(id){const el=document.getElementById('P'+id);if(el)el.scrollIntoView({behavior:'smooth',block:'center'});}
+
+// MODAL
+function openModal(type){
+  if(!CU){toast('Đăng nhập để đăng bài!','warning');setTimeout(()=>location='login.html',1000);return;}
+  setPType(type,document.querySelector('.type-tab'));
+  document.getElementById('modal').classList.add('open');
+  setTimeout(()=>document.getElementById('mContent').focus(),100);
+}
+function closeModal(){document.getElementById('modal').classList.remove('open');imgs=[];document.getElementById('mImgPrev').innerHTML='';document.getElementById('mContent').value='';document.getElementById('mTitle2').value='';document.getElementById('cnt').textContent=0;}
+function setPType(t,btn){
+  ptype=t;
+  document.querySelectorAll('.type-tab').forEach(b=>b.classList.remove('active'));
+  const map={post:'📝 Bài viết',review:'⭐ Review',question:'❓ Hỏi đáp',tip:'💡 Mẹo hay',discussion:'💬 Thảo luận',confession:'🎭 Confession ẩn danh'};
+  document.getElementById('mTitle').innerHTML=`<i class="fas fa-pen"></i> ${map[t]||'Tạo bài viết'}`;
+  document.getElementById('confNote').style.display=t==='confession'?'block':'none';
+  document.getElementById('mAnon').checked=t==='confession';
+  // find matching button
+  const tabs=document.querySelectorAll('.type-tab');
+  tabs.forEach(b=>{if(b.textContent.toLowerCase().includes(t.substring(0,4)))b.classList.add('active');});
+}
+function cCnt(){const v=document.getElementById('mContent').value.length;document.getElementById('cnt').textContent=v;document.getElementById('cnt').style.color=v>4800?'red':'';}
+function prevImgs(inp){
+  imgs=[];document.getElementById('mImgPrev').innerHTML='';
+  Array.from(inp.files).slice(0,4).forEach(f=>{const rd=new FileReader();rd.onload=e=>{imgs.push(e.target.result);const im=document.createElement('img');im.src=e.target.result;im.className='img-prev';document.getElementById('mImgPrev').appendChild(im);};rd.readAsDataURL(f);});
+}
+async function uploadVideo(file){
+  const fd=new FormData();
+  fd.append('video',file);
+  fd.append('token',localStorage.getItem('token'));
+  const r=await fetch('/api/upload-video.php',{method:'POST',body:fd,credentials:'include'});
+  const d=await r.json();
+  if(d.success) return d.url;
+  throw new Error(d.message||'Upload failed');
+}
+function renderVideo(url){
+  if(!url)return '';
+  if(url.includes('/uploads/videos/')){
+    return '<video controls playsinline preload="metadata" style="width:100%;max-height:500px;border-radius:8px;margin:8px 0"><source src="'+url+'" type="video/mp4">Video không hỗ trợ</video>';
+  }
+  var eid=url;
+  if(url.includes('youtube.com/watch'))eid='https://www.youtube.com/embed/'+url.split('v=')[1].split('&')[0];
+  else if(url.includes('youtu.be/'))eid='https://www.youtube.com/embed/'+url.split('youtu.be/')[1].split('?')[0];
+  else if(url.includes('tiktok.com'))return '<a href="'+url+'" target="_blank" style="display:block;padding:12px;background:#f5f5f5;border-radius:8px;text-decoration:none;color:#333;margin:8px 0"><i class="fab fa-tiktok"></i> Xem video trên TikTok</a>';
+  return '<iframe src="'+eid+'" style="width:100%;aspect-ratio:16/9;border:none;border-radius:8px;margin:8px 0" allowfullscreen></iframe>';
+}
+async function submitPost(){
+  if(!CU){toast('Đăng nhập đi!','warning');return;}
+  const ct=document.getElementById('mContent').value.trim();
+  if(!ct){toast('Nhập nội dung bài viết!','warning');return;}
+  const btn=document.getElementById('subBtn');btn.disabled=true;btn.textContent='Đang đăng...';
+  try{
+    var videoUrl=document.getElementById('mVideo').value.trim()||null;
+    var vf=document.getElementById('mVideoFile');
+    if(vf&&vf.files&&vf.files[0]){try{var fd=new FormData();fd.append('video',vf.files[0]);var vr=await fetch('/api/upload-video.php',{method:'POST',headers:{'Authorization':'Bearer '+localStorage.getItem('token')},body:fd});var vd=await vr.json();if(vd.success)videoUrl=vd.url;else toast('Upload lỗi: '+(vd.message||''),'warning');}catch(ve){toast('Lỗi upload video','error');}}
+    const r=await fetch('/api/posts.php',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+localStorage.getItem('token')},credentials:'include',body:JSON.stringify({content:ct,type:ptype,title:document.getElementById('mTitle2').value.trim()||null,province:document.getElementById('mProv').value||null,is_anonymous:document.getElementById('mAnon').checked?1:0,video_url:videoUrl,images:imgs.length?imgs:null})});
+    const d=await r.json();
+    if(d.success){toast('🎉 Đăng bài thành công!','success');closeModal();setTimeout(()=>loadPosts(),600);}
+    else toast(d.message||'Lỗi','error');
+  }catch{toast('Lỗi kết nối','error');}
+  finally{btn.disabled=false;btn.innerHTML='<i class="fas fa-paper-plane"></i> Đăng bài';}
+}
+
+// Lightbox
+function openLb(src){document.getElementById('lbImg').src=src;document.getElementById('lb').classList.add('open');}
+function closeLb(){document.getElementById('lb').classList.remove('open');}
+
+// Helpers
+function xpnd(id){const e=document.getElementById('pc-'+id);e.classList.add('full');e.nextElementSibling&&e.nextElementSibling.classList.contains('show-more')&&e.nextElementSibling.remove();}
+function esc(t){if(!t)return'';return String(t).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+function fN(n){n=parseInt(n)||0;if(n>=1000)return(n/1000).toFixed(1)+'K';return n.toString();}
+function ago(dt){if(!dt)return'';const s=Math.floor((new Date()-new Date(dt.replace(' ','T')))/1000);if(s<60)return s+'s';if(s<3600)return Math.floor(s/60)+'m';if(s<86400)return Math.floor(s/3600)+'h';if(s<604800)return Math.floor(s/86400)+'d';return new Date(dt).toLocaleDateString('vi-VN');}
+function toast(msg,type='success'){const t=document.getElementById('toast');t.textContent=msg;t.className=`toast ${type} show`;setTimeout(()=>t.classList.remove('show'),2800);}
+
+const up=new URLSearchParams(location.search);
+if(up.get('post'))setTimeout(()=>scrollTo2(parseInt(up.get('post'))),1500);
+if(up.get('type'))fType(up.get('type'));
+function handleFab(){if(!CU){toast('Đăng nhập để đăng bài!','warning');setTimeout(function(){location='login.html'},1000);return;}openModal('post');}
+</script>
+    <script src="js/mobile.js"></script>
+
+  <!-- MOBILE BOTTOM NAV - rendered in HTML, no JS injection -->
+  <nav id="mobileBottomNav" role="navigation" aria-label="Mobile navigation">
+    <a href="index.html" class="mnav-item" data-page="index.html"><i class="fas fa-home"></i><span>Trang chủ</span></a>
+    <a href="marketplace.html" class="mnav-item" data-page="marketplace.html"><i class="fas fa-store"></i><span class="mnav-badge" id="navCartBadge" style="display:none">0</span><span>Mua sắm</span></a>
+    <button class="mnav-item mnav-fab-wrap" onclick="handleFab()" aria-label="Đăng bài"><div class="mnav-fab"><i class="fas fa-camera" id="fabIcon"></i></div></button>
+    <a href="map.html" class="mnav-item" data-page="map.html"><i class="fas fa-map-marked-alt"></i><span>Bản đồ</span></a>
+    <a href="profile.html" class="mnav-item" data-page="profile.html" id="navProfileItem"><i class="fas fa-user" id="navProfileIcon"></i><span id="navProfileName">Tài khoản</span></a>
+  </nav>
+
+      <div style="display:flex;flex-wrap:wrap;gap:8px;padding:0 16px 12px">
+        <button class="s-tag" onclick="filterSearch('all')"><i class="fas fa-fire" style="color:#ff4500"></i> Tất cả</button>
+        <button class="s-tag" onclick="filterSearch('post')"><i class="fas fa-pen" style="color:#0079d3"></i> Bài viết</button>
+        <button class="s-tag" onclick="filterSearch('question')"><i class="fas fa-question" style="color:#ff585b"></i> Hỏi đáp</button>
+        <button class="s-tag" onclick="filterSearch('discussion')"><i class="fas fa-comments" style="color:#46d160"></i> Thảo luận</button>
+        <button class="s-tag" onclick="filterSearch('confession')"><i class="fas fa-mask" style="color:#888"></i> Confession</button>
+        <button class="s-tag" onclick="filterSearch('review')"><i class="fas fa-star" style="color:#ffb000"></i> Review</button>
+        <button class="s-tag" onclick="filterSearch('tip')"><i class="fas fa-lightbulb" style="color:#0dd3bb"></i> Mẹo</button>
+      </div>
+
+      <div style="padding:14px 16px 8px;font-weight:700;font-size:15px;color:#333">Đơn vị vận chuyển</div>
+      <div style="display:flex;flex-wrap:wrap;gap:8px;padding:0 16px 12px">
+        <button class="s-tag" onclick="filterShip('GHTK')"><span style="color:#00b14f;font-weight:700">GHTK</span></button>
+        <button class="s-tag" onclick="filterShip('GHN')"><span style="color:#ff6600;font-weight:700">GHN</span></button>
+        <button class="s-tag" onclick="filterShip('J&T')"><span style="color:#d32f2f;font-weight:700">J&T</span></button>
+        <button class="s-tag" onclick="filterShip('SPX')"><span style="color:#EE4D2D;font-weight:700">SPX</span></button>
+        <button class="s-tag" onclick="filterShip('Viettel Post')"><span style="color:#e21a1a;font-weight:700">Viettel Post</span></button>
+        <button class="s-tag" onclick="filterShip('Ninja Van')"><span style="color:#c41230;font-weight:700">Ninja Van</span></button>
+        <button class="s-tag" onclick="filterShip('Grab')"><span style="color:#00b14f;font-weight:700">Grab</span></button>
+        <button class="s-tag" onclick="filterShip('Be')"><span style="color:#5bc500;font-weight:700">Be</span></button>
+        <button class="s-tag" onclick="filterShip('Gojek')"><span style="color:#00aa13;font-weight:700">Gojek</span></button>
+      </div>
+
+      <div style="padding:14px 16px 8px;font-weight:700;font-size:15px;color:#333">Khu vực</div>
+      <div style="display:flex;flex-wrap:wrap;gap:8px;padding:0 16px 16px" id="sProvinces">
+        <button class="s-tag" onclick="filterProv('Hồ Chí Minh')">TP.HCM</button>
+        <button class="s-tag" onclick="filterProv('Hà Nội')">Hà Nội</button>
+        <button class="s-tag" onclick="filterProv('Đà Nẵng')">Đà Nẵng</button>
+        <button class="s-tag" onclick="filterProv('Cần Thơ')">Cần Thơ</button>
+        <button class="s-tag" onclick="filterProv('Bình Dương')">Bình Dương</button>
+        <button class="s-tag" onclick="filterProv('Đồng Nai')">Đồng Nai</button>
+        <button class="s-tag" onclick="filterProv('Hải Phòng')">Hải Phòng</button>
+      </div>
+
+      <div id="sResults"></div>
+    </div>
+  </div>
+</div>
+
+
+  <!-- BACK TO TOP -->
+  
+
+  <!-- PULL TO REFRESH INDICATOR -->
+  <div id="pullIndicator" aria-hidden="true">
+    <i class="fas fa-rotate-right"></i>
+    <span>Kéo xuống để làm mới</span>
+  </div>
+
+<script src="js/reddit-mkpost.js">
+    function renderComments(comments, postId) {
+        if (!comments || comments.length === 0) return '<p style="text-align:center;color:#999;padding:20px;font-size:13px">Chưa có bình luận</p>';
+        // Group: top-level and replies
+        var top = [], replies = {};
+        comments.forEach(function(c) {
+            if (c.parent_id && c.parent_id > 0) {
+                if (!replies[c.parent_id]) replies[c.parent_id] = [];
+                replies[c.parent_id].push(c);
+            } else {
+                top.push(c);
+            }
+        });
+        return top.map(function(c) {
+            var av = c.user_avatar ? '<img src="'+c.user_avatar+'" style="width:32px;height:32px;border-radius:50%;object-fit:cover">' : '<div style="width:32px;height:32px;border-radius:50%;background:#e4e6eb;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700">'+(c.user_name||'U').charAt(0)+'</div>';
+            var liked = c.user_liked ? ' style="color:#d32f2f;font-weight:700"' : '';
+            var html = '<div style="display:flex;gap:8px;margin-bottom:12px">'
+                + '<div style="flex-shrink:0">'+av+'</div>'
+                + '<div style="flex:1;min-width:0">'
+                + '<div style="background:#f0f2f5;border-radius:12px;padding:8px 12px;display:inline-block;max-width:100%">'
+                + '<div style="font-weight:600;font-size:13px">'+escH(c.user_name||'User')+'</div>'
+                + '<div style="font-size:14px;line-height:1.4;margin-top:2px">'+escH(c.content||'')+'</div>'
+                + '</div>'
+                + '<div style="display:flex;gap:12px;padding:2px 12px;font-size:12px;color:#65676b">'
+                + '<span>'+timeAgo(c.created_at)+'</span>'
+                + '<a href="#" onclick="likeComment('+c.id+',this);return false"'+liked+'>Thích'+(c.likes_count>0?' · '+c.likes_count:'')+'</a>'
+                + '<a href="#" onclick="replyTo('+postId+','+c.id+',\''+escH(c.user_name||'')+'\');return false" style="color:#65676b">Trả lời</a>'
+                + '</div>';
+            // Render replies
+            if (replies[c.id] && replies[c.id].length > 0) {
+                html += '<div style="margin-top:8px;padding-left:4px">';
+                replies[c.id].forEach(function(r) {
+                    var rav = r.user_avatar ? '<img src="'+r.user_avatar+'" style="width:26px;height:26px;border-radius:50%;object-fit:cover">' : '<div style="width:26px;height:26px;border-radius:50%;background:#e4e6eb;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700">'+(r.user_name||'U').charAt(0)+'</div>';
+                    var rliked = r.user_liked ? ' style="color:#d32f2f;font-weight:700"' : '';
+                    html += '<div style="display:flex;gap:6px;margin-bottom:8px">'
+                        + '<div style="flex-shrink:0">'+rav+'</div>'
+                        + '<div style="flex:1">'
+                        + '<div style="background:#f0f2f5;border-radius:12px;padding:6px 10px;display:inline-block">'
+                        + '<div style="font-weight:600;font-size:12px">'+escH(r.user_name||'User')+'</div>'
+                        + '<div style="font-size:13px;line-height:1.4">'+escH(r.content||'')+'</div>'
+                        + '</div>'
+                        + '<div style="display:flex;gap:10px;padding:2px 10px;font-size:11px;color:#65676b">'
+                        + '<span>'+timeAgo(r.created_at)+'</span>'
+                        + '<a href="#" onclick="likeComment('+r.id+',this);return false"'+rliked+'>Thích'+(r.likes_count>0?' · '+r.likes_count:'')+'</a>'
+                        + '<a href="#" onclick="replyTo('+postId+','+c.id+',\''+escH(r.user_name||'')+'\');return false" style="color:#65676b">Trả lời</a>'
+                        + '</div></div></div>';
+                });
+                html += '</div>';
+            }
+            html += '</div></div>';
+            return html;
+        }).join('');
+    }
+    
+    var _replyParentId = 0;
+    function replyTo(postId, commentId, userName) {
+        _replyParentId = commentId;
+        var inp = document.getElementById('cmtInput-'+postId);
+        if (inp) { inp.value = '@'+userName+' '; inp.focus(); inp.placeholder = 'Trả lời '+userName+'...'; }
+    }
+
+    async function likeComment(commentId, el) {
+        if (!token) { window.location='login.html'; return; }
+        try {
+            var r = await fetch('/api/social.php?action=like_comment', {method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+token},body:JSON.stringify({comment_id:commentId})});
+            var d = await r.json();
+            if (d.success) {
+                el.style.color = d.data.liked ? '#d32f2f' : '#65676b';
+                el.style.fontWeight = d.data.liked ? '700' : '400';
+                el.textContent = 'Thích' + (d.data.count > 0 ? ' · '+d.data.count : '');
+            }
+        } catch(e) {}
+    }
+</script>
+<script>
+function togMenu(pid){var m=document.getElementById('pm'+pid);if(!m)return;m.style.display=m.style.display==='none'?'block':'none';}
+function reportP(pid){toast('Đã gửi báo cáo!','success');togMenu(pid);}
+document.addEventListener('click',function(e){if(!e.target.closest('.post-dots')&&!e.target.closest('.post-menu')){document.querySelectorAll('.post-menu').forEach(function(m){m.style.display='none';});}});
+</script>
+<script>
+function openSearch(){
+    document.getElementById('searchOverlay').style.display='block';
+    document.body.style.overflow='hidden';
+    setTimeout(function(){document.getElementById('sInput').focus();},100);
+}
+function closeSearch(){
+    document.getElementById('searchOverlay').style.display='none';
+    document.body.style.overflow='';
+}
+function filterSearch(t){
+    closeSearch();
+    if(t==='all'){type='all';}else{type=t;}
+    page=1;
+    document.querySelectorAll('[id^="t-"]').forEach(function(i){i.classList.remove('active');});
+    var el=document.getElementById('t-'+t);if(el)el.classList.add('active');
+    loadPosts();
+}
+function filterShip(company){
+    closeSearch();
+    document.getElementById('q').value=company;
+    page=1;
+    loadPosts();
+}
+function filterProv(pv){
+    closeSearch();
+    prov=pv;page=1;loadPosts();
+}
+function doSearch(val){
+    document.getElementById('q').value=val;
+    page=1;search();
+}
+function liveSearch(val){
+    var r=document.getElementById('sResults');
+    if(val.length<2){r.innerHTML='';return;}
+    r.innerHTML='<div style="padding:16px;text-align:center;color:#999"><i class="fas fa-spinner fa-spin"></i> Đang tìm...</div>';
+    fetch('/api/posts.php?search='+encodeURIComponent(val)+'&limit=5')
+    .then(function(res){return res.json()})
+    .then(function(d){
+        if(d.success&&d.data.posts.length){
+            r.innerHTML='<div style="padding:10px 16px;font-weight:700;font-size:15px;color:#333">Kết quả</div>'
+            +d.data.posts.map(function(p){
+                return '<div style="padding:10px 16px;display:flex;gap:10px;cursor:pointer;border-bottom:1px solid #f0f0f0" onclick="closeSearch();scrollTo2('+p.id+')">'
+                +'<div style="flex:1;min-width:0"><div style="font-size:13px;font-weight:600;color:#333;margin-bottom:2px">'+esc((p.user_name||"Ẩn danh"))+'</div>'
+                +'<div style="font-size:12px;color:#666;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+esc((p.content||"").substring(0,80))+'</div></div></div>';
+            }).join('');
+        }else{
+            r.innerHTML='<div style="padding:20px;text-align:center;color:#999">Không tìm thấy kết quả</div>';
+        }
+    }).catch(function(){r.innerHTML='';});
+}
+</script>
+<script>
+(function(){
+    var token=localStorage.getItem('token');
+    if(!token)return;
+    fetch('/api/notifications.php',{headers:{'Authorization':'Bearer '+token}})
+    .then(function(r){return r.json()})
+    .then(function(d){
+        if(d.success&&d.data){
+            var unread=d.data.filter(function(n){return !n.is_read}).length;
+            var badge=document.getElementById('tabNotifBadge');
+            if(badge&&unread>0){badge.style.display='flex';badge.textContent=unread>99?'99+':unread;}
+        }
+    }).catch(function(){});
+})();
+</script>
+<!-- NOTIFICATION PAGE -->
+<div id="notifPage" style="display:none;position:fixed;inset:0;z-index:200;background:#fff;overflow-y:auto">
+  <div style="position:sticky;top:0;background:#fff;z-index:1;padding:12px 16px;display:flex;align-items:center;gap:12px;border-bottom:1px solid #eee">
+    <button onclick="closeNotifPage()" style="background:none;border:none;font-size:20px;cursor:pointer;padding:4px;color:#333"><i class="fas fa-arrow-left"></i></button>
+    <h2 style="font-size:20px;font-weight:700;color:#111;flex:1">Thông báo</h2>
+    <button onclick="markAllRead()" style="background:none;border:none;font-size:13px;color:var(--primary);cursor:pointer;font-weight:600">Đọc tất cả</button>
+  </div>
+  <div id="notifPageList" style="padding:0"><div style="text-align:center;padding:60px;color:#999"><i class="fas fa-spinner spin" style="font-size:24px"></i><p style="margin-top:8px">Đang tải...</p></div></div>
+</div>
+
+<script>
+function toggleNotifPage(){
+  var p=document.getElementById("notifPage");
+  if(p.style.display==="none"||!p.style.display){
+    p.style.display="block";
+    document.body.style.overflow="hidden";
+    loadNotifPage();
+  }else{closeNotifPage();}
+}
+function closeNotifPage(){
+  document.getElementById("notifPage").style.display="none";
+  document.body.style.overflow="";
+}
+function ntAgo(d){
+  var s=Math.floor((Date.now()-new Date(d).getTime())/1000);
+  if(s<60)return s+" giây";
+  if(s<3600)return Math.floor(s/60)+" phút";
+  if(s<86400)return Math.floor(s/3600)+" giờ";
+  return Math.floor(s/86400)+" ngày";
+}
+async function loadNotifPage(){
+  var list=document.getElementById("notifPageList");
+  var token=localStorage.getItem("token");
+  if(!token){list.innerHTML="<div style=\"text-align:center;padding:60px;color:#999\"><i class=\"fas fa-bell\" style=\"font-size:48px;color:#ddd;display:block;margin-bottom:12px\"></i>Đăng nhập để xem thông báo</div>";return;}
+  try{
+    var r=await fetch("/api/notifications.php",{headers:{"Authorization":"Bearer "+token}});
+    var d=await r.json();
+    if(!d.success||!d.data||d.data.length===0){
+      list.innerHTML="<div style=\"text-align:center;padding:60px;color:#999\"><div style=\"font-size:48px;margin-bottom:12px\">🔔</div>Chưa có thông báo nào</div>";
+      return;
+    }
+    var unread=d.data.filter(function(n){return !n.is_read});
+    var read=d.data.filter(function(n){return n.is_read});
+    var html="";
+    if(unread.length>0){
+      html+="<div style=\"padding:14px 16px 8px;font-weight:700;font-size:16px;color:#111\">Mới</div>";
+      html+=unread.map(function(n){return mkNotif(n)}).join("");
+    }
+    if(read.length>0){
+      html+="<div style=\"padding:14px 16px 8px;font-weight:700;font-size:16px;color:#111\">Trước đó</div>";
+      html+=read.map(function(n){return mkNotif(n)}).join("");
+    }
+    list.innerHTML=html;
+    updateNotifBadge(d.data);
+  }catch(e){
+    list.innerHTML="<div style=\"text-align:center;padding:60px;color:#999\">Lỗi tải thông báo</div>";
+  }
+}
+function mkNotif(n){
+  var icon=n.type==="like"?"❤️":"💬";
+  var iconBg=n.type==="like"?"background:#E74C3C":"background:#3498DB";
+  var label=n.type==="like"?"đã thích bài viết của bạn":"đã bình luận bài viết của bạn";
+  var bg=n.is_read?"background:#fff;":"background:#FFF0EB;";
+  var dot=n.is_read?"":"<div style=\"width:10px;height:10px;border-radius:50%;background:var(--primary);flex-shrink:0\"></div>";
+  var av=n.actor_avatar
+    ?"<div style=\"position:relative;flex-shrink:0\"><img src=\""+n.actor_avatar+"\" style=\"width:52px;height:52px;border-radius:50%;object-fit:cover\"><div style=\"position:absolute;bottom:-2px;right:-2px;width:20px;height:20px;border-radius:50%;"+iconBg+";display:flex;align-items:center;justify-content:center;font-size:10px;border:2px solid #fff\">"+icon+"</div></div>"
+    :"<div style=\"position:relative;flex-shrink:0\"><div style=\"width:52px;height:52px;border-radius:50%;background:#EE4D2D;color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:18px\">"+((n.actor_name||"U").charAt(0))+"</div><div style=\"position:absolute;bottom:-2px;right:-2px;width:20px;height:20px;border-radius:50%;"+iconBg+";display:flex;align-items:center;justify-content:center;font-size:10px;border:2px solid #fff\">"+icon+"</div></div>";
+  return "<div data-key=\""+n.notif_key+"\" data-postid=\""+n.post_id+"\" data-read=\""+(n.is_read?"1":"0")+"\" style=\"display:flex;gap:12px;padding:12px 16px;cursor:pointer;align-items:center;"+bg+"\" onclick=\"clickNotif(this)\">" +av+"<div style=\"flex:1;min-width:0\"><div style=\"font-size:14px;line-height:1.4;color:#333\"><b>"+n.actor_name+"</b> "+label+"</div><div style=\"font-size:12px;color:var(--primary);margin-top:4px;font-weight:600\">"+ntAgo(n.created_at)+"</div></div>"+dot+"</div>";
+}
+function clickNotif(el){
+  var key=el.dataset.key;
+  var pid=el.dataset.postid;
+  if(el.dataset.read!=="1"){
+    el.dataset.read="1";
+    el.style.background="#fff";
+    var dot=el.querySelector("div[style*=\"border-radius:50%;background:var(--primary)\"]");
+    if(dot)dot.remove();
+    var token=localStorage.getItem("token");
+    fetch("/api/notifications.php",{method:"POST",headers:{"Authorization":"Bearer "+token,"Content-Type":"application/json"},body:JSON.stringify({notif_key:key})});
+    var items=document.querySelectorAll("#notifPageList [data-read=\"0\"]");
+    var badge=document.getElementById("tabNotifBadge");
+    if(badge){if(items.length>0){badge.style.display="flex";badge.textContent=items.length>99?"99+":items.length;}else{badge.style.display="none";}}
+  }
+  if(pid){closeNotifPage();setTimeout(function(){window.location.href="index.html?post="+pid;window.location.reload();},150);}
+}
+function markAllRead(){
+  var items=document.querySelectorAll("#notifPageList [data-read=\"0\"]");
+  var token=localStorage.getItem("token");
+  items.forEach(function(el){
+    el.dataset.read="1";
+    el.style.background="#fff";
+    var dot=el.querySelector("div[style*=\"border-radius:50%;background:var(--primary)\"]");
+    if(dot)dot.remove();
+    fetch("/api/notifications.php",{method:"POST",headers:{"Authorization":"Bearer "+token,"Content-Type":"application/json"},body:JSON.stringify({notif_key:el.dataset.key})});
+  });
+  var badge=document.getElementById("tabNotifBadge");
+  if(badge)badge.style.display="none";
+}
+function updateNotifBadge(data){
+  var unread=data.filter(function(n){return !n.is_read}).length;
+  var badge=document.getElementById("tabNotifBadge");
+  if(badge){if(unread>0){badge.style.display="flex";badge.textContent=unread>99?"99+":unread;}else{badge.style.display="none";}}
+}
+</script>
+</body>
+</html>

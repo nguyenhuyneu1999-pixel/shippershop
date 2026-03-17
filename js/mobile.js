@@ -63,13 +63,12 @@
 
   /* ---------- fab action ---------- */
   window.handleFab = function () {
-    const page = location.pathname.split('/').pop() || 'index.html';
-    if (page.includes('community')) {
+    var page = location.pathname.split('/').pop() || 'index.html';
+    if (page.indexOf('index') > -1 || page === '' || page === '/') {
       if (typeof openModal === 'function') openModal('post');
-      else if (typeof openCreatePostModal === 'function') openCreatePostModal();
+      else if (typeof openSPM === 'function') openSPM();
     } else {
-      const si = document.getElementById('searchInput') || document.querySelector('.search-bar input');
-      if (si) { si.focus(); si.scrollIntoView({ behavior: 'smooth', block: 'center' }); }
+      if (typeof openSPM === 'function') openSPM();
     }
   };
 

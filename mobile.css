@@ -126,20 +126,28 @@ a, button, [onclick] {
 
   .mnav-item {
     flex: 1;
+    overflow: hidden;
+    white-space: nowrap;
+    min-width: 0;
+    padding: 0 2px;
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    gap: 3px;
+    gap: 2px;
     height: 100%;
     cursor: pointer;
     text-decoration: none;
     color: #999;
-    font-size: 10px;
+    font-size: 9px;
     font-weight: 600;
     position: relative;
     -webkit-tap-highlight-color: transparent;
     transition: color .2s;
+    overflow: hidden;
+    white-space: nowrap;
+    min-width: 0;
+    padding: 0 2px;
   }
 
   .mnav-item i { font-size: 20px; transition: transform .15s; }
@@ -346,29 +354,6 @@ a, button, [onclick] {
   /* --- TABLES → SCROLL --- */
   .table-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; }
 
-  /* --- BACK TO TOP BUTTON --- */
-  #backToTop {
-    position: fixed;
-    bottom: calc(var(--mobile-nav-h) + 12px);
-    right: 14px;
-    width: 42px;
-    height: 42px;
-    background: var(--primary);
-    color: #fff;
-    border: none;
-    border-radius: 50%;
-    font-size: 18px;
-    cursor: pointer;
-    z-index: 400;
-    display: none;
-    align-items: center;
-    justify-content: center;
-    box-shadow: 0 4px 12px rgba(238,77,45,.4);
-    transition: .2s;
-  }
-  #backToTop.visible { display: flex; }
-  #backToTop:active { transform: scale(0.9); }
-
   /* --- TOAST POSITION MOBILE --- */
   .toast {
     bottom: calc(var(--mobile-nav-h) + 12px) !important;
@@ -382,7 +367,7 @@ a, button, [onclick] {
 
   /* --- PROFILE --- */
   .profile-header { padding: 20px 12px !important; }
-  .profile-grid { grid-template-columns: 1fr !important; }
+  .profile-container { grid-template-columns: 1fr !important; }
   .profile-tabs { overflow-x: auto; -webkit-overflow-scrolling: touch; }
   .profile-tab { flex-shrink: 0; }
 
@@ -448,7 +433,7 @@ a, button, [onclick] {
   .product-card img { height: 130px !important; }
   .header-btn { min-width: 36px; padding: 0 6px !important; }
   .mnav-item { font-size: 9px; }
-  .mnav-item i { font-size: 18px; }
+  .mnav-item i { font-size: 22px; }
 }
 
 /* ========================
@@ -538,3 +523,5 @@ a, button, [onclick] {
         padding-bottom: 100px !important;
     }
 }
+
+.mnav-item{transition:none!important;}

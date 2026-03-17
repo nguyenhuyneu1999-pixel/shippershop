@@ -103,7 +103,7 @@ input:focus, textarea:focus, select:focus {
    HEADER & NAVIGATION
    ============================================ */
 
-header {
+.site-header {
     background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
     color: var(--white);
     box-shadow: var(--shadow-md);
@@ -562,13 +562,7 @@ nav {
     border-radius: 20px;
 }
 
-.post-card {
-    background: var(--white);
-    border-radius: 15px;
-    padding: 20px;
-    margin-bottom: 20px;
-    box-shadow: var(--shadow-sm);
-}
+/* removed by fix */
 
 .post-header {
     display: flex;
@@ -599,39 +593,15 @@ nav {
     color: var(--gray);
 }
 
-.post-content {
-    margin-bottom: 15px;
-    line-height: 1.6;
-}
+/* removed by fix */
 
-.post-images {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-    gap: 10px;
-    margin-bottom: 15px;
-    border-radius: 10px;
-    overflow: hidden;
-}
+/* removed by fix */
 
-.post-images img {
-    width: 100%;
-    aspect-ratio: 1;
-    object-fit: cover;
-}
+/* removed: .post-images img - moved to inline */
 
-.post-footer {
-    display: flex;
-    justify-content: space-between;
-    padding-top: 15px;
-    border-top: 1px solid var(--gray-light);
-}
+/* removed by fix */
 
-.post-stats {
-    display: flex;
-    gap: 20px;
-    color: var(--gray);
-    font-size: 14px;
-}
+/* removed by fix */
 
 .post-interactions {
     display: flex;
@@ -968,3 +938,7 @@ nav {
 
 .shadow { box-shadow: var(--shadow-md); }
 .shadow-lg { box-shadow: var(--shadow-lg); }
+
+/* Global viewport fix */
+*{box-sizing:border-box}body{max-width:100vw;overflow-x:hidden}
+img,video,iframe{max-width:100%}

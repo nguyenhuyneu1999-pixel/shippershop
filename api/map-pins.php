@@ -1,0 +1,72 @@
+<?php
+session_start();
+define('APP_ACCESS', true);
+require_once __DIR__ . '/../includes/config.php';
+require_once __DIR__ . '/../includes/db.php';
+require_once __DIR__ . '/../includes/functions.php';
+
+header('Content-Type: application/json; charset=utf-8');
+header('Access-Control-Allow-Origin: *');
+header('Access-Control-Allow-Methods: GET, POST, DELETE, OPTIONS');
+header('Access-Control-Allow-Headers: Content-Type, Authorization');
+if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') { http_response_code(200); exit; }
+
+function ok($msg, $data=[]) { echo json_encode(['success'=>true,'message'=>$msg,'data'=>$data], JSON_UNESCAPED_UNICODE); exit; }
+function err($msg, $code=400) { http_response_code($code); echo json_encode(['success'=>false,'message'=>$msg], JSON_UNESCAPED_UNICODE); exit; }
+function auth() {
+    if (isset($_SESSION['user_id'])) return $_SESSION['user_id'];
+    $h = $_SERVER['HTTP_AUTHORIZATION'] ?? $_SERVER['REDIRECT_HTTP_AUTHORIZATION'] ?? '';
+    if (preg_match('/Bearer\s+(.+)/i', $h, $m)) { $t = verifyJWT($m[1]); if ($t) return $t['user_id']; }
+    return null;
+}
+
+$db = db();
+$method = $_SERVER['REQUEST_METHOD'];
+
+// GET - List pins
+if ($method === 'GET') {
+    $type = $_GET['type'] ?? '';
+    $where = "1=1"; $params = [];
+    if ($type) { $where .= " AND p.pin_type = ?"; $params[] = $type; }
+    // Bounding box filter
+    if (isset($_GET['lat1'],$_GET['lng1'],$_GET['lat2'],$_GET['lng2'])) {
+        $where .= " AND p.lat BETWEEN ? AND ? AND p.lng BETWEEN ? AND ?";
+        $params[] = min($_GET['lat1'],$_GET['lat2']); $params[] = max($_GET['lat1'],$_GET['lat2']);
+        $params[] = min($_GET['lng1'],$_GET['lng2']); $params[] = max($_GET['lng1'],$_GET['lng2']);
+    }
+    $pins = $db->fetchAll(
+        "SELECT p.*, u.fullname as user_name, u.avatar as user_avatar, u.username
+         FROM map_pins p JOIN users u ON p.user_id = u.id
+         WHERE $where ORDER BY p.created_at DESC LIMIT 200", $params
+    );
+    ok('OK', $pins);
+}
+
+// POST - Create pin
+if ($method === 'POST') {
+    $uid = auth(); if (!$uid) err('Đăng nhập để thêm ghim', 401);
+    $raw = file_get_contents('php://input');
+    $input = json_decode($raw, true) ?: $_POST;
+    $lat = floatval($input['lat'] ?? 0);
+    $lng = floatval($input['lng'] ?? 0);
+    $title = trim($input['title'] ?? '');
+    if (!$lat || !$lng || !$title) err('Thiếu thông tin');
+    $id = $db->insert('map_pins', [
+        'user_id'=>$uid, 'lat'=>$lat, 'lng'=>$lng, 'title'=>$title,
+        'description'=>trim($input['description'] ?? ''),
+        'pin_type'=>$input['pin_type'] ?? 'note',
+        'address'=>trim($input['address'] ?? ''),
+        'created_at'=>date('Y-m-d H:i:s')
+    ]);
+    ok('Đã thêm ghim!', ['id'=>$id]);
+}
+
+// DELETE
+if ($method === 'DELETE') {
+    $uid = auth(); if (!$uid) err('Đăng nhập', 401);
+    $id = $_GET['id'] ?? 0;
+    $db->query("DELETE FROM map_pins WHERE id = ? AND user_id = ?", [$id, $uid]);
+    ok('Đã xóa');
+}
+
+err('Invalid');

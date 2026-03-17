@@ -35,7 +35,7 @@ RewriteRule ^ - [L]
 
 # Cache CSS/JS/Images
 <IfModule mod_expires.c>
-    ExpiresActive On
+    ExpiresActive Off
     ExpiresByType text/css "access plus 1 month"
     ExpiresByType application/javascript "access plus 1 month"
     ExpiresByType image/gif "access plus 1 year"
@@ -47,3 +47,6 @@ RewriteRule ^ - [L]
 <IfModule mod_deflate.c>
     AddOutputFilterByType DEFLATE text/html text/plain text/xml text/css text/javascript application/javascript
 </IfModule>
+RewriteEngine On
+RewriteCond %{HTTP:Authorization} ^(.*)
+RewriteRule .* - [e=HTTP_AUTHORIZATION:%1]

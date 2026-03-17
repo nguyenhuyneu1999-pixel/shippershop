@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="theme-color" content="#ffffff">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Trang cá nhân - ShipperShop</title>
+<link rel="stylesheet" href="css/style.css">
+<link rel="stylesheet" href="mobile.css">
+<link rel="preload" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+<noscript><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"></noscript>
+<style>
+:root{--primary:#EE4D2D;--bg:#f0f2f5;--card:#fff;--border:#e4e6eb;--text:#1C1C1C;--muted:#65676B;}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{background:var(--bg);font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;color:var(--text);padding-bottom:80px;}
+.back-nav{position:fixed;top:0;left:0;right:0;z-index:100;background:rgba(255,255,255,.95);backdrop-filter:blur(10px);padding:10px 16px;display:flex;align-items:center;gap:12px;border-bottom:1px solid #f0f0f0;}
+.back-btn{background:none;border:none;font-size:20px;cursor:pointer;padding:4px;color:#333;}
+.back-nav-title{font-size:17px;font-weight:700;flex:1;}
+.cover{height:140px;background:linear-gradient(135deg,#1a1a2e,#16213e,#0f3460);margin-top:48px;}
+.profile-section{background:#fff;padding:0 16px 16px;border-bottom:1px solid var(--border);}
+.avatar-wrap{position:relative;width:96px;height:96px;margin-top:-48px;margin-bottom:8px;}
+.profile-av{width:96px;height:96px;border-radius:50%;border:4px solid #fff;object-fit:cover;background:var(--primary);color:#fff;display:flex;align-items:center;justify-content:center;font-size:36px;font-weight:800;}
+.profile-name{font-size:22px;font-weight:800;margin-bottom:2px;}
+.profile-username{font-size:14px;color:var(--muted);margin-bottom:6px;}
+.profile-bio{font-size:14px;line-height:1.5;margin-bottom:10px;color:#444;}
+.profile-stats{display:flex;gap:0;margin-bottom:12px;}
+.stat{flex:1;text-align:center;padding:10px 0;}
+.stat-n{font-size:20px;font-weight:800;}
+.stat-l{font-size:11px;color:var(--muted);margin-top:2px;}
+.profile-actions{display:flex;gap:8px;}
+.p-btn{flex:1;padding:8px;border-radius:8px;font-size:14px;font-weight:700;cursor:pointer;text-align:center;border:none;}
+.p-btn.primary{background:var(--primary);color:#fff;}
+.p-btn.secondary{background:#e4e6eb;color:var(--text);}
+.ship-tag{display:inline-flex;align-items:center;gap:4px;padding:4px 10px;border-radius:20px;font-size:12px;font-weight:700;margin-bottom:8px;}
+.online-dot{display:inline-block;width:8px;height:8px;border-radius:50%;background:#22c55e;margin-left:4px;}
+.info-row{display:flex;align-items:center;gap:8px;padding:4px 0;font-size:13px;color:var(--muted);}
+.info-row i{width:18px;text-align:center;}
+.tabs{display:flex;background:#fff;border-bottom:1px solid var(--border);position:sticky;top:48px;z-index:50;}
+.tab{flex:1;padding:12px;text-align:center;font-size:14px;font-weight:700;color:var(--muted);cursor:pointer;border-bottom:3px solid transparent;}
+.tab.active{color:var(--primary);border-bottom-color:var(--primary);}
+.post-card{background:#fff;margin-bottom:8px;padding:14px 16px;cursor:pointer;}
+.post-card:hover{background:#fafafa;}
+.post-content{font-size:14px;line-height:1.6;white-space:pre-wrap;word-break:break-word;}
+.post-stats{display:flex;gap:16px;margin-top:8px;font-size:13px;color:var(--muted);}
+.comment-card{background:#fff;margin-bottom:1px;padding:12px 16px;}
+.cmt-ref{font-size:12px;color:var(--primary);margin-bottom:4px;cursor:pointer;}
+.about-section{background:#fff;margin:8px;border-radius:12px;padding:16px;}
+.about-section h3{font-size:15px;font-weight:700;margin-bottom:12px;}
+.about-item{display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid #f5f5f5;font-size:14px;}
+.about-item:last-child{border:none;}
+.about-item i{width:24px;text-align:center;font-size:16px;color:var(--muted);}
+.about-item b{color:var(--text);}
+.empty{text-align:center;padding:40px 20px;color:var(--muted);}
+.empty i{font-size:36px;display:block;margin-bottom:8px;color:#ddd;}
+.spin{animation:spin 1s linear infinite;}@keyframes spin{to{transform:rotate(360deg);}}
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:1000;display:none;align-items:flex-end;justify-content:center;}
+.modal-overlay.open{display:flex;}
+.modal{background:#fff;border-radius:16px 16px 0 0;width:100%;max-width:500px;max-height:85vh;display:flex;flex-direction:column;}
+.modal-head{padding:16px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--border);}
+.modal-head h2{font-size:17px;font-weight:700;}
+.modal-x{background:none;border:none;font-size:24px;cursor:pointer;color:var(--muted);}
+.modal-body{padding:16px;overflow-y:auto;flex:1;}
+.f-row{margin-bottom:14px;}
+.f-row label{display:block;font-size:13px;font-weight:600;margin-bottom:6px;color:var(--muted);}
+.f-row input,.f-row textarea{width:100%;padding:10px 12px;border:1px solid var(--border);border-radius:8px;font-size:14px;font-family:inherit;outline:none;}
+.f-row textarea{min-height:80px;resize:vertical;}
+.submit-btn{width:100%;padding:12px;background:var(--primary);color:#fff;border:none;border-radius:8px;font-size:15px;font-weight:700;cursor:pointer;}
+.toast{position:fixed;bottom:90px;left:50%;transform:translateX(-50%) translateY(100px);background:#333;color:#fff;padding:12px 20px;border-radius:8px;font-size:14px;z-index:3000;opacity:0;transition:.3s;}
+.toast.show{transform:translateX(-50%) translateY(0);opacity:1;}
+</style>
+<link rel="manifest" href="/manifest.json"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="default"><meta name="apple-mobile-web-app-title" content="ShipperShop"><link rel="apple-touch-icon" href="/icons/icon-192.png"></head>
+<body>
+<div class="back-nav"><button class="back-btn" onclick="history.back()"><i class="fas fa-arrow-left"></i></button><span class="back-nav-title" id="navTitle">Trang cá nhân</span></div>
+<div class="cover" id="cover"></div>
+<div class="profile-section">
+<div class="avatar-wrap"><div class="profile-av" id="avatar">?</div></div>
+<div class="profile-name" id="pName">...</div>
+<div class="profile-username" id="pUsername">u/...</div>
+<div id="pShipBadge"></div>
+<div class="profile-bio" id="pBio"></div>
+<div class="profile-stats">
+<div class="stat"><div class="stat-n" id="sKarma">0</div><div class="stat-l">Karma</div></div>
+<div class="stat"><div class="stat-n" id="sPosts">0</div><div class="stat-l">Bài đăng</div></div>
+<div class="stat"><div class="stat-n" id="sAge">0</div><div class="stat-l">Ngày</div></div>
+<div class="stat"><div class="stat-n" id="sFollowers">0</div><div class="stat-l">Theo dõi</div></div>
+</div>
+<div id="pInfo"></div>
+<div class="profile-actions" id="pActions"></div>
+</div>
+<div class="tabs"><div class="tab active" onclick="setTab('posts',this)">Bài đăng</div><div class="tab" onclick="setTab('comments',this)">Bình luận</div><div class="tab" onclick="setTab('about',this)">Giới thiệu</div></div>
+<div id="tabContent"><div class="empty"><i class="fas fa-spinner spin"></i></div></div>
+<div class="modal-overlay" id="editModal"><div class="modal"><div class="modal-head"><h2>Sửa hồ sơ</h2><button class="modal-x" onclick="closeEdit()">×</button></div><div class="modal-body"><div class="f-row"><label>Tên hiển thị</label><input id="eName" type="text" maxlength="90"></div><div class="f-row"><label>Giới thiệu</label><textarea id="eBio" maxlength="200"></textarea></div><button class="submit-btn" onclick="saveProfile()">Lưu</button></div></div></div>
+<div class="toast" id="toast"></div>
+<script src="js/reddit-mkpost.js"></script>
+<script src="js/mobile.js"></script>
+<script>
+var CU=JSON.parse(localStorage.getItem('user')||'null');var targetId=parseInt(new URLSearchParams(location.search).get('id'))||(CU?CU.id:0);var userData=null;
+var shipColors={'GHTK':'#00b14f','J&T':'#d32f2f','GHN':'#ff6600','SPX':'#EE4D2D','Grab':'#00b14f','Be':'#5bc500','Gojek':'#00aa13','Ninja Van':'#c41230','Viettel Post':'#e21a1a','Lalamove':'#f5a623'};
+async function loadProfile(){if(!targetId){location.href='login.html';return;}try{var r=await fetch('/api/user-page.php?id='+targetId,{credentials:'include'});var d=await r.json();if(!d.success){document.getElementById('tabContent').innerHTML='<div class="empty"><i class="fas fa-user-slash"></i><p>Không tìm thấy</p></div>';return;}userData=d.data;renderProfile();loadTab('posts');}catch(e){document.getElementById('tabContent').innerHTML='<div class="empty"><p>Lỗi</p></div>';}}
+function renderProfile(){var u=userData;document.title=u.fullname+' - ShipperShop';document.getElementById('navTitle').textContent=u.fullname;document.getElementById('pName').innerHTML=esc(u.fullname)+(u.is_online?'<span class="online-dot"></span>':'');document.getElementById('pUsername').textContent='u/'+u.username;document.getElementById('pBio').textContent=u.bio||'';document.getElementById('sKarma').textContent=fN(u.karma);document.getElementById('sPosts').textContent=fN(u.post_count);document.getElementById('sAge').textContent=u.account_age_days;document.getElementById('sFollowers').textContent=fN(u.follower_count);
+if(u.avatar)document.getElementById('avatar').outerHTML='<img class="profile-av" id="avatar" src="'+u.avatar+'" onerror="this.outerHTML=\'<div class=profile-av>'+((u.fullname||'?').charAt(0))+'</div>\'">';
+if(u.shipping_company){var c=shipColors[u.shipping_company]||'#999';document.getElementById('pShipBadge').innerHTML='<div class="ship-tag" style="background:'+c+'15;color:'+c+'"><i class="fas fa-truck"></i> '+esc(u.shipping_company)+'</div>';}
+var info='';if(u.address)info+='<div class="info-row"><i class="fas fa-map-marker-alt"></i> '+esc(u.address)+'</div>';info+='<div class="info-row"><i class="fas fa-cake-candles"></i> Tham gia '+new Date(u.created_at).toLocaleDateString('vi-VN')+'</div>';document.getElementById('pInfo').innerHTML=info;
+var act='';if(u.is_self){act='<button class="p-btn secondary" onclick="openEdit()"><i class="fas fa-pen"></i> Sửa hồ sơ</button>';}else{act='<button class="p-btn '+(u.is_following?'secondary':'primary')+'" onclick="toggleFollow()"><i class="fas fa-'+(u.is_following?'check':'user-plus')+'"></i> '+(u.is_following?'Đang theo dõi':'Theo dõi')+'</button>';act+='<button class="p-btn secondary" onclick="location.href=\'messages.html?user='+targetId+'\'"><i class="fas fa-comment-dots"></i> Nhắn tin</button>';}document.getElementById('pActions').innerHTML=act;}
+function setTab(tab,el){document.querySelectorAll('.tab').forEach(function(t){t.classList.remove('active');});el.classList.add('active');loadTab(tab);}
+async function loadTab(tab){var c=document.getElementById('tabContent');c.innerHTML='<div class="empty"><i class="fas fa-spinner spin"></i></div>';
+if(tab==='posts'){try{var r=await fetch('/api/user-page.php?action=posts&id='+targetId,{credentials:'include'});var d=await r.json();if(d.success&&d.data.length){c.innerHTML=d.data.map(function(p){return '<div class="post-card" onclick="location.href=\'index.html?post='+p.id+'\'"><div class="post-content">'+esc((p.content||'').substring(0,200))+(p.content&&p.content.length>200?'...':'')+'</div><div class="post-stats"><span><i class="far fa-heart"></i> '+fN(p.likes_count)+'</span><span><i class="far fa-comment"></i> '+fN(p.comments_count)+'</span><span>'+ago(p.created_at)+'</span></div></div>';}).join('');}else c.innerHTML='<div class="empty"><i class="fas fa-file-lines"></i><p>Chưa có bài đăng</p></div>';}catch(e){c.innerHTML='<div class="empty"><p>Lỗi</p></div>';}}
+if(tab==='comments'){try{var r=await fetch('/api/user-page.php?action=comments&id='+targetId,{credentials:'include'});var d=await r.json();if(d.success&&d.data.length){c.innerHTML=d.data.map(function(cm){return '<div class="comment-card"><div class="cmt-ref" onclick="location.href=\'index.html?post='+cm.post_id+'\'"><i class="fas fa-reply"></i> '+esc((cm.post_content||'').substring(0,60))+'...</div><div class="post-content" style="font-size:13px">'+esc(cm.content)+'</div><div class="post-stats" style="font-size:12px"><span>'+ago(cm.created_at)+'</span></div></div>';}).join('');}else c.innerHTML='<div class="empty"><i class="far fa-comment"></i><p>Chưa có bình luận</p></div>';}catch(e){c.innerHTML='<div class="empty"><p>Lỗi</p></div>';}}
+if(tab==='about'){var u=userData;var html='<div class="about-section"><h3>Giới thiệu</h3>';html+='<div class="about-item"><i class="fas fa-user"></i><div><b>'+esc(u.fullname)+'</b></div></div>';if(u.username)html+='<div class="about-item"><i class="fas fa-at"></i><div>u/'+esc(u.username)+'</div></div>';if(u.shipping_company)html+='<div class="about-item"><i class="fas fa-truck"></i><div>'+esc(u.shipping_company)+'</div></div>';if(u.address)html+='<div class="about-item"><i class="fas fa-map-marker-alt"></i><div>'+esc(u.address)+'</div></div>';if(u.bio)html+='<div class="about-item"><i class="fas fa-quote-left"></i><div>'+esc(u.bio)+'</div></div>';html+='<div class="about-item"><i class="fas fa-calendar"></i><div>Tham gia '+new Date(u.created_at).toLocaleDateString('vi-VN')+'</div></div>';html+='<div class="about-item"><i class="fas fa-star"></i><div><b>'+fN(u.karma)+'</b> karma</div></div>';html+='<div class="about-item"><i class="fas fa-users"></i><div><b>'+fN(u.follower_count)+'</b> theo dõi · <b>'+fN(u.following_count)+'</b> đang theo dõi</div></div></div>';c.innerHTML=html;}}
+async function toggleFollow(){if(!CU){toast('Đăng nhập!');return;}try{var r=await fetch('/api/social.php?action=follow',{method:'POST',headers:{'Content-Type':'application/json'},credentials:'include',body:JSON.stringify({user_id:targetId})});var d=await r.json();if(d.success){userData.is_following=!userData.is_following;renderProfile();toast(userData.is_following?'Đã theo dõi!':'Đã bỏ theo dõi');}}catch(e){toast('Lỗi');}}
+function openEdit(){document.getElementById('eName').value=userData.fullname||'';document.getElementById('eBio').value=userData.bio||'';document.getElementById('editModal').classList.add('open');}
+function closeEdit(){document.getElementById('editModal').classList.remove('open');}
+async function saveProfile(){try{var r=await fetch('/api/user-page.php?action=update_profile',{method:'POST',headers:{'Content-Type':'application/json'},credentials:'include',body:JSON.stringify({display_name:document.getElementById('eName').value.trim(),bio:document.getElementById('eBio').value.trim()})});var d=await r.json();if(d.success){toast('Đã cập nhật!');closeEdit();loadProfile();}else toast(d.message||'Lỗi');}catch(e){toast('Lỗi');}}
+function esc(t){if(!t)return'';return String(t).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+function fN(n){n=parseInt(n)||0;if(n>=1000)return(n/1000).toFixed(1)+'K';return n.toString();}
+function ago(dt){if(!dt)return'';var s=Math.floor((new Date()-new Date(dt.replace(' ','T')))/1000);if(s<60)return s+'s';if(s<3600)return Math.floor(s/60)+'m';if(s<86400)return Math.floor(s/3600)+'h';if(s<604800)return Math.floor(s/86400)+'d';return new Date(dt).toLocaleDateString('vi-VN');}
+function toast(msg){var t=document.getElementById('toast');t.textContent=msg;t.className='toast show';setTimeout(function(){t.classList.remove('show');},2500);}
+loadProfile();
+</script>
+<nav id="mobileBottomNav" role="navigation"><a href="index.html" class="mnav-item"><i class="fas fa-home"></i><span>Trang chủ</span></a><a href="marketplace.html" class="mnav-item"><i class="fas fa-store"></i><span>Mua sắm</span></a><button class="mnav-item mnav-fab-wrap" onclick="location='index.html'"><div class="mnav-fab"><i class="fas fa-plus"></i></div></button><a href="map.html" class="mnav-item"><i class="fas fa-map-marked-alt"></i><span>Bản đồ</span></a><a href="profile.html" class="mnav-item"><i class="fas fa-user"></i><span>Tài khoản</span></a></nav>
+<script>if("serviceWorker" in navigator)navigator.serviceWorker.register("/sw.js");</script></body></html>

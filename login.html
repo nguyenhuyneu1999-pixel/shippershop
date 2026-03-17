@@ -1,683 +1,114 @@
 <!DOCTYPE html>
 <html lang="vi">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Đăng nhập - ShipperShop</title>
-    <link rel="stylesheet" href="css/style.css">
-    <link rel="stylesheet" href="css/mobile.css">
-    <link rel="preload" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
-    <noscript><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"></noscript>
-    <script src="https://accounts.google.com/gsi/client" async defer></script>
-    <script>
-    window.fbAsyncInit = function() {
-        FB.init({ appId: 'YOUR_FACEBOOK_APP_ID', cookie: true, xfbml: true, version: 'v18.0' });
-    };
-    </script>
-    <script async defer crossorigin="anonymous" src="https://connect.facebook.net/vi_VN/sdk.js"></script>
-    <style>
-        .auth-page {
-            min-height: 100vh;
-            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 20px;
-        }
-
-        .auth-container {
-            background: var(--white);
-            border-radius: 20px;
-            box-shadow: var(--shadow-lg);
-            max-width: 450px;
-            width: 100%;
-            padding: 40px;
-        }
-
-        .auth-header {
-            text-align: center;
-            margin-bottom: 30px;
-        }
-
-        .auth-logo {
-            font-size: 40px;
-            margin-bottom: 10px;
-        }
-
-        .auth-title {
-            font-size: 28px;
-            color: var(--dark);
-            margin-bottom: 10px;
-        }
-
-        .auth-subtitle {
-            color: var(--gray);
-            font-size: 14px;
-        }
-
-        .form-group {
-            margin-bottom: 20px;
-        }
-
-        .form-label {
-            display: block;
-            font-weight: 600;
-            margin-bottom: 8px;
-            color: var(--dark);
-        }
-
-        .form-input {
-            width: 100%;
-            padding: 14px 16px;
-            border: 2px solid var(--gray-light);
-            border-radius: 10px;
-            font-size: 15px;
-            transition: var(--transition-fast);
-        }
-
-        .form-input:focus {
-            border-color: var(--primary);
-            outline: none;
-            box-shadow: 0 0 0 3px rgba(238, 77, 45, 0.1);
-        }
-
-        .form-input.error {
-            border-color: var(--danger);
-        }
-
-        .error-message {
-            color: var(--danger);
-            font-size: 13px;
-            margin-top: 5px;
-            display: none;
-        }
-
-        .error-message.show {
-            display: block;
-        }
-
-        .password-toggle {
-            position: relative;
-        }
-
-        .password-toggle-btn {
-            position: absolute;
-            right: 15px;
-            top: 50%;
-            transform: translateY(-50%);
-            background: none;
-            border: none;
-            color: var(--gray);
-            cursor: pointer;
-            font-size: 18px;
-        }
-
-        .remember-forgot {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 25px;
-        }
-
-        .checkbox-label {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            font-size: 14px;
-            cursor: pointer;
-        }
-
-        .checkbox-label input {
-            width: 18px;
-            height: 18px;
-            cursor: pointer;
-        }
-
-        .forgot-link {
-            color: var(--primary);
-            font-size: 14px;
-            text-decoration: none;
-        }
-
-        .forgot-link:hover {
-            text-decoration: underline;
-        }
-
-        .btn-submit {
-            width: 100%;
-            padding: 16px;
-            background: var(--primary);
-            color: var(--white);
-            border: none;
-            border-radius: 10px;
-            font-size: 16px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: var(--transition-fast);
-        }
-
-        .btn-submit:hover {
-            background: var(--primary-dark);
-            transform: translateY(-2px);
-            box-shadow: var(--shadow-lg);
-        }
-
-        .btn-submit:disabled {
-            background: var(--gray-light);
-            cursor: not-allowed;
-            transform: none;
-        }
-
-        .divider {
-            text-align: center;
-            margin: 30px 0;
-            position: relative;
-        }
-
-        .divider::before {
-            content: '';
-            position: absolute;
-            left: 0;
-            top: 50%;
-            width: 100%;
-            height: 1px;
-            background: var(--gray-light);
-        }
-
-        .divider span {
-            background: var(--white);
-            padding: 0 15px;
-            position: relative;
-            color: var(--gray);
-            font-size: 14px;
-        }
-
-        .oauth-buttons {
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-        }
-
-        .oauth-btn {
-            width: 100%;
-            padding: 14px;
-            border: 2px solid var(--gray-light);
-            background: var(--white);
-            border-radius: 10px;
-            font-size: 15px;
-            font-weight: 600;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 10px;
-            transition: var(--transition-fast);
-        }
-
-        .oauth-btn:hover {
-            border-color: var(--primary);
-            background: rgba(238, 77, 45, 0.05);
-        }
-
-        .oauth-btn i {
-            font-size: 20px;
-        }
-
-        .oauth-btn.google {
-            color: #DB4437;
-        }
-
-        .oauth-btn.facebook {
-            color: #4267B2;
-        }
-
-        .auth-footer {
-            text-align: center;
-            margin-top: 25px;
-            color: var(--gray);
-            font-size: 14px;
-        }
-
-        .auth-footer a {
-            color: var(--primary);
-            font-weight: 600;
-            text-decoration: none;
-        }
-
-        .auth-footer a:hover {
-            text-decoration: underline;
-        }
-
-        .back-home {
-            text-align: center;
-            margin-top: 20px;
-        }
-
-        .back-home a {
-            color: var(--gray);
-            font-size: 14px;
-            text-decoration: none;
-        }
-
-        .back-home a:hover {
-            color: var(--primary);
-        }
-
-        .loading-spinner {
-            display: none;
-            width: 20px;
-            height: 20px;
-            border: 3px solid var(--white);
-            border-top-color: transparent;
-            border-radius: 50%;
-            animation: spin 0.8s linear infinite;
-            margin: 0 auto;
-        }
-
-        @keyframes spin {
-            to { transform: rotate(360deg); }
-        }
-
-        .btn-submit.loading .btn-text {
-            display: none;
-        }
-
-        .btn-submit.loading .loading-spinner {
-            display: block;
-        }
-    </style>
-</head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Đăng nhập - ShipperShop</title>
+<link rel="stylesheet" href="css/style.css">
+<link rel="stylesheet" href="css/mobile.css">
+<link rel="preload" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+<noscript><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"></noscript>
+<style>
+*{box-sizing:border-box}
+body{max-width:100vw;overflow-x:hidden}
+.auth-page{min-height:100vh;background:linear-gradient(135deg,var(--primary) 0%,#b71c1c 100%);display:flex;align-items:center;justify-content:center;padding:16px}
+.auth-container{background:#fff;border-radius:20px;box-shadow:0 20px 60px rgba(0,0,0,.15);max-width:440px;width:100%;padding:36px 28px}
+.auth-header{text-align:center;margin-bottom:28px}
+.auth-logo{font-size:40px;margin-bottom:8px}
+.auth-title{font-size:26px;color:#333;margin-bottom:6px;font-weight:700}
+.auth-subtitle{color:#999;font-size:13px}
+.form-group{margin-bottom:18px}
+.form-label{display:block;font-weight:600;margin-bottom:8px;color:#333;font-size:14px}
+.form-input{width:100%;padding:14px 16px;border:2px solid #e0e0e0;border-radius:10px;font-size:15px;transition:all .2s;font-family:inherit}
+.form-input:focus{border-color:var(--primary);outline:none;box-shadow:0 0 0 3px rgba(211,47,47,.1)}
+.form-input.error{border-color:#f44336}
+.error-message{color:#f44336;font-size:13px;margin-top:5px;display:none}
+.error-message.show{display:block}
+.password-toggle{position:relative}
+.password-toggle-btn{position:absolute;right:14px;top:50%;transform:translateY(-50%);background:none;border:none;color:#999;cursor:pointer;font-size:16px}
+.remember-forgot{display:flex;justify-content:space-between;align-items:center;margin-bottom:22px}
+.checkbox-label{display:flex;align-items:center;gap:8px;font-size:14px;cursor:pointer}
+.checkbox-label input{width:18px;height:18px;accent-color:var(--primary)}
+.forgot-link{color:var(--primary);font-size:14px;text-decoration:none}
+.btn-submit{width:100%;padding:15px;background:var(--primary);color:#fff;border:none;border-radius:10px;font-size:16px;font-weight:600;cursor:pointer;transition:all .2s}
+.btn-submit:hover:not(:disabled){background:#b71c1c;transform:translateY(-1px)}
+.btn-submit:disabled{background:#ccc;cursor:not-allowed}
+.btn-submit.loading .btn-text{display:none}
+.btn-submit.loading .loading-spinner{display:block}
+.loading-spinner{display:none;width:20px;height:20px;border:3px solid #fff;border-top-color:transparent;border-radius:50%;animation:spin .8s linear infinite;margin:0 auto}
+@keyframes spin{to{transform:rotate(360deg)}}
+.divider{text-align:center;margin:24px 0;position:relative}
+.divider::before{content:'';position:absolute;left:0;top:50%;width:100%;height:1px;background:#e0e0e0}
+.divider span{background:#fff;padding:0 15px;position:relative;color:#999;font-size:13px}
+.auth-footer{text-align:center;margin-top:22px;color:#999;font-size:14px}
+.auth-footer a{color:var(--primary);font-weight:600;text-decoration:none}
+.back-home{text-align:center;margin-top:12px}
+.back-home a{color:#999;font-size:13px;text-decoration:none}
+@media(max-width:480px){.auth-container{padding:28px 18px}.auth-title{font-size:22px}}
+</style>
+<link rel="manifest" href="/manifest.json"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="default"><meta name="apple-mobile-web-app-title" content="ShipperShop"><link rel="apple-touch-icon" href="/icons/icon-192.png"></head>
 <body>
-<div id="g_id_onload" data-client_id="YOUR_GOOGLE_CLIENT_ID.apps.googleusercontent.com" data-callback="handleGoogleCredential" data-auto_prompt="false"></div>
-    <div class="auth-page">
-        <div class="auth-container">
-            <!-- Header -->
-            <div class="auth-header">
-                <div class="auth-logo">🛒</div>
-                <h1 class="auth-title">Đăng nhập</h1>
-                <p class="auth-subtitle">Chào mừng trở lại với ShipperShop!</p>
-            </div>
-
-            <!-- Login Form -->
-            <form id="loginForm">
-                <div class="form-group">
-                    <label class="form-label">Email</label>
-                    <input 
-                        type="email" 
-                        class="form-input" 
-                        id="email" 
-                        placeholder="example@email.com"
-                        required
-                    >
-                    <div class="error-message" id="emailError">Email không hợp lệ</div>
-                </div>
-
-                <div class="form-group">
-                    <label class="form-label">Mật khẩu</label>
-                    <div class="password-toggle">
-                        <input 
-                            type="password" 
-                            class="form-input" 
-                            id="password" 
-                            placeholder="Nhập mật khẩu"
-                            required
-                        >
-                        <button type="button" class="password-toggle-btn" onclick="togglePassword()">
-                            <i class="far fa-eye" id="toggleIcon"></i>
-                        </button>
-                    </div>
-                    <div class="error-message" id="passwordError">Mật khẩu không hợp lệ</div>
-                </div>
-
-                <div class="remember-forgot">
-                    <label class="checkbox-label">
-                        <input type="checkbox" id="remember">
-                        <span>Ghi nhớ đăng nhập</span>
-                    </label>
-                    <a href="#" class="forgot-link" onclick="forgotPassword(); return false;">Quên mật khẩu?</a>
-                </div>
-
-                <div class="error-message show" id="formError" style="text-align: center; margin-bottom: 15px;"></div>
-
-                <button type="submit" class="btn-submit" id="submitBtn">
-                    <span class="btn-text">Đăng nhập</span>
-                    <div class="loading-spinner"></div>
-                </button>
-            </form>
-
-            <!-- Divider -->
-            <div class="divider">
-                <span>Hoặc đăng nhập với</span>
-            </div>
-
-            <!-- OAuth Buttons -->
-            <div class="oauth-buttons">
-                <button class="oauth-btn google" onclick="loginWithGoogle()">
-                    <i class="fab fa-google"></i>
-                    <span>Đăng nhập với Google</span>
-                </button>
-                <button class="oauth-btn facebook" onclick="loginWithFacebook()">
-                    <i class="fab fa-facebook-f"></i>
-                    <span>Đăng nhập với Facebook</span>
-                </button>
-            </div>
-
-            <!-- Footer -->
-            <div class="auth-footer">
-                Chưa có tài khoản? <a href="register.html">Đăng ký ngay</a>
-            </div>
-
-            <div class="back-home">
-                <a href="index.html">
-                    <i class="fas fa-arrow-left"></i> Về trang chủ
-                </a>
-            </div>
-        </div>
-    </div>
-
-    <script>
-        // ==========================================
-        // LOGIN PAGE JAVASCRIPT
-        // ==========================================
-
-        // Toggle password visibility
-        function togglePassword() {
-            const passwordInput = document.getElementById('password');
-            const toggleIcon = document.getElementById('toggleIcon');
-            
-            if (passwordInput.type === 'password') {
-                passwordInput.type = 'text';
-                toggleIcon.classList.remove('fa-eye');
-                toggleIcon.classList.add('fa-eye-slash');
-            } else {
-                passwordInput.type = 'password';
-                toggleIcon.classList.remove('fa-eye-slash');
-                toggleIcon.classList.add('fa-eye');
-            }
-        }
-
-        // Show error message
-        function showError(field, message) {
-            const input = document.getElementById(field);
-            const errorDiv = document.getElementById(field + 'Error');
-            
-            input.classList.add('error');
-            errorDiv.textContent = message;
-            errorDiv.classList.add('show');
-        }
-
-        // Clear error message
-        function clearError(field) {
-            const input = document.getElementById(field);
-            const errorDiv = document.getElementById(field + 'Error');
-            
-            input.classList.remove('error');
-            errorDiv.classList.remove('show');
-        }
-
-        // Clear all errors
-        function clearAllErrors() {
-            clearError('email');
-            clearError('password');
-            document.getElementById('formError').textContent = '';
-            document.getElementById('formError').classList.remove('show');
-        }
-
-        // Validate email
-        function validateEmail(email) {
-            const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-            return re.test(email);
-        }
-
-        // Handle form submission
-        document.getElementById('loginForm').addEventListener('submit', async function(e) {
-            e.preventDefault();
-            
-            clearAllErrors();
-            
-            const email = document.getElementById('email').value.trim();
-            const password = document.getElementById('password').value;
-            const remember = document.getElementById('remember').checked;
-            
-            // Validation
-            let hasError = false;
-            
-            if (!email) {
-                showError('email', 'Vui lòng nhập email');
-                hasError = true;
-            } else if (!validateEmail(email)) {
-                showError('email', 'Email không hợp lệ');
-                hasError = true;
-            }
-            
-            if (!password) {
-                showError('password', 'Vui lòng nhập mật khẩu');
-                hasError = true;
-            } else if (password.length < 6) {
-                showError('password', 'Mật khẩu phải có ít nhất 6 ký tự');
-                hasError = true;
-            }
-            
-            if (hasError) return;
-            
-            // Show loading
-            const submitBtn = document.getElementById('submitBtn');
-            submitBtn.classList.add('loading');
-            submitBtn.disabled = true;
-            
-            try {
-                // Call API
-                const response = await fetch('/api/auth.php?action=login', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({
-                        email: email,
-                        password: password
-                    })
-                });
-                
-                const data = await response.json();
-                
-                if (data.success) {
-                    // Save user data
-                    localStorage.setItem('user', JSON.stringify(data.data.user));
-                    localStorage.setItem('token', data.data.token);
-                    
-                    if (remember) {
-                        localStorage.setItem('remember', 'true');
-                    }
-                    
-                    // Show success message
-                    alert('✅ Đăng nhập thành công!');
-                    
-                    // Redirect to return URL or home
-                    const returnUrl = localStorage.getItem('returnUrl') || 'index.html';
-                    localStorage.removeItem('returnUrl');
-                    window.location.href = returnUrl;
-                    
-                } else {
-                    // Show error
-                    const formError = document.getElementById('formError');
-                    formError.textContent = data.message || 'Đăng nhập thất bại';
-                    formError.classList.add('show');
-                }
-                
-            } catch (error) {
-                console.error('Login error:', error);
-                const formError = document.getElementById('formError');
-                formError.textContent = 'Lỗi kết nối. Vui lòng thử lại';
-                formError.classList.add('show');
-            } finally {
-                // Hide loading
-                submitBtn.classList.remove('loading');
-                submitBtn.disabled = false;
-            }
-        });
-
-        // Clear errors on input
-        document.getElementById('email').addEventListener('input', function() {
-            clearError('email');
-        });
-
-        document.getElementById('password').addEventListener('input', function() {
-            clearError('password');
-        });
-
-        // Forgot password
-        function forgotPassword() {
-            const email = document.getElementById('email').value.trim();
-            
-            if (!email) {
-                alert('Vui lòng nhập email của bạn');
-                document.getElementById('email').focus();
-                return;
-            }
-            
-            if (!validateEmail(email)) {
-                alert('Email không hợp lệ');
-                return;
-            }
-            
-            // TODO: Call forgot password API
-            alert('Link đặt lại mật khẩu đã được gửi đến email: ' + email + '\n\n(Tính năng đang phát triển)');
-        }
-
-        // ===== GOOGLE LOGIN =====
-        window.addEventListener('DOMContentLoaded', function() {
-            if (typeof google !== 'undefined') {
-                google.accounts.id.initialize({
-                    client_id: 'YOUR_GOOGLE_CLIENT_ID.apps.googleusercontent.com',
-                    callback: handleGoogleCredential,
-                    auto_select: false
-                });
-            }
-        });
-
-        async function handleGoogleCredential(response) {
-            try {
-                showLoading();
-                const res = await fetch('/api/auth.php?action=google_login', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    credentials: 'include',
-                    body: JSON.stringify({ credential: response.credential })
-                });
-                const data = await res.json();
-                if (data.success) {
-                    localStorage.setItem('user', JSON.stringify(data.data.user));
-                    localStorage.setItem('token', data.data.token);
-                    showNotification('🎉 ' + data.message, 'success');
-                    setTimeout(() => {
-                        const returnUrl = localStorage.getItem('returnUrl') || 'index.html';
-                        localStorage.removeItem('returnUrl');
-                        window.location.href = returnUrl;
-                    }, 1000);
-                } else {
-                    showNotification(data.message || 'Đăng nhập thất bại', 'error');
-                }
-            } catch (err) {
-                showNotification('Lỗi kết nối. Vui lòng thử lại', 'error');
-            } finally {
-                hideLoading();
-            }
-        }
-
-        function loginWithGoogle() {
-            if (typeof google === 'undefined') {
-                showNotification('Đang tải Google... thử lại sau 2 giây', 'warning');
-                return;
-            }
-            google.accounts.id.prompt();
-        }
-
-        function loginWithFacebook() {
-            if (typeof FB === 'undefined') {
-                showNotification('Đang tải Facebook SDK... thử lại sau 2 giây', 'warning');
-                return;
-            }
-            FB.login(function(response) {
-                if (response.authResponse) {
-                    handleFacebookLogin(response.authResponse.accessToken);
-                } else {
-                    showNotification('Đăng nhập Facebook bị huỷ', 'warning');
-                }
-            }, { scope: 'public_profile,email' });
-        }
-
-        async function handleFacebookLogin(accessToken) {
-            try {
-                showLoading();
-                const res = await fetch('/api/auth.php?action=facebook_login', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    credentials: 'include',
-                    body: JSON.stringify({ access_token: accessToken })
-                });
-                const data = await res.json();
-                if (data.success) {
-                    localStorage.setItem('user', JSON.stringify(data.data.user));
-                    localStorage.setItem('token', data.data.token);
-                    showNotification('🎉 ' + data.message, 'success');
-                    setTimeout(() => {
-                        const returnUrl = localStorage.getItem('returnUrl') || 'index.html';
-                        localStorage.removeItem('returnUrl');
-                        window.location.href = returnUrl;
-                    }, 1000);
-                } else {
-                    showNotification(data.message || 'Đăng nhập thất bại', 'error');
-                }
-            } catch (err) {
-                showNotification('Lỗi kết nối. Vui lòng thử lại', 'error');
-            } finally {
-                hideLoading();
-            }
-        }
-
-        // Check if already logged in
-        window.addEventListener('DOMContentLoaded', function() {
-            const user = localStorage.getItem('user');
-            if (user) {
-                const returnUrl = localStorage.getItem('returnUrl') || 'index.html';
-                localStorage.removeItem('returnUrl');
-                window.location.href = returnUrl;
-            }
-        });
-    </script>
-    <script src="js/mobile.js"></script>
-
-  <!-- MOBILE BOTTOM NAV - rendered in HTML, no JS injection -->
-  <nav id="mobileBottomNav" role="navigation" aria-label="Mobile navigation">
-    <a href="index.html"     class="mnav-item" data-page="index.html">
-      <i class="fas fa-home"></i><span>Trang chủ</span>
-    </a>
-    <a href="shop.html"      class="mnav-item" data-page="shop.html">
-      <i class="fas fa-store"></i>
-      <span class="mnav-badge" id="navCartBadge" style="display:none">0</span>
-      <span>Mua sắm</span>
-    </a>
-    <button class="mnav-item mnav-fab-wrap" onclick="handleFab()" aria-label="Hành động nhanh">
-      <div class="mnav-fab"><i class="fas fa-search" id="fabIcon"></i></div>
-    </button>
-    <a href="community.html" class="mnav-item" data-page="community.html">
-      <i class="fas fa-users"></i><span>Cộng đồng</span>
-    </a>
-    <a href="profile.html"   class="mnav-item" data-page="profile.html" id="navProfileItem">
-      <i class="fas fa-user" id="navProfileIcon"></i><span id="navProfileName">Tài khoản</span>
-    </a>
-  </nav>
-
-  <!-- BACK TO TOP -->
-  <button id="backToTop" onclick="scrollToTop()" aria-label="Lên đầu trang">
-    <i class="fas fa-chevron-up"></i>
-  </button>
-
-  <!-- PULL TO REFRESH INDICATOR -->
-  <div id="pullIndicator" aria-hidden="true">
-    <i class="fas fa-rotate-right"></i>
-    <span>Kéo xuống để làm mới</span>
-  </div>
-
-</body>
+<div class="auth-page">
+<div class="auth-container">
+<div class="auth-header">
+<div class="auth-logo">🛒</div>
+<h1 class="auth-title">Đăng nhập</h1>
+<p class="auth-subtitle">Chào mừng trở lại với ShipperShop!</p>
+</div>
+<form id="loginForm">
+<div class="form-group">
+<label class="form-label">Tên đăng nhập</label>
+<input type="text" class="form-input" id="username" placeholder="Nhập tên đăng nhập" required autocomplete="username">
+<div class="error-message" id="usernameError"></div>
+</div>
+<div class="form-group">
+<label class="form-label">Mật khẩu</label>
+<div class="password-toggle">
+<input type="password" class="form-input" id="password" placeholder="Nhập mật khẩu" required autocomplete="current-password">
+<button type="button" class="password-toggle-btn" onclick="var i=document.getElementById('password'),c=document.getElementById('toggleIcon');if(i.type==='password'){i.type='text';c.className='far fa-eye-slash'}else{i.type='password';c.className='far fa-eye'}"><i class="far fa-eye" id="toggleIcon"></i></button>
+</div>
+<div class="error-message" id="passwordError"></div>
+</div>
+<div class="remember-forgot">
+<label class="checkbox-label"><input type="checkbox" id="remember"><span>Ghi nhớ đăng nhập</span></label>
+<a href="#" class="forgot-link" onclick="alert('Vui lòng liên hệ admin để đặt lại mật khẩu');return false">Quên mật khẩu?</a>
+</div>
+<div class="error-message show" id="formError" style="text-align:center;margin-bottom:12px"></div>
+<button type="submit" class="btn-submit" id="submitBtn"><span class="btn-text">Đăng nhập</span><div class="loading-spinner"></div></button>
+</form>
+<div class="auth-footer">Chưa có tài khoản? <a href="register.html">Đăng ký ngay</a></div>
+<div class="back-home"><a href="index.html"><i class="fas fa-arrow-left"></i> Về trang chủ</a></div>
+</div>
+</div>
+<script>
+document.getElementById('loginForm').addEventListener('submit',async function(e){
+  e.preventDefault();
+  document.getElementById('formError').textContent='';
+  var un=document.getElementById('username').value.trim();
+  var pw=document.getElementById('password').value;
+  if(!un){document.getElementById('usernameError').textContent='Vui lòng nhập tên đăng nhập';document.getElementById('usernameError').classList.add('show');return}
+  if(!pw||pw.length<6){document.getElementById('passwordError').textContent='Mật khẩu phải có ít nhất 6 ký tự';document.getElementById('passwordError').classList.add('show');return}
+  var btn=document.getElementById('submitBtn');btn.classList.add('loading');btn.disabled=true;
+  try{
+    var r=await fetch('/api/auth.php?action=login',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({username:un,password:pw})});
+    var d=await r.json();
+    if(d.success){
+      localStorage.setItem('user',JSON.stringify(d.data.user));
+      localStorage.setItem('token',d.data.token);
+      if(document.getElementById('remember').checked)localStorage.setItem('remember','true');
+      var ret=localStorage.getItem('returnUrl')||'index.html';localStorage.removeItem('returnUrl');
+      window.location.href=ret;
+    }else{
+      var fe=document.getElementById('formError');fe.textContent=d.message||'Đăng nhập thất bại';fe.classList.add('show');
+    }
+  }catch(e){document.getElementById('formError').textContent='Lỗi kết nối';document.getElementById('formError').classList.add('show');}
+  finally{btn.classList.remove('loading');btn.disabled=false;}
+});
+document.getElementById('username').addEventListener('input',function(){document.getElementById('usernameError').classList.remove('show')});
+document.getElementById('password').addEventListener('input',function(){document.getElementById('passwordError').classList.remove('show')});
+window.addEventListener('DOMContentLoaded',function(){if(localStorage.getItem('user')){var r=localStorage.getItem('returnUrl')||'index.html';localStorage.removeItem('returnUrl');window.location.href=r}});
+</script>
+<script src="js/mobile.js"></script>
+<nav id="mobileBottomNav" role="navigation"><a href="index.html" class="mnav-item" data-page="index.html"><i class="fas fa-home"></i><span>Trang chủ</span></a><a href="marketplace.html" class="mnav-item" data-page="marketplace.html"><i class="fas fa-store"></i><span class="mnav-badge" id="navCartBadge" style="display:none">0</span><span>Mua sắm</span></a><button class="mnav-item mnav-fab-wrap" onclick="handleFab()"><div class="mnav-fab"><i class="fas fa-search" id="fabIcon"></i></div></button><a href="map.html" class="mnav-item" data-page="map.html"><i class="fas fa-map-marked-alt"></i><span>Bản đồ</span></a><a href="profile.html" class="mnav-item" data-page="profile.html" id="navProfileItem"><i class="fas fa-user" id="navProfileIcon"></i><span id="navProfileName">Tài khoản</span></a></nav>
+<script>if("serviceWorker" in navigator)navigator.serviceWorker.register("/sw.js");</script></body>
 </html>

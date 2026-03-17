@@ -1,0 +1,374 @@
+<!DOCTYPE html><html lang="vi"><head><meta charset="UTF-8"><meta name="theme-color" content="#ffffff"><meta name="viewport" content="width=device-width,initial-scale=1.0"><title>Tin nhắn - ShipperShop</title><link rel="stylesheet" href="css/style.css"><link rel="stylesheet" href="mobile.css"><link rel="preload" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" as="style" onload="this.onload=null;this.rel='stylesheet'"><noscript><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"></noscript><link rel="manifest" href="/manifest.json"><style>:root{--primary:#0084ff;--bg:#fff;--border:#e4e6eb;--text:#1C1C1C;--muted:#65676B;--bubble-me:#0084ff;--bubble-other:#f0f0f0;}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{background:var(--bg);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;color:var(--text);height:100vh;overflow:hidden;}
+.top-bar{position:fixed;top:0;left:0;right:0;z-index:100;background:#fff;border-bottom:1px solid var(--border);}
+.top-header{display:none!important;}.tabs{display:none!important;}
+.top-header{padding:10px 16px;display:flex;align-items:center;gap:10px;}
+.top-back{background:none;border:none;font-size:20px;cursor:pointer;color:var(--primary);padding:4px;}
+.top-header h1{font-size:22px;font-weight:800;flex:1;}
+.top-header .top-btn{width:36px;height:36px;border-radius:50%;background:#f0f2f5;border:none;font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;color:#333;}
+.tabs{display:flex;border-bottom:1px solid var(--border);}
+.tab{flex:1;padding:10px;text-align:center;font-size:13px;font-weight:700;color:var(--muted);cursor:pointer;border-bottom:2px solid transparent;position:relative;}
+.tab.active{color:var(--primary);border-bottom-color:var(--primary);}
+.tab .badge{position:absolute;top:4px;right:50%;transform:translateX(20px);background:#E74C3C;color:#fff;font-size:10px;min-width:16px;height:16px;border-radius:8px;display:flex;align-items:center;justify-content:center;padding:0 4px;}
+.online-bar{display:flex;gap:12px;padding:10px 16px;overflow-x:auto;border-bottom:1px solid var(--border);-webkit-overflow-scrolling:touch;scrollbar-width:none;}
+.online-bar::-webkit-scrollbar{display:none;}
+.ol-item{flex-shrink:0;text-align:center;cursor:pointer;position:relative;}
+.ol-av{width:52px;height:52px;border-radius:50%;object-fit:cover;display:block;}
+.ol-av-ph{width:52px;height:52px;border-radius:50%;background:#e4e6eb;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:16px;color:#666;}
+.ol-dot{position:absolute;bottom:14px;right:0;width:14px;height:14px;border-radius:50%;background:#22c55e;border:2px solid #fff;}
+.ol-name{font-size:11px;margin-top:4px;max-width:60px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.conv-list{overflow-y:auto;padding-top:0;}
+.conv-item{display:flex;align-items:center;gap:12px;padding:10px 16px;cursor:pointer;}
+.conv-item:active{background:#f0f2f5;}
+.conv-item.unread .cv-name{font-weight:800;color:#000;}
+.conv-item.unread .cv-last{color:#000;font-weight:600;}
+.cv-av-wrap{position:relative;flex-shrink:0;}
+.cv-av{width:52px;height:52px;border-radius:50%;object-fit:cover;}
+.cv-av-ph{width:52px;height:52px;border-radius:50%;background:#e4e6eb;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:18px;color:#666;}
+.cv-dot{position:absolute;bottom:2px;right:2px;width:14px;height:14px;border-radius:50%;background:#22c55e;border:2px solid #fff;}
+.cv-info{flex:1;min-width:0;}
+.cv-name{font-size:15px;font-weight:600;display:flex;align-items:center;gap:4px;}
+.cv-ship{font-size:11px;font-weight:700;}
+.cv-last{font-size:13px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:1px;}
+.cv-right{text-align:right;flex-shrink:0;}
+.cv-time{font-size:11px;color:var(--muted);}
+.cv-unread{width:10px;height:10px;border-radius:50%;background:var(--primary);margin:4px 0 0 auto;}
+.chat-view{display:none;height:100vh;flex-direction:column;}
+.chat-view.active{display:flex;}
+.list-view{display:block;height:100vh;overflow:hidden;display:flex;flex-direction:column;padding-top:0;}
+.list-view.hidden{display:none;}
+.ch-header{position:fixed;top:0;left:0;right:0;padding:8px 12px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px;background:#fff;z-index:100;}
+.ch-back{background:none;border:none;font-size:22px;cursor:pointer;color:var(--primary);padding:4px;}
+.ch-av{width:36px;height:36px;border-radius:50%;object-fit:cover;flex-shrink:0;}
+.ch-av-ph{width:36px;height:36px;border-radius:50%;background:#e4e6eb;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:12px;}
+.ch-info{flex:1;min-width:0;}
+.ch-name{font-weight:700;font-size:15px;}
+.ch-sub{font-size:11px;display:flex;align-items:center;gap:4px;}
+.ch-sub .online{color:#22c55e;font-weight:600;}
+.ch-sub .offline{color:var(--muted);}
+.ch-sub .ship{font-weight:700;}
+.ch-btns{display:flex;gap:6px;}
+.ch-btn{width:32px;height:32px;border-radius:50%;background:#f0f2f5;border:none;font-size:14px;cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--primary);}
+.ch-msgs{flex:1;overflow-y:auto;padding:60px 12px 120px;display:flex;flex-direction:column;gap:2px;-webkit-overflow-scrolling:touch;}
+.msg-date{text-align:center;font-size:11px;color:var(--muted);padding:8px 0;}
+.msg-row{display:flex;align-items:flex-end;gap:6px;max-width:75%;}
+.msg-row.mine{margin-left:auto;}
+.msg-av{width:24px;height:24px;border-radius:50%;object-fit:cover;flex-shrink:0;}
+.msg-av-ph{width:24px;height:24px;border-radius:50%;background:#e4e6eb;display:flex;align-items:center;justify-content:center;font-size:8px;font-weight:700;}
+.msg-bubble{padding:8px 12px;border-radius:18px;font-size:14px;line-height:1.4;max-width:100%;word-break:break-word;}
+.msg-row.other .msg-bubble{background:var(--bubble-other);color:var(--text);border-bottom-left-radius:4px;}
+.msg-row.mine .msg-bubble{background:var(--bubble-me);color:#fff;border-bottom-right-radius:4px;}
+.msg-time{text-align:center;font-size:10px;color:var(--muted);padding:2px 0;}
+.ch-input{display:none!important;}
+.ch-input input{flex:1;padding:10px 16px;border:1px solid var(--border);border-radius:24px;font-size:14px;outline:none;background:#f0f2f5;}
+.ch-input input:focus{border-color:var(--primary);background:#fff;}
+.ch-send{width:36px;height:36px;border-radius:50%;background:var(--primary);border:none;color:#fff;font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.ch-send:disabled{background:#ccc;}
+/* Enhanced Input Bar */
+.ch-input-wrap{position:fixed;bottom:0;left:0;right:0;background:#fff;border-top:1px solid var(--border);z-index:100;}
+.ch-input-main{display:flex;align-items:flex-end;padding:6px 8px;gap:4px;}
+.ch-input-main .ib-btn{width:34px;height:34px;border-radius:50%;border:none;background:none;color:var(--primary);font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;padding:0;}
+.ch-input-main .ib-btn:active{background:#f0f2f5;}
+.ch-input-main .ib-text{flex:1;min-width:0;padding:8px 14px;border:1px solid var(--border);border-radius:22px;font-size:14px;outline:none;background:#f0f2f5;max-height:100px;overflow-y:auto;resize:none;line-height:1.3;font-family:inherit;}
+.ch-input-main .ib-text:focus{border-color:var(--primary);background:#fff;}
+.ib-like{color:#0084ff!important;font-size:22px!important;}
+.ib-send{color:#0084ff!important;}
+/* Attach Menu */
+.attach-menu{display:none;padding:8px 16px;border-top:1px solid var(--border);background:#fff;}
+.attach-menu.show{display:flex;gap:20px;justify-content:flex-start;flex-wrap:wrap;}
+.am-item{display:flex;flex-direction:column;align-items:center;gap:4px;cursor:pointer;padding:8px;border-radius:12px;}
+.am-item:active{background:#f0f2f5;}
+.am-icon{width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:18px;color:#fff;}
+.am-label{font-size:11px;color:#65676B;}
+/* Message types */
+.msg-img{max-width:220px;border-radius:12px;cursor:pointer;display:block;}
+.msg-video{max-width:240px;border-radius:12px;display:block;}
+.msg-file{display:flex;align-items:center;gap:8px;padding:8px 12px;background:rgba(0,0,0,.05);border-radius:12px;text-decoration:none;color:inherit;max-width:220px;}
+.msg-file i{font-size:20px;color:var(--primary);}
+.msg-file span{font-size:13px;word-break:break-all;}
+.msg-loc{display:block;border-radius:12px;overflow:hidden;max-width:220px;}
+.msg-loc img{width:220px;height:120px;object-fit:cover;display:block;}
+.msg-loc span{display:block;padding:6px 8px;font-size:12px;color:var(--primary);}
+/* Activity status */
+.ch-sub .activity{color:#65676B;font-size:11px;}
+.ch-sub .dot-online{width:8px;height:8px;border-radius:50%;background:#22c55e;display:inline-block;margin-right:3px;}
+/* Image preview */
+.img-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.9);z-index:300;align-items:center;justify-content:center;}
+.img-overlay.show{display:flex;}
+.img-overlay img{max-width:95%;max-height:90vh;object-fit:contain;}
+.img-overlay-close{position:absolute;top:16px;right:16px;color:#fff;font-size:28px;cursor:pointer;z-index:301;}
+.pending-banner{background:#FFF8E1;padding:12px 16px;display:flex;align-items:center;gap:10px;border-bottom:1px solid #FFE082;}
+.pending-banner i{color:#F9A825;font-size:18px;}
+.pending-banner p{flex:1;font-size:13px;color:#333;}
+.pending-btns{display:flex;gap:8px;}
+.pending-btns button{padding:6px 16px;border-radius:20px;font-size:13px;font-weight:600;cursor:pointer;border:none;}
+.btn-accept{background:var(--primary);color:#fff;}
+.btn-delete{background:#e4e6eb;color:#333;}
+.empty{text-align:center;padding:60px 20px;color:var(--muted);}
+.empty i{font-size:40px;display:block;margin-bottom:8px;color:#ddd;}</style><script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+<script src="js/webrtc-call.js"></script>
+</head><body>
+<div class="list-view" id="listView">
+<div class="top-bar" id="topBar">
+<div class="top-header"><button class="top-back" onclick="history.back()"><i class="fas fa-arrow-left"></i></button><h1>Đoạn chat</h1><button class="top-btn"><i class="fas fa-user-group"></i></button></div>
+<div class="tabs"><div class="tab active" id="tabActive" onclick="switchTab('active')">Tin nhắn</div><div class="tab" id="tabPending" onclick="switchTab('pending')">Đang chờ <span class="badge" id="pendingBadge" style="display:none">0</span></div></div>
+<div style="display:flex;align-items:center;padding:10px 16px 0;gap:10px"><button onclick="history.back()" style="background:none;border:none;font-size:20px;cursor:pointer;color:#0084ff;padding:4px;flex-shrink:0"><i class="fas fa-arrow-left"></i></button><h1 style="font-size:20px;font-weight:800;margin:0">Đoạn chat</h1></div>
+<div class="search-bar" id="searchBar"><i class="fas fa-search"></i><input type="text" id="searchInput" placeholder="Tìm kiếm đoạn chat..." oninput="onSearchInput(this.value)"></div>
+<div class="filter-chips" id="filterChips">
+<button class="f-chip active" data-filter="" onclick="setFilter(this,'')">Tất cả</button>
+<button class="f-chip" data-filter="online" onclick="setFilter(this,'online')"><span class="chip-dot"></span> Online</button>
+<button class="f-chip" data-filter="unread" onclick="setFilter(this,'unread')">Chưa đọc</button>
+<button class="f-chip" data-filter="strangers" onclick="setFilter(this,'strangers')" id="chipStrangers">Người lạ <span id="stBadge" style="display:none;background:#E74C3C;color:#fff;font-size:10px;min-width:16px;height:16px;border-radius:8px;align-items:center;justify-content:center;padding:0 4px;margin-left:2px">0</span></button>
+<button class="f-chip" data-filter="categories" onclick="openCatManager()" id="chipCategories">Phân loại</button>
+</div>
+</div>
+<div id="onlineBar" class="online-bar" id="onlineBarMargin"></div>
+<div class="conv-list" id="convList"></div>
+</div>
+
+<div class="chat-view" id="chatView">
+<div class="ch-header"><button class="ch-back" onclick="backToList()"><i class="fas fa-arrow-left"></i></button><img class="ch-av" id="chAv" src="" onerror="this.style.display='none'"><div class="ch-info"><div class="ch-name" id="chName">...</div><div class="ch-sub"><span id="chStatus"></span><span id="chShip"></span></div></div><div class="ch-btns"><button class="ch-btn" onclick="if(!window.curOtherId){alert('Mở cuộc trò chuyện trước!');return}SSCall.startCall(window.curOtherId,document.getElementById('chName')?.textContent,'',false)"><i class="fas fa-phone"></i></button><button class="ch-btn" onclick="if(!window.curOtherId){alert('Mở cuộc trò chuyện trước!');return}SSCall.startCall(window.curOtherId,document.getElementById('chName')?.textContent,'',true)"><i class="fas fa-video"></i></button><button class="ch-btn"><i class="fas fa-circle-info"></i></button></div></div>
+<div class="ch-msgs" id="chMsgs"></div>
+<div id="pendingBannerChat" style="display:none"></div>
+<div class="ch-input-wrap" id="chInputWrap">
+<div class="attach-menu" id="attachMenu">
+<div class="am-item" onclick="pickFile()"><div class="am-icon" style="background:#7C4DFF"><i class="fas fa-file"></i></div><div class="am-label">File</div></div>
+<div class="am-item" onclick="pickImage()"><div class="am-icon" style="background:#00C853"><i class="fas fa-image"></i></div><div class="am-label">Ảnh</div></div>
+<div class="am-item" onclick="shareLocation()"><div class="am-icon" style="background:#FF5252"><i class="fas fa-location-dot"></i></div><div class="am-label">Vị trí</div></div>
+</div>
+<div class="ch-input-main">
+<button class="ib-btn" onclick="toggleAttach()" id="btnAttach"><i class="fas fa-circle-plus"></i></button>
+<button class="ib-btn" onclick="pickImage()" title="Ảnh"><i class="fas fa-image" style="color:#00C853"></i></button>
+<input class="ib-text" id="msgInput" placeholder="Nhắn tin" oninput="onMsgInput()" onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendMsg();}">
+<button class="ib-btn" onclick="insertEmoji()" title="Emoji"><i class="far fa-face-smile" style="color:#f5a623"></i></button>
+<button class="ib-btn" id="btnSendLike" onclick="sendLikeOrMsg()"><i class="fas fa-thumbs-up ib-like"></i></button>
+</div>
+</div>
+<input type="file" id="fileInput" style="display:none" accept="image/*,video/*,.pdf,.doc,.docx,.xls,.xlsx,.zip,.rar" onchange="handleFileSelect(this)">
+<input type="file" id="imgInput" style="display:none" accept="image/*,video/*" onchange="handleFileSelect(this)">
+<div class="img-overlay" id="imgOverlay" onclick="this.classList.remove('show')"><span class="img-overlay-close">&times;</span><img id="imgOverlayImg" src=""></div>
+</div><script src="js/reddit-mkpost.js"></script><script>
+var CU=JSON.parse(localStorage.getItem("user")||"null");
+if(!CU)location.href="login.html";
+var curConvId=null,curOtherId=null,curTab="active",pollTimer=null;
+var SC={"GHTK":"#00b14f","J&T":"#d32f2f","GHN":"#ff6600","Viettel Post":"#e21a1a","SPX":"#EE4D2D","Grab":"#00b14f","Be":"#5bc500","Gojek":"#00aa13","Ninja Van":"#c41230"};
+
+init();
+function init(){loadConvs();loadOnline();loadPendingCount();
+var au=new URLSearchParams(location.search).get("user");
+if(au)openFromUser(parseInt(au));}
+
+function switchTab(t){curTab=t;
+document.getElementById("tabActive").className="tab"+(t==="active"?" active":"");
+document.getElementById("tabPending").className="tab"+(t==="pending"?" active":"");
+document.getElementById("onlineBar").style.display="none";
+loadConvs();if(t==='active')loadOnline();}
+
+async function loadConvs(){
+var list=document.getElementById("convList");
+list.innerHTML="<div class=empty><i class='fas fa-spinner fa-spin'></i></div>";
+try{var r=await fetch("/api/messages-api.php?action=conversations&tab="+curTab,{credentials:"include"});
+var d=await r.json();
+if(!d.success||!d.data.length){list.innerHTML="<div class=empty><i class='far fa-comment-dots'></i><p>"+(curTab==="pending"?"Không có tin nhắn đang chờ":"Chưa có tin nhắn")+"</p></div>";return;}
+list.innerHTML=d.data.map(function(c){
+var av=c.other_avatar?"<img class=cv-av src='"+c.other_avatar+"'onerror='this.className=\"cv-av-ph\";this.innerHTML=\""+(c.other_name||"U").charAt(0)+"\"'>"
+:"<div class=cv-av-ph>"+(c.other_name||"U").charAt(0)+"</div>";
+var dot=c.other_online?"<div class=cv-dot></div>":"";
+var ship=c.other_ship?"<span class=cv-ship style=color:"+(SC[c.other_ship]||"#999")+">"+esc(c.other_ship)+"</span>":"";
+var unread=parseInt(c.unread_count)>0;
+var status="";
+if(!c.other_online&&c.other_last_active){var mn=Math.floor((Date.now()-new Date(c.other_last_active.replace(" ","T")).getTime())/60000);
+if(mn<60)status=mn+"p";else if(mn<1440)status=Math.floor(mn/60)+"h";else status=Math.floor(mn/1440)+"d";}
+return "<div class='conv-item"+(unread?" unread":"")+"'onclick='openConv("+c.id+","+c.other_id+",\""+esc(c.other_name)+"\",\""+esc(c.other_avatar||"")+"\","+c.other_online+",\""+esc(c.other_ship||"")+"\")'>"+
+"<div class=cv-av-wrap>"+av+dot+"</div>"+
+"<div class=cv-info><div class=cv-name>"+esc(c.other_name)+" "+ship+"</div><div class=cv-last>"+esc((c.last_message||"").substring(0,40))+"</div></div>"+
+"<div class=cv-right><div class=cv-time>"+ago(c.last_message_at)+"</div>"+(unread?"<div class=cv-unread></div>":"")+"</div></div>";
+}).join("");}catch(e){list.innerHTML="<div class=empty><p>Lỗi kết nối</p></div>";}}
+
+async function loadOnline(){try{var r=await fetch("/api/messages-api.php?action=online_friends",{credentials:"include"});
+var d=await r.json();var bar=document.getElementById("onlineBar");
+if(!d.success||!d.data.length){bar.style.display="none";return;}
+bar.innerHTML=d.data.map(function(f){
+var av=f.avatar?"<img class=ol-av src='"+f.avatar+"'onerror='this.className=\"ol-av-ph\";this.textContent=\""+(f.fullname||"U").charAt(0)+"\"'>"
+:"<div class=ol-av-ph>"+(f.fullname||"U").charAt(0)+"</div>";
+return "<div class=ol-item onclick='openFromUser("+f.id+")'>"+av+(f.is_online?"<div class=ol-dot></div>":"")+"<div class=ol-name>"+esc((f.fullname||"").split(" ").pop())+"</div></div>";
+}).join("");}catch(e){}}
+
+async function loadPendingCount(){try{var r=await fetch("/api/messages-api.php?action=pending_count",{credentials:"include"});
+var d=await r.json();var b=document.getElementById("pendingBadge");
+if(d.success&&d.count>0){b.textContent=d.count;b.style.display="flex";var sb=document.getElementById("stBadge");if(sb){sb.textContent=d.count;sb.style.display="inline-flex";}}else{b.style.display="none";var sb=document.getElementById("stBadge");if(sb)sb.style.display="none";}}catch(e){}}
+
+function openConv(cid,oid,name,avatar,online,ship,lastActive){
+curConvId=cid;curOtherId=oid;window.curOtherId=oid;
+document.getElementById("listView").classList.add("hidden");
+document.getElementById("chatView").classList.add("active");
+document.getElementById("chName").textContent=name;
+var avEl=document.getElementById("chAv");if(avatar){avEl.src=avatar;avEl.style.display="";}else avEl.style.display="none";
+var stEl=document.getElementById("chStatus");
+if(parseInt(online)){stEl.innerHTML="<span class=dot-online></span>Đang hoạt động";stEl.className="online";}else if(lastActive){var mn=Math.floor((Date.now()-new Date(lastActive.replace(" ","T")).getTime())/60000);var txt="";if(mn<1)txt="Vừa mới hoạt động";else if(mn<60)txt="Hoạt động "+mn+" phút trước";else if(mn<1440)txt="Hoạt động "+Math.floor(mn/60)+" giờ trước";else txt="Hoạt động "+Math.floor(mn/1440)+" ngày trước";stEl.innerHTML=txt;stEl.className="activity";}else{stEl.textContent="";stEl.className="offline";}
+var shEl=document.getElementById("chShip");
+if(ship){shEl.textContent=" · "+ship;shEl.style.color=SC[ship]||"#999";}else shEl.textContent="";
+document.getElementById("pendingBannerChat").style.display="none";
+document.getElementById("pendingBannerChat").innerHTML="";
+loadMsgs();startPoll();
+setTimeout(function(){document.getElementById("msgInput").focus();},200);}
+
+async function openFromUser(uid){
+try{var r=await fetch("/api/messages-api.php?action=user_info&id="+uid,{credentials:"include"});
+var d=await r.json();if(d.success&&d.data){
+var u=d.data;openConv(u.conversation_id,uid,u.fullname,u.avatar||"",u.is_online,u.shipping_company||"");
+if(u.conv_status==="pending")showPendingBanner(u.conversation_id);
+}else openConv(null,uid,"Người dùng","",false,"");}catch(e){openConv(null,uid,"Người dùng","",false,"");}}
+
+function showPendingBanner(cid){
+var el=document.getElementById("pendingBannerChat");
+el.style.display="block";
+el.innerHTML="<div class=pending-banner><i class='fas fa-clock'></i><p>Tin nhắn đang chờ. Chấp nhận để trả lời.</p><div class=pending-btns><button class=btn-accept onclick='acceptConv("+cid+")'>Chấp nhận</button><button class=btn-delete onclick='this.parentElement.parentElement.parentElement.style.display=\"none\"'>Xoá</button></div></div>";}
+
+async function acceptConv(cid){
+try{await fetch("/api/messages-api.php?action=accept",{method:"POST",headers:{"Content-Type":"application/json"},credentials:"include",body:JSON.stringify({conversation_id:cid})});
+document.getElementById("pendingBannerChat").style.display="none";}catch(e){}}
+
+async function loadMsgs(){var c=document.getElementById("chMsgs");
+if(!curConvId){c.innerHTML="<div class=empty style=padding-top:40vh><i class='far fa-hand-peace' style=font-size:48px;color:#ddd></i><p style=margin-top:8px>Gửi lời chào!</p></div>";return;}
+try{var r=await fetch("/api/messages-api.php?action=messages&conversation_id="+curConvId,{credentials:"include"});
+var d=await r.json();if(!d.success){c.innerHTML="<div class=empty><p>Lỗi</p></div>";return;}
+if(!d.data.length){c.innerHTML="<div class=empty style=padding-top:40vh><i class='far fa-hand-peace' style=font-size:48px;color:#ddd></i><p>Gửi lời chào!</p></div>";return;}
+var html="",lastDate="";
+d.data.forEach(function(m){
+var dt=new Date(m.created_at.replace(" ","T"));
+var dateStr=dt.toLocaleDateString("vi-VN",{day:"numeric",month:"short"});
+if(dateStr!==lastDate){html+="<div class=msg-date>"+dateStr+" "+dt.toLocaleTimeString("vi-VN",{hour:"2-digit",minute:"2-digit"})+"</div>";lastDate=dateStr;}
+var mine=parseInt(m.sender_id)===parseInt(CU.id);
+var av="";
+if(!mine){av=m.sender_avatar?"<img class=msg-av src='"+m.sender_avatar+"'onerror='this.className=\"msg-av-ph\";this.textContent=\""+(m.sender_name||"U").charAt(0)+"\"'>":"<div class=msg-av-ph>"+(m.sender_name||"U").charAt(0)+"</div>";}
+var bubble="";if(m.type==="image"&&m.file_url){bubble="<img class=msg-img src='"+m.file_url+"' onclick='viewImg(this.src)' loading=lazy>";}else if(m.type==="video"&&m.file_url){bubble="<video class=msg-img controls playsinline preload=metadata style='max-width:240px;border-radius:12px'><source src='"+m.file_url+"'>Video</video>";}else if(m.type==="file"&&m.file_url){bubble="<a class=msg-file href='"+m.file_url+"' target=_blank download><i class='fas fa-file-alt'></i><span>"+esc(m.file_name||m.content||"File")+"</span></a>";}else if(m.type==="location"&&m.file_url){bubble="<a class=msg-loc href='"+m.file_url+"' target=_blank><span>📍 Xem vị trí trên bản đồ</span></a>";}else{bubble="<div class=msg-bubble>"+esc(m.content)+"</div>";}html+="<div class='msg-row "+(mine?"mine":"other")+"'>"+av+bubble+"</div>";});
+c.innerHTML=html;c.scrollTop=c.scrollHeight;}catch(e){c.innerHTML="<div class=empty><p>Lỗi tải</p></div>";}}
+
+async function sendMsg(){var inp=document.getElementById("msgInput");var ct=inp.value.trim();if(!ct)return;
+inp.value="";var c=document.getElementById("chMsgs");
+var empty=c.querySelector(".empty");if(empty)empty.remove();
+c.insertAdjacentHTML("beforeend","<div class='msg-row mine'><div class=msg-bubble>"+esc(ct)+"</div></div>");
+c.scrollTop=c.scrollHeight;
+try{var r=await fetch("/api/messages-api.php?action=send",{method:"POST",headers:{"Content-Type":"application/json"},credentials:"include",body:JSON.stringify({to_user_id:curOtherId,content:ct})});
+var d=await r.json();if(d.success&&!curConvId){curConvId=d.data.conversation_id;startPoll();}}catch(e){}}
+
+function startPoll(){if(pollTimer)clearInterval(pollTimer);
+if(curConvId)pollTimer=setInterval(function(){loadMsgs();},5000);}
+
+function backToList(){document.getElementById("listView").classList.remove("hidden");
+document.getElementById("chatView").classList.remove("active");
+curConvId=null;curOtherId=null;if(pollTimer)clearInterval(pollTimer);loadConvs();loadPendingCount();}
+
+function esc(t){if(!t)return"";return String(t).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");}
+function ago(dt){if(!dt)return"";var s=Math.floor((new Date()-new Date(dt.replace(" ","T")))/1000);if(s<60)return"Vừa xong";if(s<3600)return Math.floor(s/60)+"p";if(s<86400)return Math.floor(s/3600)+"h";if(s<604800)return Math.floor(s/86400)+"d";return new Date(dt).toLocaleDateString("vi-VN");}
+</script><script>if("serviceWorker" in navigator)navigator.serviceWorker.register("/sw.js");</script>
+<!-- CALL UI -->
+<style>
+#callOverlay,#incomingOverlay{display:none;position:fixed;top:0;left:0;right:0;bottom:0;z-index:9999;flex-direction:column;align-items:center;justify-content:center;}
+#callOverlay{background:#1a1a2e;}
+#incomingOverlay{background:rgba(0,0,0,.85);}
+.call-info{text-align:center;color:#fff;margin-top:40px;}
+.call-info .name{font-size:24px;font-weight:700;margin-bottom:8px;}
+.call-info .status{font-size:14px;color:#ccc;}
+.call-avatar{width:80px;height:80px;border-radius:50%;background:#444;display:flex;align-items:center;justify-content:center;font-size:32px;color:#fff;margin:0 auto 16px;}
+.call-actions{position:absolute;bottom:60px;display:flex;gap:24px;align-items:center;}
+.call-btn{width:56px;height:56px;border-radius:50%;border:none;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:20px;color:#fff;}
+.call-btn.end{background:#e74c3c;width:64px;height:64px;}
+.call-btn.mute{background:#555;}
+.call-btn.cam{background:#555;}
+.call-btn.mute.active,.call-btn.cam.active{background:#e74c3c;}
+.call-btn.accept{background:#2ecc71;width:64px;height:64px;}
+.call-btn.reject{background:#e74c3c;width:64px;height:64px;}
+#localVideo{position:absolute;top:20px;right:20px;width:100px;height:140px;border-radius:12px;object-fit:cover;z-index:2;display:none;background:#000;}
+#remoteVideo{width:100%;height:100%;object-fit:cover;position:absolute;top:0;left:0;display:none;}
+.incoming-actions{display:flex;gap:40px;margin-top:40px;}
+@keyframes pulse{0%{transform:scale(1)}50%{transform:scale(1.1)}100%{transform:scale(1)}}
+.incoming-ring{animation:pulse 1s infinite;}
+.search-bar{padding:8px 16px;background:#fff;position:relative;}.search-bar input{width:100%;padding:8px 12px 8px 36px;border:none;border-radius:20px;background:#f0f2f5;font-size:14px;outline:none;-webkit-appearance:none;}.search-bar input:focus{background:#fff;box-shadow:0 0 0 2px var(--primary);}.search-bar i{position:absolute;left:28px;top:50%;transform:translateY(-50%);color:#65676B;font-size:14px;pointer-events:none;}
+.filter-chips{display:flex;gap:8px;padding:8px 16px;overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none;background:#fff;border-bottom:1px solid var(--border);}.filter-chips::-webkit-scrollbar{display:none;}.f-chip{flex-shrink:0;padding:6px 14px;border-radius:18px;background:#f0f2f5;font-size:13px;font-weight:600;color:#333;cursor:pointer;border:none;display:flex;align-items:center;gap:4px;white-space:nowrap;transition:all .2s;}.f-chip.active{background:#e7f3ff;color:var(--primary);}.f-chip .chip-dot{width:8px;height:8px;border-radius:50%;background:#22c55e;}
+.cat-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:200;align-items:flex-end;justify-content:center;}.cat-overlay.show{display:flex;}.cat-sheet{background:#fff;border-radius:16px 16px 0 0;width:100%;max-width:500px;max-height:75vh;overflow:hidden;display:flex;flex-direction:column;animation:slideUp .25s ease;}@keyframes slideUp{from{transform:translateY(100%)}to{transform:translateY(0)}}.cat-sheet-header{padding:12px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;}.cat-sheet-header h3{font-size:17px;font-weight:700;}.cat-sheet-close{background:none;border:none;font-size:20px;cursor:pointer;color:#65676B;padding:4px 8px;}.cat-list{overflow-y:auto;flex:1;padding:8px 0;}.cat-item{display:flex;align-items:center;gap:12px;padding:10px 16px;cursor:pointer;}.cat-item:active{background:#f0f2f5;}.cat-item .cat-icon{width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:18px;}.cat-item .cat-info{flex:1;}.cat-item .cat-name{font-size:15px;font-weight:600;}.cat-item .cat-count{font-size:12px;color:#65676B;}.cat-item .cat-check{color:var(--primary);font-size:18px;}.cat-item .cat-del{color:#999;font-size:14px;padding:4px 8px;background:none;border:none;cursor:pointer;}.cat-add-row{display:flex;gap:8px;padding:12px 16px;border-top:1px solid var(--border);align-items:center;}.cat-add-row input{flex:1;padding:8px 12px;border:1px solid var(--border);border-radius:20px;font-size:14px;outline:none;}.cat-add-row input:focus{border-color:var(--primary);}.cat-add-btn{padding:8px 16px;background:var(--primary);color:#fff;border:none;border-radius:20px;font-size:13px;font-weight:600;cursor:pointer;}
+.ctx-menu{display:none;position:fixed;z-index:201;background:#fff;border-radius:12px;box-shadow:0 4px 20px rgba(0,0,0,.15);min-width:200px;overflow:hidden;}.ctx-menu.show{display:block;}.ctx-item{padding:12px 16px;font-size:14px;cursor:pointer;display:flex;align-items:center;gap:8px;}.ctx-item:active{background:#f0f2f5;}.ctx-item i{width:20px;text-align:center;color:#65676B;}
+</style>
+
+<div id="callOverlay">
+  <video id="remoteVideo" autoplay playsinline></video>
+  <video id="localVideo" autoplay playsinline muted></video>
+  <audio id="remoteAudio" autoplay></audio>
+  <div class="call-info" style="z-index:3;position:relative;">
+    <div class="call-avatar" id="callAvatar">📞</div>
+    <div class="name" id="callPeerName">Đang gọi...</div>
+    <div class="status" id="callStatus">Đang kết nối...</div>
+  </div>
+  <div class="call-actions" style="z-index:3;">
+    <button class="call-btn mute" id="btnMute" onclick="toggleMute()" title="Tắt mic">🎤</button>
+    <button class="call-btn end" onclick="endCall()" title="Kết thúc">📞</button>
+    <button class="call-btn cam" id="btnCam" onclick="toggleCamera()" title="Tắt cam">📷</button>
+  </div>
+</div>
+
+<div id="incomingOverlay">
+  <div class="call-info incoming-ring">
+    <div class="call-avatar">📞</div>
+    <div class="name" id="incomingName">Người dùng</div>
+    <div class="status" id="incomingType">Cuộc gọi thoại</div>
+  </div>
+  <div class="incoming-actions">
+    <button class="call-btn reject" onclick="rejectIncoming()" title="Từ chối">❌</button>
+    <button class="call-btn accept" onclick="acceptIncoming()" title="Nghe">✅</button>
+  </div>
+</div>
+
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+<script src="js/call.js"></script>
+
+<div class="cat-overlay" id="catOverlay" onclick="if(event.target===this)closeCatManager()">
+<div class="cat-sheet">
+<div class="cat-sheet-header"><h3 id="catSheetTitle">Phân loại</h3><button class="cat-sheet-close" onclick="closeCatManager()">&times;</button></div>
+<div class="cat-list" id="catList"></div>
+<div class="cat-add-row"><input type="text" id="catNameInput" placeholder="Tên phân loại mới..." maxlength="30"><button class="cat-add-btn" onclick="saveCat()">Thêm</button></div>
+</div>
+</div>
+<div class="ctx-menu" id="ctxMenu">
+<div class="ctx-item" onclick="openAssignCat()"><i class="fas fa-tag"></i> Phân loại</div>
+<div class="ctx-item" onclick="markConvRead()"><i class="fas fa-check-double"></i> Đánh dấu đã đọc</div>
+</div><script>
+var curFilter="",curSearch="",searchTimer=null,catData=[],ctxConvId=0,ctxConvName="";
+function onSearchInput(v){clearTimeout(searchTimer);curSearch=v.trim();searchTimer=setTimeout(function(){applyFilter();},300);}
+function setFilter(el,f){document.querySelectorAll(".f-chip").forEach(function(c){c.classList.remove("active");});el.classList.add("active");curFilter=f;if(f==="strangers"){curTab="pending";loadConvs();return;}if(f===""){curTab="active";curSearch="";document.getElementById("searchInput").value="";}applyFilter();}
+function applyFilter(){if(curFilter===""&&curSearch===""){loadConvs();return;}var url="/api/messages-api.php?action=filter_conversations&filter="+encodeURIComponent(curFilter)+"&search="+encodeURIComponent(curSearch);if(curFilter==="category"){var ac=document.querySelector(".f-chip.active[data-cat-id]");if(ac)url+="&category_id="+ac.getAttribute("data-cat-id");}var list=document.getElementById("convList");list.innerHTML="<div class=empty><i class='fas fa-spinner fa-spin'></i></div>";fetch(url,{credentials:"include"}).then(function(r){return r.json();}).then(function(d){if(!d.success||!d.data.length){list.innerHTML="<div class=empty><i class='far fa-comment-dots'></i><p>Không tìm thấy</p></div>";return;}list.innerHTML=d.data.map(function(c){return renderConvItem(c);}).join("");attachLongPress();}).catch(function(){list.innerHTML="<div class=empty><p>Lỗi</p></div>";});}
+function renderConvItem(c){var av=c.other_avatar?"<img class=cv-av src='"+c.other_avatar+"' onerror='this.className=\"cv-av-ph\";this.innerHTML=\""+(c.other_name||"U").charAt(0)+"\"'>":"<div class=cv-av-ph>"+(c.other_name||"U").charAt(0)+"</div>";var dot=parseInt(c.other_online)?"<div class=cv-dot></div>":"";var ship=c.other_ship?"<span class=cv-ship style=color:"+(SC[c.other_ship]||"#999")+">"+esc(c.other_ship)+"</span>":"";var unread=parseInt(c.unread_count)>0;var cb="";if(c.category_id&&catData.length){for(var i=0;i<catData.length;i++){if(parseInt(catData[i].id)===parseInt(c.category_id)){cb=" <span style='font-size:10px;background:"+catData[i].color+";color:#fff;padding:1px 6px;border-radius:8px'>"+esc(catData[i].name)+"</span>";break;}}}return "<div class='conv-item"+(unread?" unread":"")+"' data-conv-id='"+c.id+"' onclick='openConv("+c.id+","+c.other_id+",\""+esc(c.other_name)+"\",\""+esc(c.other_avatar||"")+"\","+c.other_online+",\""+esc(c.other_ship||"")+"\")'>"+
+"<div class=cv-av-wrap>"+av+dot+"</div>"+
+"<div class=cv-info><div class=cv-name>"+esc(c.other_name)+" "+ship+cb+"</div><div class=cv-last>"+esc((c.last_message||"").substring(0,40))+"</div></div>"+
+"<div class=cv-right><div class=cv-time>"+ago(c.last_message_at)+"</div>"+(unread?"<div class=cv-unread></div>":"")+"</div></div>";}
+function loadCategories(){fetch("/api/messages-api.php?action=get_categories",{credentials:"include"}).then(function(r){return r.json();}).then(function(d){if(d.success)catData=d.data||[];renderCatChips();}).catch(function(){});}
+function renderCatChips(){var c=document.getElementById("filterChips");c.querySelectorAll(".f-chip[data-cat-id]").forEach(function(e){e.remove();});var ref=document.getElementById("chipCategories");catData.forEach(function(d){var b=document.createElement("button");b.className="f-chip";b.setAttribute("data-filter","category");b.setAttribute("data-cat-id",d.id);b.innerHTML=d.icon+" "+d.name+(parseInt(d.conv_count)>0?" <span style='font-size:11px;color:#65676B'>("+d.conv_count+")</span>":"");b.onclick=function(){document.querySelectorAll(".f-chip").forEach(function(x){x.classList.remove("active");});b.classList.add("active");curFilter="category";applyFilter();};c.insertBefore(b,ref);});}
+function openCatManager(){document.getElementById("catSheetTitle").textContent="Phân loại";document.getElementById("catOverlay").classList.add("show");renderCatList();}
+function closeCatManager(){document.getElementById("catOverlay").classList.remove("show");}
+function renderCatList(){var el=document.getElementById("catList");if(!catData.length){el.innerHTML="<div class=empty style='padding:30px'><p>Chưa có phân loại nào</p></div>";return;}el.innerHTML=catData.map(function(c){return "<div class=cat-item><div class=cat-icon style='background:"+c.color+"20;color:"+c.color+"'>"+c.icon+"</div><div class=cat-info><div class=cat-name>"+esc(c.name)+"</div><div class=cat-count>"+(parseInt(c.conv_count)||0)+" đoạn chat</div></div><button class=cat-del onclick='event.stopPropagation();deleteCat("+c.id+",\""+esc(c.name)+"\")' ><i class='fas fa-trash'></i></button></div>";}).join("");}
+function saveCat(){var inp=document.getElementById("catNameInput");var n=inp.value.trim();if(!n)return;inp.value="";var icons=["📁","📦","🏷","⭐","💼","🔔","👥","❤️","🚚","💰"];var colors=["#0084ff","#00b14f","#EE4D2D","#9b59b6","#e67e22","#e74c3c","#1abc9c","#f39c12","#3498db","#2c3e50"];fetch("/api/messages-api.php?action=save_category",{method:"POST",headers:{"Content-Type":"application/json"},credentials:"include",body:JSON.stringify({name:n,icon:icons[catData.length%icons.length],color:colors[catData.length%colors.length]})}).then(function(r){return r.json();}).then(function(d){if(d.success){loadCategories();setTimeout(renderCatList,500);}}).catch(function(){});}
+function deleteCat(id,name){if(!confirm("Xóa phân loại \""+name+"\"?"))return;fetch("/api/messages-api.php?action=delete_category",{method:"POST",headers:{"Content-Type":"application/json"},credentials:"include",body:JSON.stringify({id:id})}).then(function(r){return r.json();}).then(function(d){if(d.success){loadCategories();setTimeout(renderCatList,500);}}).catch(function(){});}
+function attachLongPress(){document.querySelectorAll(".conv-item[data-conv-id]").forEach(function(el){var tm=null;el.addEventListener("touchstart",function(e){tm=setTimeout(function(){e.preventDefault();ctxConvId=parseInt(el.getAttribute("data-conv-id"));ctxConvName=el.querySelector(".cv-name")?el.querySelector(".cv-name").textContent:"";showCtxMenu(e.touches[0].clientX,e.touches[0].clientY);},500);},{passive:false});el.addEventListener("touchend",function(){clearTimeout(tm);});el.addEventListener("touchmove",function(){clearTimeout(tm);});});}
+function showCtxMenu(x,y){var m=document.getElementById("ctxMenu");m.style.left=Math.min(x,window.innerWidth-220)+"px";m.style.top=Math.min(y,window.innerHeight-100)+"px";m.classList.add("show");setTimeout(function(){document.addEventListener("click",hideCtxMenu,{once:true});},10);}
+function hideCtxMenu(){document.getElementById("ctxMenu").classList.remove("show");}
+function openAssignCat(){hideCtxMenu();if(!ctxConvId)return;document.getElementById("catSheetTitle").textContent="Phân loại: "+ctxConvName.substring(0,20);document.getElementById("catOverlay").classList.add("show");fetch("/api/messages-api.php?action=get_chat_category&conversation_id="+ctxConvId,{credentials:"include"}).then(function(r){return r.json();}).then(function(d){var cc=d.success?parseInt(d.data.category_id):0;var el=document.getElementById("catList");var h="<div class=cat-item onclick='assignCat(0)'><div class=cat-icon style='background:#f0f2f5'>✕</div><div class=cat-info><div class=cat-name>Không phân loại</div></div>"+(cc===0?"<div class=cat-check><i class='fas fa-check-circle'></i></div>":"")+"</div>";h+=catData.map(function(c){var s=parseInt(c.id)===cc;return "<div class=cat-item onclick='assignCat("+c.id+")'><div class=cat-icon style='background:"+c.color+"20;color:"+c.color+"'>"+c.icon+"</div><div class=cat-info><div class=cat-name>"+esc(c.name)+"</div></div>"+(s?"<div class=cat-check><i class='fas fa-check-circle'></i></div>":"")+"</div>";}).join("");el.innerHTML=h;}).catch(function(){});}
+function assignCat(catId){fetch("/api/messages-api.php?action=set_chat_category",{method:"POST",headers:{"Content-Type":"application/json"},credentials:"include",body:JSON.stringify({conversation_id:ctxConvId,category_id:catId})}).then(function(r){return r.json();}).then(function(d){if(d.success){closeCatManager();loadCategories();if(curFilter)applyFilter();else loadConvs();}}).catch(function(){});}
+function markConvRead(){hideCtxMenu();}
+function fixListPadding(){var tb=document.getElementById("topBar");if(tb){var h=tb.offsetHeight;var ob=document.getElementById("onlineBarMargin");if(ob)ob.style.marginTop=h+"px";document.querySelector(".list-view").style.paddingTop=h+"px";}}
+loadCategories();setTimeout(fixListPadding,100);setTimeout(function(){attachLongPress();},1000);window.addEventListener("resize",fixListPadding);
+</script><script>
+function toggleAttach(){var m=document.getElementById("attachMenu");m.classList.toggle("show");if(m.classList.contains("show")){document.getElementById("btnAttach").innerHTML="<i class='fas fa-xmark'></i>";}else{document.getElementById("btnAttach").innerHTML="<i class='fas fa-circle-plus'></i>";}}
+function closeAttach(){document.getElementById("attachMenu").classList.remove("show");document.getElementById("btnAttach").innerHTML="<i class='fas fa-circle-plus'></i>";}
+function onMsgInput(){var inp=document.getElementById("msgInput");var btn=document.getElementById("btnSendLike");if(inp.value.trim()){btn.innerHTML="<i class='fas fa-paper-plane ib-send'></i>";btn.onclick=function(){sendMsg();};}else{btn.innerHTML="<i class='fas fa-thumbs-up ib-like'></i>";btn.onclick=function(){sendLikeOrMsg();};}}
+function sendLikeOrMsg(){var inp=document.getElementById("msgInput");if(inp.value.trim()){sendMsg();}else{inp.value="👍";sendMsg();}}
+function pickFile(){closeAttach();document.getElementById("fileInput").click();}
+function pickImage(){closeAttach();document.getElementById("imgInput").click();}
+function handleFileSelect(input){if(!input.files||!input.files[0])return;var file=input.files[0];var fd=new FormData();fd.append("file",file);fd.append("to_user_id",curOtherId);fd.append("type",file.type.startsWith("image/")?"image":(file.type.startsWith("video/")?"video":"file"));var c=document.getElementById("chMsgs");var preview="";if(file.type.startsWith("image/")){preview="<img class=msg-img src='"+URL.createObjectURL(file)+"' style='opacity:.6'>";}else if(file.type.startsWith("video/")){preview="<video class=msg-img style='opacity:.6;max-width:240px;border-radius:12px' controls><source src='"+URL.createObjectURL(file)+"'>Video</video>";}else{preview="<div class=msg-file style='opacity:.6'><i class='fas fa-file-alt'></i><span>"+file.name+"</span></div>";}c.insertAdjacentHTML("beforeend","<div class='msg-row mine'>"+preview+"</div>");c.scrollTop=c.scrollHeight;fetch("/api/messages-api.php?action=upload_message",{method:"POST",credentials:"include",body:fd}).then(function(r){return r.json();}).then(function(d){if(d.success){if(!curConvId){curConvId=d.data.conversation_id;startPoll();}loadMsgs();}}).catch(function(){});input.value="";}
+function shareLocation(){closeAttach();if(!navigator.geolocation){alert("Trình duyệt không hỗ trợ vị trí");return;}navigator.geolocation.getCurrentPosition(function(pos){var fd=new FormData();fd.append("to_user_id",curOtherId);fd.append("type","location");fd.append("lat",pos.coords.latitude);fd.append("lng",pos.coords.longitude);var c=document.getElementById("chMsgs");c.insertAdjacentHTML("beforeend","<div class='msg-row mine'><div class=msg-bubble>📍 Đang gửi vị trí...</div></div>");c.scrollTop=c.scrollHeight;fetch("/api/messages-api.php?action=upload_message",{method:"POST",credentials:"include",body:fd}).then(function(r){return r.json();}).then(function(d){if(d.success){if(!curConvId){curConvId=d.data.conversation_id;startPoll();}loadMsgs();}}).catch(function(){});},function(){alert("Không thể lấy vị trí. Vui lòng cho phép truy cập GPS.");},{enableHighAccuracy:true,timeout:10000});}
+function insertEmoji(){var inp=document.getElementById("msgInput");inp.value+="😊";inp.focus();onMsgInput();}
+function viewImg(src){var ov=document.getElementById("imgOverlay");document.getElementById("imgOverlayImg").src=src;ov.classList.add("show");}
+</script><script src="js/post-modal.js"></script>
+</body></html>

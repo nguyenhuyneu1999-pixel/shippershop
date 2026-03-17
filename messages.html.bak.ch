@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="theme-color" content="#ffffff">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Tin nhắn - ShipperShop</title>
+<link rel="stylesheet" href="css/style.css">
+<link rel="stylesheet" href="mobile.css">
+<link rel="preload" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+<noscript><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"></noscript>
+<style>
+:root{--primary:#EE4D2D;--bg:#fff;--border:#e4e6eb;--text:#1C1C1C;--muted:#65676B;}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{background:var(--bg);font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;color:var(--text);height:100vh;overflow:hidden;}
+.msg-header{padding:12px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:12px;}
+.msg-header h1{font-size:24px;font-weight:800;flex:1;}
+.msg-header-btn{width:36px;height:36px;border-radius:50%;background:#f0f2f5;border:none;font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;color:#333;}
+.online-bar{display:flex;gap:12px;padding:12px 16px;overflow-x:auto;border-bottom:1px solid var(--border);-webkit-overflow-scrolling:touch;}
+.online-bar::-webkit-scrollbar{display:none;}
+.online-av{position:relative;flex-shrink:0;cursor:pointer;text-align:center;}
+.online-av img,.online-av>div:first-child{width:52px;height:52px;border-radius:50%;object-fit:cover;}
+.online-av .dot{position:absolute;bottom:14px;right:0;width:12px;height:12px;border-radius:50%;background:#22c55e;border:2px solid #fff;}
+.online-av span{display:block;font-size:11px;margin-top:4px;max-width:60px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.conv-list{overflow-y:auto;height:calc(100vh - 180px);}
+.conv-item{display:flex;align-items:center;gap:12px;padding:10px 16px;cursor:pointer;}
+.conv-item:hover{background:#f0f2f5;}
+.conv-item.unread{background:#FFF0EB;}
+.conv-av{width:52px;height:52px;border-radius:50%;object-fit:cover;flex-shrink:0;}
+.conv-av-wrap{position:relative;flex-shrink:0;}
+.conv-online{position:absolute;bottom:2px;right:2px;width:12px;height:12px;border-radius:50%;background:#22c55e;border:2px solid #fff;}
+.conv-info{flex:1;min-width:0;}
+.conv-name{font-size:15px;font-weight:600;margin-bottom:2px;}
+.conv-last{font-size:13px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.conv-item.unread .conv-name{font-weight:800;}
+.conv-item.unread .conv-last{color:var(--text);font-weight:600;}
+.conv-time{font-size:11px;color:var(--muted);flex-shrink:0;}
+.conv-unread-dot{width:10px;height:10px;border-radius:50%;background:var(--primary);flex-shrink:0;}
+.chat-view{display:none;height:100vh;flex-direction:column;}
+.chat-view.active{display:flex;}
+.conv-list-view{display:block;}
+.conv-list-view.hidden{display:none;}
+.chat-header{padding:10px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px;background:#fff;flex-shrink:0;}
+.chat-back{background:none;border:none;font-size:20px;cursor:pointer;color:var(--primary);padding:4px;}
+.chat-av{width:36px;height:36px;border-radius:50%;object-fit:cover;flex-shrink:0;}
+.chat-name{font-weight:700;font-size:15px;}
+.chat-status{font-size:11px;color:#22c55e;}
+.chat-messages{flex:1;overflow-y:auto;padding:16px;display:flex;flex-direction:column;gap:4px;-webkit-overflow-scrolling:touch;}
+.msg-row{display:flex;align-items:flex-end;gap:6px;max-width:80%;}
+.msg-row.mine{margin-left:auto;flex-direction:row-reverse;}
+.msg-av{width:28px;height:28px;border-radius:50%;object-fit:cover;flex-shrink:0;}
+.msg-bubble{padding:8px 14px;border-radius:18px;font-size:14px;line-height:1.4;max-width:100%;word-break:break-word;}
+.msg-row.other .msg-bubble{background:#f0f2f5;color:var(--text);border-bottom-left-radius:4px;}
+.msg-row.mine .msg-bubble{background:var(--primary);color:#fff;border-bottom-right-radius:4px;}
+.msg-time{font-size:10px;color:var(--muted);text-align:center;padding:8px 0;}
+.chat-input{padding:8px 12px;border-top:1px solid var(--border);display:flex;gap:8px;align-items:center;background:#fff;flex-shrink:0;padding-bottom:max(8px,env(safe-area-inset-bottom));}
+.chat-input input{flex:1;padding:10px 16px;border:1px solid var(--border);border-radius:24px;font-size:14px;outline:none;background:#f0f2f5;}
+.chat-input input:focus{border-color:var(--primary);background:#fff;}
+.send-btn{width:40px;height:40px;border-radius:50%;background:var(--primary);color:#fff;border:none;font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.empty{text-align:center;padding:60px 20px;color:var(--muted);}
+.empty i{font-size:48px;display:block;margin-bottom:12px;color:#ddd;}
+</style>
+<link rel="manifest" href="/manifest.json"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="default"><meta name="apple-mobile-web-app-title" content="ShipperShop"><link rel="apple-touch-icon" href="/icons/icon-192.png"></head>
+<body>
+<div class="conv-list-view" id="convListView">
+<div class="msg-header"><button class="msg-header-btn" onclick="history.back()"><i class="fas fa-arrow-left"></i></button><h1>Đoạn chat</h1><button class="msg-header-btn" onclick="location='people.html'"><i class="fas fa-users"></i></button></div>
+<div class="online-bar" id="onlineBar"></div>
+<div class="conv-list" id="convList"><div class="empty"><i class="fas fa-spinner fa-spin"></i><p>Đang tải...</p></div></div>
+</div>
+<div class="chat-view" id="chatView">
+<div class="chat-header"><button class="chat-back" onclick="backToList()"><i class="fas fa-arrow-left"></i></button><img class="chat-av" id="chatAvatar" src="" onerror="this.style.display='none'"><div style="flex:1"><div class="chat-name" id="chatName">...</div><div style="display:flex;align-items:center;gap:6px"><span class="chat-status" id="chatStatus"></span><span id="chatShip" style="font-size:11px;font-weight:700"></span></div></div><div style="display:flex;gap:8px"><button style="width:32px;height:32px;border-radius:50%;background:#f0f2f5;border:none;font-size:14px;cursor:pointer;color:#333"><i class="fas fa-phone"></i></button><button style="width:32px;height:32px;border-radius:50%;background:#f0f2f5;border:none;font-size:14px;cursor:pointer;color:#333"><i class="fas fa-video"></i></button><button style="width:32px;height:32px;border-radius:50%;background:#f0f2f5;border:none;font-size:14px;cursor:pointer;color:#333"><i class="fas fa-circle-info"></i></button></div></div>
+<div class="chat-messages" id="chatMessages"></div>
+<div class="chat-input"><input type="text" id="msgInput" placeholder="Aa" onkeydown="if(event.key==='Enter')sendMsg()"><button class="send-btn" onclick="sendMsg()"><i class="fas fa-paper-plane"></i></button></div>
+</div>
+<script src="js/reddit-mkpost.js"></script>
+<script>
+var CU=JSON.parse(localStorage.getItem('user')||'null');if(!CU)location.href='login.html';
+var currentConvId=null,currentOtherId=null,pollTimer=null;
+async function loadConversations(){try{var r=await fetch('/api/messages-api.php?action=conversations',{credentials:'include'});var d=await r.json();if(d.success)renderConvList(d.data);}catch(e){document.getElementById('convList').innerHTML='<div class="empty"><i class="fas fa-wifi"></i><p>Lỗi kết nối</p></div>';}}
+function renderConvList(convs){var list=document.getElementById('convList');if(!convs.length){list.innerHTML='<div class="empty"><i class="fas fa-comment-dots"></i><p>Chưa có tin nhắn</p><p style="font-size:13px;margin-top:4px">Tìm bạn bè để trò chuyện!</p></div>';return;}
+list.innerHTML=convs.map(function(c){var av=c.other_avatar?'<img src="'+c.other_avatar+'" class="conv-av">':'<div class="conv-av" style="background:var(--primary);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:18px">'+((c.other_name||'U').charAt(0))+'</div>';var online=c.other_online?'<div class="conv-online"></div>':'';var unread=c.unread_count>0;
+return '<div class="conv-item'+(unread?' unread':'')+'" onclick="openChat('+c.id+','+c.other_id+',\''+esc(c.other_name)+'\',\''+esc(c.other_avatar||'')+'\','+(c.other_online?'true':'false')+')"><div class="conv-av-wrap">'+av+online+'</div><div class="conv-info"><div class="conv-name">'+esc(c.other_name)+'</div><div class="conv-last">'+esc((c.last_message||'').substring(0,50))+'</div></div><div style="text-align:right;flex-shrink:0"><div class="conv-time">'+ago(c.last_message_at)+'</div>'+(unread?'<div class="conv-unread-dot" style="margin-left:auto;margin-top:4px"></div>':'')+'</div></div>';}).join('');}
+async function loadOnlineFriends(){try{var r=await fetch('/api/messages-api.php?action=online_friends',{credentials:'include'});var d=await r.json();if(d.success&&d.data.length){document.getElementById('onlineBar').innerHTML=d.data.map(function(f){var av=f.avatar?'<img src="'+f.avatar+'">':'<div style="background:var(--primary);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:16px;width:52px;height:52px;border-radius:50%">'+((f.fullname||'U').charAt(0))+'</div>';return '<div class="online-av" onclick="startChat('+f.id+',\''+esc(f.fullname)+'\',\''+esc(f.avatar||'')+'\')">'+av+(f.is_online?'<div class="dot"></div>':'')+'<span>'+esc((f.fullname||'').split(' ').pop())+'</span></div>';}).join('');}else document.getElementById('onlineBar').style.display='none';}catch(e){}}
+function openChat(convId,otherId,name,avatar,online){currentConvId=convId;currentOtherId=otherId;document.getElementById('convListView').classList.add('hidden');document.getElementById('chatView').classList.add('active');document.getElementById('chatName').textContent=name;document.getElementById('chatStatus').textContent=online?'Đang hoạt động':'';if(avatar)document.getElementById('chatAvatar').src=avatar;loadMessages();startPoll();setTimeout(function(){document.getElementById('msgInput').focus();},200);}
+function startChat(userId,name,avatar){openChat(null,userId,name,avatar,true);}
+function backToList(){document.getElementById('convListView').classList.remove('hidden');document.getElementById('chatView').classList.remove('active');currentConvId=null;if(pollTimer)clearInterval(pollTimer);loadConversations();
+// Auto-open chat from user.html?user=X
+var autoUser=new URLSearchParams(location.search).get("user");
+if(autoUser){
+  fetch("/api/user-page.php?action=profile&id="+autoUser,{credentials:"include"}).then(function(r){return r.json();}).then(function(d){
+    if(d.success&&d.data){
+      var u=d.data;
+      startChatWithInfo(parseInt(autoUser),u.fullname,u.avatar||"",u.shipping_company||"",u.is_online);
+    }else{startChat(parseInt(autoUser),"Người dùng","");}
+  }).catch(function(){startChat(parseInt(autoUser),"Người dùng","");});
+}}
+async function loadMessages(){var c=document.getElementById('chatMessages');if(!currentConvId){c.innerHTML='<div class="empty"><i class="fas fa-hand-wave"></i><p>Gửi lời chào đầu tiên!</p></div>';return;}
+try{var r=await fetch('/api/messages-api.php?action=messages&conversation_id='+currentConvId,{credentials:'include'});var d=await r.json();if(d.success){if(!d.data.length){c.innerHTML='<div class="empty"><i class="fas fa-hand-wave"></i><p>Gửi lời chào!</p></div>';return;}var html='';var lastDate='';d.data.forEach(function(m){var date=new Date(m.created_at).toLocaleDateString('vi-VN');if(date!==lastDate){html+='<div class="msg-time">'+date+'</div>';lastDate=date;}var mine=m.sender_id==CU.id;var av=m.sender_avatar?'<img src="'+m.sender_avatar+'" class="msg-av">':'<div class="msg-av" style="background:#ddd;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700">'+((m.sender_name||'U').charAt(0))+'</div>';html+='<div class="msg-row '+(mine?'mine':'other')+'">'+(mine?'':av)+'<div class="msg-bubble">'+esc(m.content)+'</div></div>';});c.innerHTML=html;c.scrollTop=c.scrollHeight;}}catch(e){c.innerHTML='<div class="empty"><p>Lỗi tải tin nhắn</p></div>';}}
+async function sendMsg(){var input=document.getElementById('msgInput');var content=input.value.trim();if(!content)return;input.value='';var c=document.getElementById('chatMessages');var emptyEl=c.querySelector('.empty');if(emptyEl)emptyEl.remove();c.insertAdjacentHTML('beforeend','<div class="msg-row mine"><div class="msg-bubble">'+esc(content)+'</div></div>');c.scrollTop=c.scrollHeight;
+try{var r=await fetch('/api/messages-api.php?action=send',{method:'POST',headers:{'Content-Type':'application/json'},credentials:'include',body:JSON.stringify({to_user_id:currentOtherId,content:content})});var d=await r.json();if(d.success&&!currentConvId){currentConvId=d.data.conversation_id;startPoll();}}catch(e){}}
+function startPoll(){if(pollTimer)clearInterval(pollTimer);pollTimer=setInterval(function(){if(currentConvId)loadMessages();},5000);}
+function esc(t){if(!t)return'';return String(t).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');}
+function ago(dt){if(!dt)return'';var s=Math.floor((new Date()-new Date(dt.replace(' ','T')))/1000);if(s<60)return'Vừa xong';if(s<3600)return Math.floor(s/60)+' ph';if(s<86400)return Math.floor(s/3600)+' giờ';return Math.floor(s/86400)+' ngày';}
+var params=new URLSearchParams(location.search);var directUser=params.get('user');
+loadConversations();
+// Auto-open chat from user.html?user=X
+var autoUser=new URLSearchParams(location.search).get("user");
+if(autoUser){
+  fetch("/api/user-page.php?action=profile&id="+autoUser,{credentials:"include"}).then(function(r){return r.json();}).then(function(d){
+    if(d.success&&d.data){
+      var u=d.data;
+      startChatWithInfo(parseInt(autoUser),u.fullname,u.avatar||"",u.shipping_company||"",u.is_online);
+    }else{startChat(parseInt(autoUser),"Người dùng","");}
+  }).catch(function(){startChat(parseInt(autoUser),"Người dùng","");});
+}loadOnlineFriends();
+if(directUser){fetch('/api/user-page.php?id='+directUser,{credentials:'include'}).then(function(r){return r.json()}).then(function(d){if(d.success)startChat(parseInt(directUser),d.data.fullname,d.data.avatar);});}
+</script>
+<script>if("serviceWorker" in navigator)navigator.serviceWorker.register("/sw.js");</script></body></html>

@@ -1,0 +1,25 @@
+===NAV-COMMUNITY===
+6:<title>Cộng đồng - ShipperShop</title>
+218:    <h3><i class="fas fa-users"></i> Cộng đồng ShipperShop</h3>
+493:    <a href="marketplace.html"      class="mnav-item" data-page="marketplace.html">
+502:      <i class="fas fa-users"></i><span>Cộng đồng</span>
+===NAV-PROFILE===
+747:      <i class="fas fa-users"></i><span>Cộng đồng</span>
+===MK-ZALO===
+396:            html += '<a href="https://zalo.me/' + (item.phone||'').replace(/^0/, '84') + '" target="_blank" style="display:block;text-align:center;background:#0068ff;color:#fff;padding:12px;border-radius:10px;font-weight:700;margin-top:8px"><i class="fas fa-comment-dots"></i> Nhắn Zalo</a>';
+===PROFILE-SHOWTAB===
+306:                    <li><a href="#" class="active" onclick="showTab('overview',this);return false">
+309:                    <li><a href="#" onclick="showTab('profile',this);return false">
+312:                    <li><a href="#" onclick="showTab('orders',this);return false">
+318:                    <li><a href="#" onclick="showTab('password',this);return false">
+321:                    <li><a href="#" onclick="showTab('activity',this);return false">
+543:        function showTab(tabName, clickedEl) {
+===INDEX-EXISTS===
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+===MAP-EXISTS===
+-rw-rw-r-- 1 nhshiw2j nhshiw2j 15295 Feb 27 00:32 /home/nhshiw2j/public_html/map.html
+===MESSAGES-EXISTS===

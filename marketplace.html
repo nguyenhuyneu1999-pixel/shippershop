@@ -1,0 +1,457 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chợ ShipperShop - Mua sắm đồ cũ</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        :root { --primary: #d32f2f; --bg: #f0f2f5; --card: #fff; --text: #1c1e21; --text2: #65676b; --radius: 12px; }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: var(--bg); color: var(--text); padding-bottom: 70px; -webkit-tap-highlight-color: transparent; }
+        a { text-decoration: none; color: inherit; }
+
+        /* HEADER */
+        .mk-header { position: sticky; top: 0; z-index: 100; background: var(--card); padding: 10px 12px; box-shadow: 0 1px 3px rgba(0,0,0,.1); display: flex; align-items: center; gap: 10px; }
+        .mk-header h1 { font-size: 20px; font-weight: 800; white-space: nowrap; }
+        .mk-header h1 i { color: var(--primary); }
+        .mk-search { flex: 1; position: relative; }
+        .mk-search input { width: 100%; padding: 8px 12px 8px 36px; border: none; background: var(--bg); border-radius: 20px; font-size: 14px; outline: none; }
+        .mk-search i { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: var(--text2); font-size: 14px; }
+        .mk-header-btn { width: 36px; height: 36px; border-radius: 50%; background: var(--bg); display: flex; align-items: center; justify-content: center; border: none; font-size: 16px; color: var(--text); cursor: pointer; }
+
+        /* CATEGORIES */
+        .mk-cats { display: flex; gap: 8px; padding: 12px; overflow-x: auto; -webkit-overflow-scrolling: touch; scrollbar-width: none; background: var(--card); border-bottom: 1px solid #e4e6eb; }
+        .mk-cats::-webkit-scrollbar { display: none; }
+        .mk-cat { flex-shrink: 0; display: flex; flex-direction: column; align-items: center; gap: 4px; padding: 8px 14px; border-radius: 10px; background: var(--bg); cursor: pointer; transition: all .2s; font-size: 11px; color: var(--text2); min-width: 72px; text-align: center; border: 2px solid transparent; }
+        .mk-cat.active { background: #fce4ec; color: var(--primary); border-color: var(--primary); font-weight: 600; }
+        .mk-cat i { font-size: 20px; }
+
+        /* GRID */
+        .mk-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; padding: 8px; }
+        .mk-item { background: var(--card); border-radius: var(--radius); overflow: hidden; cursor: pointer; transition: transform .15s; }
+        .mk-item:active { transform: scale(.97); }
+        .mk-item-img { width: 100%; aspect-ratio: 1; object-fit: cover; background: #e4e6eb; display: block; }
+        .mk-item-info { padding: 8px 10px 12px; }
+        .mk-item-price { font-size: 15px; font-weight: 700; color: var(--text); }
+        .mk-item-title { font-size: 13px; color: var(--text2); margin-top: 2px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        .mk-item-loc { font-size: 11px; color: var(--text2); margin-top: 4px; display: flex; align-items: center; gap: 4px; }
+
+        /* FAB */
+        .mk-fab { position: fixed; bottom: 80px; right: 16px; z-index: 90; width: 52px; height: 52px; border-radius: 50%; background: var(--primary); color: #fff; border: none; font-size: 24px; box-shadow: 0 4px 12px rgba(211,47,47,.4); cursor: pointer; display: flex; align-items: center; justify-content: center; }
+
+        /* MODAL */
+        .mk-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,.5); z-index: 200; }
+        .mk-overlay.active { display: block; }
+        .mk-modal { position: fixed; bottom: 0; left: 0; right: 0; z-index: 201; background: var(--card); border-radius: 16px 16px 0 0; max-height: 92vh; display: none; flex-direction: column; }
+        .mk-modal.active { display: flex; }
+        .mk-modal-header { display: flex; align-items: center; justify-content: space-between; padding: 14px 16px; border-bottom: 1px solid #e4e6eb; flex-shrink: 0; }
+        .mk-modal-header h2 { font-size: 17px; font-weight: 700; }
+        .mk-modal-close { width: 32px; height: 32px; border-radius: 50%; background: var(--bg); border: none; font-size: 16px; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+        .mk-modal-body { flex: 1; overflow-y: auto; padding: 16px; -webkit-overflow-scrolling: touch; }
+        .mk-modal-footer { padding: 12px 16px; border-top: 1px solid #e4e6eb; flex-shrink: 0; }
+
+        /* FORM */
+        .mk-field { margin-bottom: 16px; }
+        .mk-field label { display: block; font-size: 13px; font-weight: 600; color: var(--text2); margin-bottom: 6px; }
+        .mk-field input, .mk-field textarea, .mk-field select { width: 100%; padding: 10px 14px; border: 1.5px solid #ddd; border-radius: 10px; font-size: 15px; outline: none; transition: border .2s; background: var(--card); }
+        .mk-field input:focus, .mk-field textarea:focus, .mk-field select:focus { border-color: var(--primary); }
+        .mk-field textarea { resize: vertical; min-height: 80px; }
+        .mk-btn { display: block; width: 100%; padding: 12px; border: none; border-radius: 10px; font-size: 15px; font-weight: 700; cursor: pointer; text-align: center; }
+        .mk-btn-primary { background: var(--primary); color: #fff; }
+        .mk-btn-primary:disabled { opacity: .5; }
+
+        /* IMAGE UPLOAD */
+        .mk-images { display: flex; gap: 8px; flex-wrap: wrap; }
+        .mk-img-add { width: 80px; height: 80px; border: 2px dashed #ccc; border-radius: 10px; display: flex; flex-direction: column; align-items: center; justify-content: center; cursor: pointer; color: var(--text2); font-size: 11px; gap: 2px; }
+        .mk-img-add i { font-size: 20px; }
+        .mk-img-preview { width: 80px; height: 80px; border-radius: 10px; object-fit: cover; position: relative; }
+        .mk-img-preview img { width: 100%; height: 100%; object-fit: cover; border-radius: 10px; }
+        .mk-img-del { position: absolute; top: -6px; right: -6px; width: 22px; height: 22px; border-radius: 50%; background: #333; color: #fff; border: none; font-size: 12px; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+
+        /* DETAIL */
+        .mk-detail-imgs { width: 100%; aspect-ratio: 1; position: relative; overflow: hidden; background: #000; }
+        .mk-detail-imgs img { width: 100%; height: 100%; object-fit: contain; }
+        .mk-detail-dots { position: absolute; bottom: 10px; left: 50%; transform: translateX(-50%); display: flex; gap: 6px; }
+        .mk-detail-dots span { width: 8px; height: 8px; border-radius: 50%; background: rgba(255,255,255,.5); }
+        .mk-detail-dots span.active { background: #fff; }
+        .mk-seller { display: flex; align-items: center; gap: 10px; padding: 14px 0; border-top: 1px solid #e4e6eb; margin-top: 14px; }
+        .mk-seller-avatar { width: 40px; height: 40px; border-radius: 50%; background: var(--primary); color: #fff; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 16px; overflow: hidden; }
+        .mk-seller-avatar img { width: 100%; height: 100%; object-fit: cover; }
+        .mk-cond { display: inline-block; padding: 4px 10px; border-radius: 6px; background: var(--bg); font-size: 12px; color: var(--text2); margin-top: 6px; }
+
+        /* EMPTY */
+        .mk-empty { text-align: center; padding: 60px 20px; color: var(--text2); }
+        .mk-empty i { font-size: 56px; color: #ddd; margin-bottom: 12px; display: block; }
+
+        /* BOTTOM NAV */
+        .mk-bnav { position: fixed; bottom: 0; left: 0; right: 0; z-index: 100; background: var(--card); display: flex; border-top: 1px solid #e4e6eb; padding: 6px 0 max(6px, env(safe-area-inset-bottom)); }
+        .mk-bnav a { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 2px; font-size: 10px; color: var(--text2); padding: 4px 0; position: relative; }
+        .mk-bnav a.active { color: var(--primary); }
+        .mk-bnav a i { font-size: 20px; }
+        .mk-bnav .fab-space{position:relative;width:60px;display:flex;align-items:center;justify-content:center;}
+        .mk-fab-nav{width:46px;height:46px;border-radius:50%;background:#EE4D2D;color:#fff;border:none;display:flex;align-items:center;justify-content:center;font-size:18px;position:absolute;top:50%;left:50%;transform:translate(-50%,-65%);box-shadow:0 2px 8px rgba(0,0,0,.15);cursor:pointer;z-index:10;}
+        .mk-badge { position: absolute; top: 0; right: calc(50% - 18px); background: var(--primary); color: #fff; font-size: 10px; padding: 1px 5px; border-radius: 8px; font-weight: 700; }
+
+        @keyframes spin { to { transform: rotate(360deg); } }
+        .mk-loading { width: 32px; height: 32px; border: 3px solid #e4e6eb; border-top-color: var(--primary); border-radius: 50%; animation: spin .8s linear infinite; margin: 40px auto; }
+    .mk-fab{display:none!important;}.mk-bottom-nav a.active,.mk-bottom-nav a.active i,.mk-bottom-nav a.active span{color:#EE4D2D!important;} .mk-bottom-nav a{transition:none!important;}.mk-bottom-nav{position:fixed!important;bottom:0!important;left:0!important;right:0!important;}.mk-bottom-nav a[href*="marketplace"]{color:#EE4D2D!important;}.mk-bottom-nav a[href*="marketplace"] i{color:#EE4D2D!important;}.mk-bottom-nav a[href*="marketplace"] span{color:#EE4D2D!important;}</style>
+<link rel="manifest" href="/manifest.json"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="default"><meta name="apple-mobile-web-app-title" content="ShipperShop"><link rel="apple-touch-icon" href="/icons/icon-192.png"></head>
+<body>
+
+<!-- HEADER -->
+<div class="mk-header">
+    <h1><i class="fas fa-store"></i> Chợ</h1>
+    <div class="mk-search">
+        <i class="fas fa-search"></i>
+        <input type="text" id="mkSearch" placeholder="Tìm kiếm trên Chợ" oninput="debounceSearch()">
+    </div>
+    <a href="cart.html" class="mk-header-btn" style="position:relative;text-decoration:none"><i class="fas fa-shopping-cart"></i><span id="mkCartBadge" style="position:absolute;top:-2px;right:-2px;background:#EE4D2D;color:#fff;font-size:9px;min-width:14px;height:14px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700"></span></a>
+</div>
+
+<!-- CATEGORIES -->
+<div class="mk-cats" id="mkCats">
+    <div class="mk-cat active" onclick="filterCat('',this)"><i class="fas fa-fire"></i>Tất cả</div>
+    <div class="mk-cat" onclick="filterCat('xe-co',this)"><i class="fas fa-motorcycle"></i>Xe cộ</div>
+    <div class="mk-cat" onclick="filterCat('dien-thoai',this)"><i class="fas fa-mobile-alt"></i>Điện thoại</div>
+    <div class="mk-cat" onclick="filterCat('dien-tu',this)"><i class="fas fa-laptop"></i>Đồ điện tử</div>
+    <div class="mk-cat" onclick="filterCat('thoi-trang-nu',this)"><i class="fas fa-female"></i>Thời trang nữ</div>
+    <div class="mk-cat" onclick="filterCat('thoi-trang-nam',this)"><i class="fas fa-male"></i>Thời trang nam</div>
+    <div class="mk-cat" onclick="filterCat('noi-that',this)"><i class="fas fa-couch"></i>Nội thất</div>
+    <div class="mk-cat" onclick="filterCat('gia-dung',this)"><i class="fas fa-blender"></i>Gia dụng</div>
+    <div class="mk-cat" onclick="filterCat('the-thao',this)"><i class="fas fa-futbol"></i>Thể thao</div>
+    <div class="mk-cat" onclick="filterCat('sach',this)"><i class="fas fa-book"></i>Sách</div>
+    <div class="mk-cat" onclick="filterCat('nha-dat',this)"><i class="fas fa-house"></i>Nhà đất</div>
+    <div class="mk-cat" onclick="filterCat('khac',this)"><i class="fas fa-ellipsis-h"></i>Khác</div>
+</div>
+
+<!-- LISTING GRID -->
+<div class="mk-grid" id="mkGrid"></div>
+<div id="mkMore" style="text-align:center;padding:16px;display:none">
+    <button class="mk-btn" style="max-width:200px;margin:0 auto;background:var(--bg);color:var(--text)" onclick="loadMore()">Xem thêm</button>
+</div>
+
+<!-- FAB CREATE -->
+<button class="mk-fab" onclick="if(typeof openSPM==='function'){openSPM();}else{openCreate();}"><i class="fas fa-camera"></i></button>
+
+<!-- CREATE MODAL -->
+<div class="mk-overlay" id="createOverlay" onclick="closeCreate()"></div>
+<div class="mk-modal" id="createModal">
+    <div class="mk-modal-header">
+        <h2>Đăng tin bán</h2>
+        <button class="mk-modal-close" onclick="closeCreate()"><i class="fas fa-times"></i></button>
+    </div>
+    <div class="mk-modal-body">
+        <div class="mk-field">
+            <label>Ảnh sản phẩm (tối đa 10)</label>
+            <div class="mk-images" id="imgPreviews">
+                <label class="mk-img-add" id="imgAddBtn">
+                    <i class="fas fa-camera"></i>
+                    <span>Thêm ảnh</span>
+                    <input type="file" accept="image/*" multiple style="display:none" onchange="handleImgUpload(this)">
+                </label>
+            </div>
+        </div>
+        <div class="mk-field">
+            <label>Tiêu đề *</label>
+            <input type="text" id="cTitle" placeholder="VD: iPhone 14 Pro Max 256GB" maxlength="200">
+        </div>
+        <div class="mk-field">
+            <label>Giá (VNĐ) *</label>
+            <input type="number" id="cPrice" placeholder="0 = Miễn phí / Tặng" min="0">
+        </div>
+        <div class="mk-field">
+            <label>Danh mục</label>
+            <select id="cCategory">
+                <option value="dien-thoai">Điện thoại & Tablet</option>
+                <option value="dien-tu">Đồ điện tử / Laptop</option>
+                <option value="xe-co">Xe cộ</option>
+                <option value="thoi-trang-nu">Thời trang nữ</option>
+                <option value="thoi-trang-nam">Thời trang nam</option>
+                <option value="noi-that">Đồ nội thất</option>
+                <option value="gia-dung">Đồ gia dụng</option>
+                <option value="the-thao">Thể thao & Giải trí</option>
+                <option value="sach">Sách & Học liệu</option>
+                <option value="nha-dat">Nhà đất / Cho thuê</option>
+                <option value="khac">Khác</option>
+            </select>
+        </div>
+        <div class="mk-field">
+            <label>Tình trạng</label>
+            <select id="cCondition">
+                <option value="new">Mới 100%</option>
+                <option value="like_new">Như mới (99%)</option>
+                <option value="good" selected>Tốt (đã dùng)</option>
+                <option value="fair">Khá (có vết)</option>
+            </select>
+        </div>
+        <div class="mk-field">
+            <label>Mô tả</label>
+            <textarea id="cDesc" placeholder="Mô tả chi tiết sản phẩm, lý do bán..." rows="4"></textarea>
+        </div>
+        <div class="mk-field">
+            <label>Địa điểm</label>
+            <input type="text" id="cLocation" placeholder="VD: Quận 1, TP.HCM">
+        </div>
+        <div class="mk-field">
+            <label>Số điện thoại liên hệ</label>
+            <input type="tel" id="cPhone" placeholder="0xxx xxx xxx">
+        </div>
+    </div>
+    <div class="mk-modal-footer">
+        <button class="mk-btn mk-btn-primary" id="cSubmit" onclick="submitListing()">Đăng tin</button>
+    </div>
+</div>
+
+<!-- DETAIL MODAL -->
+<div class="mk-overlay" id="detailOverlay" onclick="closeDetail()"></div>
+<div class="mk-modal" id="detailModal" style="max-height:95vh">
+    <div class="mk-modal-header">
+        <button class="mk-modal-close" onclick="closeDetail()"><i class="fas fa-arrow-left"></i></button>
+        <h2>Chi tiết</h2>
+        <button class="mk-modal-close" onclick="shareListing()" style="background:transparent"><i class="fas fa-share-alt"></i></button>
+    </div>
+    <div class="mk-modal-body" id="detailContent" style="padding:0"></div>
+</div>
+
+<!-- BOTTOM NAV -->
+<nav class="mk-bnav">
+    <a href="index.html"><i class="fas fa-home"></i><span>Trang chủ</span></a>
+    <a href="marketplace.html" class="active"><i class="fas fa-store"></i><span>Mua sắm</span></a>
+    <div class="fab-space"><div class="mk-fab-nav" onclick="handleFab()"><i class="fas fa-camera"></i></div></div>
+    <a href="map.html"><i class="fas fa-map-marked-alt"></i><span>Bản đồ</span></a>
+    <a href="profile.html"><i class="fas fa-user"></i><span>Tài khoản</span></a>
+</nav>
+
+<script>
+var currentCat = '', currentSearch = '', currentPage = 1, totalPages = 1;
+var uploadedImgUrls = [];
+var searchTimer = null;
+
+// ============ LOAD LISTINGS ============
+async function loadListings(append) {
+    if (!append) { currentPage = 1; document.getElementById('mkGrid').innerHTML = '<div class="mk-loading"></div>'; }
+    var url = '/api/marketplace.php?page=' + currentPage;
+    if (currentCat) url += '&category=' + currentCat;
+    if (currentSearch) url += '&search=' + encodeURIComponent(currentSearch);
+    try {
+        var r = await fetch(url);
+        var d = await r.json();
+        if (d.success) {
+            totalPages = d.data.pages;
+            var html = d.data.items.map(function(item) {
+                var imgs = []; try { imgs = JSON.parse(item.images || '[]'); } catch(e) {}
+                var img = imgs.length > 0 ? imgs[0] : '';
+                var priceStr = item.price > 0 ? Number(item.price).toLocaleString('vi-VN') + ' ₫' : 'Miễn phí';
+                return '<div class="mk-item" onclick="openDetail(' + item.id + ')">'
+                    + (img ? '<img class="mk-item-img" src="' + img + '" onerror="this.src=\'data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 1 1%22><rect fill=%22%23e4e6eb%22 width=%221%22 height=%221%22/></svg>\'" loading="lazy">' : '<div class="mk-item-img" style="display:flex;align-items:center;justify-content:center;font-size:40px;color:#ccc"><i class="fas fa-image"></i></div>')
+                    + '<div class="mk-item-info">'
+                    + '<div class="mk-item-price">' + priceStr + '</div>'
+                    + '<div class="mk-item-title">' + esc(item.title) + '</div>'
+                    + (item.location ? '<div class="mk-item-loc"><i class="fas fa-map-marker-alt"></i>' + esc(item.location) + '</div>' : '')
+                    + '</div></div>';
+            }).join('');
+            if (append) document.getElementById('mkGrid').innerHTML += html;
+            else document.getElementById('mkGrid').innerHTML = html || '<div class="mk-empty" style="grid-column:1/-1"><i class="fas fa-store-slash"></i><p>Chưa có tin đăng nào</p><p style="margin-top:8px;font-size:13px">Hãy là người đầu tiên đăng bán!</p></div>';
+            document.getElementById('mkMore').style.display = currentPage < totalPages ? 'block' : 'none';
+        }
+    } catch(e) { document.getElementById('mkGrid').innerHTML = '<div class="mk-empty" style="grid-column:1/-1"><i class="fas fa-exclamation-circle"></i><p>Lỗi tải dữ liệu</p></div>'; }
+}
+
+function loadMore() { currentPage++; loadListings(true); }
+
+function filterCat(cat, el) {
+    currentCat = cat;
+    document.querySelectorAll('.mk-cat').forEach(function(c) { c.classList.remove('active'); });
+    el.classList.add('active');
+    loadListings();
+}
+
+function debounceSearch() {
+    clearTimeout(searchTimer);
+    searchTimer = setTimeout(function() {
+        currentSearch = document.getElementById('mkSearch').value.trim();
+        loadListings();
+    }, 400);
+}
+
+function esc(s) { var d = document.createElement('div'); d.textContent = s; return d.innerHTML; }
+
+// ============ CREATE LISTING ============
+function openCreate() {
+    var user = localStorage.getItem('user');
+    if (!user) { alert('Vui lòng đăng nhập để đăng tin'); window.location.href = 'login.html'; return; }
+    document.getElementById('createOverlay').classList.add('active');
+    document.getElementById('createModal').classList.add('active');
+}
+function closeCreate() {
+    document.getElementById('createOverlay').classList.remove('active');
+    document.getElementById('createModal').classList.remove('active');
+}
+
+async function handleImgUpload(input) {
+    if (!input.files || input.files.length === 0) return;
+    var fd = new FormData();
+    for (var i = 0; i < Math.min(input.files.length, 10); i++) { fd.append('images[]', input.files[i]); }
+    // Show loading
+    var addBtn = document.getElementById('imgAddBtn');
+    addBtn.innerHTML = '<div class="mk-loading" style="width:20px;height:20px;margin:0"></div>';
+    try {
+        var r = await fetch('/api/marketplace.php?action=upload', {
+            method: 'POST',
+            headers: { 'Authorization': 'Bearer ' + localStorage.getItem('token') },
+            body: fd
+        });
+        var d = await r.json();
+        if (d.success && d.data.urls) {
+            uploadedImgUrls = uploadedImgUrls.concat(d.data.urls);
+            renderImgPreviews();
+        } else { alert(d.message || 'Lỗi upload'); }
+    } catch(e) { alert('Lỗi kết nối'); }
+    addBtn.innerHTML = '<i class="fas fa-camera"></i><span>Thêm ảnh</span><input type="file" accept="image/*" multiple style="display:none" onchange="handleImgUpload(this)">';
+}
+
+function renderImgPreviews() {
+    var container = document.getElementById('imgPreviews');
+    var html = uploadedImgUrls.map(function(url, i) {
+        return '<div class="mk-img-preview"><img src="' + url + '"><button class="mk-img-del" onclick="removeImg(' + i + ')"><i class="fas fa-times"></i></button></div>';
+    }).join('');
+    html += '<label class="mk-img-add" id="imgAddBtn"><i class="fas fa-camera"></i><span>Thêm</span><input type="file" accept="image/*" multiple style="display:none" onchange="handleImgUpload(this)"></label>';
+    container.innerHTML = html;
+}
+
+function removeImg(i) { uploadedImgUrls.splice(i, 1); renderImgPreviews(); }
+
+async function submitListing() {
+    var title = document.getElementById('cTitle').value.trim();
+    var price = parseInt(document.getElementById('cPrice').value) || 0;
+    if (!title) { alert('Vui lòng nhập tiêu đề'); return; }
+    var btn = document.getElementById('cSubmit');
+    btn.disabled = true; btn.textContent = 'Đang đăng...';
+    try {
+        var r = await fetch('/api/marketplace.php', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + localStorage.getItem('token') },
+            body: JSON.stringify({
+                title: title, price: price,
+                category: document.getElementById('cCategory').value,
+                condition_type: document.getElementById('cCondition').value,
+                description: document.getElementById('cDesc').value,
+                location: document.getElementById('cLocation').value,
+                phone: document.getElementById('cPhone').value,
+                images: uploadedImgUrls
+            })
+        });
+        var d = await r.json();
+        if (d.success) {
+            alert('✅ Đăng tin thành công!');
+            closeCreate(); uploadedImgUrls = [];
+            document.getElementById('cTitle').value = '';
+            document.getElementById('cPrice').value = '';
+            document.getElementById('cDesc').value = '';
+            document.getElementById('cLocation').value = '';
+            document.getElementById('cPhone').value = '';
+            renderImgPreviews();
+            loadListings();
+        } else { alert('❌ ' + (d.message || 'Lỗi')); }
+    } catch(e) { alert('Lỗi kết nối'); }
+    btn.disabled = false; btn.textContent = 'Đăng tin';
+}
+
+// ============ DETAIL VIEW ============
+async function openDetail(id) {
+    document.getElementById('detailOverlay').classList.add('active');
+    document.getElementById('detailModal').classList.add('active');
+    document.getElementById('detailContent').innerHTML = '<div class="mk-loading" style="margin:60px auto"></div>';
+    try {
+        var r = await fetch('/api/marketplace.php?id=' + id);
+        var d = await r.json();
+        if (d.success) {
+            var item = d.data;
+            var imgs = []; try { imgs = JSON.parse(item.images || '[]'); } catch(e) {}
+            var priceStr = item.price > 0 ? Number(item.price).toLocaleString('vi-VN') + ' ₫' : 'Miễn phí';
+            var condLabels = {new:'Mới 100%',like_new:'Như mới',good:'Đã qua sử dụng',fair:'Còn dùng được'};
+            var currentImg = 0;
+            var html = '';
+            // Images
+            if (imgs.length > 0) {
+                html += '<div class="mk-detail-imgs" id="detailImgWrap"><img id="detailMainImg" src="' + imgs[0] + '"><div class="mk-detail-dots">' + imgs.map(function(_,i){return '<span' + (i===0?' class="active"':'') + '></span>';}).join('') + '</div></div>';
+            }
+            html += '<div style="padding:16px">';
+            html += '<div style="font-size:22px;font-weight:800;color:var(--primary)">' + priceStr + '</div>';
+            html += '<h3 style="font-size:17px;margin-top:6px">' + esc(item.title) + '</h3>';
+            html += '<div class="mk-cond">' + (condLabels[item.condition_type]||item.condition_type) + '</div>';
+            if (item.location) html += '<p style="margin-top:8px;color:var(--text2);font-size:13px"><i class="fas fa-map-marker-alt"></i> ' + esc(item.location) + '</p>';
+            html += '<p style="margin-top:4px;color:var(--text2);font-size:12px"><i class="fas fa-eye"></i> ' + (item.views_count||0) + ' lượt xem</p>';
+            if (item.description) html += '<div style="margin-top:16px;padding-top:16px;border-top:1px solid #e4e6eb"><h4 style="font-size:14px;margin-bottom:8px">Mô tả</h4><p style="font-size:14px;line-height:1.6;color:var(--text2);white-space:pre-wrap">' + esc(item.description) + '</p></div>';
+            // Seller
+            html += '<div class="mk-seller">';
+            if (item.seller_avatar) html += '<div class="mk-seller-avatar"><img src="' + item.seller_avatar + '"></div>';
+            else html += '<div class="mk-seller-avatar">' + (item.seller_name||'U').charAt(0) + '</div>';
+            html += '<div><div style="font-weight:600">' + esc(item.seller_name||'') + '</div>';
+            if (item.seller_username) html += '<div style="font-size:12px;color:var(--text2)">@' + esc(item.seller_username) + '</div>';
+            html += '</div></div>';
+            // Contact
+            html += '<a href="messages.html?to=' + item.user_id + '" style="display:block;text-align:center;background:var(--primary);color:#fff;padding:12px;border-radius:10px;font-weight:700;margin-top:12px"><i class="fas fa-comment-dots"></i> Nhắn tin cho người bán</a>';
+            html += '</div>';
+            document.getElementById('detailContent').innerHTML = html;
+            // Swipe images
+            if (imgs.length > 1) {
+                var wrap = document.getElementById('detailImgWrap');
+                var sx = 0;
+                wrap.addEventListener('touchstart', function(e) { sx = e.touches[0].clientX; }, {passive:true});
+                wrap.addEventListener('touchend', function(e) {
+                    var diff = sx - e.changedTouches[0].clientX;
+                    if (Math.abs(diff) > 40) {
+                        if (diff > 0) currentImg = Math.min(currentImg + 1, imgs.length - 1);
+                        else currentImg = Math.max(currentImg - 1, 0);
+                        document.getElementById('detailMainImg').src = imgs[currentImg];
+                        wrap.querySelectorAll('.mk-detail-dots span').forEach(function(s,i) { s.classList.toggle('active', i === currentImg); });
+                    }
+                }, {passive:true});
+            }
+        } else { document.getElementById('detailContent').innerHTML = '<div class="mk-empty"><p>Không tìm thấy tin đăng</p></div>'; }
+    } catch(e) { document.getElementById('detailContent').innerHTML = '<div class="mk-empty"><p>Lỗi tải dữ liệu</p></div>'; }
+}
+
+function closeDetail() {
+    document.getElementById('detailOverlay').classList.remove('active');
+    document.getElementById('detailModal').classList.remove('active');
+}
+
+function shareListing() {
+    if (navigator.share) navigator.share({title:'Xem trên ShipperShop', url:location.href});
+    else { navigator.clipboard.writeText(location.href); alert('Đã copy link!'); }
+}
+
+function openMyListings() {
+    var user = JSON.parse(localStorage.getItem('user') || 'null');
+    if (!user) { window.location.href = 'login.html'; return; }
+    currentSearch = '';
+    document.getElementById('mkSearch').value = '';
+    currentCat = '';
+    document.querySelectorAll('.mk-cat').forEach(function(c) { c.classList.remove('active'); });
+    document.querySelectorAll('.mk-cat')[0].classList.add('active');
+    // Load user's listings
+    document.getElementById('mkGrid').innerHTML = '<div class="mk-loading"></div>';
+    fetch('/api/marketplace.php?user_id=' + user.id).then(function(r){return r.json();}).then(function(d) {
+        if (d.success) {
+            if (d.data.items.length === 0) {
+                document.getElementById('mkGrid').innerHTML = '<div class="mk-empty" style="grid-column:1/-1"><i class="fas fa-box-open"></i><p>Bạn chưa đăng tin nào</p></div>';
+            } else {
+                document.getElementById('mkGrid').innerHTML = d.data.items.map(function(item) {
+                    var imgs = []; try { imgs = JSON.parse(item.images || '[]'); } catch(e) {}
+                    var img = imgs.length > 0 ? imgs[0] : '';
+                    var priceStr = item.price > 0 ? Number(item.price).toLocaleString('vi-VN') + ' ₫' : 'Miễn phí';
+                    return '<div class="mk-item" onclick="openDetail(' + item.id + ')">' + (img ? '<img class="mk-item-img" src="' + img + '" loading="lazy">' : '<div class="mk-item-img" style="display:flex;align-items:center;justify-content:center;font-size:40px;color:#ccc"><i class="fas fa-image"></i></div>') + '<div class="mk-item-info"><div class="mk-item-price">' + priceStr + '</div><div class="mk-item-title">' + esc(item.title) + '</div></div></div>';
+                }).join('');
+            }
+        }
+    }).catch(function() {});
+}
+
+// Init
+loadListings();
+</script>
+<script>if("serviceWorker" in navigator)navigator.serviceWorker.register("/sw.js");</script><script src="js/post-modal.js"></script></body>
+</html>
