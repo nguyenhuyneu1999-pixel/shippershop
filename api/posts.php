@@ -88,9 +88,7 @@ if ($method === 'GET') {
                     u.fullname as user_name,
                     u.avatar as user_avatar,
                     u.username as user_username,
-                    u.shipping_company as shipping_company,
-                    (SELECT COUNT(*) FROM likes WHERE post_id = p.id) as likes_count,
-                    (SELECT COUNT(*) FROM comments WHERE post_id = p.id AND status = 'active') as comments_count
+                    u.shipping_company as shipping_company
                 FROM posts p
                 LEFT JOIN users u ON p.user_id = u.id
                 WHERE p.id = ? AND p.status = 'active'";
