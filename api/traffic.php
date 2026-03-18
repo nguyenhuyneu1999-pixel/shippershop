@@ -78,8 +78,18 @@ if ($method === 'GET' && empty($action)) {
             ORDER BY a.created_at DESC
             LIMIT $limit OFFSET $offset";
 
-    $alerts = empty($params) ? $db->fetchAll($sql, []) : $db->fetchAll($sql, $params);
-    if (!$alerts) $alerts = [];
+    try {
+        $alerts = $db->fetchAll($sql, $params);
+        if (!$alerts) $alerts = [];
+    } catch (Throwable $qe) {
+        // Fallback: simple query
+        try {
+            $alerts = $db->fetchAll("SELECT a.*, u.fullname as user_name, u.avatar as user_avatar, u.shipping_company FROM traffic_alerts a JOIN users u ON a.user_id = u.id WHERE a.`status`='active' ORDER BY a.created_at DESC LIMIT 20", []);
+            if (!$alerts) $alerts = [];
+        } catch (Throwable $qe2) {
+            tError("SQL: " . $qe2->getMessage());
+        }
+    }
 
     // Add time remaining
     foreach ($alerts as &$a) {
