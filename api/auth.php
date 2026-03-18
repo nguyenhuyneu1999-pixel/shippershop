@@ -17,7 +17,13 @@ require_once __DIR__ . '/../includes/db.php';
 require_once __DIR__ . '/../includes/functions.php';
 
 header('Content-Type: application/json; charset=utf-8');
-header('Access-Control-Allow-Origin: *');
+$origin = $_SERVER['HTTP_ORIGIN'] ?? '';
+if ($origin === 'https://shippershop.vn' || $origin === 'http://shippershop.vn' || $origin === '') {
+    header('Access-Control-Allow-Origin: ' . ($origin ?: 'https://shippershop.vn'));
+} else {
+    header('Access-Control-Allow-Origin: https://shippershop.vn');
+}
+header('Access-Control-Allow-Credentials: true');
 header('Access-Control-Allow-Methods: GET, POST, OPTIONS');
 header('Access-Control-Allow-Headers: Content-Type, Authorization, X-Requested-With');
 header('Access-Control-Allow-Credentials: true');
@@ -56,6 +62,15 @@ $action = $_GET['action'] ?? $_POST['action'] ?? '';
 // ĐĂNG KÝ
 // ============================================
 if ($action === 'register') {
+    // Rate limit: max 3 registrations per IP per hour
+    $ip = $_SERVER['HTTP_X_FORWARDED_FOR'] ?? $_SERVER['REMOTE_ADDR'] ?? '0.0.0.0';
+    $ip = explode(',', $ip)[0];
+    $window = date('Y-m-d H:i:s', time() - 3600);
+    $regCount = $db->fetchOne("SELECT COUNT(*) as cnt FROM login_attempts WHERE ip = ? AND success = 1 AND created_at > ?", [$ip, $window]);
+    if (intval($regCount['cnt'] ?? 0) >= 3) {
+        apiError('Quá nhiều tài khoản được tạo. Vui lòng thử lại sau.', 429);
+    }
+
     $input = getInput();
     $fullname = trim($input['fullname'] ?? '');
     $username = trim($input['username'] ?? '');
@@ -91,6 +106,7 @@ if ($action === 'register') {
         ]);
 
         try { $db->insert('wallets', ['user_id' => $userId, 'balance' => 0]); } catch (Exception $e) {}
+        try { $db->query("INSERT INTO login_attempts (ip, user_id, email, success, created_at) VALUES (?, ?, ?, 1, NOW())", [$ip, $userId, $username]); } catch (Throwable $e) {}
 
         $_SESSION['user_id'] = $userId;
         $token = generateJWT($userId, $username . '@shippershop.local', 'user');
@@ -119,6 +135,15 @@ if ($action === 'login') {
         apiError('Vui lòng nhập tên đăng nhập và mật khẩu');
     }
 
+    // Brute force protection: 5 failed attempts in 15 min = lock
+    $ip = $_SERVER['HTTP_X_FORWARDED_FOR'] ?? $_SERVER['REMOTE_ADDR'] ?? '0.0.0.0';
+    $ip = explode(',', $ip)[0];
+    $window = date('Y-m-d H:i:s', time() - 900);
+    $attempts = $db->fetchOne("SELECT COUNT(*) as cnt FROM login_attempts WHERE ip = ? AND success = 0 AND created_at > ?", [$ip, $window]);
+    if (intval($attempts['cnt'] ?? 0) >= 5) {
+        apiError('Quá nhiều lần đăng nhập sai. Vui lòng thử lại sau 15 phút.', 429);
+    }
+
     // Tìm user bằng username HOẶC email (tương thích ngược)
     $user = $db->fetchOne(
         "SELECT * FROM users WHERE (username = ? OR email = ?) AND status = 'active'",
@@ -126,11 +151,16 @@ if ($action === 'login') {
     );
 
     if (!$user) {
+        try { $db->query("INSERT INTO login_attempts (ip, email, success, created_at) VALUES (?, ?, 0, NOW())", [$ip, $loginId]); } catch (Throwable $e) {}
         apiError('Tên đăng nhập hoặc mật khẩu không đúng', 401);
     }
     if (!password_verify($password, $user['password'])) {
+        try { $db->query("INSERT INTO login_attempts (ip, user_id, email, success, created_at) VALUES (?, ?, ?, 0, NOW())", [$ip, $user['id'], $loginId]); } catch (Throwable $e) {}
         apiError('Tên đăng nhập hoặc mật khẩu không đúng', 401);
     }
+
+    // Login success - clear attempts
+    try { $db->query("DELETE FROM login_attempts WHERE ip = ? AND success = 0", [$ip]); } catch (Throwable $e) {}
 
     $_SESSION['user_id']    = $user['id'];
     $_SESSION['user_email'] = $user['email'];

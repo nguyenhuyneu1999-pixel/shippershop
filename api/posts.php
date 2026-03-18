@@ -25,7 +25,6 @@ setCorsHeaders();
 
 // Get database
 $db = db();
-try{$db->query("ALTER TABLE comments ADD COLUMN likes_count INT DEFAULT 0");}catch(\Exception $e){}
 
 // Get request method
 $method = getRequestMethod();
@@ -58,11 +57,11 @@ if ($method === 'GET') {
         $uid = intval($_GET["user_id"] ?? 0);
         $tab = $_GET["tab"] ?? "posts";
         if ($tab === "posts") {
-            $items = $db->fetchAll("SELECT p.*, u.fullname as user_name, u.avatar as user_avatar, u.shipping_company as shipping_company, (SELECT COUNT(*) FROM post_likes WHERE post_id=p.id) as likes_count, (SELECT COUNT(*) FROM comments WHERE post_id=p.id AND status='active') as comments_count FROM posts p LEFT JOIN users u ON p.user_id=u.id WHERE p.user_id=? AND p.status='active' ORDER BY p.created_at DESC LIMIT 50", [$uid]);
+            $items = $db->fetchAll("SELECT p.*, u.fullname as user_name, u.avatar as user_avatar, u.shipping_company as shipping_company FROM posts p LEFT JOIN users u ON p.user_id=u.id WHERE p.user_id=? AND p.status='active' ORDER BY p.created_at DESC LIMIT 50", [$uid]);
         } elseif ($tab === "liked") {
-            $items = $db->fetchAll("SELECT p.*, u.fullname as user_name, u.avatar as user_avatar, u.shipping_company as shipping_company, (SELECT COUNT(*) FROM post_likes WHERE post_id=p.id) as likes_count, (SELECT COUNT(*) FROM comments WHERE post_id=p.id AND status='active') as comments_count FROM posts p LEFT JOIN users u ON p.user_id=u.id JOIN post_likes pl ON pl.post_id=p.id WHERE pl.user_id=? AND p.status='active' ORDER BY pl.created_at DESC LIMIT 50", [$uid]);
+            $items = $db->fetchAll("SELECT p.*, u.fullname as user_name, u.avatar as user_avatar, u.shipping_company as shipping_company FROM posts p LEFT JOIN users u ON p.user_id=u.id JOIN post_likes pl ON pl.post_id=p.id WHERE pl.user_id=? AND p.status='active' ORDER BY pl.created_at DESC LIMIT 50", [$uid]);
         } else {
-            $items = $db->fetchAll("SELECT DISTINCT p.*, u.fullname as user_name, u.avatar as user_avatar, u.shipping_company as shipping_company, (SELECT COUNT(*) FROM post_likes WHERE post_id=p.id) as likes_count, (SELECT COUNT(*) FROM comments WHERE post_id=p.id AND status='active') as comments_count FROM posts p LEFT JOIN users u ON p.user_id=u.id JOIN comments c ON c.post_id=p.id WHERE c.user_id=? AND p.status='active' ORDER BY p.created_at DESC LIMIT 50", [$uid]);
+            $items = $db->fetchAll("SELECT DISTINCT p.*, u.fullname as user_name, u.avatar as user_avatar, u.shipping_company as shipping_company FROM posts p LEFT JOIN users u ON p.user_id=u.id JOIN comments c ON c.post_id=p.id WHERE c.user_id=? AND p.status='active' ORDER BY p.created_at DESC LIMIT 50", [$uid]);
         }
         success("OK", $items);
     }
@@ -170,15 +169,13 @@ if ($method === 'GET') {
     
     $pagination = paginate($total, $page, $limit);
     
-    // Get posts
+    // Get posts (use denormalized counts - no subqueries)
     $sql = "SELECT 
                 p.*,
                 u.fullname as user_name,
                 u.avatar as user_avatar,
                 u.username as user_username,
-                u.shipping_company as shipping_company,
-                (SELECT COUNT(*) FROM likes WHERE post_id = p.id) as likes_count,
-                (SELECT COUNT(*) FROM comments WHERE post_id = p.id AND status = 'active') as comments_count
+                u.shipping_company as shipping_company
             FROM posts p
             LEFT JOIN users u ON p.user_id = u.id
             WHERE $whereClause
@@ -187,13 +184,21 @@ if ($method === 'GET') {
     
     $posts = $db->fetchAll($sql, $params);
     
+    // Batch check liked/saved (2 queries instead of 40 N+1 queries)
     $authUid2 = getOptionalAuthUserId();
-    if ($authUid2) {
+    if ($authUid2 && !empty($posts)) {
+        $postIds = array_column($posts, 'id');
+        $placeholders = implode(',', array_fill(0, count($postIds), '?'));
+        
+        $likedRows = $db->fetchAll("SELECT post_id FROM likes WHERE user_id = ? AND post_id IN ($placeholders)", array_merge([$authUid2], $postIds));
+        $likedSet = array_flip(array_column($likedRows, 'post_id'));
+        
+        $savedRows = $db->fetchAll("SELECT post_id FROM saved_posts WHERE user_id = ? AND post_id IN ($placeholders)", array_merge([$authUid2], $postIds));
+        $savedSet = array_flip(array_column($savedRows, 'post_id'));
+        
         foreach ($posts as &$post) {
-            $liked = $db->fetchOne("SELECT id FROM likes WHERE post_id = ? AND user_id = ?", [$post['id'], $authUid2]);
-            $post['user_liked'] = $liked ? true : false;
-            $saved = $db->fetchOne("SELECT id FROM saved_posts WHERE post_id = ? AND user_id = ?", [$post['id'], $authUid2]);
-            $post['user_saved'] = $saved ? true : false;
+            $post['user_liked'] = isset($likedSet[$post['id']]);
+            $post['user_saved'] = isset($savedSet[$post['id']]);
         }
     } else {
         foreach ($posts as &$post) {
@@ -221,10 +226,11 @@ if ($method === 'POST') {
             if ($voteType === "remove") { $db->hardDelete("likes", "post_id = ? AND user_id = ?", [$postId, $userId]); }
             else { $ex = $db->fetchOne("SELECT id FROM likes WHERE post_id = ? AND user_id = ?", [$postId, $userId]); if ($ex) { $db->hardDelete("likes", "post_id = ? AND user_id = ?", [$postId, $userId]); } else { $db->insert("likes", ["post_id" => $postId, "user_id" => $userId]); } }
             $score = $db->fetchColumn("SELECT COUNT(*) FROM likes WHERE post_id = ?", [$postId]);
+            $db->query("UPDATE posts SET likes_count = ? WHERE id = ?", [intval($score), $postId]);
             $uv = $db->fetchOne("SELECT id FROM likes WHERE post_id = ? AND user_id = ?", [$postId, $userId]);
             success("OK", ["score" => intval($score), "user_vote" => $uv ? "up" : null]);
         }
-        if ($action === "comment") { $pid = intval($input["post_id"] ?? 0); $ct = sanitize($input["content"] ?? ""); $par = $input["parent_id"] ?? null; if (empty($ct)) error("Nội dung trống"); $db->insert("comments", ["post_id" => $pid, "user_id" => $userId, "parent_id" => $par, "content" => $ct]); success("Đã bình luận!"); }
+        if ($action === "comment") { $pid = intval($input["post_id"] ?? 0); $ct = sanitize($input["content"] ?? ""); $par = $input["parent_id"] ?? null; if (empty($ct)) error("Nội dung trống"); $db->insert("comments", ["post_id" => $pid, "user_id" => $userId, "parent_id" => $par, "content" => $ct]); $db->query("UPDATE posts SET comments_count = comments_count + 1 WHERE id = ?", [$pid]); success("Đã bình luận!"); }
         if ($action === "save") { $pid = intval($input["post_id"] ?? 0); $ex = $db->fetchOne("SELECT id FROM saved_posts WHERE post_id = ? AND user_id = ?", [$pid, $userId]); if ($ex) { $db->hardDelete("saved_posts", "post_id = ? AND user_id = ?", [$pid, $userId]); success("OK", ["saved" => false]); } else { $db->insert("saved_posts", ["post_id" => $pid, "user_id" => $userId]); success("OK", ["saved" => true]); } }
         if ($action === "share") { success("OK"); }
         if ($action === "delete") { $pid = intval($input["post_id"] ?? 0); $po = $db->fetchOne("SELECT user_id FROM posts WHERE id = ?", [$pid]); if (!$po || intval($po["user_id"]) !== $userId) error("Không có quyền"); $db->update("posts", ["status" => "deleted"], "id = ?", [$pid]); success("Đã xóa"); }
@@ -240,7 +246,6 @@ if ($method === 'POST') {
                 $cnt = $db->fetchOne("SELECT likes_count FROM comments WHERE id = ?", [$cid]);
                 success("OK", ["user_vote" => null, "score" => intval($cnt["likes_count"] ?? 0)]);
             } else {
-                $db->query("CREATE TABLE IF NOT EXISTS comment_likes(id INT AUTO_INCREMENT PRIMARY KEY,comment_id INT,user_id INT,created_at DATETIME DEFAULT CURRENT_TIMESTAMP,UNIQUE KEY(comment_id,user_id))ENGINE=InnoDB DEFAULT CHARSET=utf8mb4");
                 $db->query("INSERT IGNORE INTO comment_likes(comment_id,user_id) VALUES(?,?)", [$cid, $userId]);
                 $db->query("UPDATE comments SET likes_count = likes_count + 1 WHERE id = ?", [$cid]);
                 $cnt = $db->fetchOne("SELECT likes_count FROM comments WHERE id = ?", [$cid]);
