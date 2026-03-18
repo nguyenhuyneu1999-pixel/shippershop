@@ -3,6 +3,8 @@
  * SHIPPERSHOP WALLET & SUBSCRIPTION API
  * Security: Rate limiting, CSRF, PIN verification, audit logging, SQL injection prevention
  */
+set_error_handler(function($n,$s,$f,$l){echo json_encode(['success'=>false,'message'=>"Err: $s L$l"]);exit;});
+set_exception_handler(function($e){echo json_encode(['success'=>false,'message'=>"Ex: ".$e->getMessage()." L".$e->getLine()]);exit;});
 define('APP_ACCESS', true);
 require_once __DIR__ . '/../includes/config.php';
 require_once __DIR__ . '/../includes/db.php';
