@@ -135,12 +135,13 @@ if ($action === 'login') {
         apiError('Vui lòng nhập tên đăng nhập và mật khẩu');
     }
 
-    // Brute force protection: 5 failed attempts in 15 min = lock
+    // Brute force protection: 5 failed attempts in 15 min = lock (by IP OR by email)
     $ip = $_SERVER['HTTP_X_FORWARDED_FOR'] ?? $_SERVER['REMOTE_ADDR'] ?? '0.0.0.0';
     $ip = explode(',', $ip)[0];
     $window = date('Y-m-d H:i:s', time() - 900);
-    $attempts = $db->fetchOne("SELECT COUNT(*) as cnt FROM login_attempts WHERE ip = ? AND success = 0 AND created_at > ?", [$ip, $window]);
-    if (intval($attempts['cnt'] ?? 0) >= 5) {
+    $ipAttempts = $db->fetchOne("SELECT COUNT(*) as cnt FROM login_attempts WHERE ip = ? AND success = 0 AND created_at > ?", [$ip, $window]);
+    $emailAttempts = $db->fetchOne("SELECT COUNT(*) as cnt FROM login_attempts WHERE email = ? AND success = 0 AND created_at > ?", [$loginId, $window]);
+    if (intval($ipAttempts['cnt'] ?? 0) >= 5 || intval($emailAttempts['cnt'] ?? 0) >= 5) {
         apiError('Quá nhiều lần đăng nhập sai. Vui lòng thử lại sau 15 phút.', 429);
     }
 
