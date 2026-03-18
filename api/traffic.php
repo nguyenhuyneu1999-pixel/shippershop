@@ -1,10 +1,11 @@
 <?php
-ini_set('display_errors',1);error_reporting(E_ALL);
+set_error_handler(function($n,$s,$f,$l){echo json_encode(['success'=>false,'message'=>"Error: $s line $l"]);exit;});
+set_exception_handler(function($e){echo json_encode(['success'=>false,'message'=>"Ex: ".$e->getMessage()." L".$e->getLine()]);exit;});
 define('APP_ACCESS', true);
 require_once __DIR__ . '/../includes/config.php';
 require_once __DIR__ . '/../includes/db.php';
 require_once __DIR__ . '/../includes/functions.php';
-require_once __DIR__ . '/auth-check.php';
+// auth handled by tAuth()
 
 header('Content-Type: application/json; charset=utf-8');
 header('Access-Control-Allow-Origin: *');
@@ -39,7 +40,7 @@ $action = $_GET['action'] ?? '';
 // Auto-expire old alerts
 try {
     $db->query("UPDATE traffic_alerts SET `status`='expired' WHERE `status`='active' AND expires_at < NOW()", []);
-} catch (Throwable $e) {}
+} catch (Throwable $e) { /* ignore */ }
 
 // ==========================================
 // GET - List alerts
