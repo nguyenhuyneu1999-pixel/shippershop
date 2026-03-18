@@ -56,7 +56,12 @@ body{background:var(--bg);font-family:-apple-system,BlinkMacSystemFont,'Segoe UI
 .spin{animation:spin 1s linear infinite;}@keyframes spin{to{transform:rotate(360deg);}}
 .toast{position:fixed;bottom:90px;left:50%;transform:translateX(-50%) translateY(100px);background:#333;color:#fff;padding:12px 20px;border-radius:8px;font-size:14px;z-index:3000;opacity:0;transition:.3s;}
 .toast.show{transform:translateX(-50%) translateY(0);opacity:1;}
-.mnav-fab-wrap{overflow:visible!important;position:relative!important;}.mnav-fab{width:46px!important;height:46px!important;font-size:18px!important;margin-top:-16px!important;cursor:pointer!important;position:relative!important;z-index:1001!important;border-radius:50%!important;background:#EE4D2D!important;color:#fff!important;display:flex!important;align-items:center!important;justify-content:center!important;box-shadow:0 2px 8px rgba(0,0,0,.2)!important;}</style>
+.mnav-fab-wrap{overflow:visible!important;position:relative!important;}.mnav-fab{width:46px!important;height:46px!important;font-size:18px!important;margin-top:-16px!important;cursor:pointer!important;position:relative!important;z-index:1001!important;border-radius:50%!important;background:#EE4D2D!important;color:#fff!important;display:flex!important;align-items:center!important;justify-content:center!important;box-shadow:0 2px 8px rgba(0,0,0,.2)!important;}
+@media (min-width: 769px) {
+  .top-nav { max-width: 680px; margin: 0 auto; }
+  body { padding-bottom: 0 !important; }
+}
+</style>
 <link rel="manifest" href="/manifest.json"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="default"><meta name="apple-mobile-web-app-title" content="ShipperShop"><link rel="apple-touch-icon" href="/icons/icon-192.png"></head>
 <body>
 <nav class="top-nav">
