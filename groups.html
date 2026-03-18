@@ -119,13 +119,13 @@ body{background:var(--bg);font-family:-apple-system,BlinkMacSystemFont,'Segoe UI
 <div id="catPage" style="display:none"></div>
 
 <!-- FAB -->
-<button class="fab-create" onclick="location.href='group.html?create=1'"><i class="fas fa-plus"></i></button>
+<button class="fab-create" onclick="createGroup()"><i class="fas fa-plus"></i></button>
 
 <!-- Bottom nav -->
 <div class="bnav" id="mobileBottomNav">
 <a href="index.html"><i class="fas fa-home"></i>Trang chủ</a>
 <a href="groups.html" class="active"><i class="fas fa-users"></i>Cộng đồng</a>
-<a href="index.html?create=1"><i class="fas fa-plus-circle"></i>Tạo</a>
+<a href="index.html" onclick="localStorage.setItem('openCreate','1')"><i class="fas fa-plus-circle"></i>Tạo</a>
 <a href="notifications.html"><i class="far fa-bell"></i>Hộp thư đến</a>
 <a href="profile.html"><i class="far fa-user"></i>Bạn</a>
 </div>
@@ -291,6 +291,21 @@ function backToDiscover(){
 // Init
 loadCategories();
 loadDiscover();
+
+function createGroup(){
+  if(!CU){location.href="login.html";return;}
+  var name=prompt("Tên nhóm mới:");
+  if(!name||!name.trim())return;
+  var hdrs={"Content-Type":"application/json"};
+  var tk=localStorage.getItem("token");
+  if(tk)hdrs["Authorization"]="Bearer "+tk;
+  fetch("/api/groups.php?action=create",{method:"POST",headers:hdrs,credentials:"include",body:JSON.stringify({name:name.trim(),description:""})})
+  .then(function(r){return r.json();})
+  .then(function(d){
+    if(d.success&&d.data.slug){location.href="group.html?slug="+d.data.slug;}
+    else{toast(d.message||"Lỗi tạo nhóm");}
+  }).catch(function(){toast("Lỗi kết nối");});
+}
 </script>
 <script src="js/mobile.js"></script>
 </body>
