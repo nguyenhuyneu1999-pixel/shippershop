@@ -75,10 +75,11 @@ if ($method === 'GET' && empty($action)) {
     $sql = "SELECT a.*, u.fullname as user_name, u.avatar as user_avatar, u.shipping_company, u.trust_score
             FROM traffic_alerts a JOIN users u ON a.user_id = u.id
             WHERE $whereStr
-            ORDER BY a.severity DESC, a.created_at DESC
+            ORDER BY a.created_at DESC
             LIMIT $limit OFFSET $offset";
 
-    $alerts = $db->fetchAll($sql, $params);
+    $alerts = empty($params) ? $db->fetchAll($sql, []) : $db->fetchAll($sql, $params);
+    if (!$alerts) $alerts = [];
 
     // Add time remaining
     foreach ($alerts as &$a) {
