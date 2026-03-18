@@ -2,6 +2,14 @@
 session_start();
 ini_set('display_errors',1);error_reporting(E_ALL);
 define('APP_ACCESS', true);
+set_error_handler(function($errno, $errstr, $errfile, $errline) {
+    echo json_encode(['success'=>false,'message'=>'PHP Error: '.$errstr.' at line '.$errline]);
+    exit;
+});
+set_exception_handler(function($e) {
+    echo json_encode(['success'=>false,'message'=>'Exception: '.$e->getMessage().' at line '.$e->getLine()]);
+    exit;
+});
 require_once __DIR__ . '/../includes/config.php';
 require_once __DIR__ . '/../includes/db.php';
 require_once __DIR__ . '/../includes/functions.php';
