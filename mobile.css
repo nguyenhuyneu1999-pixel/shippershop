@@ -533,3 +533,58 @@ body.page-enter{animation:pageIn .2s ease forwards;}
 @keyframes pageIn{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:translateY(0);}}
 #mobileBottomNav{transition:none!important;transform:none!important;}
 #mobileBottomNav .mnav-item{-webkit-tap-highlight-color:transparent;}
+
+
+/* ============================================
+   DESKTOP LAYOUT (min-width: 769px)
+   Centers all pages, constrains widths
+   ============================================ */
+@media (min-width: 769px) {
+  /* Hide ALL mobile bottom navs on desktop */
+  #mobileBottomNav, .mk-bnav, .map-bnav, .mk-fab, .map-fab, .ask-fab, .map-locate,
+  #backToTop, .mnav-fab-wrap, .fab-center, .fab-space { display: none !important; }
+
+  /* Global body - centered bg */
+  body { background: #e4e6eb !important; }
+
+  /* Post detail page */
+  .header { max-width: 680px; margin: 0 auto; left: 50% !important; transform: translateX(-50%); border-radius: 0 0 12px 12px; }
+  .post-wrap, #cmtSection, .cmt-input { max-width: 680px; margin-left: auto; margin-right: auto; }
+  .cmt-input { border-radius: 0; left: 50% !important; transform: translateX(-50%); }
+
+  /* User page */
+  .back-nav, .profile-section, .tabs, #tabContent, .cover { max-width: 680px; margin-left: auto; margin-right: auto; }
+
+  /* Groups page */
+  .page-header, .search-bar, .cats, .groups-list { max-width: 680px; margin-left: auto; margin-right: auto; }
+
+  /* Marketplace page */
+  .mk-header, .mk-cats, .mk-grid { max-width: 900px; margin-left: auto; margin-right: auto; }
+  .mk-grid { grid-template-columns: repeat(3, 1fr) !important; }
+
+  /* Messages page */
+  .list-view, .chat-view { max-width: 700px; margin-left: auto; margin-right: auto; }
+
+  /* Listing detail */
+  .carousel, .price-section, .variants-section, .seller-section, .section,
+  .similar-section, .reviews-section, .bottom-bar, .hd { max-width: 680px; margin-left: auto; margin-right: auto; }
+  .hd { left: 50% !important; transform: translateX(-50%); }
+  .bottom-bar { left: 50% !important; transform: translateX(-50%); max-width: 680px; }
+
+  /* Profile settings page */
+  .container { max-width: 680px !important; margin-left: auto !important; margin-right: auto !important; }
+
+  /* Map - keep full width */
+
+  /* Post cards on desktop - add shadow + round corners */
+  .post-card { border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,.1); margin-bottom: 12px; }
+
+  /* Modal overlay - center properly */
+  .modal-overlay, .pd-cmt-overlay, .spm-overlay, .post-sheet-overlay,
+  .cmt-modal-overlay, .ask-overlay { padding: 20px; }
+}
+
+/* Tablet adjustments */
+@media (min-width: 769px) and (max-width: 1024px) {
+  .mk-grid { grid-template-columns: repeat(2, 1fr) !important; }
+}
