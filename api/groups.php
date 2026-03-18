@@ -1,56 +1,230 @@
 <?php
 session_start();
+define('APP_ACCESS', true);
+require_once __DIR__ . '/../includes/config.php';
 require_once __DIR__ . '/../includes/db.php';
+require_once __DIR__ . '/../includes/functions.php';
 require_once __DIR__ . '/auth-check.php';
 header('Content-Type: application/json; charset=utf-8');
-error_reporting(0);
-$d=db();$method=$_SERVER['REQUEST_METHOD'];$action=$_GET['action']??'';
+header('Access-Control-Allow-Origin: *');
+header('Access-Control-Allow-Methods: GET, POST, OPTIONS');
+header('Access-Control-Allow-Headers: Content-Type, Authorization');
+if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') { http_response_code(200); exit; }
+
+function gOk($msg, $data = []) { echo json_encode(['success'=>true,'message'=>$msg,'data'=>$data], JSON_UNESCAPED_UNICODE); exit; }
+function gErr($msg, $code = 400) { http_response_code($code); echo json_encode(['success'=>false,'message'=>$msg], JSON_UNESCAPED_UNICODE); exit; }
+
+$d = db();
+$method = $_SERVER['REQUEST_METHOD'];
+$action = $_GET['action'] ?? '';
+
 try {
-if($method==='GET'){
-if($action==='detail'){
-$slug=$_GET['slug']??'';$userId=getOptionalAuthUserId();
-$group=$d->fetchOne("SELECT g.*,u.fullname as creator_name FROM `groups` g JOIN users u ON g.creator_id=u.id WHERE g.slug=? AND g.status='active'",[$slug]);
-if(!$group){echo json_encode(['success'=>false,'message'=>'Not found']);exit;}
-$isMember=false;$memberRole=null;
-if($userId){$m=$d->fetchOne("SELECT role FROM group_members WHERE group_id=? AND user_id=?",[$group['id'],$userId]);if($m){$isMember=true;$memberRole=$m['role'];}}
-$group['is_member']=$isMember;$group['member_role']=$memberRole;
-echo json_encode(['success'=>true,'data'=>$group]);exit;}
-if($action==='posts'){
-$gid=intval($_GET['group_id']??0);$page=max(1,intval($_GET['page']??1));$limit=15;$offset=($page-1)*$limit;
-$total=$d->fetchOne("SELECT COUNT(*) as c FROM group_posts WHERE group_id=? AND status='active'",[$gid]);
-$posts=$d->fetchAll("SELECT gp.*,u.fullname as user_name,u.avatar as user_avatar,u.username as user_username,u.shipping_company FROM group_posts gp JOIN users u ON gp.user_id=u.id WHERE gp.group_id=? AND gp.status='active' ORDER BY gp.created_at DESC LIMIT $limit OFFSET $offset",[$gid]);
-echo json_encode(['success'=>true,'data'=>['posts'=>$posts,'total'=>intval($total['c']??0),'total_pages'=>ceil(intval($total['c']??0)/$limit)]]);exit;}
-if($action==='members'){
-$gid=intval($_GET['group_id']??0);
-$members=$d->fetchAll("SELECT u.id,u.fullname,u.avatar,u.username,u.shipping_company,gm.role,gm.joined_at FROM group_members gm JOIN users u ON gm.user_id=u.id WHERE gm.group_id=? ORDER BY FIELD(gm.role,'admin','moderator','member'),gm.joined_at",[$gid]);
-echo json_encode(['success'=>true,'data'=>$members]);exit;}
-$search=$_GET['search']??'';$category=$_GET['category']??'';$where="WHERE g.status='active'";$params=[];
-if($search){$where.=" AND (g.name LIKE ? OR g.description LIKE ?)";$params[]="%$search%";$params[]="%$search%";}
-if($category){$where.=" AND g.category=?";$params[]=$category;}
-$userId=getOptionalAuthUserId();
-$groups=$d->fetchAll("SELECT g.*,u.fullname as creator_name FROM `groups` g JOIN users u ON g.creator_id=u.id $where ORDER BY g.member_count DESC",$params);
-if($userId){$my=$d->fetchAll("SELECT group_id FROM group_members WHERE user_id=?",[$userId]);$myIds=array_column($my,'group_id');foreach($groups as &$g){$g['is_member']=in_array($g['id'],$myIds);}}
-echo json_encode(['success'=>true,'data'=>$groups]);exit;}
-if($method==='POST'){
-$userId=getAuthUserId();$input=json_decode(file_get_contents('php://input'),true);
-if($action==='join'){
-$gid=intval($input['group_id']??0);$ex=$d->fetchOne("SELECT id FROM group_members WHERE group_id=? AND user_id=?",[$gid,$userId]);
-if($ex){$d->query("DELETE FROM group_members WHERE group_id=? AND user_id=?",[$gid,$userId]);$d->query("UPDATE `groups` SET member_count=member_count-1 WHERE id=?",[$gid]);echo json_encode(['success'=>true,'joined'=>false]);}
-else{$d->query("INSERT INTO group_members (group_id,user_id,role) VALUES (?,?,'member')",[$gid,$userId]);$d->query("UPDATE `groups` SET member_count=member_count+1 WHERE id=?",[$gid]);echo json_encode(['success'=>true,'joined'=>true]);}exit;}
-if($action==='post'){
-$gid=intval($input['group_id']??0);$content=trim($input['content']??'');
-if(!$content){echo json_encode(['success'=>false,'message'=>'Empty']);exit;}
-$member=$d->fetchOne("SELECT id FROM group_members WHERE group_id=? AND user_id=?",[$gid,$userId]);
-if(!$member){echo json_encode(['success'=>false,'message'=>'Not member']);exit;}
-$d->query("INSERT INTO group_posts (group_id,user_id,content,type) VALUES (?,?,?,?)",[$gid,$userId,$content,$input['type']??'post']);
-$d->query("UPDATE `groups` SET post_count=post_count+1 WHERE id=?",[$gid]);
-echo json_encode(['success'=>true,'message'=>'OK']);exit;}
-if($action==='create'){
-$name=trim($input['name']??'');if(!$name){echo json_encode(['success'=>false,'message'=>'Empty name']);exit;}
-$slug=preg_replace('/[^a-z0-9]+/','-',mb_strtolower($name));$slug=trim($slug,'-');
-$ex=$d->fetchOne("SELECT id FROM `groups` WHERE slug=?",[$slug]);if($ex)$slug.='-'.time();
-$d->query("INSERT INTO `groups` (name,slug,description,rules,creator_id,category) VALUES (?,?,?,?,?,?)",[$name,$slug,$input['description']??'',$input['rules']??'',$userId,$input['category']??'general']);
-$gid=$d->getLastInsertId();$d->query("INSERT INTO group_members (group_id,user_id,role) VALUES (?,?,'admin')",[$gid,$userId]);
-echo json_encode(['success'=>true,'data'=>['id'=>$gid,'slug'=>$slug]]);exit;}}
-} catch(Throwable $e){echo json_encode(['success'=>false,'message'=>$e->getMessage()]);exit;}
-echo json_encode(['success'=>false,'message'=>'Invalid']);
+
+if ($method === 'GET') {
+
+    if ($action === 'categories') {
+        $cats = $d->fetchAll("SELECT * FROM group_categories WHERE parent_id IS NULL ORDER BY sort_order", []);
+        $subs = $d->fetchAll("SELECT * FROM group_categories WHERE parent_id IS NOT NULL ORDER BY sort_order", []);
+        $subMap = [];
+        foreach ($subs as $s) { $subMap[$s['parent_id']][] = $s; }
+        foreach ($cats as &$c) { $c['children'] = $subMap[$c['id']] ?? []; }
+        gOk('OK', $cats);
+    }
+
+    if ($action === 'discover' || $action === '') {
+        $uid = getOptionalAuthUserId();
+        $myGroupIds = [];
+        if ($uid) { $myGroupIds = array_column($d->fetchAll("SELECT group_id FROM group_members WHERE user_id = ?", [$uid]), 'group_id'); }
+
+        $popular = $d->fetchAll("SELECT g.*, gc.name as cat_name FROM `groups` g LEFT JOIN group_categories gc ON g.category_id = gc.id WHERE g.status = 'active' ORDER BY g.member_count DESC LIMIT 10", []);
+        foreach ($popular as &$p) { $p['is_member'] = in_array($p['id'], $myGroupIds); }
+
+        $recommended = [];
+        if ($uid) {
+            $notIn = empty($myGroupIds) ? '' : ' AND g.id NOT IN (' . implode(',', array_map('intval', $myGroupIds)) . ')';
+            $recommended = $d->fetchAll("SELECT g.*, gc.name as cat_name FROM `groups` g LEFT JOIN group_categories gc ON g.category_id = gc.id WHERE g.status = 'active' $notIn ORDER BY g.member_count DESC LIMIT 6", []);
+            foreach ($recommended as &$r) { $r['is_member'] = false; }
+        }
+
+        $cats = $d->fetchAll("SELECT id, name, slug, icon FROM group_categories WHERE parent_id IS NULL ORDER BY sort_order LIMIT 6", []);
+        $byCategory = [];
+        foreach ($cats as $cat) {
+            $groups = $d->fetchAll("SELECT g.*, gc.name as cat_name FROM `groups` g LEFT JOIN group_categories gc ON g.category_id = gc.id WHERE g.status = 'active' AND (g.category_id = ? OR g.category_id IN (SELECT id FROM group_categories WHERE parent_id = ?)) ORDER BY g.member_count DESC LIMIT 4", [$cat['id'], $cat['id']]);
+            foreach ($groups as &$g) { $g['is_member'] = in_array($g['id'], $myGroupIds); }
+            if (!empty($groups)) { $byCategory[] = ['category' => $cat, 'groups' => $groups]; }
+        }
+        gOk('OK', ['popular' => $popular, 'recommended' => $recommended, 'by_category' => $byCategory]);
+    }
+
+    if ($action === 'category') {
+        $slug = $_GET['slug'] ?? '';
+        $cat = $d->fetchOne("SELECT * FROM group_categories WHERE slug = ?", [$slug]);
+        if (!$cat) gErr('Khong tim thay', 404);
+        $uid = getOptionalAuthUserId();
+        $myGroupIds = [];
+        if ($uid) { $myGroupIds = array_column($d->fetchAll("SELECT group_id FROM group_members WHERE user_id = ?", [$uid]), 'group_id'); }
+        $subs = $d->fetchAll("SELECT * FROM group_categories WHERE parent_id = ? ORDER BY sort_order", [$cat['id']]);
+        $catIds = [$cat['id']];
+        foreach ($subs as $s) { $catIds[] = $s['id']; }
+        $ph = implode(',', array_fill(0, count($catIds), '?'));
+        $groups = $d->fetchAll("SELECT g.*, gc.name as cat_name FROM `groups` g LEFT JOIN group_categories gc ON g.category_id = gc.id WHERE g.status = 'active' AND g.category_id IN ($ph) ORDER BY g.member_count DESC", $catIds);
+        foreach ($groups as &$g) { $g['is_member'] = in_array($g['id'], $myGroupIds); }
+        gOk('OK', ['category' => $cat, 'subcategories' => $subs, 'groups' => $groups]);
+    }
+
+    if ($action === 'detail') {
+        $slug = $_GET['slug'] ?? '';
+        $gid = intval($_GET['id'] ?? 0);
+        $where = $slug ? "g.slug = ?" : "g.id = ?";
+        $param = $slug ?: $gid;
+        $group = $d->fetchOne("SELECT g.*, u.fullname as creator_name, u.avatar as creator_avatar, gc.name as cat_name FROM `groups` g JOIN users u ON g.creator_id = u.id LEFT JOIN group_categories gc ON g.category_id = gc.id WHERE $where AND g.status = 'active'", [$param]);
+        if (!$group) gErr('Khong tim thay', 404);
+        $uid = getOptionalAuthUserId();
+        $group['is_member'] = false;
+        $group['member_role'] = null;
+        if ($uid) {
+            $m = $d->fetchOne("SELECT role FROM group_members WHERE group_id = ? AND user_id = ?", [$group['id'], $uid]);
+            if ($m) { $group['is_member'] = true; $group['member_role'] = $m['role']; }
+        }
+        $group['rules'] = $d->fetchAll("SELECT * FROM group_rules WHERE group_id = ? ORDER BY rule_order", [$group['id']]) ?: [];
+        $group['moderators'] = $d->fetchAll("SELECT u.id, u.fullname, u.avatar, u.username, gm.role FROM group_members gm JOIN users u ON gm.user_id = u.id WHERE gm.group_id = ? AND gm.role IN ('admin','moderator') ORDER BY FIELD(gm.role,'admin','moderator')", [$group['id']]) ?: [];
+        gOk('OK', $group);
+    }
+
+    if ($action === 'posts') {
+        $gid = intval($_GET['group_id'] ?? 0);
+        $page = max(1, intval($_GET['page'] ?? 1));
+        $limit = 15; $offset = ($page - 1) * $limit;
+        $sort = $_GET['sort'] ?? 'new';
+        $orderBy = 'gp.created_at DESC';
+        if ($sort === 'hot') $orderBy = '(gp.likes_count * 2 + gp.comments_count * 3) DESC, gp.created_at DESC';
+        if ($sort === 'top') $orderBy = 'gp.likes_count DESC';
+        $total = $d->fetchOne("SELECT COUNT(*) as c FROM group_posts WHERE group_id = ? AND status = 'active'", [$gid]);
+        $posts = $d->fetchAll("SELECT gp.*, u.fullname as user_name, u.avatar as user_avatar, u.username, u.shipping_company FROM group_posts gp JOIN users u ON gp.user_id = u.id WHERE gp.group_id = ? AND gp.status = 'active' ORDER BY $orderBy LIMIT $limit OFFSET $offset", [$gid]);
+        $uid = getOptionalAuthUserId();
+        if ($uid && !empty($posts)) {
+            $postIds = array_column($posts, 'id');
+            $ph = implode(',', array_fill(0, count($postIds), '?'));
+            $liked = $d->fetchAll("SELECT post_id FROM group_post_likes WHERE user_id = ? AND post_id IN ($ph)", array_merge([$uid], $postIds));
+            $likedSet = array_flip(array_column($liked, 'post_id'));
+            foreach ($posts as &$p) { $p['user_liked'] = isset($likedSet[$p['id']]); }
+        } else { foreach ($posts as &$p) { $p['user_liked'] = false; } }
+        gOk('OK', ['posts' => $posts, 'total' => intval($total['c'] ?? 0), 'page' => $page]);
+    }
+
+    if ($action === 'members') {
+        $gid = intval($_GET['group_id'] ?? 0);
+        $members = $d->fetchAll("SELECT u.id, u.fullname, u.avatar, u.username, u.shipping_company, gm.role, gm.joined_at FROM group_members gm JOIN users u ON gm.user_id = u.id WHERE gm.group_id = ? ORDER BY FIELD(gm.role,'admin','moderator','member'), gm.joined_at LIMIT 50", [$gid]);
+        gOk('OK', $members ?: []);
+    }
+
+    if ($action === 'leaderboard') {
+        $gid = intval($_GET['group_id'] ?? 0);
+        $type = $_GET['type'] ?? 'posts';
+        $month = $_GET['month'] ?? date('Y-m');
+        $sd = $month . '-01 00:00:00';
+        $ed = date('Y-m-t 23:59:59', strtotime($sd));
+        if ($type === 'posts') {
+            $leaders = $d->fetchAll("SELECT u.id, u.fullname, u.avatar, u.username, COUNT(gp.id) as post_count, COALESCE(SUM(gp.likes_count),0) as total_likes FROM group_posts gp JOIN users u ON gp.user_id = u.id WHERE gp.group_id = ? AND gp.status = 'active' AND gp.created_at BETWEEN ? AND ? GROUP BY u.id ORDER BY total_likes DESC LIMIT 20", [$gid, $sd, $ed]);
+        } else {
+            $leaders = $d->fetchAll("SELECT u.id, u.fullname, u.avatar, u.username, COUNT(gc.id) as comment_count, COALESCE(SUM(gc.likes_count),0) as total_likes FROM group_post_comments gc JOIN users u ON gc.user_id = u.id JOIN group_posts gp ON gc.post_id = gp.id WHERE gp.group_id = ? AND gc.status = 'active' AND gc.created_at BETWEEN ? AND ? GROUP BY u.id ORDER BY total_likes DESC LIMIT 20", [$gid, $sd, $ed]);
+        }
+        gOk('OK', ['leaderboard' => $leaders ?: [], 'month' => $month, 'type' => $type]);
+    }
+
+    if ($action === 'comments') {
+        $pid = intval($_GET['post_id'] ?? 0);
+        $cmts = $d->fetchAll("SELECT c.*, u.fullname as user_name, u.avatar as user_avatar, u.username FROM group_post_comments c JOIN users u ON c.user_id = u.id WHERE c.post_id = ? AND c.status = 'active' ORDER BY c.created_at ASC", [$pid]);
+        gOk('OK', $cmts ?: []);
+    }
+
+    if ($action === 'search') {
+        $q = trim($_GET['q'] ?? '');
+        if (strlen($q) < 2) gErr('Tu khoa qua ngan');
+        $uid = getOptionalAuthUserId();
+        $myGroupIds = [];
+        if ($uid) { $myGroupIds = array_column($d->fetchAll("SELECT group_id FROM group_members WHERE user_id = ?", [$uid]), 'group_id'); }
+        $groups = $d->fetchAll("SELECT g.*, gc.name as cat_name FROM `groups` g LEFT JOIN group_categories gc ON g.category_id = gc.id WHERE g.status = 'active' AND (g.name LIKE ? OR g.description LIKE ?) ORDER BY g.member_count DESC LIMIT 20", ["%$q%", "%$q%"]);
+        foreach ($groups as &$g) { $g['is_member'] = in_array($g['id'], $myGroupIds); }
+        gOk('OK', $groups);
+    }
+    gErr('Invalid action');
+}
+
+if ($method === 'POST') {
+    $uid = getAuthUserId();
+    $input = json_decode(file_get_contents('php://input'), true) ?: $_POST;
+
+    if ($action === 'join') {
+        $gid = intval($input['group_id'] ?? 0);
+        if (!$gid) gErr('Missing group_id');
+        $ex = $d->fetchOne("SELECT id, role FROM group_members WHERE group_id = ? AND user_id = ?", [$gid, $uid]);
+        if ($ex) {
+            if ($ex['role'] === 'admin') gErr('Admin khong the roi nhom');
+            $d->query("DELETE FROM group_members WHERE group_id = ? AND user_id = ?", [$gid, $uid]);
+            $d->query("UPDATE `groups` SET member_count = GREATEST(member_count - 1, 0) WHERE id = ?", [$gid]);
+            gOk('Da roi nhom', ['joined' => false]);
+        } else {
+            $d->query("INSERT INTO group_members (group_id, user_id, role) VALUES (?, ?, 'member')", [$gid, $uid]);
+            $d->query("UPDATE `groups` SET member_count = member_count + 1 WHERE id = ?", [$gid]);
+            gOk('Da tham gia', ['joined' => true]);
+        }
+    }
+
+    if ($action === 'post') {
+        $gid = intval($input['group_id'] ?? 0);
+        $content = trim($input['content'] ?? '');
+        if (!$content) gErr('Noi dung trong');
+        $member = $d->fetchOne("SELECT id FROM group_members WHERE group_id = ? AND user_id = ?", [$gid, $uid]);
+        if (!$member) gErr('Ban chua tham gia nhom nay');
+        $imgs = isset($input['images']) ? json_encode($input['images']) : null;
+        $d->query("INSERT INTO group_posts (group_id, user_id, content, title, images, type) VALUES (?, ?, ?, ?, ?, ?)", [$gid, $uid, $content, $input['title'] ?? null, $imgs, $input['type'] ?? 'post']);
+        $d->query("UPDATE `groups` SET post_count = post_count + 1 WHERE id = ?", [$gid]);
+        gOk('Da dang bai');
+    }
+
+    if ($action === 'like_post') {
+        $pid = intval($input['post_id'] ?? 0);
+        $ex = $d->fetchOne("SELECT id FROM group_post_likes WHERE post_id = ? AND user_id = ?", [$pid, $uid]);
+        if ($ex) {
+            $d->query("DELETE FROM group_post_likes WHERE post_id = ? AND user_id = ?", [$pid, $uid]);
+            $d->query("UPDATE group_posts SET likes_count = GREATEST(likes_count - 1, 0) WHERE id = ?", [$pid]);
+        } else {
+            $d->query("INSERT IGNORE INTO group_post_likes (post_id, user_id) VALUES (?, ?)", [$pid, $uid]);
+            $d->query("UPDATE group_posts SET likes_count = likes_count + 1 WHERE id = ?", [$pid]);
+        }
+        $cnt = $d->fetchOne("SELECT likes_count FROM group_posts WHERE id = ?", [$pid]);
+        gOk('OK', ['liked' => !$ex, 'count' => intval($cnt['likes_count'] ?? 0)]);
+    }
+
+    if ($action === 'comment') {
+        $pid = intval($input['post_id'] ?? 0);
+        $content = trim($input['content'] ?? '');
+        if (!$content) gErr('Noi dung trong');
+        $d->query("INSERT INTO group_post_comments (post_id, user_id, parent_id, content) VALUES (?, ?, ?, ?)", [$pid, $uid, $input['parent_id'] ?? null, $content]);
+        $d->query("UPDATE group_posts SET comments_count = comments_count + 1 WHERE id = ?", [$pid]);
+        gOk('Da binh luan');
+    }
+
+    if ($action === 'create') {
+        $name = trim($input['name'] ?? '');
+        if (!$name || mb_strlen($name) < 3) gErr('Ten nhom 3-100 ky tu');
+        $slug = preg_replace('/[^a-z0-9]+/', '-', mb_strtolower($name));
+        $slug = trim($slug, '-') ?: 'group-' . time();
+        $ex = $d->fetchOne("SELECT id FROM `groups` WHERE slug = ?", [$slug]);
+        if ($ex) $slug .= '-' . time();
+        $d->query("INSERT INTO `groups` (name, slug, description, creator_id, category_id, category, banner_color) VALUES (?, ?, ?, ?, ?, ?, ?)", [$name, $slug, $input['description'] ?? '', $uid, intval($input['category_id'] ?? 0) ?: null, $input['category'] ?? 'general', $input['banner_color'] ?? '#EE4D2D']);
+        $gid = $d->getLastInsertId();
+        if (!$gid) { $gid = $d->fetchOne("SELECT MAX(id) as m FROM `groups`", [])['m']; }
+        $d->query("INSERT INTO group_members (group_id, user_id, role) VALUES (?, ?, 'admin')", [$gid, $uid]);
+        $d->query("UPDATE `groups` SET member_count = 1 WHERE id = ?", [$gid]);
+        gOk('Da tao nhom', ['id' => intval($gid), 'slug' => $slug]);
+    }
+    gErr('Invalid action');
+}
+
+} catch (Throwable $e) {
+    error_log("Groups API: " . $e->getMessage());
+    gErr('Loi: ' . $e->getMessage(), 500);
+}
+gErr('Invalid request');
