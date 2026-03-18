@@ -11,7 +11,8 @@ $avatarDir = '/home/nhshiw2j/public_html/uploads/avatars/';
 // Batch number from query string (run multiple times)
 $batch = intval($_GET['batch'] ?? 1);
 $perBatch = 15;
-$offset = ($batch - 1) * $perBatch;
+// Always offset 0 - processed users no longer match WHERE condition
+$offset = 0;
 
 // Vietnamese female name indicators
 $femaleNames = ['Thị','Hương','Mai','Ngọc','Lan','Tuyết','Thảo','Kim','Linh','Hoa','Yến','Trang','Vy','Phương','Hạnh','Nhung','Dung','Quyên','Nhi','Trinh','Oanh','Thanh','Loan','Hiền','Mỹ','Uyên','Trâm','Châu','Hằng','Duyên','Anh','Huệ','Giang','Diệu','Bích','Thủy','Cúc','Sen','Thu','Xuân','Hà'];
