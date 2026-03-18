@@ -280,8 +280,8 @@ foreach ($allPosts as $idx => $post) {
     $isAnon = ($post['type'] === 'confession') ? 1 : 0;
 
     try {
-        $db->query("INSERT INTO posts (user_id, content, images, type, province, `status`, is_anonymous, created_at) VALUES (?,?,?,?,?,?,?,?)",
-            [$uid, $post['content'], $images, $post['type'], $prov, 'active', $isAnon, $createdAt]);
+        $db->query("INSERT INTO posts (user_id, content, images, type, province, `status`, created_at) VALUES (?,?,?,?,?,?,?)",
+            [$uid, $post['content'], $images, $post['type'], $prov, 'active', $createdAt]);
         $pid = $db->getLastInsertId();
         $postIds[] = $pid;
         $postCount++;
