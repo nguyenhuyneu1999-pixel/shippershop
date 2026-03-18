@@ -1,42 +1,43 @@
 <?php
-error_reporting(E_ALL);
-ini_set('display_errors', 1);
-header('Content-Type: text/plain');
 define('APP_ACCESS', true);
 require_once '/home/nhshiw2j/public_html/includes/config.php';
 require_once '/home/nhshiw2j/public_html/includes/db.php';
 $pdo = db()->getConnection();
+header('Content-Type: text/plain');
 
-// Check login_attempts structure
+// Add missing email column
 try {
-    $cols = $pdo->query("SHOW COLUMNS FROM login_attempts")->fetchAll(PDO::FETCH_ASSOC);
-    echo "login_attempts columns:\n";
-    foreach ($cols as $c) echo "  {$c['Field']} ({$c['Type']}) {$c['Null']} {$c['Default']}\n";
+    $pdo->exec("ALTER TABLE login_attempts ADD COLUMN `email` VARCHAR(255) DEFAULT NULL AFTER `user_id`");
+    echo "Added email column OK\n";
 } catch (Throwable $e) {
-    echo "login_attempts table missing: " . $e->getMessage() . "\n";
-    echo "Creating...\n";
-    try {
-        $pdo->exec("CREATE TABLE IF NOT EXISTS `login_attempts` (
-            `id` INT AUTO_INCREMENT PRIMARY KEY,
-            `ip` VARCHAR(45) NOT NULL,
-            `user_id` INT DEFAULT NULL,
-            `email` VARCHAR(255) DEFAULT NULL,
-            `success` TINYINT(1) NOT NULL DEFAULT 0,
-            `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP,
-            INDEX `idx_ip_time` (`ip`, `created_at`),
-            INDEX `idx_user_time` (`user_id`, `created_at`)
-        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4");
-        echo "Created OK\n";
-    } catch (Throwable $e2) {
-        echo "Create ERR: " . $e2->getMessage() . "\n";
-    }
+    echo "email column: " . $e->getMessage() . "\n";
 }
 
-// Test insert
+// Add missing indexes if needed
+try {
+    $pdo->exec("ALTER TABLE login_attempts ADD INDEX idx_ip_time (ip, created_at)");
+    echo "Added idx_ip_time\n";
+} catch (Throwable $e) {
+    echo "idx_ip_time: exists\n";
+}
+
+// Test query that auth.php will use
+try {
+    $r = $pdo->prepare("SELECT COUNT(*) as cnt FROM login_attempts WHERE ip = ? AND success = 0 AND created_at > ?");
+    $r->execute(['127.0.0.1', date('Y-m-d H:i:s', time() - 900)]);
+    echo "Brute force query OK: " . $r->fetch(PDO::FETCH_ASSOC)['cnt'] . "\n";
+} catch (Throwable $e) {
+    echo "Query ERR: " . $e->getMessage() . "\n";
+}
+
+// Test insert 
 try {
     $pdo->prepare("INSERT INTO login_attempts (ip, email, success, created_at) VALUES (?, ?, 0, NOW())")->execute(['127.0.0.1', 'test']);
     echo "Insert OK\n";
-    $pdo->exec("DELETE FROM login_attempts WHERE ip='127.0.0.1' AND email='test'");
+    $pdo->exec("DELETE FROM login_attempts WHERE ip='127.0.0.1'");
+    echo "Cleanup OK\n";
 } catch (Throwable $e) {
     echo "Insert ERR: " . $e->getMessage() . "\n";
 }
+
+echo "DONE\n";
