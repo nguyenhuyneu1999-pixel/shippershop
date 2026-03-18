@@ -117,7 +117,7 @@ body{background:var(--bg);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI
 <div class="list-view" id="listView">
 <div class="top-bar" id="topBar">
 <div class="top-header"><button class="top-back" onclick="history.back()"><i class="fas fa-arrow-left"></i></button><h1>Đoạn chat</h1><button class="top-btn"><i class="fas fa-user-group"></i></button></div>
-<div class="tabs"><div class="tab active" id="tabActive" onclick="switchTab('active')">Tin nhắn</div><div class="tab" id="tabPending" onclick="switchTab('pending')">Đang chờ <span class="badge" id="pendingBadge" style="display:none">0</span></div><div class="tab" id="tabGroups" onclick="switchTab('groups')">Nhóm</div></div>
+<div class="tabs"><div class="tab active" id="tabActive" onclick="switchTab('active')">Tin nhắn</div><div class="tab" id="tabPending" onclick="switchTab('pending')">Đang chờ <span class="badge" id="pendingBadge" style="display:none">0</span></div></div>
 <div style="display:flex;align-items:center;padding:10px 16px 0;gap:10px"><button onclick="history.back()" style="background:none;border:none;font-size:20px;cursor:pointer;color:#0084ff;padding:4px;flex-shrink:0"><i class="fas fa-arrow-left"></i></button><h1 style="font-size:20px;font-weight:800;margin:0">Đoạn chat</h1></div>
 <div class="search-bar" id="searchBar"><i class="fas fa-search"></i><input type="text" id="searchInput" placeholder="Tìm kiếm đoạn chat..." oninput="onSearchInput(this.value)"></div>
 <div class="filter-chips" id="filterChips">
@@ -126,6 +126,7 @@ body{background:var(--bg);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI
 <button class="f-chip" data-filter="unread" onclick="setFilter(this,'unread')">Chưa đọc</button>
 <button class="f-chip" data-filter="strangers" onclick="setFilter(this,'strangers')" id="chipStrangers">Người lạ <span id="stBadge" style="display:none;background:#E74C3C;color:#fff;font-size:10px;min-width:16px;height:16px;border-radius:8px;align-items:center;justify-content:center;padding:0 4px;margin-left:2px">0</span></button>
 <button class="f-chip" data-filter="categories" onclick="openCatManager()" id="chipCategories">Phân loại</button>
+<button class="f-chip" data-filter="groups" onclick="setFilter(this,'groups')">👥 Nhóm</button>
 </div>
 </div>
 <div id="onlineBar" class="online-bar" id="onlineBarMargin"></div>
@@ -167,8 +168,6 @@ if(au)openFromUser(parseInt(au));}
 function switchTab(t){curTab=t;
 document.getElementById("tabActive").className="tab"+(t==="active"?" active":"");
 document.getElementById("tabPending").className="tab"+(t==="pending"?" active":"");
-document.getElementById("tabGroups").className="tab"+(t==="groups"?" active":"");
-if(t==="groups"){loadGroupConvs();}else{loadConvs();loadPendingCount();}
 document.getElementById("onlineBar").style.display="none";
 loadConvs();if(t==='active')loadOnline();}
 
@@ -348,7 +347,7 @@ function ago(dt){if(!dt)return"";var s=Math.floor((new Date()-new Date(dt.replac
 </div><script>
 var curFilter="",curSearch="",searchTimer=null,catData=[],ctxConvId=0,ctxConvName="";
 function onSearchInput(v){clearTimeout(searchTimer);curSearch=v.trim();searchTimer=setTimeout(function(){applyFilter();},300);}
-function setFilter(el,f){document.querySelectorAll(".f-chip").forEach(function(c){c.classList.remove("active");});el.classList.add("active");curFilter=f;if(f==="strangers"){curTab="pending";loadConvs();return;}if(f===""){curTab="active";curSearch="";document.getElementById("searchInput").value="";}applyFilter();}
+function setFilter(el,f){document.querySelectorAll(".f-chip").forEach(function(c){c.classList.remove("active");});el.classList.add("active");curFilter=f;if(f==="groups"){loadGroupConvs();return;}if(f==="strangers"){curTab="pending";loadConvs();return;}if(f===""){curTab="active";curSearch="";document.getElementById("searchInput").value="";}applyFilter();}
 function applyFilter(){if(curFilter===""&&curSearch===""){loadConvs();return;}var url="/api/messages-api.php?action=filter_conversations&filter="+encodeURIComponent(curFilter)+"&search="+encodeURIComponent(curSearch);if(curFilter==="category"){var ac=document.querySelector(".f-chip.active[data-cat-id]");if(ac)url+="&category_id="+ac.getAttribute("data-cat-id");}var list=document.getElementById("convList");list.innerHTML="<div class=empty><i class='fas fa-spinner fa-spin'></i></div>";fetch(url,{credentials:"include"}).then(function(r){return r.json();}).then(function(d){if(!d.success||!d.data.length){list.innerHTML="<div class=empty><i class='far fa-comment-dots'></i><p>Không tìm thấy</p></div>";return;}list.innerHTML=d.data.map(function(c){return renderConvItem(c);}).join("");attachLongPress();}).catch(function(){list.innerHTML="<div class=empty><p>Lỗi</p></div>";});}
 function renderConvItem(c){var av=c.other_avatar?"<img class=cv-av src='"+c.other_avatar+"' onerror='this.className=\"cv-av-ph\";this.innerHTML=\""+(c.other_name||"U").charAt(0)+"\"'>":"<div class=cv-av-ph>"+(c.other_name||"U").charAt(0)+"</div>";var dot=parseInt(c.other_online)?"<div class=cv-dot></div>":"";var ship=c.other_ship?"<span class=cv-ship style=color:"+(SC[c.other_ship]||"#999")+">"+esc(c.other_ship)+"</span>":"";var unread=parseInt(c.unread_count)>0;var cb="";if(c.category_id&&catData.length){for(var i=0;i<catData.length;i++){if(parseInt(catData[i].id)===parseInt(c.category_id)){cb=" <span style='font-size:10px;background:"+catData[i].color+";color:#fff;padding:1px 6px;border-radius:8px'>"+esc(catData[i].name)+"</span>";break;}}}return "<div class='conv-item"+(unread?" unread":"")+"' data-conv-id='"+c.id+"' onclick='openConv("+c.id+","+c.other_id+",\""+esc(c.other_name)+"\",\""+esc(c.other_avatar||"")+"\","+c.other_online+",\""+esc(c.other_ship||"")+"\")'>"+
 "<div class=cv-av-wrap>"+av+dot+"</div>"+
