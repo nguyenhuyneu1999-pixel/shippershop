@@ -302,6 +302,7 @@ async function handleImgUpload(input) {
     addBtn.innerHTML = '<div class="mk-loading" style="width:20px;height:20px;margin:0"></div>';
     try {
         var r = await fetch('/api/marketplace.php?action=upload', {
+            credentials: 'include',
             method: 'POST',
             headers: { 'Authorization': 'Bearer ' + localStorage.getItem('token') },
             body: fd
@@ -335,7 +336,8 @@ async function submitListing() {
     try {
         var r = await fetch('/api/marketplace.php', {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + localStorage.getItem('token') },
+            headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + (localStorage.getItem('token')||'') },
+            credentials: 'include',
             body: JSON.stringify({
                 title: title, price: price,
                 category: document.getElementById('cCategory').value,
