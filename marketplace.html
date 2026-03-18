@@ -86,11 +86,11 @@
 
         /* BOTTOM NAV */
         .mk-bnav { position: fixed; bottom: 0; left: 0; right: 0; z-index: 100; background: var(--card); display: flex; border-top: 1px solid #e4e6eb; padding: 6px 0 max(6px, env(safe-area-inset-bottom)); }
-        .mk-bnav a { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 2px; font-size: 10px; color: var(--text2); padding: 4px 0; position: relative; }
+        .mk-bnav a,.mk-bnav button.mnav-item { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 2px; font-size: 10px; color: var(--text2); padding: 4px 0; position: relative; }
         .mk-bnav a.active { color: var(--primary); }
         .mk-bnav a i { font-size: 20px; }
-        .mk-bnav .fab-space{position:relative;width:60px;display:flex;align-items:center;justify-content:center;}
-        .mk-fab-nav{width:46px;height:46px;border-radius:50%;background:#EE4D2D;color:#fff;border:none;display:flex;align-items:center;justify-content:center;font-size:18px;position:absolute;top:50%;left:50%;transform:translate(-50%,-65%);box-shadow:0 2px 8px rgba(0,0,0,.15);cursor:pointer;z-index:10;}
+        
+        
         .mk-badge { position: absolute; top: 0; right: calc(50% - 18px); background: var(--primary); color: #fff; font-size: 10px; padding: 1px 5px; border-radius: 8px; font-weight: 700; }
 
         @keyframes spin { to { transform: rotate(360deg); } }
@@ -215,12 +215,14 @@
 </div>
 
 <!-- BOTTOM NAV -->
-<nav class="mk-bnav">
-    <a href="index.html"><i class="fas fa-home"></i><span>Trang chủ</span></a>
-    <a href="marketplace.html" class="active"><i class="fas fa-store"></i><span>Mua sắm</span></a>
-    <div class="fab-space"><div class="mk-fab-nav" onclick="openCreate()"><i class="fas fa-plus"></i></div></div>
-    <a href="map.html"><i class="fas fa-map-marked-alt"></i><span>Bản đồ</span></a>
-    <a href="profile.html"><i class="fas fa-user"></i><span>Tài khoản</span></a>
+<nav class="mk-bnav" id="mobileBottomNav">
+    <a href="index.html" class="mnav-item" data-page="index.html"><i class="fas fa-home"></i><span>Trang chủ</span></a>
+    <a href="marketplace.html" class="mnav-item active" data-page="marketplace.html"><i class="fas fa-store"></i><span>Mua sắm</span></a>
+    <button class="mnav-item" style="overflow:visible;background:none;border:none" onclick="openCreate()">
+      <div style="width:46px;height:46px;border-radius:50%;background:#EE4D2D;color:#fff;display:flex;align-items:center;justify-content:center;font-size:18px;margin-top:-16px;box-shadow:0 2px 8px rgba(238,77,45,.4);cursor:pointer"><i class="fas fa-plus"></i></div>
+    </button>
+    <a href="map.html" class="mnav-item" data-page="map.html"><i class="fas fa-map-marked-alt"></i><span>Bản đồ</span></a>
+    <a href="profile.html" class="mnav-item" data-page="profile.html"><i class="fas fa-user"></i><span>Tài khoản</span></a>
 </nav>
 
 <script>
