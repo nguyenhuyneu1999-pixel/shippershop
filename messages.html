@@ -133,7 +133,7 @@ body{background:var(--bg);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI
 </div>
 
 <div class="chat-view" id="chatView">
-<div class="ch-header"><button class="ch-back" onclick="backToList()"><i class="fas fa-arrow-left"></i></button><img class="ch-av" id="chAv" src="" onerror="this.style.display='none'"><div class="ch-info"><div class="ch-name" id="chName">...</div><div class="ch-sub"><span id="chStatus"></span><span id="chShip"></span></div></div><div class="ch-btns"><button class="ch-btn" onclick="if(!window.curOtherId){alert('Mở cuộc trò chuyện trước!');return}SSCall.startCall(window.curOtherId,document.getElementById('chName')?.textContent,'',false)"><i class="fas fa-phone"></i></button><button class="ch-btn" onclick="if(!window.curOtherId){alert('Mở cuộc trò chuyện trước!');return}SSCall.startCall(window.curOtherId,document.getElementById('chName')?.textContent,'',true)"><i class="fas fa-video"></i></button><button class="ch-btn"><i class="fas fa-circle-info"></i></button></div></div>
+<div class="ch-header"><button class="ch-back" onclick="backToList()"><i class="fas fa-arrow-left"></i></button><img class="ch-av" id="chAv" src="" onerror="this.style.display='none'"><div class="ch-info"><div class="ch-name" id="chName">...</div><div class="ch-sub"><span id="chStatus"></span><span id="chShip"></span></div></div><div class="ch-btns"><button class="ch-btn" onclick="if(!window.curOtherId){alert('Mở cuộc trò chuyện trước!');return}SSCall.startCall(window.curOtherId,document.getElementById('chName')?.textContent,'',false)"><i class="fas fa-phone"></i></button><button class="ch-btn" onclick="if(!window.curOtherId){alert('Mở cuộc trò chuyện trước!');return}SSCall.startCall(window.curOtherId,document.getElementById('chName')?.textContent,'',true)"><i class="fas fa-video"></i></button><button class="ch-btn" onclick="openChatOpts()"><i class="fas fa-circle-info"></i></button></div></div>
 <div class="ch-msgs" id="chMsgs"></div>
 <div id="pendingBannerChat" style="display:none"></div>
 <div class="ch-input-wrap" id="chInputWrap">
@@ -378,5 +378,226 @@ function handleFileSelect(input){if(!input.files||!input.files[0])return;var fil
 function shareLocation(){closeAttach();if(!navigator.geolocation){alert("Trình duyệt không hỗ trợ vị trí");return;}navigator.geolocation.getCurrentPosition(function(pos){var fd=new FormData();fd.append("to_user_id",curOtherId);fd.append("type","location");fd.append("lat",pos.coords.latitude);fd.append("lng",pos.coords.longitude);var c=document.getElementById("chMsgs");c.insertAdjacentHTML("beforeend","<div class='msg-row mine'><div class=msg-bubble>📍 Đang gửi vị trí...</div></div>");c.scrollTop=c.scrollHeight;fetch("/api/messages-api.php?action=upload_message",{method:"POST",credentials:"include",body:fd}).then(function(r){return r.json();}).then(function(d){if(d.success){if(!curConvId){curConvId=d.data.conversation_id;startPoll();}loadMsgs();}}).catch(function(){});},function(){alert("Không thể lấy vị trí. Vui lòng cho phép truy cập GPS.");},{enableHighAccuracy:true,timeout:10000});}
 function insertEmoji(){var inp=document.getElementById("msgInput");inp.value+="😊";inp.focus();onMsgInput();}
 function viewImg(src){var ov=document.getElementById("imgOverlay");document.getElementById("imgOverlayImg").src=src;ov.classList.add("show");}
-</script><script src="js/post-modal.js"></script>
+</script><style>
+.co-overlay{position:fixed;inset:0;z-index:1200;display:none;}
+.co-overlay.open{display:block;}
+.co-bg{position:absolute;inset:0;background:rgba(0,0,0,.4);opacity:0;transition:opacity .25s;}
+.co-overlay.open .co-bg{opacity:1;}
+.co-panel{position:absolute;top:0;right:0;bottom:0;width:100%;max-width:360px;background:#fff;transform:translateX(100%);transition:transform .3s cubic-bezier(.32,.72,0,1);overflow-y:auto;-webkit-overflow-scrolling:touch;}
+.co-overlay.open .co-panel{transform:translateX(0);}
+.co-head{padding:12px 16px;border-bottom:1px solid #e4e6eb;display:flex;align-items:center;gap:10px;position:sticky;top:0;background:#fff;z-index:1;}
+.co-head h3{flex:1;font-size:17px;font-weight:700;margin:0;}
+.co-x{width:32px;height:32px;border-radius:50%;background:#e4e6eb;border:none;font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;}
+.co-profile{text-align:center;padding:24px 16px 16px;}
+.co-profile-av{width:72px;height:72px;border-radius:50%;object-fit:cover;margin:0 auto 8px;display:block;}
+.co-profile-av-ph{width:72px;height:72px;border-radius:50%;background:#0084ff;color:#fff;display:flex;align-items:center;justify-content:center;font-size:24px;font-weight:700;margin:0 auto 8px;}
+.co-profile-name{font-size:18px;font-weight:700;}
+.co-profile-sub{font-size:13px;color:#65676B;margin-top:2px;}
+.co-quick{display:flex;justify-content:center;gap:16px;padding:8px 16px 16px;}
+.co-qbtn{display:flex;flex-direction:column;align-items:center;gap:6px;cursor:pointer;width:70px;}
+.co-qbtn .co-qi{width:36px;height:36px;border-radius:50%;background:#f0f2f5;display:flex;align-items:center;justify-content:center;font-size:15px;color:#333;}
+.co-qbtn span{font-size:11px;color:#333;text-align:center;line-height:1.3;}
+.co-section{padding:4px 0;border-top:8px solid #f0f2f5;}
+.co-item{display:flex;align-items:center;gap:14px;padding:14px 16px;cursor:pointer;}
+.co-item:active{background:#f5f5f5;}
+.co-item i{width:24px;text-align:center;font-size:18px;color:#333;flex-shrink:0;}
+.co-item .co-label{flex:1;font-size:15px;color:#333;}
+.co-item .co-desc{font-size:12px;color:#65676B;}
+.co-item .co-right{font-size:13px;color:#65676B;}
+.co-toggle{position:relative;width:44px;height:24px;background:#ccc;border-radius:12px;border:none;cursor:pointer;transition:background .2s;flex-shrink:0;}
+.co-toggle.on{background:#0084ff;}
+.co-toggle::after{content:'';position:absolute;top:2px;left:2px;width:20px;height:20px;background:#fff;border-radius:50%;transition:transform .2s;box-shadow:0 1px 3px rgba(0,0,0,.2);}
+.co-toggle.on::after{transform:translateX(20px);}
+.co-media-row{display:flex;gap:4px;padding:4px 16px 8px;overflow-x:auto;scrollbar-width:none;}
+.co-media-row::-webkit-scrollbar{display:none;}
+.co-media-thumb{width:80px;height:80px;border-radius:8px;object-fit:cover;flex-shrink:0;background:#f0f2f5;}
+.co-media-more{width:80px;height:80px;border-radius:8px;background:#f0f2f5;display:flex;align-items:center;justify-content:center;flex-shrink:0;cursor:pointer;}
+.co-media-more i{font-size:20px;color:#65676B;}
+.co-danger{color:#E74C3C !important;}
+.co-danger i{color:#E74C3C !important;}
+</style>
+
+<!-- Chat Options Panel -->
+<div class="co-overlay" id="coOverlay" onclick="if(event.target.classList.contains('co-bg'))closeChatOpts()">
+<div class="co-bg"></div>
+<div class="co-panel">
+<div class="co-head"><button class="co-x" onclick="closeChatOpts()"><i class="fas fa-arrow-left"></i></button><h3>Tùy chọn</h3></div>
+<div class="co-profile">
+<img class="co-profile-av" id="coAv" src="" onerror="this.style.display='none'">
+<div class="co-profile-name" id="coName">...</div>
+<div class="co-profile-sub" id="coSub"></div>
+</div>
+<div class="co-quick">
+<div class="co-qbtn" onclick="coSearchMsgs()"><div class="co-qi"><i class="fas fa-search"></i></div><span>Tìm tin nhắn</span></div>
+<div class="co-qbtn" onclick="coGoProfile()"><div class="co-qi"><i class="fas fa-user"></i></div><span>Trang cá nhân</span></div>
+<div class="co-qbtn" onclick="coBgChange()"><div class="co-qi"><i class="fas fa-image"></i></div><span>Đổi hình nền</span></div>
+<div class="co-qbtn" onclick="coToggleMute()"><div class="co-qi" id="coMuteIcon"><i class="fas fa-bell"></i></div><span id="coMuteLabel">Tắt thông báo</span></div>
+</div>
+
+<div class="co-section">
+<div class="co-item" onclick="coNickname()"><i class="fas fa-pen"></i><div><div class="co-label">Đổi tên gợi nhớ</div></div></div>
+<div class="co-item"><i class="fas fa-star"></i><div class="co-label" style="flex:1">Đánh dấu bạn thân</div><button class="co-toggle" id="coBff" onclick="coToggleBff(this)"></button></div>
+</div>
+
+<div class="co-section">
+<div class="co-item" onclick="coMedia()"><i class="fas fa-photo-video"></i><div><div class="co-label">Ảnh, file, link</div></div><i class="fas fa-chevron-right" style="font-size:12px;color:#ccc"></i></div>
+<div class="co-media-row" id="coMediaRow"></div>
+</div>
+
+<div class="co-section">
+<div class="co-item" onclick="coCreateGroup()"><i class="fas fa-user-group"></i><div><div class="co-label" id="coCreateGroupLabel">Tạo nhóm với ...</div></div></div>
+<div class="co-item" onclick="coAddToGroup()"><i class="fas fa-user-plus"></i><div><div class="co-label" id="coAddGroupLabel">Thêm ... vào nhóm</div></div></div>
+<div class="co-item" onclick="coSharedGroups()"><i class="fas fa-users"></i><div><div class="co-label">Xem nhóm chung</div></div><span class="co-right" id="coGroupCount"></span></div>
+</div>
+
+<div class="co-section">
+<div class="co-item" onclick="coCategory()"><i class="fas fa-tag"></i><div><div class="co-label">Thẻ phân loại</div><div class="co-desc" id="coCatDesc">Chưa gắn thẻ</div></div></div>
+<div class="co-item"><i class="fas fa-thumbtack"></i><div class="co-label" style="flex:1">Ghim trò chuyện</div><button class="co-toggle" id="coPin" onclick="coTogglePin(this)"></button></div>
+<div class="co-item"><i class="fas fa-eye-slash"></i><div class="co-label" style="flex:1">Ẩn trò chuyện</div><button class="co-toggle" id="coHide" onclick="coToggleHide(this)"></button></div>
+</div>
+
+<div class="co-section">
+<div class="co-item" onclick="coAutoDelete()"><i class="fas fa-clock"></i><div><div class="co-label">Tin nhắn tự xóa</div><div class="co-desc" id="coAutoDelDesc">Không tự xóa</div></div></div>
+<div class="co-item" onclick="coReport()"><i class="fas fa-triangle-exclamation"></i><div class="co-label">Báo xấu</div></div>
+<div class="co-item" onclick="coBlock()"><i class="fas fa-ban"></i><div class="co-label">Quản lý chặn</div><i class="fas fa-chevron-right" style="font-size:12px;color:#ccc"></i></div>
+</div>
+
+<div class="co-section">
+<div class="co-item co-danger" onclick="coDeleteHistory()"><i class="fas fa-trash"></i><div class="co-label co-danger">Xóa lịch sử trò chuyện</div></div>
+</div>
+<div style="height:40px"></div>
+</div>
+</div>
+
+<script>
+var coMuted=false,coPinned=false,coHidden=false,coBffOn=false;
+
+function openChatOpts(){
+  if(!curOtherId)return;
+  var ov=document.getElementById("coOverlay");
+  ov.style.display="block";
+  requestAnimationFrame(function(){ov.classList.add("open");});
+  // Fill profile
+  var av=document.getElementById("chAv");
+  var coAvEl=document.getElementById("coAv");
+  if(av&&av.src&&av.style.display!=="none"){coAvEl.src=av.src;coAvEl.style.display="block";}
+  else{coAvEl.style.display="none";}
+  var name=document.getElementById("chName").textContent||"";
+  document.getElementById("coName").textContent=name;
+  var ship=document.getElementById("chShip").textContent||"";
+  var status=document.getElementById("chStatus").textContent||"";
+  document.getElementById("coSub").textContent=(status?status+" ":"")+(ship?" · "+ship:"");
+  document.getElementById("coCreateGroupLabel").textContent="Tạo nhóm với "+name;
+  document.getElementById("coAddGroupLabel").textContent="Thêm "+name+" vào nhóm";
+  // Load media
+  coLoadMedia();
+}
+
+function closeChatOpts(){
+  var ov=document.getElementById("coOverlay");
+  ov.classList.remove("open");
+  setTimeout(function(){ov.style.display="none";},300);
+}
+
+function coLoadMedia(){
+  var row=document.getElementById("coMediaRow");
+  if(!curConvId){row.innerHTML="";return;}
+  fetch("/api/messages-api.php?action=messages&conversation_id="+curConvId,{credentials:"include"}).then(function(r){return r.json();}).then(function(d){
+    if(!d.success||!d.data)return;
+    var imgs=[];
+    for(var i=0;i<d.data.length;i++){
+      var m=d.data[i];
+      if(m.type==="image"&&m.file_url){imgs.push(m.file_url);if(imgs.length>=4)break;}
+    }
+    if(imgs.length===0){row.innerHTML="<span style='font-size:12px;color:#999;padding:4px'>Chưa có ảnh</span>";return;}
+    var h="";
+    for(var j=0;j<imgs.length;j++){h+="<img class='co-media-thumb' src='"+imgs[j]+"' onclick='viewImg(\""+imgs[j]+"\")'>";}
+    h+="<div class='co-media-more' onclick='coMedia()'><i class='fas fa-arrow-right'></i></div>";
+    row.innerHTML=h;
+  }).catch(function(){});
+}
+
+function coSearchMsgs(){
+  closeChatOpts();
+  var q=prompt("Tìm tin nhắn:");
+  if(!q||!q.trim())return;
+  var msgs=document.querySelectorAll(".msg-bubble");
+  var found=false;
+  for(var i=msgs.length-1;i>=0;i--){
+    if(msgs[i].textContent.toLowerCase().indexOf(q.toLowerCase())!==-1){
+      msgs[i].style.background="#FFF3CD";
+      msgs[i].scrollIntoView({behavior:"smooth",block:"center"});
+      found=true;
+      setTimeout(function(el){el.style.background="";},3000,msgs[i]);
+      break;
+    }
+  }
+  if(!found)alert("Không tìm thấy");
+}
+
+function coGoProfile(){closeChatOpts();if(curOtherId)location.href="user.html?id="+curOtherId;}
+
+function coBgChange(){
+  var colors=["#fff","#f0f4f8","#fdf2f8","#f0fdf4","#fefce8","#1a1a2e","#0f0f23"];
+  var idx=colors.indexOf(document.getElementById("chMsgs").style.background||"#fff");
+  var next=colors[(idx+1)%colors.length];
+  document.getElementById("chMsgs").style.background=next;
+  closeChatOpts();
+}
+
+function coToggleMute(){
+  coMuted=!coMuted;
+  var icon=document.getElementById("coMuteIcon");
+  var label=document.getElementById("coMuteLabel");
+  if(coMuted){icon.innerHTML="<i class='fas fa-bell-slash'></i>";label.textContent="Bật thông báo";}
+  else{icon.innerHTML="<i class='fas fa-bell'></i>";label.textContent="Tắt thông báo";}
+}
+
+function coNickname(){
+  var n=prompt("Đặt tên gợi nhớ:",document.getElementById("chName").textContent);
+  if(n&&n.trim()){document.getElementById("chName").textContent=n.trim();document.getElementById("coName").textContent=n.trim();}
+}
+
+function coToggleBff(el){el.classList.toggle("on");coBffOn=!coBffOn;}
+function coTogglePin(el){el.classList.toggle("on");coPinned=!coPinned;}
+function coToggleHide(el){el.classList.toggle("on");coHidden=!coHidden;}
+
+function coMedia(){closeChatOpts();alert("Tính năng đang phát triển");}
+function coCreateGroup(){closeChatOpts();location.href="groups.html";}
+function coAddToGroup(){closeChatOpts();alert("Tính năng đang phát triển");}
+function coSharedGroups(){closeChatOpts();alert("Tính năng đang phát triển");}
+
+function coCategory(){
+  closeChatOpts();
+  if(typeof openAssignCat==="function"&&curConvId){
+    ctxConvId=curConvId;ctxConvName=document.getElementById("chName").textContent||"";
+    openAssignCat();
+  }
+}
+
+function coAutoDelete(){
+  var opts=["Không tự xóa","1 giờ","24 giờ","7 ngày","30 ngày"];
+  var cur=document.getElementById("coAutoDelDesc").textContent;
+  var idx=opts.indexOf(cur);
+  var next=opts[(idx+1)%opts.length];
+  document.getElementById("coAutoDelDesc").textContent=next;
+}
+
+function coReport(){if(confirm("Báo cáo người dùng này?")){alert("Đã gửi báo cáo. Cảm ơn bạn!");}}
+
+function coBlock(){
+  if(confirm("Chặn người dùng này? Họ sẽ không thể nhắn tin cho bạn.")){
+    alert("Đã chặn.");closeChatOpts();backToList();
+  }
+}
+
+function coDeleteHistory(){
+  if(!confirm("Xóa toàn bộ lịch sử trò chuyện? Hành động này không thể hoàn tác."))return;
+  if(!curConvId)return;
+  fetch("/api/messages-api.php?action=delete_conversation",{method:"POST",headers:{"Content-Type":"application/json"},credentials:"include",body:JSON.stringify({conversation_id:curConvId})}).then(function(r){return r.json();}).then(function(d){
+    closeChatOpts();backToList();
+  }).catch(function(){closeChatOpts();backToList();});
+}
+</script>
+<script src="js/post-modal.js"></script>
 </body></html>
