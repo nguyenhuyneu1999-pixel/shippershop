@@ -204,14 +204,27 @@ function renderHeader(){
   document.title=g.name+" - ShipperShop";
   document.getElementById("ghName").textContent=g.name;
   var jb=document.getElementById("ghJoin");
-  if(g.is_member){jb.className="gh-join joined";jb.textContent="Đã tham gia";}
+  if(g.is_member){jb.className="gh-join joined";jb.textContent="Tham gia r\u1ed3i";}
   else{jb.className="gh-join join";jb.textContent="Tham gia";}
 
   var icon=g.icon_image?"<img src='"+esc(g.icon_image)+"' style='width:100%;height:100%;object-fit:cover;border-radius:16px'>":"<span>"+esc(g.name[0])+"</span>";
+  var isAdmin=g.member_role==="admin";
+  var bannerBg=g.banner_image?"background:url("+esc(g.banner_image)+") center/cover no-repeat":"background:"+(g.banner_color||"var(--primary)");
+  var editBtns="";
+  if(isAdmin){
+    editBtns="<div style='position:absolute;bottom:8px;right:8px;display:flex;gap:6px'>";
+    editBtns+="<label style='width:32px;height:32px;border-radius:50%;background:rgba(0,0,0,.5);display:flex;align-items:center;justify-content:center;cursor:pointer'><i class='fas fa-camera' style='color:#fff;font-size:12px'></i><input type='file' accept='image/*' style='display:none' onchange='uploadGroupImg(\"banner\",this)'></label>";
+    editBtns+="</div>";
+  }
+  var iconEdit="";
+  if(isAdmin){
+    iconEdit="<label style='position:absolute;bottom:-2px;right:-2px;width:20px;height:20px;border-radius:50%;background:var(--primary);display:flex;align-items:center;justify-content:center;cursor:pointer;border:2px solid #fff'><i class='fas fa-camera' style='color:#fff;font-size:8px'></i><input type='file' accept='image/*' style='display:none' onchange='uploadGroupImg(\"icon\",this)'></label>";
+  }
   document.getElementById("gBanner").innerHTML=
+    "<div style='"+bannerBg+";height:120px;position:relative'>"+editBtns+"</div>"+
     "<div class='g-banner-info'>"+
-      "<div class='g-banner-icon' style='background:"+(g.banner_color||"var(--primary)")+"'>"+icon+"</div>"+
-      "<div class='g-banner-text'><h1>"+esc(g.name)+"</h1><div class='gm'>"+fN(g.member_count)+" thành viên"+(g.cat_name?" · "+esc(g.cat_name):"")+"</div></div>"+
+      "<div class='g-banner-icon' style='background:"+(g.banner_color||"var(--primary)")+";position:relative'>"+icon+iconEdit+"</div>"+
+      "<div class='g-banner-text'><h1>"+esc(g.name)+"</h1><div class='gm'>"+fN(g.member_count)+" th\u00e0nh vi\u00ean \u00b7 "+fN(g.post_count||0)+" b\u00e0i vi\u1ebft"+(g.cat_name?" \u00b7 "+esc(g.cat_name):"")+"</div>"+(g.privacy==="private"?"<div class='gm' style='color:var(--primary)'><i class='fas fa-lock' style='margin-right:4px'></i>Ri\u00eang t\u01b0</div>":"")+"</div>"+
     "</div>";
 }
 
@@ -429,6 +442,25 @@ function submitPost(){
 // Init
 if(groupSlug||groupId){loadGroup();}
 else{document.getElementById("gBanner").innerHTML="<p class='empty-msg'>Không tìm thấy nhóm</p>";}
+
+function uploadGroupImg(type,input){
+  if(!input.files||!input.files[0]||!GROUP)return;
+  var f=input.files[0];
+  if(f.size>10*1024*1024){toast("File max 10MB");return;}
+  var fd=new FormData();
+  fd.append("action","update_group");
+  fd.append("group_id",GROUP.id);
+  fd.append(type,f);
+  var tk=localStorage.getItem("token");
+  var hdrs={};if(tk)hdrs["Authorization"]="Bearer "+tk;
+  toast("Đang tải lên...");
+  fetch("/api/groups.php?action=update_group",{method:"POST",headers:hdrs,credentials:"include",body:fd})
+  .then(function(r){return r.json();})
+  .then(function(d){
+    if(d.success){toast("Đã cập nhật!");loadGroup();}
+    else toast(d.message||"Lỗi");
+  }).catch(function(){toast("Lỗi kết nối");});
+}
 
 // Comment bottom sheet
 function openComment(pid){

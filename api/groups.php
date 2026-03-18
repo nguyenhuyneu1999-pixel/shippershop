@@ -213,12 +213,86 @@ if ($method === 'POST') {
         $slug = trim($slug, '-') ?: 'group-' . time();
         $ex = $d->fetchOne("SELECT id FROM `groups` WHERE slug = ?", [$slug]);
         if ($ex) $slug .= '-' . time();
-        $d->query("INSERT INTO `groups` (name, slug, description, creator_id, category_id, category, banner_color) VALUES (?, ?, ?, ?, ?, ?, ?)", [$name, $slug, $input['description'] ?? '', $uid, intval($input['category_id'] ?? 0) ?: null, $input['category'] ?? 'general', $input['banner_color'] ?? '#EE4D2D']);
+        
+        $privacy = in_array($input['privacy'] ?? '', ['public','private']) ? $input['privacy'] : 'public';
+        $catId = intval($input['category_id'] ?? 0) ?: null;
+        $desc = trim($input['description'] ?? '');
+        
+        // Handle icon upload
+        $iconUrl = null;
+        if (!empty($_FILES['icon']) && $_FILES['icon']['error'] === UPLOAD_ERR_OK) {
+            $ext = strtolower(pathinfo($_FILES['icon']['name'], PATHINFO_EXTENSION));
+            if (in_array($ext, ['jpg','jpeg','png','gif','webp']) && $_FILES['icon']['size'] <= 5*1024*1024) {
+                $dir = __DIR__ . '/../uploads/avatars/';
+                if (!is_dir($dir)) mkdir($dir, 0755, true);
+                $fn = 'grp_' . uniqid() . '.' . $ext;
+                move_uploaded_file($_FILES['icon']['tmp_name'], $dir . $fn);
+                $iconUrl = '/uploads/avatars/' . $fn;
+            }
+        }
+        
+        // Handle banner upload
+        $bannerUrl = null;
+        if (!empty($_FILES['banner']) && $_FILES['banner']['error'] === UPLOAD_ERR_OK) {
+            $ext = strtolower(pathinfo($_FILES['banner']['name'], PATHINFO_EXTENSION));
+            if (in_array($ext, ['jpg','jpeg','png','gif','webp']) && $_FILES['banner']['size'] <= 10*1024*1024) {
+                $dir = __DIR__ . '/../uploads/posts/';
+                if (!is_dir($dir)) mkdir($dir, 0755, true);
+                $fn = 'grp_banner_' . uniqid() . '.' . $ext;
+                move_uploaded_file($_FILES['banner']['tmp_name'], $dir . $fn);
+                $bannerUrl = '/uploads/posts/' . $fn;
+            }
+        }
+        
+        $d->query("INSERT INTO `groups` (name, slug, description, creator_id, category_id, category, banner_color, privacy, icon_image, banner_image) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", 
+            [$name, $slug, $desc, $uid, $catId, $input['category'] ?? 'general', '#7C3AED', $privacy, $iconUrl, $bannerUrl]);
         $gid = $d->getLastInsertId();
         if (!$gid) { $gid = $d->fetchOne("SELECT MAX(id) as m FROM `groups`", [])['m']; }
         $d->query("INSERT INTO group_members (group_id, user_id, role) VALUES (?, ?, 'admin')", [$gid, $uid]);
         $d->query("UPDATE `groups` SET member_count = 1 WHERE id = ?", [$gid]);
         gOk('Da tao nhom', ['id' => intval($gid), 'slug' => $slug]);
+    }
+    
+    // Update group (admin only)
+    if ($action === 'update_group') {
+        $gid = intval($input['group_id'] ?? ($_POST['group_id'] ?? 0));
+        $role = $d->fetchOne("SELECT role FROM group_members WHERE group_id = ? AND user_id = ?", [$gid, $uid]);
+        if (!$role || $role['role'] !== 'admin') gErr('Khong co quyen');
+        
+        $updates = [];
+        $params = [];
+        
+        if (isset($input['name']) && trim($input['name'])) { $updates[] = "name = ?"; $params[] = trim($input['name']); }
+        if (isset($input['description'])) { $updates[] = "description = ?"; $params[] = trim($input['description']); }
+        if (isset($input['privacy']) && in_array($input['privacy'], ['public','private'])) { $updates[] = "privacy = ?"; $params[] = $input['privacy']; }
+        if (isset($input['category_id'])) { $updates[] = "category_id = ?"; $params[] = intval($input['category_id']); }
+        if (isset($input['banner_color'])) { $updates[] = "banner_color = ?"; $params[] = $input['banner_color']; }
+        
+        // Icon upload
+        if (!empty($_FILES['icon']) && $_FILES['icon']['error'] === UPLOAD_ERR_OK) {
+            $ext = strtolower(pathinfo($_FILES['icon']['name'], PATHINFO_EXTENSION));
+            if (in_array($ext, ['jpg','jpeg','png','gif','webp'])) {
+                $dir = __DIR__ . '/../uploads/avatars/';
+                $fn = 'grp_' . uniqid() . '.' . $ext;
+                move_uploaded_file($_FILES['icon']['tmp_name'], $dir . $fn);
+                $updates[] = "icon_image = ?"; $params[] = '/uploads/avatars/' . $fn;
+            }
+        }
+        // Banner upload
+        if (!empty($_FILES['banner']) && $_FILES['banner']['error'] === UPLOAD_ERR_OK) {
+            $ext = strtolower(pathinfo($_FILES['banner']['name'], PATHINFO_EXTENSION));
+            if (in_array($ext, ['jpg','jpeg','png','gif','webp'])) {
+                $dir = __DIR__ . '/../uploads/posts/';
+                $fn = 'grp_banner_' . uniqid() . '.' . $ext;
+                move_uploaded_file($_FILES['banner']['tmp_name'], $dir . $fn);
+                $updates[] = "banner_image = ?"; $params[] = '/uploads/posts/' . $fn;
+            }
+        }
+        
+        if (empty($updates)) gErr('Khong co gi de cap nhat');
+        $params[] = $gid;
+        $d->query("UPDATE `groups` SET " . implode(', ', $updates) . " WHERE id = ?", $params);
+        gOk('Da cap nhat nhom');
     }
     gErr('Invalid action');
 }

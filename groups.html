@@ -294,17 +294,7 @@ loadDiscover();
 
 function createGroup(){
   if(!CU){location.href="login.html";return;}
-  var name=prompt("Tên nhóm mới:");
-  if(!name||!name.trim())return;
-  var hdrs={"Content-Type":"application/json"};
-  var tk=localStorage.getItem("token");
-  if(tk)hdrs["Authorization"]="Bearer "+tk;
-  fetch("/api/groups.php?action=create",{method:"POST",headers:hdrs,credentials:"include",body:JSON.stringify({name:name.trim(),description:""})})
-  .then(function(r){return r.json();})
-  .then(function(d){
-    if(d.success&&d.data.slug){location.href="group.html?slug="+d.data.slug;}
-    else{toast(d.message||"Lỗi tạo nhóm");}
-  }).catch(function(){toast("Lỗi kết nối");});
+  location.href="create-group.html";
 }
 </script>
 <script src="js/mobile.js"></script>
