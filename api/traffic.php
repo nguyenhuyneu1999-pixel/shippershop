@@ -44,6 +44,17 @@ try {
 // GET - List alerts
 // ==========================================
 if ($method === 'GET' && empty($action)) {
+    // Force simple query for now
+    $alerts2 = $db->fetchAll("SELECT a.*, u.fullname as user_name, u.avatar as user_avatar, u.shipping_company FROM traffic_alerts a JOIN users u ON a.user_id = u.id WHERE a.`status`='active' AND a.expires_at > NOW() ORDER BY a.created_at DESC LIMIT 20", []);
+    if (!$alerts2) $alerts2 = [];
+    foreach ($alerts2 as &$aa) {
+        $exp2 = strtotime($aa['expires_at']); $now2 = time(); $rem2 = $exp2 - $now2;
+        if ($rem2 > 3600) $aa['time_left'] = floor($rem2/3600).'h '.floor(($rem2%3600)/60).'m';
+        elseif ($rem2 > 60) $aa['time_left'] = floor($rem2/60).' phút';
+        else $aa['time_left'] = 'Sắp hết';
+        $aa['reliability'] = ($aa['confirms']+1)/($aa['confirms']+$aa['denies']+1)*100;
+    }
+    tSuccess('OK', $alerts2);
     $cat = $_GET['category'] ?? '';
     $lat = floatval($_GET['lat'] ?? 0);
     $lng = floatval($_GET['lng'] ?? 0);
