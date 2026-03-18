@@ -10,7 +10,7 @@ $avatarDir = '/home/nhshiw2j/public_html/uploads/avatars/';
 
 // Batch number from query string (run multiple times)
 $batch = intval($_GET['batch'] ?? 1);
-$perBatch = 50;
+$perBatch = 15;
 $offset = ($batch - 1) * $perBatch;
 
 // Vietnamese female name indicators
@@ -91,8 +91,8 @@ foreach ($users as $u) {
     echo "  #{$u['id']} {$u['fullname']} ($gender): OK → $filename (" . filesize($filepath) . "b)\n";
     $success++;
     
-    // Rate limit: 0.8s between downloads
-    usleep(800000);
+    // Rate limit: 0.5s between downloads
+    usleep(500000);
 }
 
 echo "\n=== Batch $batch Result ===\n";
