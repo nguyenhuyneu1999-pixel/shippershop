@@ -10,7 +10,7 @@
 <link rel="preload" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
 <noscript><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"></noscript>
 <style>
-:root{--primary:#EE4D2D;--bg:#f0f2f5;--card:#fff;--border:#e4e6eb;--text:#1C1C1C;--muted:#65676B}
+:root{--primary:#7C3AED;--bg:#f0f2f5;--card:#fff;--border:#e4e6eb;--text:#1C1C1C;--muted:#65676B}
 *{margin:0;padding:0;box-sizing:border-box}
 body{background:var(--bg);font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;color:var(--text);padding-bottom:80px}
 
@@ -440,7 +440,7 @@ function openComment(pid){
   sh.style.cssText="background:#fff;width:100%;max-width:600px;max-height:80vh;border-radius:16px 16px 0 0;display:flex;flex-direction:column;overflow:hidden;";
   sh.innerHTML="<div style='padding:12px 16px;border-bottom:1px solid #e4e6eb;display:flex;align-items:center'><h3 style='flex:1;font-size:16px;font-weight:700;margin:0'>Ghi chú</h3><button onclick='closeComment()' style='background:#e4e6eb;border:none;width:30px;height:30px;border-radius:50%;cursor:pointer;font-size:14px'><i class='fas fa-times'></i></button></div>"
   +"<div id='gcCmts2' style='flex:1;overflow-y:auto;padding:8px'><div style='text-align:center;padding:30px;color:#999'><i class='fas fa-spinner fa-spin'></i></div></div>"
-  +"<div style='display:flex;gap:8px;padding:10px 12px;border-top:1px solid #e4e6eb'><input id='gcInput2' style='flex:1;padding:8px 14px;border-radius:20px;border:1px solid #e4e6eb;font-size:14px;outline:none' placeholder='Viết bình luận...' onkeydown='if(event.key===\"Enter\")sendGroupComment("+pid+")'><button onclick='sendGroupComment("+pid+")' style='background:#EE4D2D;color:#fff;border:none;border-radius:50%;width:32px;height:32px;font-size:14px;cursor:pointer'><i class='fas fa-paper-plane'></i></button></div>";
+  +"<div style='display:flex;gap:8px;padding:10px 12px;border-top:1px solid #e4e6eb'><input id='gcInput2' style='flex:1;padding:8px 14px;border-radius:20px;border:1px solid #e4e6eb;font-size:14px;outline:none' placeholder='Viết bình luận...' onkeydown='if(event.key===\"Enter\")sendGroupComment("+pid+")'><button onclick='sendGroupComment("+pid+")' style='background:#7C3AED;color:#fff;border:none;border-radius:50%;width:32px;height:32px;font-size:14px;cursor:pointer'><i class='fas fa-paper-plane'></i></button></div>";
   ov.appendChild(sh);document.body.appendChild(ov);
   // Load comments
   apiFetch("/api/groups.php?action=comments&post_id="+pid).then(function(d){

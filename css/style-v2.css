@@ -1,14 +1,14 @@
 /* ============================================
    COMPLETE E-COMMERCE + SOCIAL STYLESHEET
-   Theme: Shopee Orange (#EE4D2D)
+   Theme: ShipperShop Purple (#7C3AED)
    Effects: LVMH 3D Floating Products
    ============================================ */
 
 :root {
     /* Shopee Orange Theme */
-    --primary: #EE4D2D;
-    --primary-dark: #D73211;
-    --primary-light: #FF6B4A;
+    --primary: #7C3AED;
+    --primary-dark: #5B21B6;
+    --primary-light: #A78BFA;
     
     /* Secondary Colors */
     --secondary: #FF8C00;

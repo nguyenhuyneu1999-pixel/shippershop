@@ -99,9 +99,9 @@ const PRODUCTS = [
         categoryName: 'Thời Trang',
         price: 299000,
         salePrice: 199000,
-        image: 'https://via.placeholder.com/600x600/EE4D2D/FFFFFF?text=Ao+Thun+Nam',
+        image: 'https://via.placeholder.com/600x600/7C3AED/FFFFFF?text=Ao+Thun+Nam',
         gallery: [
-            'https://via.placeholder.com/600x600/EE4D2D/FFFFFF?text=Ao+Thun',
+            'https://via.placeholder.com/600x600/7C3AED/FFFFFF?text=Ao+Thun',
             'https://via.placeholder.com/600x600/FF6B4A/FFFFFF?text=Detail',
             'https://via.placeholder.com/600x600/FFB84D/FFFFFF?text=Model'
         ],
@@ -130,7 +130,7 @@ const PRODUCTS = [
         gallery: [
             'https://via.placeholder.com/600x600/FF6B4A/FFFFFF?text=Dior+999',
             'https://via.placeholder.com/600x600/D73211/FFFFFF?text=Swatch',
-            'https://via.placeholder.com/600x600/EE4D2D/FFFFFF?text=Packaging'
+            'https://via.placeholder.com/600x600/7C3AED/FFFFFF?text=Packaging'
         ],
         rating: 4.9,
         reviews: 3456,

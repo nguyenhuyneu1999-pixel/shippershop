@@ -10,7 +10,7 @@
 :root {
   --mobile-nav-h: 60px;
   --header-h: 54px;
-  --primary: #EE4D2D;
+  --primary: #7C3AED;
   --primary-dark: #D73211;
   --touch-min: 44px;
 }
@@ -602,7 +602,7 @@ a, button, [onclick] {
   position: fixed;
   top: 0; left: 0; right: 0;
   height: 56px;
-  background: var(--primary, #EE4D2D);
+  background: var(--primary, #7C3AED);
   color: #fff;
   font-size: 13px;
   font-weight: 600;
@@ -633,7 +633,7 @@ a, button, [onclick] {
 #navCartBadge {
   position: absolute;
   top: 2px; right: 8px;
-  background: #EE4D2D;
+  background: #7C3AED;
   color: #fff;
   font-size: 9px;
   font-weight: 700;

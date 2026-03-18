@@ -38,7 +38,7 @@ function mkPost(p){
   var av=anon?'<span class="avatar-sm" style="background:#888">?</span>':(p.user_avatar?'<a href="'+profileLink+'"><img class="avatar-sm" src="'+p.user_avatar+'" onerror="this.outerHTML=\'<span class=avatar-sm>'+firstChar+'</span>\'"></a>':'<a href="'+profileLink+'"><span class="avatar-sm">'+firstChar+'</span></a>');
   var pvBadge=p.province?'<span class="province-badge">'+p.province+'</span>':'';
   var anonBadge=anon?'<span class="anon-badge">🎭</span>':'';
-  var shipColors={'GHTK':'#00b14f','J&T':'#d32f2f','GHN':'#ff6600','Viettel Post':'#e21a1a','BEST':'#ffc107','Ninja Van':'#c41230','SPX':'#EE4D2D','Ahamove':'#f5a623','Lalamove':'#f5a623','Grab':'#00b14f','Be':'#5bc500','Gojek':'#00aa13'};
+  var shipColors={'GHTK':'#00b14f','J&T':'#d32f2f','GHN':'#ff6600','Viettel Post':'#e21a1a','BEST':'#ffc107','Ninja Van':'#c41230','SPX':'#7C3AED','Ahamove':'#f5a623','Lalamove':'#f5a623','Grab':'#00b14f','Be':'#5bc500','Gojek':'#00aa13'};
   var shipBadge='';
   if(!anon&&p.shipping_company){
     var sc=p.shipping_company;
