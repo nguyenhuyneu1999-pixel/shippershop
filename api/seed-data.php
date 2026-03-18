@@ -77,7 +77,14 @@ for ($i = 0; $i < 100; $i++) {
     }
 }
 
-echo "\nCreated " . count($userIds) . " users\n\n";
+// Re-fetch actual user IDs from DB
+$seedUsers = $db->fetchAll("SELECT id FROM users WHERE username LIKE '%seed%' OR email LIKE '%@gmail.com' ORDER BY id DESC LIMIT 100", []);
+if (empty($seedUsers)) {
+    // Fallback: get latest 100 users (excluding first 10 real users)
+    $seedUsers = $db->fetchAll("SELECT id FROM users WHERE id > 10 ORDER BY id DESC LIMIT 100", []);
+}
+$userIds = array_map(function($u) { return intval($u['id']); }, $seedUsers);
+echo "\nFound " . count($userIds) . " user IDs in DB\n\n";
 
 // ===== STEP 2: Download post images from Unsplash (Vietnamese landscapes) =====
 echo "Step 2: Downloading post images...\n";
@@ -219,7 +226,7 @@ for ($i = 0; $i < $numPosts; $i++) {
         $postIds[] = $pid;
         echo "  Post #{$i}: [ID={$pid}] " . mb_substr($content, 0, 50) . "...\n";
     } catch (Throwable $e) {
-        echo "  SKIP post {$i}: " . $e->getMessage() . "\n";
+        echo "  SKIP post {$i}: " . $e->getMessage() . " SQL user_id={$uid} type={$type}\n";
     }
 }
 
