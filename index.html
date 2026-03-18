@@ -558,16 +558,27 @@ function onDistChange(){
 // Modal province/district/ward
 var mDistData=[],mWardData=[];
 function onMProvChange(){
-  var sel=document.getElementById('mProv');var name=sel.value;
-  var dR=document.getElementById('mDistRow');var wR=document.getElementById('mWardRow');
-  document.getElementById('mDist').innerHTML='<option value="">-- Ch\u1ECDn --</option>';
-  document.getElementById('mWard').innerHTML='<option value="">-- Ch\u1ECDn --</option>';
+  var name=document.getElementById('mProv').value;
+  var dR=document.getElementById('mDistRow');
+  var wR=document.getElementById('mWardRow');
+  var dSel=document.getElementById('mDist');
+  var wSel=document.getElementById('mWard');
+  dSel.innerHTML='<option value="">-- Ch\u1ECDn --</option>';
+  wSel.innerHTML='<option value="">-- Ch\u1ECDn --</option>';
   if(!name){dR.style.display='none';wR.style.display='none';return;}
-  dR.style.display='';wR.style.display='none';
-  var allProvs=document.getElementById('fProvince').options;
+  dR.style.display='block';
+  wR.style.display='none';
   var code=null;
-  for(var i=0;i<fProvData.length;i++){if(fProvData[i].name===name){code=fProvData[i].code;break;}}
-  if(!code) return;
+  if(typeof fProvData!=='undefined'){for(var i=0;i<fProvData.length;i++){if(fProvData[i].name===name){code=fProvData[i].code;break;}}}
+  if(!code){
+    fetch('https://provinces.open-api.vn/api/?depth=1').then(function(r){return r.json();}).then(function(all){
+      for(var i=0;i<all.length;i++){if(all[i].name===name){loadMDist(all[i].code);break;}}
+    });
+    return;
+  }
+  loadMDist(code);
+}
+function loadMDist(code){
   fetch('https://provinces.open-api.vn/api/p/'+code+'?depth=2').then(function(r){return r.json();}).then(function(d){
     mDistData=d.districts||[];
     var dSel=document.getElementById('mDist');
@@ -577,12 +588,13 @@ function onMProvChange(){
 function onMDistChange(){
   var name=document.getElementById('mDist').value;
   var wR=document.getElementById('mWardRow');
-  document.getElementById('mWard').innerHTML='<option value="">-- Ch\u1ECDn --</option>';
+  var wSel=document.getElementById('mWard');
+  wSel.innerHTML='<option value="">-- Ch\u1ECDn --</option>';
   if(!name){wR.style.display='none';return;}
-  wR.style.display='';
-  var dist=mDistData.find(function(d){return d.name===name;});
+  wR.style.display='block';
+  var dist=null;
+  if(typeof mDistData!=='undefined'){dist=mDistData.find(function(d){return d.name===name;});}
   if(dist){fetch('https://provinces.open-api.vn/api/d/'+dist.code+'?depth=2').then(function(r){return r.json();}).then(function(d){
-    var wSel=document.getElementById('mWard');
     (d.wards||[]).forEach(function(w){var o=document.createElement('option');o.value=w.name;o.textContent=w.name;wSel.appendChild(o);});
   });}
 }
