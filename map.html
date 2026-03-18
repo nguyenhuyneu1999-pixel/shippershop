@@ -50,7 +50,26 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;h
 .pin-popup strong{font-size:14px;display:block;margin-bottom:4px}
 .pin-popup .pin-user{font-size:11px;color:var(--text2);margin-top:6px}
 .pin-type-badge{display:inline-block;padding:2px 8px;border-radius:8px;font-size:10px;font-weight:600;margin-bottom:4px}
-.map-bottom-nav a.active,.map-bottom-nav a.active i,.map-bottom-nav a.active span{color:#EE4D2D!important;} .map-bottom-nav a{transition:none!important;} .map-bottom-nav{position:fixed!important;bottom:0!important;left:0!important;right:0!important;}</style>
+.map-bottom-nav a.active,.map-bottom-nav a.active i,.map-bottom-nav a.active span{color:#EE4D2D!important;} .map-bottom-nav a{transition:none!important;} .map-bottom-nav{position:fixed!important;bottom:0!important;left:0!important;right:0!important;}
+.ask-fab{position:absolute;bottom:130px;left:14px;z-index:1000;width:44px;height:44px;border-radius:50%;background:#1976d2;color:#fff;border:none;font-size:18px;box-shadow:0 3px 10px rgba(25,118,210,.4);cursor:pointer;display:flex;align-items:center;justify-content:center}
+.ask-overlay{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:2000;display:none;align-items:flex-end;justify-content:center}
+.ask-overlay.open{display:flex}
+.ask-modal{background:#fff;width:100%;max-width:500px;max-height:90vh;border-radius:16px 16px 0 0;display:flex;flex-direction:column;transform:translateY(100%);transition:transform .3s ease}
+.ask-overlay.open .ask-modal{transform:translateY(0)}
+.ask-head{display:flex;align-items:center;padding:14px 16px;border-bottom:1px solid #e4e6eb}
+.ask-head h3{flex:1;font-size:16px;font-weight:700;margin:0}
+.ask-close{background:#e4e6eb;border:none;width:32px;height:32px;border-radius:50%;font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center}
+.ask-body{padding:16px;overflow-y:auto;flex:1}
+.ask-field{margin-bottom:14px}
+.ask-field label{display:block;font-size:13px;font-weight:600;color:#65676B;margin-bottom:4px}
+.ask-field input,.ask-field select,.ask-field textarea{width:100%;padding:10px 12px;border:1.5px solid #ddd;border-radius:10px;font-size:14px;font-family:inherit;outline:none}
+.ask-field input:focus,.ask-field select:focus,.ask-field textarea:focus{border-color:#1976d2}
+.ask-field textarea{min-height:80px;resize:none}
+.ask-foot{padding:12px 16px;border-top:1px solid #e4e6eb}
+.ask-submit{width:100%;padding:12px;background:#1976d2;color:#fff;border:none;border-radius:10px;font-size:15px;font-weight:700;cursor:pointer}
+.ask-submit:disabled{opacity:.5}
+.ask-info{background:#e3f2fd;border-radius:10px;padding:10px 12px;margin-bottom:14px;font-size:12px;color:#1565c0;line-height:1.5}
+</style>
 </head>
 <body>
 
@@ -73,6 +92,9 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;h
 </div>
 
 <!-- LOCATE ME -->
+
+<!-- ASK LOCATION -->
+<button class="ask-fab" onclick="openAskLocation()" title="Hỏi địa chỉ"><i class="fas fa-question"></i></button>
 <button class="map-locate" onclick="locateMe()"><i class="fas fa-crosshairs"></i></button>
 
 <!-- ADD PIN FAB -->
@@ -252,5 +274,154 @@ function timeAgo(d){if(!d)return"";var s=Math.floor((Date.now()-new Date(d).getT
 // INIT
 document.addEventListener("DOMContentLoaded",initMap);
 </script>
-<script src="js/post-modal.js"></script></body>
+<script src="js/post-modal.js"></script>
+<!-- ASK LOCATION MODAL -->
+<div class="ask-overlay" id="askOverlay" onclick="if(event.target===this)closeAskLocation()">
+<div class="ask-modal">
+  <div class="ask-head">
+    <h3><i class="fas fa-question-circle" style="color:#1976d2;margin-right:8px"></i>Hỏi địa chỉ</h3>
+    <button class="ask-close" onclick="closeAskLocation()"><i class="fas fa-times"></i></button>
+  </div>
+  <div class="ask-body">
+    <div class="ask-info"><i class="fas fa-info-circle"></i> Bài hỏi sẽ được đăng lên feed của shipper cùng khu vực để giúp bạn tìm địa chỉ.</div>
+    <div class="ask-field">
+      <label>Tên địa điểm cần tìm *</label>
+      <input type="text" id="askPlace" placeholder="VD: Nhà bàn Lan, quán phở Hùng...">
+    </div>
+    <div class="ask-field">
+      <label>Tỉnh/Thành phố *</label>
+      <select id="askProvince" onchange="loadDistricts()"><option value="">-- Chọn tỉnh --</option></select>
+    </div>
+    <div class="ask-field">
+      <label>Quận/Huyện</label>
+      <select id="askDistrict" onchange="loadWards()"><option value="">-- Chọn quận/huyện --</option></select>
+    </div>
+    <div class="ask-field">
+      <label>Xã/Phường</label>
+      <select id="askWard"><option value="">-- Chọn xã/phường --</option></select>
+    </div>
+    <div class="ask-field">
+      <label>Mô tả thêm</label>
+      <textarea id="askDesc" placeholder="Mô tả thêm đặc điểm, gần đâu, màu sơn nhà..."></textarea>
+    </div>
+  </div>
+  <div class="ask-foot">
+    <button class="ask-submit" id="askSubmit" onclick="submitAskLocation()"><i class="fas fa-paper-plane" style="margin-right:6px"></i>Đăng hỏi</button>
+  </div>
+</div>
+</div>
+
+<script>
+// === ASK LOCATION ===
+var askProvinces=[], askDistricts=[], askWards=[];
+
+function openAskLocation(){
+  var CU2=JSON.parse(localStorage.getItem("user")||"null");
+  if(!CU2){alert("Vui l\u00f2ng \u0111\u0103ng nh\u1eadp!");location.href="login.html";return;}
+  document.getElementById("askOverlay").classList.add("open");
+  if(askProvinces.length===0) loadProvinces();
+}
+
+function closeAskLocation(){
+  document.getElementById("askOverlay").classList.remove("open");
+}
+
+async function loadProvinces(){
+  try{
+    var r=await fetch("https://provinces.open-api.vn/api/?depth=1");
+    askProvinces=await r.json();
+    var sel=document.getElementById("askProvince");
+    sel.innerHTML='<option value="">-- Ch\u1ECDn t\u1EC9nh --</option>';
+    askProvinces.forEach(function(p){
+      sel.innerHTML+='<option value="'+p.code+'">'+p.name+'</option>';
+    });
+  }catch(e){console.log("Province API error",e);}
+}
+
+async function loadDistricts(){
+  var code=document.getElementById("askProvince").value;
+  var sel=document.getElementById("askDistrict");
+  var wSel=document.getElementById("askWard");
+  sel.innerHTML='<option value="">-- Ch\u1ECDn qu\u1EADn/huy\u1EC7n --</option>';
+  wSel.innerHTML='<option value="">-- Ch\u1ECDn x\u00e3/ph\u01b0\u1EDDng --</option>';
+  if(!code)return;
+  try{
+    var r=await fetch("https://provinces.open-api.vn/api/p/"+code+"?depth=2");
+    var d=await r.json();
+    askDistricts=d.districts||[];
+    askDistricts.forEach(function(dist){
+      sel.innerHTML+='<option value="'+dist.code+'">'+dist.name+'</option>';
+    });
+  }catch(e){}
+}
+
+async function loadWards(){
+  var code=document.getElementById("askDistrict").value;
+  var sel=document.getElementById("askWard");
+  sel.innerHTML='<option value="">-- Ch\u1ECDn x\u00e3/ph\u01b0\u1EDDng --</option>';
+  if(!code)return;
+  try{
+    var r=await fetch("https://provinces.open-api.vn/api/d/"+code+"?depth=2");
+    var d=await r.json();
+    askWards=d.wards||[];
+    askWards.forEach(function(w){
+      sel.innerHTML+='<option value="'+w.code+'">'+w.name+'</option>';
+    });
+  }catch(e){}
+}
+
+async function submitAskLocation(){
+  var place=document.getElementById("askPlace").value.trim();
+  if(!place){alert("Nh\u1EADp t\u00ean \u0111\u1ECBa \u0111i\u1EC3m!");return;}
+  
+  var provSel=document.getElementById("askProvince");
+  var distSel=document.getElementById("askDistrict");
+  var wardSel=document.getElementById("askWard");
+  var provName=provSel.options[provSel.selectedIndex]?provSel.options[provSel.selectedIndex].text:"";
+  var distName=distSel.options[distSel.selectedIndex]?distSel.options[distSel.selectedIndex].text:"";
+  var wardName=wardSel.options[wardSel.selectedIndex]?wardSel.options[wardSel.selectedIndex].text:"";
+  var desc=document.getElementById("askDesc").value.trim();
+  
+  if(!provSel.value){alert("Ch\u1ECDn t\u1EC9nh/th\u00e0nh ph\u1ED1!");return;}
+  
+  // Build content
+  var location_parts=[];
+  if(wardName&&wardName.indexOf("--")===-1) location_parts.push(wardName);
+  if(distName&&distName.indexOf("--")===-1) location_parts.push(distName);
+  if(provName&&provName.indexOf("--")===-1) location_parts.push(provName);
+  var locationStr=location_parts.join(", ");
+  
+  var content="\ud83d\udccd H\u1ECFi \u0111\u1ECBa ch\u1EC9: "+place+"\n\n";
+  content+="\ud83d\udccd Khu v\u1ef1c: "+locationStr+"\n";
+  if(desc) content+="\n"+desc;
+  content+="\n\n#h\u1ECFi\u0111\u1ECBach\u1EC9 #"+provName.replace(/\s+/g,"").toLowerCase();
+  
+  var btn=document.getElementById("askSubmit");
+  btn.disabled=true;btn.textContent="\u0110ang \u0111\u0103ng...";
+  
+  try{
+    var tk=localStorage.getItem("token")||"";
+    var fd=new FormData();
+    fd.append("content",content);
+    fd.append("type","question");
+    
+    var hdrs={};
+    if(tk) hdrs["Authorization"]="Bearer "+tk;
+    
+    var r=await fetch("/api/posts.php",{method:"POST",headers:hdrs,credentials:"include",body:fd});
+    var d=await r.json();
+    if(d.success){
+      alert("\u2705 \u0110\u00e3 \u0111\u0103ng b\u00e0i h\u1ECFi \u0111\u1ECBa ch\u1EC9! Shipper c\u00f9ng khu v\u1ef1c s\u1ebd gi\u00fap b\u1ea1n.");
+      closeAskLocation();
+      document.getElementById("askPlace").value="";
+      document.getElementById("askDesc").value="";
+    }else{
+      alert("L\u1ed7i: "+(d.message||"Kh\u00f4ng \u0111\u0103ng \u0111\u01b0\u1ee3c"));
+    }
+  }catch(e){alert("L\u1ed7i k\u1ebft n\u1ed1i");}
+  btn.disabled=false;btn.innerHTML='<i class="fas fa-paper-plane" style="margin-right:6px"></i>\u0110\u0103ng h\u1ECFi';
+}
+</script>
+
+</body>
 </html>
