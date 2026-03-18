@@ -32,8 +32,7 @@ if (intval($existingCount['c'] ?? 0) >= 100) {
     echo "Step 1: SKIP - 100+ users already exist\n";
     $userIds = [];
     // Jump ahead - dont create users
-    goto STEP2;
-}
+    } else {
 echo "Step 1: Creating 100 users...\n";
 $userIds = [];
 $avatarDir = __DIR__ . '/../uploads/avatars/';
@@ -93,8 +92,13 @@ if (empty($seedUsers)) {
 }
 $userIds = array_map(function($u) { return intval($u['id']); }, $seedUsers);
 echo "\nFound " . count($userIds) . " user IDs in DB\n\n";
+} // end if (users < 100)
 
-STEP2:
+// Get user IDs regardless
+$seedUsers2 = $db->fetchAll("SELECT id FROM users WHERE id > 10 ORDER BY id ASC LIMIT 100", []);
+$userIds = array_map(function($u) { return intval($u['id']); }, $seedUsers2);
+echo "Using " . count($userIds) . " user IDs\n\n";
+
 // ===== STEP 2: Download post images from Unsplash (Vietnamese landscapes) =====
 echo "Step 2: Downloading post images...\n";
 $postImgDir = __DIR__ . '/../uploads/posts/';
@@ -306,7 +310,7 @@ foreach ($userIds as $uid) {
 echo "Created {$followCount} follows\n\n";
 
 // Cleanup
-rm(__FILE__);
+// rm(__FILE__);
 echo "=== DONE! ===\n";
 echo "Users: " . count($userIds) . "\n";
 echo "Posts: " . count($postIds) . "\n";
