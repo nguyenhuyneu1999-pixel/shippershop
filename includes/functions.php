@@ -343,6 +343,41 @@ function paginate($totalItems, $currentPage = 1, $itemsPerPage = null) {
 // ============================================
 
 /**
+ * Verify JWT token with HMAC-SHA256 signature verification
+ * Returns payload array on success, null on failure
+ * CRITICAL: Never just base64_decode - always verify signature!
+ * Note: Also defined in config.php - this is fallback only
+ */
+if (!function_exists('verifyJWT')) {
+function verifyJWT($token) {
+    $parts = explode('.', $token);
+    if (count($parts) !== 3) return null;
+
+    $header = $parts[0];
+    $payload = $parts[1];
+    $signature = $parts[2];
+
+    // Verify HMAC-SHA256 signature against JWT_SECRET
+    $validSig = base64_encode(hash_hmac('sha256', "$header.$payload", JWT_SECRET, true));
+    $validSig = rtrim(strtr($validSig, '+/', '-_'), '=');
+    $testSig = rtrim(strtr($signature, '+/', '-_'), '=');
+
+    if (!hash_equals($validSig, $testSig)) {
+        return null; // Signature mismatch - REJECT
+    }
+
+    // Signature valid - decode payload (handle URL-safe base64)
+    $data = json_decode(base64_decode(strtr($payload, '-_', '+/')), true);
+    if (!$data || !isset($data['user_id'])) return null;
+
+    // Check expiry if present
+    if (isset($data['exp']) && $data['exp'] < time()) return null;
+
+    return $data;
+}
+}
+
+/**
  * Generate CSRF token
  */
 function generateCsrfToken() {

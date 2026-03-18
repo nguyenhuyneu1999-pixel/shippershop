@@ -113,9 +113,13 @@ function verifyJWT($token) {
     if (count($parts) !== 3) return false;
     list($header, $payload, $signature) = $parts;
     $validSig = base64_encode(hash_hmac('sha256', "$header.$payload", JWT_SECRET, true));
-    if ($signature !== $validSig) return false;
-    $data = json_decode(base64_decode($payload), true);
-    if ($data['exp'] < time()) return false;
+    // URL-safe base64 normalization + timing-safe comparison
+    $validNorm = rtrim(strtr($validSig, '+/', '-_'), '=');
+    $testNorm = rtrim(strtr($signature, '+/', '-_'), '=');
+    if (!hash_equals($validNorm, $testNorm)) return false;
+    $data = json_decode(base64_decode(strtr($payload, '-_', '+/')), true);
+    if (!$data || !isset($data['user_id'])) return false;
+    if (isset($data['exp']) && $data['exp'] < time()) return false;
     return $data;
 }
 

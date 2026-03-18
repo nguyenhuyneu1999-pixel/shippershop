@@ -18,13 +18,10 @@ function mAuth() {
     $headers = getallheaders();
     $h = $headers['Authorization'] ?? $headers['authorization'] ?? $_SERVER['HTTP_AUTHORIZATION'] ?? $_SERVER['REDIRECT_HTTP_AUTHORIZATION'] ?? '';
     if (preg_match('/Bearer\s+(.+)/i', $h, $m)) {
-        $parts = explode('.', $m[1]);
-        if (count($parts) === 3) {
-            $payload = json_decode(base64_decode($parts[1]), true);
-            if ($payload && isset($payload['user_id'])) {
-                $_SESSION['user_id'] = $payload['user_id'];
-                return intval($payload['user_id']);
-            }
+        $data = verifyJWT($m[1]);
+        if ($data && isset($data['user_id'])) {
+            $_SESSION['user_id'] = $data['user_id'];
+            return intval($data['user_id']);
         }
     }
     return null;
