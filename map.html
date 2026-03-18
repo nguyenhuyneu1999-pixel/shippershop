@@ -404,6 +404,9 @@ async function submitAskLocation(){
     var fd=new FormData();
     fd.append("content",content);
     fd.append("type","question");
+    if(provName&&provName.indexOf("--")===-1) fd.append("province",provName);
+    if(distName&&distName.indexOf("--")===-1) fd.append("district",distName);
+    if(wardName&&wardName.indexOf("--")===-1) fd.append("ward",wardName);
     
     var hdrs={};
     if(tk) hdrs["Authorization"]="Bearer "+tk;

@@ -395,6 +395,7 @@ if("serviceWorker" in navigator){
     <i class="fas fa-map-marker-alt loc-icon"></i>
     <select id="fProvince" onchange="onProvChange()"><option value="">Tỉnh/TP</option></select>
     <select id="fDistrict" onchange="onDistChange()" style="display:none"><option value="">Quận/Huyện</option></select>
+    <select id="fWard" onchange="loadFeed()" style="display:none"><option value="">Xã/Phường</option></select>
     <button class="loc-clear" id="locClear" onclick="clearLocFilter()" style="display:none"><i class="fas fa-times"></i> Xóa</button>
   </div>
   <div id="feed" style="background:#f0f2f5"><div class="empty"><i class="fas fa-spinner spin"></i><p>Đang tải...</p></div></div>
@@ -447,7 +448,9 @@ if("serviceWorker" in navigator){
       <textarea id="mContent" placeholder="Chia sẻ trải nghiệm của bạn..." oninput="cCnt()"></textarea>
       <div class="char-cnt"><span id="cnt">0</span>/5000</div>
     </div>
-    <div class="f-row"><label>Tỉnh/Thành phố (tuỳ chọn)</label><select id="mProv"><option value="">-- Toàn quốc --</option></select></div>
+    <div class="f-row"><label>Tỉnh/Thành phố</label><select id="mProv" onchange="onMProvChange()"><option value="">-- Toàn quốc --</option></select></div>
+    <div class="f-row" id="mDistRow" style="display:none"><label>Quận/Huyện</label><select id="mDist" onchange="onMDistChange()"><option value="">-- Chọn --</option></select></div>
+    <div class="f-row" id="mWardRow" style="display:none"><label>Xã/Phường</label><select id="mWard"><option value="">-- Chọn --</option></select></div>
     <div class="f-row"><label>Ảnh (tối đa 4 ảnh)</label><input type="file" id="mImgs" accept="image/*" multiple onchange="prevImgs(this)"><div class="img-previews" id="mImgPrev"></div></div>
     <div class="f-row"><label><i class="fas fa-video"></i> Video</label><input id="mVideoFile" type="file" accept="video/mp4,video/quicktime,video/*" style="font-size:13px"><input id="mVideo" type="url" placeholder="Hoặc dán link YouTube/TikTok..." style="margin-top:6px"></div>
     <div class="f-row"><label class="anon-check"><input type="checkbox" id="mAnon"> Đăng ẩn danh <span style="color:var(--muted);font-size:11px">(tên sẽ bị ẩn)</span></label></div>
@@ -529,7 +532,7 @@ function search(){ page=1; loadPosts(); }
 function fType(t){ type=t; page=1; document.querySelectorAll('[id^="t-"]').forEach(i=>i.classList.remove('active')); const el=document.getElementById('t-'+t); if(el)el.classList.add('active'); loadPosts(); }
 // === LOCATION FILTER ===
 var fProvData=[],fDistData=[];
-(async function(){try{var r=await fetch("https://provinces.open-api.vn/api/?depth=1");fProvData=await r.json();var sel=document.getElementById("fProvince");fProvData.forEach(function(p){var o=document.createElement("option");o.value=p.name;o.textContent=p.name;sel.appendChild(o);});}catch(e){}})();
+(async function(){try{var r=await fetch("https://provinces.open-api.vn/api/?depth=1");fProvData=await r.json();var sel=document.getElementById("fProvince");var mSel=document.getElementById("mProv");fProvData.forEach(function(p){var o=document.createElement("option");o.value=p.name;o.textContent=p.name;sel.appendChild(o);var o2=document.createElement("option");o2.value=p.name;o2.textContent=p.name;mSel.appendChild(o2);});}catch(e){}})();
 
 function onProvChange(){
   var name=document.getElementById("fProvince").value;
@@ -541,8 +544,49 @@ function onProvChange(){
   if(prov){fetch("https://provinces.open-api.vn/api/p/"+prov.code+"?depth=2").then(function(r){return r.json();}).then(function(d){fDistData=d.districts||[];fDistData.forEach(function(dt){var o=document.createElement("option");o.value=dt.name;o.textContent=dt.name;dSel.appendChild(o);});});}
   loadFeed();
 }
-function onDistChange(){loadFeed();}
-function clearLocFilter(){document.getElementById("fProvince").value="";document.getElementById("fDistrict").value="";document.getElementById("fDistrict").style.display="none";document.getElementById("locClear").style.display="none";loadFeed();}
+function onDistChange(){
+  var dName=document.getElementById('fDistrict').value;
+  var wSel=document.getElementById('fWard');
+  wSel.innerHTML='<option value="">X\u00e3/Ph\u01b0\u1eddng</option>';
+  if(!dName){wSel.style.display='none';loadFeed();return;}
+  wSel.style.display='';
+  var dist=fDistData.find(function(d){return d.name===dName;});
+  if(dist){fetch('https://provinces.open-api.vn/api/d/'+dist.code+'?depth=2').then(function(r){return r.json();}).then(function(d){(d.wards||[]).forEach(function(w){var o=document.createElement('option');o.value=w.name;o.textContent=w.name;wSel.appendChild(o);});});}
+  loadFeed();
+}
+
+// Modal province/district/ward
+var mDistData=[],mWardData=[];
+function onMProvChange(){
+  var sel=document.getElementById('mProv');var name=sel.value;
+  var dR=document.getElementById('mDistRow');var wR=document.getElementById('mWardRow');
+  document.getElementById('mDist').innerHTML='<option value="">-- Ch\u1ECDn --</option>';
+  document.getElementById('mWard').innerHTML='<option value="">-- Ch\u1ECDn --</option>';
+  if(!name){dR.style.display='none';wR.style.display='none';return;}
+  dR.style.display='';wR.style.display='none';
+  var allProvs=document.getElementById('fProvince').options;
+  var code=null;
+  for(var i=0;i<fProvData.length;i++){if(fProvData[i].name===name){code=fProvData[i].code;break;}}
+  if(!code) return;
+  fetch('https://provinces.open-api.vn/api/p/'+code+'?depth=2').then(function(r){return r.json();}).then(function(d){
+    mDistData=d.districts||[];
+    var dSel=document.getElementById('mDist');
+    mDistData.forEach(function(dt){var o=document.createElement('option');o.value=dt.name;o.textContent=dt.name;dSel.appendChild(o);});
+  });
+}
+function onMDistChange(){
+  var name=document.getElementById('mDist').value;
+  var wR=document.getElementById('mWardRow');
+  document.getElementById('mWard').innerHTML='<option value="">-- Ch\u1ECDn --</option>';
+  if(!name){wR.style.display='none';return;}
+  wR.style.display='';
+  var dist=mDistData.find(function(d){return d.name===name;});
+  if(dist){fetch('https://provinces.open-api.vn/api/d/'+dist.code+'?depth=2').then(function(r){return r.json();}).then(function(d){
+    var wSel=document.getElementById('mWard');
+    (d.wards||[]).forEach(function(w){var o=document.createElement('option');o.value=w.name;o.textContent=w.name;wSel.appendChild(o);});
+  });}
+}
+function clearLocFilter(){document.getElementById('fProvince').value='';document.getElementById('fDistrict').value='';document.getElementById('fWard').value='';document.getElementById('fDistrict').style.display='none';document.getElementById('fWard').style.display='none';document.getElementById('locClear').style.display='none';loadFeed();}
 
 function setSort(s,btn){ sort=s; page=1; document.querySelectorAll('.sort-btn').forEach(b=>b.classList.remove('active')); btn.classList.add('active'); loadPosts(); }
 
@@ -726,7 +770,7 @@ async function submitPost(){
     var videoUrl=document.getElementById('mVideo').value.trim()||null;
     var vf=document.getElementById('mVideoFile');
     if(vf&&vf.files&&vf.files[0]){try{var fd=new FormData();fd.append('video',vf.files[0]);var vr=await fetch('/api/upload-video.php',{method:'POST',headers:{'Authorization':'Bearer '+localStorage.getItem('token')},body:fd});var vd=await vr.json();if(vd.success)videoUrl=vd.url;else toast('Upload lỗi: '+(vd.message||''),'warning');}catch(ve){toast('Lỗi upload video','error');}}
-    const r=await fetch('/api/posts.php',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+localStorage.getItem('token')},credentials:'include',body:JSON.stringify({content:ct,type:ptype,title:document.getElementById('mTitle2').value.trim()||null,province:document.getElementById('mProv').value||null,is_anonymous:document.getElementById('mAnon').checked?1:0,video_url:videoUrl,images:imgs.length?imgs:null})});
+    const r=await fetch('/api/posts.php',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+localStorage.getItem('token')},credentials:'include',body:JSON.stringify({content:ct,type:ptype,title:document.getElementById('mTitle2').value.trim()||null,province:document.getElementById('mProv').value||null,district:document.getElementById('mDist')?document.getElementById('mDist').value||null:null,ward:document.getElementById('mWard')?document.getElementById('mWard').value||null:null,is_anonymous:document.getElementById('mAnon').checked?1:0,video_url:videoUrl,images:imgs.length?imgs:null})});
     const d=await r.json();
     if(d.success){toast('🎉 Đăng bài thành công!','success');closeModal();setTimeout(()=>loadPosts(),600);}
     else toast(d.message||'Lỗi','error');

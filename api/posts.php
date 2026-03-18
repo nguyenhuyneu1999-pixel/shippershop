@@ -154,6 +154,11 @@ if ($method === 'GET') {
         $where[] = "p.district = ?";
         $params[] = $_GET['district'];
     }
+    // Filter by ward
+    if (!empty($_GET['ward'])) {
+        $where[] = "p.ward = ?";
+        $params[] = $_GET['ward'];
+    }
     
     $whereClause = implode(' AND ', $where);
     
