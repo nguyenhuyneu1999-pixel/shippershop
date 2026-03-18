@@ -1,91 +1,104 @@
 <?php
-set_time_limit(120);
+set_time_limit(300);
 header('Content-Type: text/plain; charset=utf-8');
 define('APP_ACCESS', true);
 require_once '/home/nhshiw2j/public_html/includes/config.php';
 require_once '/home/nhshiw2j/public_html/includes/db.php';
 
-$dir = '/home/nhshiw2j/public_html/uploads/avatars/';
-
-// Check seed file quality
-echo "=== Seed file quality ===\n";
-for ($i = 100; $i <= 105; $i++) {
-    $f = $dir . "seed_$i.jpg";
-    if (file_exists($f)) {
-        $info = @getimagesize($f);
-        $sz = filesize($f);
-        echo "seed_$i.jpg: {$sz}b";
-        if ($info) echo " {$info[0]}x{$info[1]} {$info['mime']}";
-        else echo " NOT VALID IMAGE";
-        echo "\n";
-    }
-}
-
-// Test xsgames.co - download 5 samples to check quality
-echo "\n=== xsgames.co Asian-looking test ===\n";
-$ctx = stream_context_create(['http' => ['timeout' => 15, 'user_agent' => 'Mozilla/5.0']]);
-for ($i = 0; $i < 3; $i++) {
-    $g = $i % 2 === 0 ? 'male' : 'female';
-    $data = @file_get_contents("https://xsgames.co/randomusers/avatar.php?g=$g", false, $ctx);
-    if ($data) {
-        $testFile = $dir . "test_xsg_$i.jpg";
-        file_put_contents($testFile, $data);
-        $info = getimagesize($testFile);
-        echo "xsg_$i ($g): " . strlen($data) . "b {$info[0]}x{$info[1]}\n";
-        unlink($testFile);
-    }
-    usleep(500000); // 0.5s delay
-}
-
-// Test thispersondoesnotexist alternative for Asian faces
-echo "\n=== fakeface.rest test ===\n";
-$data = @file_get_contents("https://fakeface.rest/face/json?minimum_age=20&maximum_age=40", false, $ctx);
-if ($data) {
-    $json = json_decode($data, true);
-    if ($json && isset($json['image_url'])) {
-        echo "fakeface.rest: " . $json['image_url'] . "\n";
-        echo "Age: " . ($json['age'] ?? '?') . ", Gender: " . ($json['gender'] ?? '?') . "\n";
-        $imgData = @file_get_contents($json['image_url'], false, $ctx);
-        echo "Image: " . ($imgData ? strlen($imgData) . " bytes" : "FAILED") . "\n";
-    } else {
-        echo "fakeface.rest: invalid response\n";
-    }
-} else {
-    echo "fakeface.rest: FAILED\n";
-}
-
-// Test generated.photos free tier
-echo "\n=== boringavatars test ===\n";
-$boring = @file_get_contents("https://source.boringavatars.com/beam/200/Nguyen%20Van%20Huy?colors=EE4D2D,FF6600,00b14f,2196F3,9C27B0", false, $ctx);
-if ($boring) echo "boringavatars: " . strlen($boring) . "b (SVG)\n";
-else echo "boringavatars: FAILED\n";
-
-// Show what we need to do
 $pdo = db()->getConnection();
-echo "\n=== Plan ===\n";
-echo "Users with randomuser.me: 15 → REPLACE\n";
-echo "Users with seed files: 694 → CHECK QUALITY, replace if low\n";
-echo "Users with null avatar: 4 → CREATE\n";
-echo "Users with real uploads: 3 → KEEP\n";
+$avatarDir = '/home/nhshiw2j/public_html/uploads/avatars/';
 
-// Check if seed files look like real photos or generated initials
-$firstSeed = $dir . "seed_100.jpg";
-if (file_exists($firstSeed)) {
-    $img = @imagecreatefromjpeg($firstSeed);
-    if ($img) {
-        $w = imagesx($img);
-        $h = imagesy($img);
-        // Sample colors from center and edges to determine if gradient/solid or photo
-        $centerColor = imagecolorat($img, $w/2, $h/2);
-        $cornerColor = imagecolorat($img, 5, 5);
-        $cr = ($centerColor >> 16) & 0xFF;
-        $cg = ($centerColor >> 8) & 0xFF;
-        $cb = $centerColor & 0xFF;
-        $er = ($cornerColor >> 16) & 0xFF;
-        $eg = ($cornerColor >> 8) & 0xFF;
-        $eb = $cornerColor & 0xFF;
-        echo "seed_100 center: rgb($cr,$cg,$cb), corner: rgb($er,$eg,$eb)\n";
-        echo "Looks like: " . (abs($cr-$er) + abs($cg-$eg) + abs($cb-$eb) < 50 ? "SOLID/GRADIENT (need replace)" : "PHOTO (might keep)") . "\n";
-        imagedestroy($img);
+// Batch number from query string (run multiple times)
+$batch = intval($_GET['batch'] ?? 1);
+$perBatch = 50;
+$offset = ($batch - 1) * $perBatch;
+
+// Vietnamese female name indicators
+$femaleNames = ['Thị','Hương','Mai','Ngọc','Lan','Tuyết','Thảo','Kim','Linh','Hoa','Yến','Trang','Vy','Phương','Hạnh','Nhung','Dung','Quyên','Nhi','Trinh','Oanh','Thanh','Loan','Hiền','Mỹ','Uyên','Trâm','Châu','Hằng','Duyên','Anh','Huệ','Giang','Diệu','Bích','Thủy','Cúc','Sen','Thu','Xuân','Hà'];
+
+function isFemale($name) {
+    global $femaleNames;
+    foreach ($femaleNames as $fn) {
+        if (mb_strpos($name, $fn) !== false) return true;
     }
+    return false;
 }
+
+// Get users needing avatar update (skip real uploads)
+$users = $pdo->query("SELECT id, fullname, avatar FROM users 
+    WHERE (avatar LIKE '%randomuser.me%' OR avatar LIKE '%seed_%' OR avatar IS NULL OR avatar = '') 
+    AND id > 1
+    ORDER BY id 
+    LIMIT $perBatch OFFSET $offset")->fetchAll(PDO::FETCH_ASSOC);
+
+if (empty($users)) {
+    echo "Batch $batch: No more users to process. DONE!\n";
+    exit;
+}
+
+echo "Batch $batch: Processing " . count($users) . " users (offset $offset)\n\n";
+
+$success = 0;
+$fail = 0;
+$ctx = stream_context_create(['http' => [
+    'timeout' => 15, 
+    'user_agent' => 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
+    'header' => "Accept: image/jpeg,image/png,*/*\r\n"
+]]);
+
+foreach ($users as $u) {
+    $gender = isFemale($u['fullname']) ? 'female' : 'male';
+    $url = "https://xsgames.co/randomusers/avatar.php?g=$gender";
+    
+    $data = @file_get_contents($url, false, $ctx);
+    if (!$data || strlen($data) < 2000) {
+        echo "  #{$u['id']} {$u['fullname']}: DOWNLOAD FAILED\n";
+        $fail++;
+        usleep(1000000); // 1s delay on failure
+        continue;
+    }
+    
+    $filename = "vn_" . $u['id'] . "_" . time() . ".jpg";
+    $filepath = $avatarDir . $filename;
+    
+    // Resize to 200x200 with GD
+    $srcImg = @imagecreatefromstring($data);
+    if (!$srcImg) {
+        echo "  #{$u['id']} {$u['fullname']}: INVALID IMAGE\n";
+        $fail++;
+        continue;
+    }
+    
+    $dstImg = imagecreatetruecolor(200, 200);
+    $srcW = imagesx($srcImg);
+    $srcH = imagesy($srcImg);
+    
+    // Center crop to square then resize
+    $cropSize = min($srcW, $srcH);
+    $cropX = ($srcW - $cropSize) / 2;
+    $cropY = ($srcH - $cropSize) / 2;
+    
+    imagecopyresampled($dstImg, $srcImg, 0, 0, $cropX, $cropY, 200, 200, $cropSize, $cropSize);
+    imagejpeg($dstImg, $filepath, 85);
+    imagedestroy($srcImg);
+    imagedestroy($dstImg);
+    
+    // Update DB
+    $avatarUrl = '/uploads/avatars/' . $filename;
+    $stmt = $pdo->prepare("UPDATE users SET avatar = ? WHERE id = ?");
+    $stmt->execute([$avatarUrl, $u['id']]);
+    
+    echo "  #{$u['id']} {$u['fullname']} ($gender): OK → $filename (" . filesize($filepath) . "b)\n";
+    $success++;
+    
+    // Rate limit: 0.8s between downloads
+    usleep(800000);
+}
+
+echo "\n=== Batch $batch Result ===\n";
+echo "Success: $success, Failed: $fail\n";
+echo "Next: ?batch=" . ($batch + 1) . "\n";
+
+// Count remaining
+$remaining = $pdo->query("SELECT COUNT(*) as c FROM users WHERE (avatar LIKE '%randomuser.me%' OR avatar LIKE '%seed_%' OR avatar IS NULL OR avatar = '') AND id > 1")->fetch()['c'];
+echo "Remaining: $remaining users\n";
