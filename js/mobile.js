@@ -197,4 +197,27 @@
 
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init);
   else init();
+
+
+  /* ---------- smooth page transitions ---------- */
+  // Fade-in on load
+  document.body.classList.add('page-enter');
+  document.body.addEventListener('animationend', function() {
+    document.body.classList.remove('page-enter');
+  }, { once: true });
+
+  // Intercept nav clicks for smooth fade-out
+  document.addEventListener('click', function(e) {
+    var link = e.target.closest('#mobileBottomNav a[href], .mk-bnav a[href], .map-bnav a[href]');
+    if (!link) return;
+    var href = link.getAttribute('href');
+    if (!href || href === '#' || href.startsWith('javascript')) return;
+    // Don't animate if same page
+    var current = location.pathname.split('/').pop() || 'index.html';
+    if (href === current) { e.preventDefault(); return; }
+    e.preventDefault();
+    document.body.classList.add('page-exit');
+    setTimeout(function() { location.href = href; }, 120);
+  }, true);
+
 })();

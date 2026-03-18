@@ -524,4 +524,12 @@ a, button, [onclick] {
     }
 }
 
-.mnav-item{transition:none!important;}
+
+
+/* === SMOOTH PAGE TRANSITIONS === */
+body{opacity:1;transition:opacity .15s ease;}
+body.page-exit{opacity:0;transition:opacity .12s ease;}
+body.page-enter{animation:pageIn .2s ease forwards;}
+@keyframes pageIn{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:translateY(0);}}
+#mobileBottomNav{transition:none!important;transform:none!important;}
+#mobileBottomNav .mnav-item{-webkit-tap-highlight-color:transparent;}
