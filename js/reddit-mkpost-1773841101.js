@@ -320,7 +320,14 @@ function _gcSetRpl(cid,name){
 function _gcShare(){
   var u=location.origin+"/post-detail.html?id="+_gcPid;
   if(navigator.share)navigator.share({url:u});else{navigator.clipboard.writeText(u);toast("Đã copy link!","success");}
-  fetch("/api/posts.php?action=share",{method:"POST",headers:{"Content-Type":"application/json"},credentials:"include",body:JSON.stringify({post_id:_gcPid})}).catch(function(){});
+  fetch("/api/posts.php?action=share",{method:"POST",headers:{"Content-Type":"application/json"},credentials:"include",body:JSON.stringify({post_id:_gcPid})}).then(function(r){return r.json();}).then(function(d){
+    if(d.success&&d.data.shares_count!==undefined){
+      var ss=document.getElementById("gcStats");
+      if(ss){var spans=ss.querySelectorAll("span");if(spans[2])spans[2].textContent=d.data.shares_count+" chuyển tiếp";}
+      var card=document.getElementById("P"+_gcPid);
+      if(card){var fs=card.querySelectorAll(".pa3-stats span");if(fs[2])fs[2].textContent=d.data.shares_count+" đơn chuyển tiếp";}
+    }
+  }).catch(function(){});
 }
 
 function sendGC(){
