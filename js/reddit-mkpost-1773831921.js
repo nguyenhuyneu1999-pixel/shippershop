@@ -127,10 +127,7 @@ async function savePost(pid,btn){
 
 /* Share - uses native share (shows Zalo, FB etc) or copy link */
 function sharePost(pid){
-  // Update chuyển tiếp counter
-  var card=document.getElementById('P'+pid);
-  if(card){var s=card.querySelector('.pa3-stats');if(s){var spans=s.querySelectorAll('span');if(spans[2]){var cur=parseInt(spans[2].textContent)||0;spans[2].textContent=(cur+1)+' đơn chuyển tiếp';}}}
-  var url=location.origin+'/share.php?id='+pid;
+  var url=location.origin+'/post-detail.html?id='+pid;
   if(navigator.share){
     navigator.share({title:'ShipperShop',text:'Xem bài viết trên ShipperShop',url:url}).catch(function(){});
   }else{
@@ -141,4 +138,14 @@ function sharePost(pid){
       toast('Đã sao chép liên kết!','success');
     }
   }
+  // Call API to increment shares_count
+  var hdrs={"Content-Type":"application/json"};
+  var tk=localStorage.getItem("token");
+  if(tk)hdrs["Authorization"]="Bearer "+tk;
+  fetch("/api/posts.php?action=share",{method:"POST",headers:hdrs,credentials:"include",body:JSON.stringify({post_id:pid})}).then(function(r){return r.json();}).then(function(d){
+    if(d.success&&d.data.shares_count!==undefined){
+      var card=document.getElementById('P'+pid);
+      if(card){var s=card.querySelector('.pa3-stats');if(s){var spans=s.querySelectorAll('span');if(spans[2])spans[2].textContent=d.data.shares_count+' đơn chuyển tiếp';}}
+    }
+  }).catch(function(){});
 }
