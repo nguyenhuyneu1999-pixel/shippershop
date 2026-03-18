@@ -253,6 +253,19 @@ body{background:var(--bg);font-family:-apple-system,BlinkMacSystemFont,'Segoe UI
   <div class="qk-loc" id="qkLoc">Đang lấy vị trí GPS...</div>
 </div>
 
+
+<!-- COMMENT SHEET -->
+<div class="tf-overlay" id="cmtOverlay" onclick="if(event.target===this)closeTfCmt()">
+<div class="tf-modal" style="max-height:80vh">
+  <div class="tf-modal-head"><h3><i class="fas fa-comment" style="color:var(--primary);margin-right:6px"></i>Ghi chú</h3><button class="tf-modal-close" onclick="closeTfCmt()"><i class="fas fa-times"></i></button></div>
+  <div class="tf-modal-body" id="tfCmtList" style="padding:12px 16px"><div class="tf-empty" style="padding:20px"><i class="fas fa-spinner spin"></i></div></div>
+  <div style="padding:10px 16px;border-top:1px solid var(--border);display:flex;gap:8px;align-items:center">
+    <input type="text" id="tfCmtInput" placeholder="Viết ghi chú..." style="flex:1;padding:10px 14px;border:1.5px solid #ddd;border-radius:24px;font-size:14px;outline:none">
+    <button onclick="sendTfCmt()" style="background:var(--primary);color:#fff;border:none;width:36px;height:36px;border-radius:50%;font-size:14px;cursor:pointer;flex-shrink:0"><i class="fas fa-paper-plane"></i></button>
+  </div>
+</div>
+</div>
+
 <!-- BOTTOM NAV -->
 <nav class="tf-bnav">
   <a href="index.html" class="mnav-item"><i class="fas fa-home"></i><span>Trang chủ</span></a>
@@ -308,7 +321,7 @@ async function loadAlerts(){
 function renderCard(a){
   var av=a.user_avatar?'<img class="tf-av" src="'+a.user_avatar+'">':'<div class="tf-av-ph">'+esc((a.user_name||"U")[0])+'</div>';
   var imgs="";
-  try{var im=JSON.parse(a.images||"[]");if(im.length){imgs='<div class="tf-card-imgs">';im.forEach(function(s){imgs+='<img src="'+s+'" style="max-height:200px;width:100%;object-fit:cover">';});imgs+='</div>';}}catch(e){}
+  try{var im=JSON.parse(a.images||"[]");if(im.length){imgs='<div class="tf-card-imgs">';im.forEach(function(s){imgs+='<img src="'+s+'" style="max-height:200px;width:100%;object-fit:cover;cursor:pointer" onclick="openTfLb(this.src)">';});imgs+='</div>';}}catch(e){}
 
   var rel=Math.round(a.reliability||100);
   var relColor=rel>=70?"#2e7d32":rel>=40?"#e65100":"#d32f2f";
@@ -325,6 +338,7 @@ function renderCard(a){
     +'<div class="tf-card-actions">'
     +'<button class="tf-act" onclick="vote('+a.id+',\'confirm\',this)"><i class="fas fa-check-circle"></i> Xác nhận ('+a.confirms+')</button>'
     +'<button class="tf-act" onclick="vote('+a.id+',\'deny\',this)"><i class="fas fa-times-circle"></i> Sai ('+a.denies+')</button>'
+    +'<button class="tf-act" onclick="openTfCmt('+a.id+')"><i class="fas fa-comment"></i> Ghi chú</button>'
     +'<button class="tf-act" onclick="shareAlert('+a.id+')"><i class="fas fa-share"></i> Chia sẻ</button>'
     +'</div></div>';
 }
@@ -534,8 +548,58 @@ async function sendQuick(cat){
 function esc(t){return t?String(t).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;"):"";}
 function ago(dt){if(!dt)return"";var s=Math.floor((Date.now()-new Date(dt.replace(" ","T")).getTime())/1000);if(s<60)return"vừa xong";if(s<3600)return Math.floor(s/60)+" phút";if(s<86400)return Math.floor(s/3600)+" giờ";return Math.floor(s/86400)+" ngày";}
 
+
+// LIGHTBOX
+function openTfLb(src){var lb=document.getElementById("tfLb");document.getElementById("tfLbImg").src=src;lb.style.display="flex";}
+
+// COMMENTS (using posts comment API - store alert_id as post reference)
+var tfCmtAlertId=0;
+function openTfCmt(id){
+  tfCmtAlertId=id;
+  document.getElementById("cmtOverlay").classList.add("open");
+  loadTfCmts(id);
+}
+function closeTfCmt(){document.getElementById("cmtOverlay").classList.remove("open");}
+
+async function loadTfCmts(id){
+  var list=document.getElementById("tfCmtList");
+  list.innerHTML='<div class="tf-empty" style="padding:20px"><i class="fas fa-spinner spin"></i></div>';
+  try{
+    var r=await fetch("/api/traffic.php?action=comments&alert_id="+id);
+    var d=await r.json();
+    if(d.success&&d.data.length){
+      list.innerHTML=d.data.map(function(c){
+        var av=c.user_avatar?'<img src="'+c.user_avatar+'" style="width:28px;height:28px;border-radius:50%;object-fit:cover;flex-shrink:0">':'<div style="width:28px;height:28px;border-radius:50%;background:#e4e6eb;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0">'+esc((c.user_name||"U")[0])+'</div>';
+        return '<div style="display:flex;gap:8px;margin-bottom:10px">'+av+'<div style="flex:1;min-width:0"><div style="background:#f0f2f5;border-radius:14px;padding:6px 10px;display:inline-block;max-width:100%"><div style="font-weight:700;font-size:12px">'+esc(c.user_name)+'</div><div style="font-size:13px;margin-top:1px">'+esc(c.content)+'</div></div><div style="font-size:11px;color:#999;margin-top:2px;padding-left:10px">'+ago(c.created_at)+'</div></div></div>';
+      }).join("");
+    }else{
+      list.innerHTML='<div class="tf-empty" style="padding:16px;font-size:13px">Chưa có ghi chú</div>';
+    }
+  }catch(e){list.innerHTML='<div class="tf-empty">Lỗi</div>';}
+}
+
+async function sendTfCmt(){
+  if(!CU){alert("Đăng nhập!");return;}
+  var inp=document.getElementById("tfCmtInput");
+  var ct=inp.value.trim();
+  if(!ct)return;
+  inp.value="";
+  try{
+    var r=await fetch("/api/traffic.php?action=comment",{method:"POST",headers:{"Content-Type":"application/json","Authorization":"Bearer "+(localStorage.getItem("token")||"")},credentials:"include",body:JSON.stringify({alert_id:tfCmtAlertId,content:ct})});
+    var d=await r.json();
+    if(d.success) loadTfCmts(tfCmtAlertId);
+    else alert(d.message||"Lỗi");
+  }catch(e){alert("Lỗi kết nối");}
+}
+
 // Auto refresh every 2 min
 setInterval(loadAlerts, 120000);
 </script>
+
+<!-- IMAGE LIGHTBOX -->
+<div id="tfLb" style="position:fixed;inset:0;background:rgba(0,0,0,.95);z-index:9999;display:none;align-items:center;justify-content:center;cursor:pointer" onclick="this.style.display='none'">
+  <button style="position:absolute;top:16px;right:16px;background:none;border:none;color:#fff;font-size:24px;cursor:pointer;z-index:10"><i class="fas fa-times"></i></button>
+  <img id="tfLbImg" style="max-width:95%;max-height:90vh;object-fit:contain">
+</div>
 </body>
 </html>

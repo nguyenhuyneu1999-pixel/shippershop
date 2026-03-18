@@ -199,4 +199,59 @@ if ($method === 'POST' && $action === 'upload') {
     tSuccess('OK', ['url' => '/uploads/traffic/' . $fname]);
 }
 
+
+// ==========================================
+// GET - Comments for alert
+// ==========================================
+if ($method === 'GET' && $action === 'comments') {
+    $alertId = intval($_GET['alert_id'] ?? 0);
+    if (!$alertId) tError('Missing alert_id');
+    
+    // Auto-create table if not exists
+    try {
+        $db->query("CREATE TABLE IF NOT EXISTS traffic_comments (
+            id INT AUTO_INCREMENT PRIMARY KEY,
+            alert_id INT NOT NULL,
+            user_id INT NOT NULL,
+            content TEXT NOT NULL,
+            created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+            INDEX idx_alert (alert_id)
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4", []);
+    } catch (Throwable $e) {}
+    
+    $cmts = $db->fetchAll("SELECT c.*, u.fullname as user_name, u.avatar as user_avatar FROM traffic_comments c JOIN users u ON c.user_id=u.id WHERE c.alert_id=? ORDER BY c.created_at ASC", [$alertId]);
+    if (!$cmts) $cmts = [];
+    tSuccess('OK', $cmts);
+}
+
+// ==========================================
+// POST - Add comment
+// ==========================================
+if ($method === 'POST' && $action === 'comment') {
+    $uid = tAuth();
+    if (!$uid) tError('Đăng nhập', 401);
+    
+    $raw = file_get_contents('php://input');
+    $input = json_decode($raw, true) ?: $_POST;
+    $alertId = intval($input['alert_id'] ?? 0);
+    $ct = trim($input['content'] ?? '');
+    
+    if (!$alertId || !$ct) tError('Thiếu thông tin');
+    
+    // Auto-create table if not exists
+    try {
+        $db->query("CREATE TABLE IF NOT EXISTS traffic_comments (
+            id INT AUTO_INCREMENT PRIMARY KEY,
+            alert_id INT NOT NULL,
+            user_id INT NOT NULL,
+            content TEXT NOT NULL,
+            created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+            INDEX idx_alert (alert_id)
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4", []);
+    } catch (Throwable $e) {}
+    
+    $db->query("INSERT INTO traffic_comments (alert_id,user_id,content,created_at) VALUES (?,?,?,NOW())", [$alertId, $uid, $ct]);
+    tSuccess('OK');
+}
+
 tError('Invalid request');
