@@ -509,16 +509,10 @@ function closeChatOpts(){
 function coLoadMedia(){
   var row=document.getElementById("coMediaRow");
   if(!curConvId){row.innerHTML="";return;}
-  fetch("/api/messages-api.php?action=messages&conversation_id="+curConvId,{credentials:"include"}).then(function(r){return r.json();}).then(function(d){
-    if(!d.success||!d.data)return;
-    var imgs=[];
-    for(var i=0;i<d.data.length;i++){
-      var m=d.data[i];
-      if(m.type==="image"&&m.file_url){imgs.push(m.file_url);if(imgs.length>=4)break;}
-    }
-    if(imgs.length===0){row.innerHTML="<span style='font-size:12px;color:#999;padding:4px'>Chưa có ảnh</span>";return;}
+  fetch("/api/messages-api.php?action=media&conversation_id="+curConvId+"&type=image",{credentials:"include"}).then(function(r){return r.json();}).then(function(d){
+    if(!d.success||!d.data||!d.data.length){row.innerHTML="<span style='font-size:12px;color:#999;padding:4px'>Chưa có ảnh</span>";return;}
     var h="";
-    for(var j=0;j<imgs.length;j++){h+="<img class='co-media-thumb' src='"+imgs[j]+"' onclick='viewImg(\""+imgs[j]+"\")'>";}
+    for(var j=0;j<Math.min(d.data.length,4);j++){h+="<img class='co-media-thumb' src='"+d.data[j].file_url+"' onclick='viewImg(\""+d.data[j].file_url+"\")'>";}
     h+="<div class='co-media-more' onclick='coMedia()'><i class='fas fa-arrow-right'></i></div>";
     row.innerHTML=h;
   }).catch(function(){});
@@ -569,7 +563,7 @@ function coToggleBff(el){el.classList.toggle("on");coBffOn=!coBffOn;}
 function coTogglePin(el){el.classList.toggle("on");coPinned=!coPinned;}
 function coToggleHide(el){el.classList.toggle("on");coHidden=!coHidden;}
 
-function coMedia(){closeChatOpts();var wrap=document.getElementById("coMediaRow");if(wrap){wrap.scrollIntoView({behavior:"smooth"});}openChatOpts();}
+function coMedia(){closeChatOpts();openMediaGallery();}
 function coCreateGroup(){closeChatOpts();location.href="groups.html";}
 function coAddToGroup(){closeChatOpts();location.href="groups.html";}
 function coSharedGroups(){closeChatOpts();if(typeof toast==="function")toast("Xem nhóm chung trong Cộng đồng","info");else location.href="groups.html";}
@@ -620,8 +614,8 @@ function loadGroupConvs(){
     for(var i=0;i<d.data.length;i++){
       var g=d.data[i];
       var av=g.avatar?"<img class='cv-av' src='"+g.avatar+"'>":"<div class='cv-av' style='background:#0084ff;color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:14px;border-radius:50%;width:52px;height:52px'>"+((g.name||"G")[0])+"</div>";
-      var unr=g.unread_count>0?"<div class='cv-badge'>"+g.unread_count+"</div>":"";
-      h+="<div class='conv-item' onclick='openGroupChat("+g.id+")' data-conv-id='"+g.id+"'>"+av+"<div class='cv-body'><div class='cv-top'><span class='cv-name'>"+esc(g.name)+"</span><span class='cv-time'>"+ago(g.last_message_at)+"</span></div><div class='cv-bottom'><span class='cv-last'>"+esc(g.last_message||"")+" · "+g.member_count+" thành viên</span>"+unr+"</div></div></div>";
+      var unr=g.unread_count>0?"<div class='cv-unread'></div>":"";
+      h+="<div class='conv-item' onclick='openGroupChat("+g.id+")' data-conv-id='"+g.id+"'>"+av+"<div class='cv-info'><div class='cv-name'>"+esc(g.name)+"</div><div class='cv-last'>"+esc(g.last_message||"")+"</div></div><div class='cv-right'><div class='cv-time'>"+ago(g.last_message_at)+"</div><div style='font-size:11px;color:#65676B'>"+g.member_count+" TV</div>"+unr+"</div></div>";
     }
     h+="<div style='text-align:center;padding:16px'><button onclick='createGroupPrompt()' style='padding:8px 20px;border-radius:20px;border:1px solid #ddd;background:#fff;color:#333;font-weight:600;cursor:pointer'>+ Tạo nhóm mới</button></div>";
     list.innerHTML=h;
@@ -631,8 +625,7 @@ function loadGroupConvs(){
 function openGroupChat(gid){
   isGroupChat=true;curConvId=gid;curOtherId=null;
   var bc=document.getElementById("btnCall");var bv=document.getElementById("btnVideo");if(bc)bc.style.display="none";if(bv)bv.style.display="none";
-  document.getElementById("listView").style.display="none";
-  document.getElementById("chatView").style.display="flex";
+  document.getElementById("listView").classList.add("hidden");
   document.getElementById("chatView").classList.add("active");
   // Load group info
   fetch("/api/messages-api.php?action=group_info&conversation_id="+gid,{credentials:"include"}).then(function(r){return r.json();}).then(function(d){
@@ -658,19 +651,20 @@ function createGroupPrompt(){
 }
 
 // Override sendMsg for group support
-var _origSendMsg=typeof sendMsg==="function"?sendMsg:null;
 function sendMsgGroup(){
   if(!curConvId||!isGroupChat)return;
   var inp=document.getElementById("msgInput");
   var ct=inp.value.trim();if(!ct)return;
   inp.value="";onMsgInput();
+  var c=document.getElementById("chMsgs");
+  var empty=c.querySelector(".empty");if(empty)empty.remove();
+  c.insertAdjacentHTML("beforeend","<div class='msg-row mine'><div><div class=msg-bubble>"+esc(ct)+"</div></div></div>");
+  c.scrollTop=c.scrollHeight;
   fetch("/api/messages-api.php?action=send",{method:"POST",headers:{"Content-Type":"application/json"},credentials:"include",body:JSON.stringify({group_id:curConvId,content:ct})}).then(function(r){return r.json();}).then(function(d){
     if(d.success)loadMsgs();
   });
 }
 
-// Patch backToList
-var _origBack=typeof backToList==="function"?backToList:null;
 
 // ============================================
 // GROUP OPTIONS PANEL (extends existing co-panel)
@@ -722,7 +716,7 @@ function openMembersList(){
       var av=m.avatar?"<img src='"+esc(m.avatar)+"' style='width:44px;height:44px;border-radius:50%;object-fit:cover'>":"<div style='width:44px;height:44px;border-radius:50%;background:#e4e6eb;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:14px'>"+esc((m.fullname||"U")[0])+"</div>";
       var role=m.role==="admin"?"<span style='font-size:12px;color:#0084ff'>Trưởng nhóm</span>":"";
       var online=m.is_online?"<span style='display:inline-block;width:8px;height:8px;border-radius:50%;background:#22c55e;margin-right:4px'></span>":"";
-      h+="<div style='display:flex;align-items:center;gap:12px;padding:10px 16px;cursor:pointer' onclick='document.getElementById(\"membersOv\").remove();if("+m.id+"!=="+userId+")openChat("+m.id+")'>"+av+"<div style='flex:1'><div style='font-weight:600;font-size:15px'>"+online+esc(m.fullname)+"</div>"+role+(m.shipping_company?"<div style='font-size:12px;color:#65676B'>"+esc(m.shipping_company)+"</div>":"")+"</div></div>";
+      h+="<div style='display:flex;align-items:center;gap:12px;padding:10px 16px;cursor:pointer' onclick='document.getElementById(\"membersOv\").remove();openFromUser("+m.id+")'>"+av+"<div style='flex:1'><div style='font-weight:600;font-size:15px'>"+online+esc(m.fullname)+"</div>"+role+(m.shipping_company?"<div style='font-size:12px;color:#65676B'>"+esc(m.shipping_company)+"</div>":"")+"</div></div>";
     }
     document.getElementById("membersContent").innerHTML=h;
   });

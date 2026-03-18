@@ -28,7 +28,7 @@ if($action==="filter_conversations"){
         FROM conversations c
         JOIN users u ON u.id=CASE WHEN c.user1_id=? THEN c.user2_id ELSE c.user1_id END
         LEFT JOIN chat_category_items cci ON cci.conversation_id=c.id AND cci.user_id=?
-        WHERE(c.user1_id=? OR c.user2_id=?) AND c.`status`=?";
+        WHERE(c.user1_id=? OR c.user2_id=?) AND c.`status`=? AND (c.type='private' OR c.type IS NULL)";
     $p=[$uid,$uid,$uid,$uid,$uid,$uid,"active"];
     if($f==="online") $sql.=" AND u.is_online=1";
     elseif($f==="unread") $sql.=" HAVING unread_count>0";
@@ -88,21 +88,31 @@ if($action==="get_chat_category"){
 if($action==="upload_message"){
     $userId=getMsgUserId();
     $toUserId=intval($_POST["to_user_id"]??0);
+    $groupId=intval($_POST["group_id"]??0);
     $type=$_POST["type"]??"image";
-    if($toUserId<=0){echo json_encode(["success"=>false]);exit;}
+    
+    // For groups: verify membership and use group conv directly
+    if($groupId>0){
+        $member=db()->fetchOne("SELECT id FROM conversation_members WHERE conversation_id=? AND user_id=?",[$groupId,$userId]);
+        if(!$member){echo json_encode(["success"=>false,"message"=>"Not a member"]);exit;}
+        $convId=$groupId;
+    } else {
+        if($toUserId<=0){echo json_encode(["success"=>false]);exit;}
+        $convId=null;
+    }
 
     if($type==="location"){
         $lat=$_POST["lat"]??"";$lng=$_POST["lng"]??"";
         $content="📍 Vị trí";
         $fileUrl="https://maps.google.com/maps?q=".$lat.",".$lng;
-        $conv=db()->fetchOne("SELECT id FROM conversations WHERE((user1_id=? AND user2_id=?)OR(user1_id=? AND user2_id=?))AND `status` IN(?,?)",[$userId,$toUserId,$toUserId,$userId,"active","pending"]);
-        if(!$conv){
-            db()->query("INSERT INTO conversations(user1_id,user2_id,last_message,last_message_at,`status`)VALUES(?,?,?,NOW(),?)",[$userId,$toUserId,$content,"pending"]);
-            $convId=db()->getLastInsertId();
-        } else {
-            $convId=$conv["id"];
-            db()->query("UPDATE conversations SET last_message=?,last_message_at=NOW() WHERE id=?",[$content,$convId]);
+        if(!$convId){
+            $conv=db()->fetchOne("SELECT id FROM conversations WHERE((user1_id=? AND user2_id=?)OR(user1_id=? AND user2_id=?))AND `status` IN(?,?)",[$userId,$toUserId,$toUserId,$userId,"active","pending"]);
+            if(!$conv){
+                db()->query("INSERT INTO conversations(user1_id,user2_id,last_message,last_message_at,`status`)VALUES(?,?,?,NOW(),?)",[$userId,$toUserId,$content,"pending"]);
+                $convId=db()->getLastInsertId();
+            } else { $convId=$conv["id"]; }
         }
+        db()->query("UPDATE conversations SET last_message=?,last_message_at=NOW() WHERE id=?",[$content,$convId]);
         db()->query("INSERT INTO messages(conversation_id,sender_id,content,`type`,file_url,file_name)VALUES(?,?,?,?,?,?)",[$convId,$userId,$content,"location",$fileUrl,""]);
         echo json_encode(["success"=>true,"data"=>["conversation_id"=>$convId]]);exit;
     }
@@ -125,14 +135,14 @@ if($action==="upload_message"){
     $fileName=$file["name"];
     $content=($msgType==="image"?"[Hình ảnh]":($msgType==="video"?"[Video]":"[File] ".$fileName));
 
-    $conv=db()->fetchOne("SELECT id FROM conversations WHERE((user1_id=? AND user2_id=?)OR(user1_id=? AND user2_id=?))AND `status` IN(?,?)",[$userId,$toUserId,$toUserId,$userId,"active","pending"]);
-    if(!$conv){
-        db()->query("INSERT INTO conversations(user1_id,user2_id,last_message,last_message_at,`status`)VALUES(?,?,?,NOW(),?)",[$userId,$toUserId,$content,"pending"]);
-        $convId=db()->getLastInsertId();
-    } else {
-        $convId=$conv["id"];
-        db()->query("UPDATE conversations SET last_message=?,last_message_at=NOW() WHERE id=?",[$content,$convId]);
+    if(!$convId){
+        $conv=db()->fetchOne("SELECT id FROM conversations WHERE((user1_id=? AND user2_id=?)OR(user1_id=? AND user2_id=?))AND `status` IN(?,?)",[$userId,$toUserId,$toUserId,$userId,"active","pending"]);
+        if(!$conv){
+            db()->query("INSERT INTO conversations(user1_id,user2_id,last_message,last_message_at,`status`)VALUES(?,?,?,NOW(),?)",[$userId,$toUserId,$content,"pending"]);
+            $convId=db()->getLastInsertId();
+        } else { $convId=$conv["id"]; }
     }
+    db()->query("UPDATE conversations SET last_message=?,last_message_at=NOW() WHERE id=?",[$content,$convId]);
     db()->query("INSERT INTO messages(conversation_id,sender_id,content,`type`,file_url,file_name)VALUES(?,?,?,?,?,?)",[$convId,$userId,$content,$msgType,$fileUrl,$fileName]);
     echo json_encode(["success"=>true,"data"=>["conversation_id"=>$convId,"type"=>$msgType,"file_url"=>$fileUrl,"file_name"=>$fileName]]);exit;
 }
