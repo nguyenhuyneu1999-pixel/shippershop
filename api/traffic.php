@@ -1,4 +1,5 @@
 <?php
+ini_set('display_errors',1);error_reporting(E_ALL);
 define('APP_ACCESS', true);
 require_once __DIR__ . '/../includes/config.php';
 require_once __DIR__ . '/../includes/db.php';
