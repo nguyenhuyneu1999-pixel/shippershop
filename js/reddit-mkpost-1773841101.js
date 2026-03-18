@@ -249,9 +249,14 @@ function _gcLoadPost(pid){
     var sh=p.shipping_company?"<span style='font-size:11px;font-weight:700;color:"+(_SC[p.shipping_company]||"#999")+"'>"+esc(p.shipping_company)+"</span>":"";
     var imgs="";
     if(p.images){try{var a=JSON.parse(p.images);if(a&&a.length){imgs="<div class='gc-imgs'>";for(var i=0;i<a.length;i++){imgs+="<img src='"+a[i]+"' onerror='this.remove()'>";}imgs+="</div>";}}catch(x){}}
+    var vid="";
+    if(p.video_url){
+      if(p.video_url.indexOf("/uploads/")!==-1){vid="<video controls playsinline preload='metadata' style='width:100%;max-height:400px;border-radius:0'><source src='"+p.video_url+"' type='video/mp4'></video>";}
+      else{vid="<div style='position:relative;padding-bottom:56%;height:0;overflow:hidden'><iframe src='"+p.video_url+"' style='position:absolute;top:0;left:0;width:100%;height:100%;border:0' allowfullscreen></iframe></div>";}
+    }
     var lk=p.user_liked;
     var h="<div class='gc-post-author'>"+av+"<div style='flex:1'><div style='font-weight:700;font-size:15px'>"+esc(p.user_name||"Ẩn danh")+"</div><div style='font-size:12px;color:#65676B;display:flex;align-items:center;gap:4px'>"+sh+(sh?"<span>·</span>":"")+"<span>"+ago(p.created_at)+"</span></div></div></div>";
-    h+="<div class='gc-content'>"+esc(p.content||"")+"</div>"+imgs;
+    h+="<div class='gc-content'>"+esc(p.content||"")+"</div>"+imgs+vid;
     h+="<div class='gc-stats' id='gcStats'><span>"+(p.likes_count||0)+" đơn giao thành công</span><span>"+(p.comments_count||0)+" ghi chú</span><span>"+(p.shares_count||0)+" chuyển tiếp</span></div>";
     h+="<div class='gc-actions'><button class='gc-abtn"+(lk?" liked":"")+"' id='gcLkBtn' onclick='_gcLike()'>Thành công</button><button class='gc-abtn' onclick='document.getElementById(\"gcInput\").focus()'>Ghi chú</button><button class='gc-abtn' onclick='_gcShare()'>Chuyển tiếp</button></div>";
     h+="<div class='gc-sort'>Phù hợp nhất <i class='fas fa-chevron-down' style='font-size:11px'></i></div>";
