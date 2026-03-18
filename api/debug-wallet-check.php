@@ -1,41 +1,29 @@
 <?php
 error_reporting(E_ALL);
 ini_set('display_errors', 1);
-ini_set('log_errors', 1);
 
-// Simulate wallet-api environment
-$_GET['action'] = 'plans';
-$_SERVER['REQUEST_METHOD'] = 'GET';
+// Check for syntax errors by tokenizing
+$file = '/home/nhshiw2j/public_html/api/wallet-api.php';
+$code = file_get_contents($file);
+echo "File size: " . strlen($code) . " bytes\n";
 
-define('APP_ACCESS', true);
-require_once '/home/nhshiw2j/public_html/includes/config.php';
-require_once '/home/nhshiw2j/public_html/includes/db.php';
-require_once '/home/nhshiw2j/public_html/includes/functions.php';
-
-echo "Step 1: includes loaded\n";
-
-$db = db();
-echo "Step 2: db() OK\n";
-
-// Run migration section manually
+// Try token_get_all to find syntax issues
 try {
-    $pdo = db()->getConnection();
-    echo "Step 3: getConnection() OK\n";
-    
-    // Test the wallets table check
-    $walletCols = array_column($pdo->query("SHOW COLUMNS FROM wallets")->fetchAll(PDO::FETCH_ASSOC), 'Field');
-    echo "Step 4: wallets columns = " . implode(',', $walletCols) . "\n";
-    
+    $tokens = token_get_all($code);
+    echo "Tokens: " . count($tokens) . " (syntax OK if this shows)\n";
 } catch (Throwable $e) {
-    echo "ERROR at migration: " . $e->getMessage() . " (line " . $e->getLine() . ")\n";
+    echo "Token error: " . $e->getMessage() . "\n";
 }
 
-// Test plans query
-try {
-    $plans = $db->fetchAll("SELECT * FROM subscription_plans WHERE is_active=1 ORDER BY sort_order ASC", []);
-    echo "Step 5: plans count = " . count($plans) . "\n";
-} catch (Throwable $e) {
-    echo "ERROR at plans: " . $e->getMessage() . "\n";
-}
+// Check if file on server matches expected content
+echo "First 50 chars: " . substr($code, 0, 50) . "\n";
+echo "Has wAuth: " . (strpos($code, 'function wAuth') !== false ? 'YES' : 'NO') . "\n";
+echo "Has getPdo: " . (strpos($code, 'getPdo') !== false ? 'YES' : 'NO') . "\n";
+echo "Has getConnection: " . (strpos($code, 'getConnection') !== false ? 'YES' : 'NO') . "\n";
+echo "Has hash_equals: " . (strpos($code, 'hash_equals') !== false ? 'YES' : 'NO') . "\n";
 
-echo "DONE\n";
+// Try eval-like approach with output buffering
+ob_start();
+$result = shell_exec('php -l ' . escapeshellarg($file) . ' 2>&1');
+ob_end_clean();
+echo "PHP lint: " . $result . "\n";
