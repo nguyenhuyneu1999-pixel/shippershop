@@ -7,37 +7,108 @@ require_once __DIR__ . '/../includes/functions.php';
 header('Content-Type: application/json; charset=utf-8');
 header('X-Content-Type-Options: nosniff');
 header('X-Frame-Options: DENY');
+header('X-XSS-Protection: 1; mode=block');
+header('Cache-Control: no-store, no-cache, must-revalidate');
+header('Strict-Transport-Security: max-age=31536000; includeSubDomains');
 if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') { http_response_code(200); exit; }
 
 $db = db();
 $method = $_SERVER['REQUEST_METHOD'];
 $action = $_GET['action'] ?? '';
 
+// ============================================
+// SECURITY LAYER
+// ============================================
+
+/**
+ * FIX #1: JWT Authentication with SIGNATURE VERIFICATION
+ * Before: just base64_decode payload (anyone can forge)
+ * After: verify HMAC-SHA256 signature against JWT_SECRET
+ */
 function wAuth() {
-    if (isset($_SESSION['user_id'])) return intval($_SESSION['user_id']);
+    // Session first (most secure - server-side)
+    if (isset($_SESSION['user_id']) && !empty($_SESSION['user_id'])) {
+        return intval($_SESSION['user_id']);
+    }
+    
     $headers = getallheaders();
     $h = $headers['Authorization'] ?? $headers['authorization'] ?? $_SERVER['HTTP_AUTHORIZATION'] ?? $_SERVER['REDIRECT_HTTP_AUTHORIZATION'] ?? '';
-    if (preg_match('/Bearer\s+(.+)/i', $h, $m)) {
-        $parts = explode('.', $m[1]);
-        if (count($parts) === 3) {
-            $payload = json_decode(base64_decode($parts[1]), true);
-            if ($payload && isset($payload['user_id'])) {
-                $_SESSION['user_id'] = $payload['user_id'];
-                return intval($payload['user_id']);
-            }
-        }
+    
+    if (!preg_match('/Bearer\s+(.+)/i', $h, $m)) return null;
+    
+    $token = $m[1];
+    $parts = explode('.', $token);
+    if (count($parts) !== 3) return null;
+    
+    // VERIFY SIGNATURE - This is the critical fix
+    $header = $parts[0];
+    $payload = $parts[1];
+    $signature = $parts[2];
+    
+    $validSig = base64_encode(hash_hmac('sha256', "$header.$payload", JWT_SECRET, true));
+    // URL-safe base64 comparison
+    $validSig = rtrim(strtr($validSig, '+/', '-_'), '=');
+    $testSig = rtrim(strtr($signature, '+/', '-_'), '=');
+    
+    if (!hash_equals($validSig, $testSig)) {
+        // Signature mismatch - REJECT (don't just decode!)
+        auditLog(null, 'jwt_invalid_sig', 'IP=' . getIP());
+        return null;
     }
-    return null;
+    
+    // Signature valid - now decode
+    $data = json_decode(base64_decode($payload), true);
+    if (!$data || !isset($data['user_id'])) return null;
+    
+    // Check expiry if present
+    if (isset($data['exp']) && $data['exp'] < time()) {
+        auditLog($data['user_id'], 'jwt_expired', '');
+        return null;
+    }
+    
+    $_SESSION['user_id'] = $data['user_id'];
+    return intval($data['user_id']);
 }
 
-function wOk($msg, $data = []) { echo json_encode(['success'=>true,'message'=>$msg,'data'=>$data], JSON_UNESCAPED_UNICODE); exit; }
-function wErr($msg, $code = 400) { http_response_code($code); echo json_encode(['success'=>false,'message'=>$msg], JSON_UNESCAPED_UNICODE); exit; }
+function getIP() { 
+    $ip = $_SERVER['HTTP_X_FORWARDED_FOR'] ?? $_SERVER['REMOTE_ADDR'] ?? '0.0.0.0';
+    // Take first IP if multiple (proxy chain)
+    return explode(',', $ip)[0];
+}
 
-function getIP() { return $_SERVER['HTTP_X_FORWARDED_FOR'] ?? $_SERVER['REMOTE_ADDR'] ?? '0.0.0.0'; }
+/**
+ * FIX #4: Rate Limiting - actually enforce it
+ */
+function rateLimit($endpoint, $maxHits = 30, $windowSec = 60) {
+    global $db;
+    $ip = getIP();
+    $window = date('Y-m-d H:i:s', time() - $windowSec);
+    
+    try {
+        // Clean old
+        $db->query("DELETE FROM rate_limits WHERE window_start < ?", [date('Y-m-d H:i:s', time() - 3600)]);
+        
+        // Count
+        $r = $db->fetchOne("SELECT COALESCE(SUM(hits),0) as total FROM rate_limits WHERE ip=? AND endpoint=? AND window_start > ?", [$ip, $endpoint, $window]);
+        $total = intval($r['total'] ?? 0);
+        
+        if ($total >= $maxHits) {
+            auditLog(null, 'rate_limit', "endpoint=$endpoint ip=$ip hits=$total");
+            http_response_code(429);
+            echo json_encode(['success'=>false,'message'=>'Quá nhiều yêu cầu. Thử lại sau.'], JSON_UNESCAPED_UNICODE);
+            exit;
+        }
+        
+        $db->query("INSERT INTO rate_limits (ip,endpoint,hits,window_start) VALUES (?,?,1,NOW())", [$ip, $endpoint]);
+    } catch (Throwable $e) {}
+}
 
 function auditLog($uid, $act, $det = '') {
     global $db;
-    try { $db->query("INSERT INTO audit_log (user_id,action,details,ip,created_at) VALUES (?,?,?,?,NOW())", [$uid, $act, $det, getIP()]); } catch (Throwable $e) {}
+    try {
+        $db->query("INSERT INTO audit_log (user_id,action,details,ip,user_agent,created_at) VALUES (?,?,?,?,?,NOW())",
+            [$uid, $act, $det, getIP(), substr($_SERVER['HTTP_USER_AGENT'] ?? '', 0, 500)]);
+    } catch (Throwable $e) {}
 }
 
 function ensureWallet($uid) {
@@ -53,32 +124,58 @@ function ensureWallet($uid) {
 function checkPin($uid, $pin) {
     global $db;
     $w = $db->fetchOne("SELECT pin_hash,pin_attempts,locked_until FROM wallets WHERE user_id=?", [$uid]);
-    if (!$w) return 'Vi khong ton tai';
+    if (!$w) return 'Ví không tồn tại';
     if ($w['locked_until'] && strtotime($w['locked_until']) > time()) {
         $m = ceil((strtotime($w['locked_until']) - time()) / 60);
-        return 'Vi bi khoa. Thu lai sau ' . $m . ' phut.';
+        return "Ví bị khóa. Thử lại sau $m phút.";
     }
-    if (!$w['pin_hash']) return 'Chua thiet lap PIN.';
+    if (!$w['pin_hash']) return 'Chưa thiết lập PIN.';
     if (!password_verify($pin, $w['pin_hash'])) {
         $att = intval($w['pin_attempts']) + 1;
         $lock = null;
-        if ($att >= 5) { $lock = date('Y-m-d H:i:s', time() + 1800); }
-        elseif ($att >= 3) { $lock = date('Y-m-d H:i:s', time() + 300); }
+        if ($att >= 5) $lock = date('Y-m-d H:i:s', time() + 1800);
+        elseif ($att >= 3) $lock = date('Y-m-d H:i:s', time() + 300);
         $db->query("UPDATE wallets SET pin_attempts=?, locked_until=? WHERE user_id=?", [$att, $lock, $uid]);
-        auditLog($uid, 'pin_fail', "att=$att");
-        return 'Sai PIN. Con ' . (5 - $att) . ' lan thu.' . ($lock ? ' Vi tam khoa.' : '');
+        auditLog($uid, 'pin_fail', "att=$att ip=" . getIP());
+        return 'Sai PIN. Còn ' . (5 - $att) . ' lần.' . ($lock ? ' Ví tạm khóa.' : '');
     }
     $db->query("UPDATE wallets SET pin_attempts=0, locked_until=NULL WHERE user_id=?", [$uid]);
-    return null; // OK
+    return null;
 }
 
-// ==========================================
-// GET
-// ==========================================
+/**
+ * FIX #2: CSRF Token generation & verification
+ */
+function generateCSRF($uid) {
+    global $db;
+    $token = bin2hex(random_bytes(32));
+    $expires = date('Y-m-d H:i:s', time() + 3600);
+    try {
+        $db->query("DELETE FROM csrf_tokens WHERE user_id=? OR expires_at < NOW()", [$uid]);
+        $db->query("INSERT INTO csrf_tokens (user_id,token,expires_at) VALUES (?,?,?)", [$uid, $token, $expires]);
+    } catch (Throwable $e) {}
+    return $token;
+}
+
+function verifyCSRF($uid, $token) {
+    global $db;
+    if (empty($token)) return false;
+    $row = $db->fetchOne("SELECT id FROM csrf_tokens WHERE user_id=? AND token=? AND expires_at > NOW() AND used=0", [$uid, $token]);
+    if (!$row) return false;
+    $db->query("UPDATE csrf_tokens SET used=1 WHERE id=?", [$row['id']]);
+    return true;
+}
+
+function wOk($msg, $data = []) { echo json_encode(['success'=>true,'message'=>$msg,'data'=>$data], JSON_UNESCAPED_UNICODE); exit; }
+function wErr($msg, $code = 400) { http_response_code($code); echo json_encode(['success'=>false,'message'=>$msg], JSON_UNESCAPED_UNICODE); exit; }
+
+// ============================================
+// GET ENDPOINTS
+// ============================================
 if ($method === 'GET') {
 
-    // Plans
     if ($action === 'plans') {
+        rateLimit('plans', 30, 60);
         $plans = $db->fetchAll("SELECT * FROM subscription_plans WHERE is_active=1 ORDER BY sort_order ASC", []);
         foreach ($plans as &$p) {
             $p['features'] = json_decode($p['features'] ?: '[]', true);
@@ -87,10 +184,10 @@ if ($method === 'GET') {
         wOk('OK', $plans);
     }
 
-    // Wallet info
     if ($action === '' || $action === 'info') {
         $uid = wAuth();
-        if (!$uid) wErr('Dang nhap', 401);
+        if (!$uid) wErr('Đăng nhập', 401);
+        rateLimit('wallet_info', 60, 60);
 
         $wallet = ensureWallet($uid);
         $hasPin = !empty($wallet['pin_hash']);
@@ -101,17 +198,19 @@ if ($method === 'GET') {
         $txns = $db->fetchAll("SELECT * FROM wallet_transactions WHERE user_id=? ORDER BY created_at DESC LIMIT 10", [$uid]);
         if (!$txns) $txns = [];
 
+        // Generate CSRF token for subsequent POST requests
+        $csrf = generateCSRF($uid);
+
         wOk('OK', [
             'balance' => floatval($wallet['balance']),
             'total_deposit' => floatval($wallet['total_deposit'] ?? 0),
             'total_spent' => floatval($wallet['total_spent'] ?? 0),
             'has_pin' => $hasPin,
             'is_locked' => $isLocked,
+            'csrf_token' => $csrf,
             'subscription' => $sub ? [
-                'plan' => $sub['plan_name'],
-                'slug' => $sub['plan_slug'],
-                'badge' => $sub['badge'],
-                'badge_color' => $sub['badge_color'],
+                'plan' => $sub['plan_name'], 'slug' => $sub['plan_slug'],
+                'badge' => $sub['badge'], 'badge_color' => $sub['badge_color'],
                 'features' => json_decode($sub['features'] ?: '[]', true),
                 'expires_at' => $sub['expires_at'],
                 'auto_renew' => (bool)($sub['auto_renew'] ?? 0),
@@ -120,10 +219,10 @@ if ($method === 'GET') {
         ]);
     }
 
-    // Transaction history
     if ($action === 'transactions') {
         $uid = wAuth();
-        if (!$uid) wErr('Dang nhap', 401);
+        if (!$uid) wErr('Đăng nhập', 401);
+        rateLimit('transactions', 30, 60);
         $page = max(1, intval($_GET['page'] ?? 1));
         $offset = ($page - 1) * 20;
         $txns = $db->fetchAll("SELECT * FROM wallet_transactions WHERE user_id=? ORDER BY created_at DESC LIMIT 20 OFFSET $offset", [$uid]);
@@ -131,22 +230,24 @@ if ($method === 'GET') {
     }
 }
 
-// ==========================================
-// POST
-// ==========================================
+// ============================================
+// POST ENDPOINTS (all require auth + CSRF for financial ops)
+// ============================================
 if ($method === 'POST') {
     $uid = wAuth();
-    if (!$uid) wErr('Dang nhap', 401);
+    if (!$uid) wErr('Đăng nhập', 401);
 
     $raw = file_get_contents('php://input');
     $input = json_decode($raw, true) ?: $_POST;
+    $csrfToken = $input['csrf_token'] ?? '';
 
-    // SET PIN
+    // SET PIN (doesn't require CSRF - first time setup)
     if ($action === 'set_pin') {
+        rateLimit('set_pin', 5, 300);
         $pin = trim($input['pin'] ?? '');
         $cfm = trim($input['confirm_pin'] ?? '');
-        if (strlen($pin) < 4 || strlen($pin) > 6 || !ctype_digit($pin)) wErr('PIN phai la 4-6 chu so');
-        if ($pin !== $cfm) wErr('PIN khong khop');
+        if (strlen($pin) < 4 || strlen($pin) > 6 || !ctype_digit($pin)) wErr('PIN phải là 4-6 chữ số');
+        if ($pin !== $cfm) wErr('PIN không khớp');
 
         $wallet = ensureWallet($uid);
         if (!empty($wallet['pin_hash'])) {
@@ -155,21 +256,21 @@ if ($method === 'POST') {
             if ($err) wErr($err);
         }
 
-        $hash = password_hash($pin, PASSWORD_BCRYPT);
+        $hash = password_hash($pin, PASSWORD_BCRYPT, ['cost' => 12]);
         $db->query("UPDATE wallets SET pin_hash=?, pin_attempts=0, locked_until=NULL WHERE user_id=?", [$hash, $uid]);
-        auditLog($uid, 'pin_set', '');
-        wOk('Da thiet lap ma PIN!');
+        auditLog($uid, 'pin_set', 'IP=' . getIP());
+        wOk('Đã thiết lập mã PIN!');
     }
 
-    // SUBSCRIBE
+    // SUBSCRIBE (requires CSRF + PIN for paid)
     if ($action === 'subscribe') {
+        rateLimit('subscribe', 10, 300);
         $planId = intval($input['plan_id'] ?? 0);
         $pin = trim($input['pin'] ?? '');
-        if (!$planId) wErr('Chon goi');
+        if (!$planId) wErr('Chọn gói');
 
         $plan = $db->fetchOne("SELECT * FROM subscription_plans WHERE id=? AND is_active=1", [$planId]);
-        if (!$plan) wErr('Goi khong ton tai');
-
+        if (!$plan) wErr('Gói không tồn tại');
         $price = floatval($plan['price']);
 
         // Free plan
@@ -177,54 +278,104 @@ if ($method === 'POST') {
             $db->query("UPDATE user_subscriptions SET `status`='cancelled' WHERE user_id=? AND `status`='active'", [$uid]);
             $db->query("INSERT INTO user_subscriptions (user_id,plan_id,`status`,started_at,expires_at,auto_renew) VALUES (?,?,'active',NOW(),DATE_ADD(NOW(), INTERVAL ? DAY),0)", [$uid, $planId, intval($plan['duration_days'])]);
             auditLog($uid, 'sub_free', $plan['name']);
-            wOk('Da kich hoat goi ' . $plan['name']);
+            wOk('Đã kích hoạt gói ' . $plan['name']);
         }
 
-        // Paid - verify PIN
-        if (!$pin) wErr('Nhap PIN de xac nhan');
+        // FIX #2: Verify CSRF token for paid operations
+        if (!verifyCSRF($uid, $csrfToken)) {
+            auditLog($uid, 'csrf_fail', 'subscribe attempt');
+            wErr('Phiên làm việc hết hạn. Vui lòng tải lại trang.');
+        }
+
+        // Verify PIN
+        if (!$pin) wErr('Nhập PIN để xác nhận');
         $err = checkPin($uid, $pin);
         if ($err) wErr($err);
 
+        // Check balance
         $wallet = ensureWallet($uid);
         if (floatval($wallet['balance']) < $price) {
-            wErr('So du khong du. Can ' . number_format($price) . 'd, hien co ' . number_format($wallet['balance']) . 'd');
+            wErr('Số dư không đủ. Cần ' . number_format($price) . 'đ, hiện có ' . number_format($wallet['balance']) . 'đ');
         }
 
-        // Deduct
-        $before = floatval($wallet['balance']);
-        $after = $before - $price;
-        $db->query("UPDATE wallets SET balance=balance-?, total_spent=total_spent+?, updated_at=NOW() WHERE user_id=? AND balance>=?", [$price, $price, $uid, $price]);
-
-        $ref = 'SUB_' . strtoupper($plan['slug']) . '_' . date('YmdHis') . '_' . $uid;
-        $db->query("INSERT INTO wallet_transactions (user_id,type,amount,balance_before,balance_after,description,reference_id,`status`,created_at) VALUES (?,'payment',?,?,?,?,?,'completed',NOW())", [$uid, $price, $before, $after, 'Dang ky goi ' . $plan['name'], $ref]);
-
-        $db->query("UPDATE user_subscriptions SET `status`='cancelled' WHERE user_id=? AND `status`='active'", [$uid]);
-        $db->query("INSERT INTO user_subscriptions (user_id,plan_id,`status`,started_at,expires_at,auto_renew) VALUES (?,?,'active',NOW(),DATE_ADD(NOW(), INTERVAL ? DAY),1)", [$uid, $planId, intval($plan['duration_days'])]);
-
-        auditLog($uid, 'sub_paid', "plan={$plan['name']} price=$price ref=$ref");
-        wOk('Dang ky thanh cong goi ' . $plan['name'] . '!', ['balance' => $after]);
+        /**
+         * FIX #3: Atomic transaction with row lock
+         * Use SELECT ... FOR UPDATE to lock the row, preventing race conditions
+         */
+        try {
+            // Begin transaction
+            $pdo = $db->getPdo();
+            $pdo->beginTransaction();
+            
+            // Lock wallet row
+            $stmt = $pdo->prepare("SELECT balance FROM wallets WHERE user_id=? FOR UPDATE");
+            $stmt->execute([$uid]);
+            $lockedWallet = $stmt->fetch(\PDO::FETCH_ASSOC);
+            
+            if (!$lockedWallet || floatval($lockedWallet['balance']) < $price) {
+                $pdo->rollBack();
+                wErr('Số dư không đủ (đã verify lại)');
+            }
+            
+            $before = floatval($lockedWallet['balance']);
+            $after = $before - $price;
+            
+            // Deduct
+            $stmt2 = $pdo->prepare("UPDATE wallets SET balance=?, total_spent=total_spent+?, updated_at=NOW() WHERE user_id=?");
+            $stmt2->execute([$after, $price, $uid]);
+            
+            // Record transaction
+            $ref = 'SUB_' . strtoupper($plan['slug']) . '_' . date('YmdHis') . '_' . $uid;
+            $stmt3 = $pdo->prepare("INSERT INTO wallet_transactions (user_id,type,amount,balance_before,balance_after,description,reference_id,`status`,created_at) VALUES (?,'payment',?,?,?,?,?,'completed',NOW())");
+            $stmt3->execute([$uid, $price, $before, $after, 'Đăng ký gói ' . $plan['name'], $ref]);
+            
+            // Cancel old + create new subscription
+            $stmt4 = $pdo->prepare("UPDATE user_subscriptions SET `status`='cancelled' WHERE user_id=? AND `status`='active'");
+            $stmt4->execute([$uid]);
+            
+            $stmt5 = $pdo->prepare("INSERT INTO user_subscriptions (user_id,plan_id,`status`,started_at,expires_at,auto_renew) VALUES (?,?,'active',NOW(),DATE_ADD(NOW(), INTERVAL ? DAY),1)");
+            $stmt5->execute([$uid, $planId, intval($plan['duration_days'])]);
+            
+            $pdo->commit();
+            
+            auditLog($uid, 'sub_paid', "plan={$plan['name']} price=$price ref=$ref balance_after=$after");
+            wOk('Đăng ký thành công gói ' . $plan['name'] . '!', ['balance' => $after]);
+            
+        } catch (Throwable $e) {
+            if (isset($pdo) && $pdo->inTransaction()) $pdo->rollBack();
+            auditLog($uid, 'sub_error', $e->getMessage());
+            wErr('Lỗi giao dịch. Vui lòng thử lại.');
+        }
     }
 
-    // DEPOSIT
+    // DEPOSIT (requires CSRF)
     if ($action === 'deposit') {
+        rateLimit('deposit', 5, 300);
+        
+        if (!verifyCSRF($uid, $csrfToken)) {
+            wErr('Phiên hết hạn. Tải lại trang.');
+        }
+        
         $amount = floatval($input['amount'] ?? 0);
         $bank = trim($input['bank_name'] ?? '');
-        if ($amount < 10000) wErr('Toi thieu 10.000d');
-        if ($amount > 10000000) wErr('Toi da 10.000.000d');
+        if ($amount < 10000) wErr('Tối thiểu 10.000đ');
+        if ($amount > 10000000) wErr('Tối đa 10.000.000đ');
 
         $wallet = ensureWallet($uid);
-        $ref = 'DEP_' . date('YmdHis') . '_' . $uid . '_' . rand(1000, 9999);
-        $db->query("INSERT INTO wallet_transactions (user_id,type,amount,balance_before,balance_after,description,reference_id,bank_name,`status`,created_at) VALUES (?,'deposit',?,?,?,?,?,?,'pending',NOW())", [$uid, $amount, $wallet['balance'], $wallet['balance'], 'Nap tien qua ' . ($bank ?: 'CK'), $ref, $bank]);
+        $ref = 'DEP_' . date('YmdHis') . '_' . $uid . '_' . bin2hex(random_bytes(4));
+        $db->query("INSERT INTO wallet_transactions (user_id,type,amount,balance_before,balance_after,description,reference_id,bank_name,`status`,created_at) VALUES (?,'deposit',?,?,?,?,?,?,'pending',NOW())",
+            [$uid, $amount, $wallet['balance'], $wallet['balance'], 'Nạp tiền qua ' . ($bank ?: 'CK'), $ref, $bank]);
 
-        auditLog($uid, 'deposit_req', "amount=$amount ref=$ref");
-        wOk('Yeu cau nap tien da gui! Admin se duyet trong 5-30 phut.', ['reference' => $ref]);
+        auditLog($uid, 'deposit_req', "amount=$amount ref=$ref ip=" . getIP());
+        wOk('Yêu cầu nạp tiền đã gửi! Admin sẽ duyệt trong 5-30 phút.', ['reference' => $ref]);
     }
 
     // CANCEL AUTO-RENEW
     if ($action === 'cancel_subscription') {
+        rateLimit('cancel_sub', 5, 300);
         $db->query("UPDATE user_subscriptions SET auto_renew=0 WHERE user_id=? AND `status`='active'", [$uid]);
         auditLog($uid, 'cancel_renew', '');
-        wOk('Da tat tu dong gia han.');
+        wOk('Đã tắt tự động gia hạn.');
     }
 }
 
