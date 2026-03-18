@@ -261,14 +261,14 @@ if ($method === 'POST') {
     $content = sanitize($content);
     $imagesJson = null;
 
-    // Get other fields from JSON
-    $title = $jsonInput["title"] ?? null;
-    $type = $jsonInput["type"] ?? 'post';
-    $province = $jsonInput["province"] ?? null;
-    $isAnonymous = $jsonInput["is_anonymous"] ?? 0;
-    $videoUrl = $jsonInput["video_url"] ?? null;
+    // Get other fields from JSON or POST
+    $title = $jsonInput["title"] ?? ($_POST["title"] ?? null);
+    $type = $jsonInput["type"] ?? ($_POST["type"] ?? 'post');
+    $province = $jsonInput["province"] ?? ($_POST["province"] ?? null);
+    $isAnonymous = $jsonInput["is_anonymous"] ?? ($_POST["is_anonymous"] ?? 0);
+    $videoUrl = $jsonInput["video_url"] ?? ($_POST["video_url"] ?? null);
 
-    if (empty($content) && empty($jsonInput['images']) && empty($_FILES['image'])) {
+    if (empty($content) && empty($jsonInput['images']) && empty($_FILES['image']) && empty($_FILES['images'])) {
         error('Vui lòng nhập nội dung hoặc chọn ảnh');
     }
 
@@ -289,13 +289,44 @@ if ($method === 'POST') {
         if (!empty($savedImages)) $imagesJson = json_encode($savedImages);
     }
 
-    // Handle file upload (form-data fallback)
-    if (!empty($_FILES['image']) && $_FILES['image']['error'] === UPLOAD_ERR_OK) {
+    // Handle multiple file uploads: images[] (from FormData)
+    if (!empty($_FILES['images']) && is_array($_FILES['images']['name'])) {
+        $savedImages = [];
+        $uploadDir = __DIR__ . '/../uploads/posts/';
+        if (!is_dir($uploadDir)) mkdir($uploadDir, 0755, true);
+        for ($i = 0; $i < count($_FILES['images']['name']); $i++) {
+            if ($_FILES['images']['error'][$i] !== UPLOAD_ERR_OK) continue;
+            $ext = strtolower(pathinfo($_FILES['images']['name'][$i], PATHINFO_EXTENSION));
+            $allowed = ['jpg','jpeg','png','gif','webp'];
+            if (!in_array($ext, $allowed)) continue;
+            if ($_FILES['images']['size'][$i] > 10 * 1024 * 1024) continue;
+            $filename = uniqid('post_') . '.' . $ext;
+            move_uploaded_file($_FILES['images']['tmp_name'][$i], $uploadDir . $filename);
+            $savedImages[] = '/uploads/posts/' . $filename;
+        }
+        if (!empty($savedImages)) $imagesJson = json_encode($savedImages);
+    }
+
+    // Handle single file upload: image (legacy fallback)
+    if (!$imagesJson && !empty($_FILES['image']) && $_FILES['image']['error'] === UPLOAD_ERR_OK) {
         $uploadResult = uploadFile($_FILES['image'], 'posts');
         if ($uploadResult['success']) {
             $imagesJson = json_encode([$uploadResult['url']]);
         } else {
             error($uploadResult['message']);
+        }
+    }
+
+    // Handle video file upload
+    if (!empty($_FILES['video']) && $_FILES['video']['error'] === UPLOAD_ERR_OK) {
+        $vExt = strtolower(pathinfo($_FILES['video']['name'], PATHINFO_EXTENSION));
+        $vAllowed = ['mp4','mov','avi','webm'];
+        if (in_array($vExt, $vAllowed) && $_FILES['video']['size'] <= 50 * 1024 * 1024) {
+            $vDir = __DIR__ . '/../uploads/videos/';
+            if (!is_dir($vDir)) mkdir($vDir, 0755, true);
+            $vName = uniqid('vid_') . '.' . $vExt;
+            move_uploaded_file($_FILES['video']['tmp_name'], $vDir . $vName);
+            $videoUrl = '/uploads/videos/' . $vName;
         }
     }
 
