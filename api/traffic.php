@@ -44,63 +44,26 @@ try {
 // GET - List alerts
 // ==========================================
 if ($method === 'GET' && empty($action)) {
-    // Force simple query for now
-    $alerts2 = $db->fetchAll("SELECT a.*, u.fullname as user_name, u.avatar as user_avatar, u.shipping_company FROM traffic_alerts a JOIN users u ON a.user_id = u.id WHERE a.`status`='active' AND a.expires_at > NOW() ORDER BY a.created_at DESC LIMIT 20", []);
-    if (!$alerts2) $alerts2 = [];
-    foreach ($alerts2 as &$aa) {
-        $exp2 = strtotime($aa['expires_at']); $now2 = time(); $rem2 = $exp2 - $now2;
-        if ($rem2 > 3600) $aa['time_left'] = floor($rem2/3600).'h '.floor(($rem2%3600)/60).'m';
-        elseif ($rem2 > 60) $aa['time_left'] = floor($rem2/60).' phút';
-        else $aa['time_left'] = 'Sắp hết';
-        $aa['reliability'] = ($aa['confirms']+1)/($aa['confirms']+$aa['denies']+1)*100;
-    }
-    tSuccess('OK', $alerts2);
     $cat = $_GET['category'] ?? '';
-    $lat = floatval($_GET['lat'] ?? 0);
-    $lng = floatval($_GET['lng'] ?? 0);
-    $radius = floatval($_GET['radius'] ?? 50); // km
-    $page = max(1, intval($_GET['page'] ?? 1));
-    $limit = 20;
-    $offset = ($page - 1) * $limit;
-
-    $where = ["`status`='active'", "expires_at > NOW()"];
+    
+    $where = "a.`status`='active' AND a.expires_at > NOW()";
     $params = [];
-
     if ($cat && $cat !== 'all') {
-        $where[] = "category = ?";
+        $where .= " AND a.category = ?";
         $params[] = $cat;
     }
-
-    // Location-based filter (Haversine)
-    if ($lat && $lng) {
-        $where[] = "(6371 * acos(cos(radians(?)) * cos(radians(latitude)) * cos(radians(longitude) - radians(?)) + sin(radians(?)) * sin(radians(latitude)))) < ?";
-        $params[] = $lat;
-        $params[] = $lng;
-        $params[] = $lat;
-        $params[] = $radius;
-    }
-
-    $whereStr = implode(' AND ', $where);
-    $sql = "SELECT a.*, u.fullname as user_name, u.avatar as user_avatar, u.shipping_company
-            FROM traffic_alerts a JOIN users u ON a.user_id = u.id
-            WHERE $whereStr
-            ORDER BY a.created_at DESC
-            LIMIT $limit OFFSET $offset";
-
-    $alerts = $db->fetchAll($sql, $params);
+    
+    $alerts = $db->fetchAll("SELECT a.*, u.fullname as user_name, u.avatar as user_avatar, u.shipping_company FROM traffic_alerts a JOIN users u ON a.user_id = u.id WHERE $where ORDER BY a.created_at DESC LIMIT 20", $params);
     if (!$alerts) $alerts = [];
-
-    // Add time remaining
+    
     foreach ($alerts as &$a) {
-        $exp = strtotime($a['expires_at']);
-        $now = time();
-        $remain = $exp - $now;
-        if ($remain > 3600) $a['time_left'] = floor($remain / 3600) . 'h ' . floor(($remain % 3600) / 60) . 'm';
-        elseif ($remain > 60) $a['time_left'] = floor($remain / 60) . ' phút';
+        $exp = strtotime($a['expires_at']); $now = time(); $rem = $exp - $now;
+        if ($rem > 3600) $a['time_left'] = floor($rem/3600).'h '.floor(($rem%3600)/60).'m';
+        elseif ($rem > 60) $a['time_left'] = floor($rem/60).' phút';
         else $a['time_left'] = 'Sắp hết';
-        $a['reliability'] = ($a['confirms'] + 1) / ($a['confirms'] + $a['denies'] + 1) * 100;
+        $a['reliability'] = ($a['confirms']+1)/($a['confirms']+$a['denies']+1)*100;
     }
-
+    
     tSuccess('OK', $alerts);
 }
 
