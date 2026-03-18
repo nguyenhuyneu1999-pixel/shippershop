@@ -1,6 +1,4 @@
 <?php
-set_error_handler(function($n,$s,$f,$l){echo json_encode(['success'=>false,'message'=>"Error: $s line $l"]);exit;});
-set_exception_handler(function($e){echo json_encode(['success'=>false,'message'=>"Ex: ".$e->getMessage()." L".$e->getLine()]);exit;});
 define('APP_ACCESS', true);
 require_once __DIR__ . '/../includes/config.php';
 require_once __DIR__ . '/../includes/db.php';
@@ -72,24 +70,14 @@ if ($method === 'GET' && empty($action)) {
     }
 
     $whereStr = implode(' AND ', $where);
-    $sql = "SELECT a.*, u.fullname as user_name, u.avatar as user_avatar, u.shipping_company, u.trust_score
+    $sql = "SELECT a.*, u.fullname as user_name, u.avatar as user_avatar, u.shipping_company
             FROM traffic_alerts a JOIN users u ON a.user_id = u.id
             WHERE $whereStr
             ORDER BY a.created_at DESC
             LIMIT $limit OFFSET $offset";
 
-    try {
-        $alerts = $db->fetchAll($sql, $params);
-        if (!$alerts) $alerts = [];
-    } catch (Throwable $qe) {
-        // Fallback: simple query
-        try {
-            $alerts = $db->fetchAll("SELECT a.*, u.fullname as user_name, u.avatar as user_avatar, u.shipping_company FROM traffic_alerts a JOIN users u ON a.user_id = u.id WHERE a.`status`='active' ORDER BY a.created_at DESC LIMIT 20", []);
-            if (!$alerts) $alerts = [];
-        } catch (Throwable $qe2) {
-            tError("SQL: " . $qe2->getMessage());
-        }
-    }
+    $alerts = $db->fetchAll($sql, $params);
+    if (!$alerts) $alerts = [];
 
     // Add time remaining
     foreach ($alerts as &$a) {
@@ -111,7 +99,7 @@ if ($method === 'GET' && empty($action)) {
 if ($method === 'GET' && $action === 'detail') {
     $id = intval($_GET['id'] ?? 0);
     if (!$id) tError('Missing id');
-    $a = $db->fetchOne("SELECT a.*, u.fullname as user_name, u.avatar as user_avatar, u.shipping_company, u.trust_score FROM traffic_alerts a JOIN users u ON a.user_id=u.id WHERE a.id=?", [$id]);
+    $a = $db->fetchOne("SELECT a.*, u.fullname as user_name, u.avatar as user_avatar, u.shipping_company FROM traffic_alerts a JOIN users u ON a.user_id=u.id WHERE a.id=?", [$id]);
     if (!$a) tError('Not found', 404);
     tSuccess('OK', $a);
 }
