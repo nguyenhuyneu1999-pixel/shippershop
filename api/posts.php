@@ -205,7 +205,13 @@ if ($method === 'GET') {
         }
     }
     
-    success('Success', ['posts' => $posts]);
+    success('Success', [
+        'posts' => $posts,
+        'total' => $total,
+        'total_pages' => $pagination['total_pages'],
+        'page' => $pagination['current_page'],
+        'per_page' => $pagination['per_page']
+    ]);
 }
 
 // ============================================

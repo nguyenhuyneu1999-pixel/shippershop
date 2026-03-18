@@ -505,7 +505,7 @@ function setProv(p,el){ prov=p; page=1; document.querySelectorAll('.province-ite
 
 async function loadPosts(append=false){
   if(!append){ document.getElementById('feed').innerHTML='<div class="empty"><i class="fas fa-spinner spin"></i><p style="margin-top:8px">Đang tải...</p></div>'; page=1; }
-  var fp=document.getElementById('fProvince')?document.getElementById('fProvince').value:'';var fd=document.getElementById('fDistrict')?document.getElementById('fDistrict').value:'';let url='/api/posts.php?sort='+sort+'&page='+page+'&limit=15'+(fp?'&province='+encodeURIComponent(fp):'')+(fd?'&district='+encodeURIComponent(fd):'');
+  var fp=document.getElementById('fProvince')?document.getElementById('fProvince').value:'';var fd=document.getElementById('fDistrict')?document.getElementById('fDistrict').value:'';let url='/api/posts.php?sort='+sort+'&page='+page+'&limit=20'+(fp?'&province='+encodeURIComponent(fp):'')+(fd?'&district='+encodeURIComponent(fd):'');
   if(type&&type!=='all') url+=`&type=${type}`;
   if(prov) url+=`&province=${encodeURIComponent(prov)}`;
   const q=document.getElementById('q').value.trim();
@@ -527,6 +527,15 @@ async function loadPosts(append=false){
   }catch(e){ document.getElementById('feed').innerHTML='<div class="empty"><i class="fas fa-wifi"></i><p>Lỗi kết nối API</p></div>'; }
 }
 function loadMore(){ page++; loadPosts(true); }
+var _loadingMore=false;
+window.addEventListener('scroll',function(){
+  if(_loadingMore||page>=totalPg)return;
+  if((window.innerHeight+window.scrollY)>=document.body.offsetHeight-800){
+    _loadingMore=true;
+    page++;
+    loadPosts(true).then(function(){_loadingMore=false;}).catch(function(){_loadingMore=false;});
+  }
+});
 function search(){ page=1; loadPosts(); }
 function fType(t){ type=t; page=1; document.querySelectorAll('[id^="t-"]').forEach(i=>i.classList.remove('active')); const el=document.getElementById('t-'+t); if(el)el.classList.add('active'); loadPosts(); }
 // === LOCATION FILTER ===
