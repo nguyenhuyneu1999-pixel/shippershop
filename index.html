@@ -395,7 +395,7 @@ if("serviceWorker" in navigator){
     <i class="fas fa-map-marker-alt loc-icon"></i>
     <select id="fProvince" onchange="onProvChange()"><option value="">Tỉnh/TP</option></select>
     <select id="fDistrict" onchange="onDistChange()" style="display:none"><option value="">Quận/Huyện</option></select>
-    <select id="fWard" onchange="loadFeed()" style="display:none"><option value="">Xã/Phường</option></select>
+    <select id="fWard" onchange="loadPosts()" style="display:none"><option value="">Xã/Phường</option></select>
     <button class="loc-clear" id="locClear" onclick="clearLocFilter()" style="display:none"><i class="fas fa-times"></i> Xóa</button>
   </div>
   <div id="feed" style="background:#f0f2f5"><div class="empty"><i class="fas fa-spinner spin"></i><p>Đang tải...</p></div></div>
@@ -537,21 +537,21 @@ function onProvChange(){
   var name=document.getElementById("fProvince").value;
   var dSel=document.getElementById("fDistrict");
   dSel.innerHTML='<option value="">Qu\u1eadn/Huy\u1ec7n</option>';
-  if(!name){dSel.style.display="none";document.getElementById("locClear").style.display="none";loadFeed();return;}
+  if(!name){dSel.style.display="none";document.getElementById("locClear").style.display="none";loadPosts();return;}
   dSel.style.display="";document.getElementById("locClear").style.display="";
   var prov=fProvData.find(function(p){return p.name===name;});
   if(prov){fetch("https://provinces.open-api.vn/api/p/"+prov.code+"?depth=2").then(function(r){return r.json();}).then(function(d){fDistData=d.districts||[];fDistData.forEach(function(dt){var o=document.createElement("option");o.value=dt.name;o.textContent=dt.name;dSel.appendChild(o);});});}
-  loadFeed();
+  loadPosts();
 }
 function onDistChange(){
   var dName=document.getElementById('fDistrict').value;
   var wSel=document.getElementById('fWard');
   wSel.innerHTML='<option value="">X\u00e3/Ph\u01b0\u1eddng</option>';
-  if(!dName){wSel.style.display='none';loadFeed();return;}
+  if(!dName){wSel.style.display='none';loadPosts();return;}
   wSel.style.display='';
   var dist=fDistData.find(function(d){return d.name===dName;});
   if(dist){fetch('https://provinces.open-api.vn/api/d/'+dist.code+'?depth=2').then(function(r){return r.json();}).then(function(d){(d.wards||[]).forEach(function(w){var o=document.createElement('option');o.value=w.name;o.textContent=w.name;wSel.appendChild(o);});});}
-  loadFeed();
+  loadPosts();
 }
 
 // Modal province/district/ward
@@ -597,7 +597,7 @@ function onMDistChange(){
     (d.wards||[]).forEach(function(w){var o=document.createElement('option');o.value=w.name;o.textContent=w.name;wSel.appendChild(o);});
   });}
 }
-function clearLocFilter(){document.getElementById('fProvince').value='';document.getElementById('fDistrict').value='';document.getElementById('fWard').value='';document.getElementById('fDistrict').style.display='none';document.getElementById('fWard').style.display='none';document.getElementById('locClear').style.display='none';loadFeed();}
+function clearLocFilter(){document.getElementById('fProvince').value='';document.getElementById('fDistrict').value='';document.getElementById('fWard').value='';document.getElementById('fDistrict').style.display='none';document.getElementById('fWard').style.display='none';document.getElementById('locClear').style.display='none';loadPosts();}
 
 function setSort(s,btn){ sort=s; page=1; document.querySelectorAll('.sort-btn').forEach(b=>b.classList.remove('active')); btn.classList.add('active'); loadPosts(); }
 
