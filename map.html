@@ -7,6 +7,7 @@
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="https://unpkg.com/leaflet.heat@0.2.0/dist/leaflet-heat.js"></script>
 <style>
 :root{--primary:#d32f2f;--bg:#f0f2f5;--card:#fff;--text:#1c1e21;--text2:#65676b;--r:12px}
 *{box-sizing:border-box;margin:0;padding:0}
@@ -48,6 +49,32 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;h
 .map-bnav .fab-center{width:46px;height:46px;border-radius:50%;background:#EE4D2D;color:#fff;border:none;display:flex;align-items:center;justify-content:center;font-size:18px;position:absolute;top:50%;left:50%;transform:translate(-50%,-80%);box-shadow:0 2px 8px rgba(0,0,0,.15);cursor:pointer;z-index:10;text-decoration:none;}
 .pin-popup{font-size:13px;line-height:1.5;max-width:220px}
 .pin-popup strong{font-size:14px;display:block;margin-bottom:4px}
+/* Traffic alert marker */
+.traffic-marker{width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:16px;border:2px solid #fff;box-shadow:0 2px 6px rgba(0,0,0,.3)}
+.traffic-marker.critical{background:#f44336;animation:tPulse 1s infinite}
+.traffic-marker.high{background:#ff5722}
+.traffic-marker.medium{background:#ff9800}
+.traffic-marker.low{background:#ffc107}
+@keyframes tPulse{0%,100%{transform:scale(1)}50%{transform:scale(1.2)}}
+/* Difficulty badge */
+.diff-easy{background:#4caf5020;color:#4caf50;padding:2px 8px;border-radius:10px;font-size:11px;font-weight:700}
+.diff-medium{background:#ff980020;color:#ff9800;padding:2px 8px;border-radius:10px;font-size:11px;font-weight:700}
+.diff-hard{background:#f4433620;color:#f44336;padding:2px 8px;border-radius:10px;font-size:11px;font-weight:700}
+/* Rating stars */
+.pin-stars{color:#ffc107;font-size:12px;margin:4px 0}
+.pin-stars .empty{color:#ddd}
+/* Shipper marker */
+.shipper-marker{width:36px;height:36px;border-radius:50%;border:3px solid #4caf50;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,.3)}
+.shipper-marker img{width:100%;height:100%;object-fit:cover}
+.shipper-marker-ph{width:36px;height:36px;border-radius:50%;border:3px solid #4caf50;background:#4caf50;color:#fff;display:flex;align-items:center;justify-content:center;font-size:18px;box-shadow:0 2px 8px rgba(0,0,0,.3)}
+/* Share location toggle */
+.share-toggle{position:absolute;top:88px;right:14px;z-index:1000;background:#fff;border-radius:12px;padding:6px 12px;box-shadow:0 2px 8px rgba(0,0,0,.15);display:flex;align-items:center;gap:8px;font-size:12px;font-weight:600;cursor:pointer;border:1.5px solid #e4e6eb}
+.share-toggle.active{border-color:#4caf50;background:#e8f5e9;color:#2e7d32}
+/* Legend */
+.map-legend{position:absolute;bottom:66px;left:14px;z-index:1000;background:rgba(255,255,255,.95);border-radius:10px;padding:8px 10px;box-shadow:0 2px 8px rgba(0,0,0,.12);font-size:11px;max-width:160px;backdrop-filter:blur(4px);display:none}
+.map-legend.show{display:block}
+.legend-item{display:flex;align-items:center;gap:6px;padding:2px 0}
+.legend-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0}
 .pin-popup .pin-user{font-size:11px;color:var(--text2);margin-top:6px}
 .pin-type-badge{display:inline-block;padding:2px 8px;border-radius:8px;font-size:10px;font-weight:600;margin-bottom:4px}
 
@@ -89,6 +116,9 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;h
 <div class="map-filter" onclick="filterPins('warning',this)">⚠️ Cảnh báo</div>
 <div class="map-filter" onclick="filterPins('note',this)">📝 Ghi chú</div>
 <div class="map-filter" onclick="filterPins('favorite',this)">⭐ Yêu thích</div>
+<div class="map-filter" onclick="toggleTraffic(this)" id="filterTraffic" style="border-color:#f44336;color:#f44336">🚨 Giao thông</div>
+<div class="map-filter" onclick="toggleShippers(this)" id="filterShippers" style="border-color:#4caf50;color:#4caf50">🛵 Shipper</div>
+<div class="map-filter" onclick="toggleHeatmap(this)" id="filterHeat" style="border-color:#ff9800;color:#ff9800">🔥 Khu vực nóng</div>
 </div>
 
 <!-- LOCATE ME -->
@@ -112,6 +142,18 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;h
 <select id="pinType"><option value="note" selected>📝 Ghi chú</option><option value="delivery">📦 Điểm giao hàng</option><option value="warning">⚠️ Cảnh báo</option><option value="favorite">⭐ Yêu thích</option></select></div>
 </div>
 <div class="pin-modal-ft"><button class="pbtn" id="pinSubmit" onclick="savePin()"><i class="fas fa-check" style="margin-right:6px"></i>Lưu địa điểm</button></div>
+</div>
+
+<!-- SHARE LOCATION TOGGLE -->
+<div class="share-toggle" id="shareToggle" onclick="toggleShareLocation()"><i class="fas fa-location-arrow"></i> <span id="shareLabel">Chia sẻ vị trí</span></div>
+
+<!-- LEGEND -->
+<div class="map-legend" id="mapLegend">
+<div class="legend-item"><div class="legend-dot" style="background:#f44336"></div> Kẹt xe / Tai nạn</div>
+<div class="legend-item"><div class="legend-dot" style="background:#ff9800"></div> Thời tiết / Cảnh báo</div>
+<div class="legend-item"><div class="legend-dot" style="background:#4caf50"></div> Shipper online</div>
+<div class="legend-item"><div class="legend-dot" style="background:#2196f3"></div> Điểm giao hàng</div>
+<div class="legend-item"><div class="legend-dot" style="background:#ffc107"></div> Yêu thích</div>
 </div>
 
 <!-- BOTTOM NAV -->
@@ -190,6 +232,8 @@ async function loadPins(){
                 var m=L.marker([pin.lat,pin.lng],{icon:icon}).addTo(map);
                 var badge='<span class="pin-type-badge" style="background:'+cfg.color+'20;color:'+cfg.color+'">'+cfg.icon+" "+cfg.label+'</span>';
                 var popup='<div class="pin-popup">'+badge+'<strong>'+esc(pin.title)+'</strong>';
+                if(pin.difficulty){var diffMap={easy:['Dễ giao','diff-easy'],medium:['Trung bình','diff-medium'],hard:['Khó giao','diff-hard']};var df=diffMap[pin.difficulty]||['',''];popup+='<span class="'+df[1]+'">'+df[0]+'</span> ';}
+                if(parseInt(pin.rating)>0){popup+='<div class="pin-stars">';for(var s=1;s<=5;s++){popup+=s<=pin.rating?'★':'<span class="empty">★</span>';}popup+=' <small>'+pin.rating+'/5</small></div>';}
                 if(pin.description)popup+='<div style="margin-top:4px">'+esc(pin.description)+'</div>';
                 if(pin.address)popup+='<div style="margin-top:4px;font-size:12px;color:#666"><i class="fas fa-map-marker-alt"></i> '+esc(pin.address)+'</div>';
                 popup+='<div class="pin-user">👤 '+esc(pin.user_name||"User")+' · '+timeAgo(pin.created_at)+'</div>';
@@ -287,6 +331,273 @@ function timeAgo(d){if(!d)return"";var s=Math.floor((Date.now()-new Date(d).getT
 
 // INIT
 document.addEventListener("DOMContentLoaded",initMap);
+
+// ============================================
+// FEATURE 1: TRAFFIC ALERTS ON MAP
+// ============================================
+var trafficMarkers=[],trafficOn=false,trafficTimer=null;
+var severityColors={critical:"#f44336",high:"#ff5722",medium:"#ff9800",low:"#ffc107"};
+var categoryIcons={traffic:"🚗",weather:"🌧️",terrain:"🚧",warning:"⚠️",other:"📢"};
+
+function toggleTraffic(el){
+    trafficOn=!trafficOn;
+    el.classList.toggle("active");
+    if(trafficOn){
+        el.style.background="#f44336";el.style.color="#fff";
+        loadTrafficAlerts();
+        trafficTimer=setInterval(loadTrafficAlerts,120000);
+        document.getElementById("mapLegend").classList.add("show");
+    }else{
+        el.style.background="";el.style.color="#f44336";
+        trafficMarkers.forEach(function(m){map.removeLayer(m)});trafficMarkers=[];
+        if(trafficTimer)clearInterval(trafficTimer);
+        document.getElementById("mapLegend").classList.remove("show");
+    }
+}
+
+async function loadTrafficAlerts(){
+    try{
+        var r=await fetch("/api/traffic.php");var d=await r.json();
+        trafficMarkers.forEach(function(m){map.removeLayer(m)});trafficMarkers=[];
+        if(!d.success||!d.data)return;
+        d.data.forEach(function(a){
+            var lat=parseFloat(a.latitude);var lng=parseFloat(a.longitude);
+            if(!lat||!lng)return;
+            var sev=a.severity||"medium";
+            var cat=a.category||"other";
+            var icon=L.divIcon({html:'<div class="traffic-marker '+sev+'">'+((categoryIcons[cat])||"⚠️")+'</div>',className:"",iconSize:[32,32],iconAnchor:[16,16]});
+            var m=L.marker([lat,lng],{icon:icon}).addTo(map);
+            var sevText={critical:"🔴 Nghiêm trọng",high:"🟠 Cao",medium:"🟡 Trung bình",low:"🟢 Thấp"};
+            var popup='<div class="pin-popup"><strong>'+((categoryIcons[cat])||"")+" "+esc(a.content||a.title||"Cảnh báo")+'</strong>';
+            popup+='<div style="margin:4px 0">Mức độ: '+(sevText[sev]||sev)+'</div>';
+            if(a.address)popup+='<div style="font-size:12px;color:#666"><i class="fas fa-map-marker-alt"></i> '+esc(a.address)+'</div>';
+            popup+='<div style="font-size:11px;color:#999;margin-top:4px">'+timeAgo(a.created_at)+' · 👍'+parseInt(a.confirms||0)+' · 👎'+parseInt(a.denies||0)+'</div>';
+            popup+='</div>';
+            m.bindPopup(popup);
+            trafficMarkers.push(m);
+        });
+    }catch(e){console.error("Traffic load error:",e);}
+}
+
+// ============================================
+// FEATURE 2: DELIVERY POINT RATING (in popup)
+// ============================================
+// Rating is shown in pin popup via loadPins() update above
+// Vote function for upvote/downvote pins
+async function votePin(id,type){
+    if(!user||!token)return;
+    try{
+        await fetch("/api/map-pins.php",{method:"POST",headers:{"Content-Type":"application/json","Authorization":"Bearer "+token},body:JSON.stringify({action:"vote",pin_id:id,vote:type})});
+        loadPins();
+    }catch(e){}
+}
+
+// ============================================
+// FEATURE 3: REAL-TIME SHIPPER LOCATION
+// ============================================
+var shipperMarkers={},shipperOn=false,shareOn=false,watchId=null;
+var fbConfig={apiKey:"AIzaSyDNwf6FKPX10szjFJ2Ei6YoKJWRA6NAkKs",databaseURL:"https://shippershop-5f8d9-default-rtdb.asia-southeast1.firebasedatabase.app",projectId:"shippershop-5f8d9"};
+var fbApp=null,fbDb=null,fbRef=null;
+
+function initFirebase(){
+    if(fbApp)return;
+    if(typeof firebase==="undefined"){
+        var s=document.createElement("script");s.src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js";
+        s.onload=function(){
+            var s2=document.createElement("script");s2.src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js";
+            s2.onload=function(){fbApp=firebase.initializeApp(fbConfig,"mapApp");fbDb=firebase.database(fbApp);};
+            document.head.appendChild(s2);
+        };
+        document.head.appendChild(s);
+    }else{
+        if(!firebase.apps.length||!firebase.apps.find(function(a){return a.name==="mapApp";})){
+            fbApp=firebase.initializeApp(fbConfig,"mapApp");
+        }else{fbApp=firebase.apps.find(function(a){return a.name==="mapApp";});}
+        fbDb=firebase.database(fbApp);
+    }
+}
+
+function toggleShippers(el){
+    shipperOn=!shipperOn;
+    el.classList.toggle("active");
+    if(shipperOn){
+        el.style.background="#4caf50";el.style.color="#fff";
+        initFirebase();
+        setTimeout(listenShippers,1000);
+    }else{
+        el.style.background="";el.style.color="#4caf50";
+        if(fbRef)fbRef.off();
+        Object.keys(shipperMarkers).forEach(function(k){map.removeLayer(shipperMarkers[k]);});
+        shipperMarkers={};
+    }
+}
+
+function listenShippers(){
+    if(!fbDb)return;
+    fbRef=fbDb.ref("shipper_locations");
+    fbRef.on("value",function(snap){
+        var data=snap.val()||{};
+        // Remove old markers for users no longer sharing
+        Object.keys(shipperMarkers).forEach(function(k){
+            if(!data[k]){map.removeLayer(shipperMarkers[k]);delete shipperMarkers[k];}
+        });
+        // Update/add markers
+        Object.keys(data).forEach(function(uid){
+            if(user&&uid===String(user.id))return; // Skip self
+            var d=data[uid];
+            if(!d.lat||!d.lng)return;
+            var age=(Date.now()-d.ts)/60000;
+            if(age>30)return; // Skip stale (>30min)
+            var icon=L.divIcon({
+                html:d.avatar?'<div class="shipper-marker"><img src="'+d.avatar+'"></div>':'<div class="shipper-marker-ph">🛵</div>',
+                className:"",iconSize:[36,36],iconAnchor:[18,18]
+            });
+            if(shipperMarkers[uid]){
+                shipperMarkers[uid].setLatLng([d.lat,d.lng]);
+                shipperMarkers[uid].setIcon(icon);
+            }else{
+                shipperMarkers[uid]=L.marker([d.lat,d.lng],{icon:icon}).addTo(map);
+            }
+            var popup='<div class="pin-popup"><strong>🛵 '+esc(d.name||"Shipper")+'</strong>';
+            if(d.ship)popup+='<div style="font-size:12px;font-weight:700;color:#666">'+esc(d.ship)+'</div>';
+            popup+='<div style="font-size:11px;color:#999">Cập nhật '+Math.floor(age)+' phút trước</div>';
+            popup+='</div>';
+            shipperMarkers[uid].bindPopup(popup);
+        });
+    });
+}
+
+function toggleShareLocation(){
+    shareOn=!shareOn;
+    var el=document.getElementById("shareToggle");
+    if(shareOn){
+        if(!user||!token){shareOn=false;return;}
+        el.classList.add("active");
+        document.getElementById("shareLabel").textContent="Đang chia sẻ...";
+        initFirebase();
+        setTimeout(startSharing,1000);
+    }else{
+        el.classList.remove("active");
+        document.getElementById("shareLabel").textContent="Chia sẻ vị trí";
+        stopSharing();
+    }
+}
+
+function startSharing(){
+    if(!fbDb||!user)return;
+    if(!navigator.geolocation)return;
+    // Immediate update
+    navigator.geolocation.getCurrentPosition(function(pos){
+        updateMyLocation(pos.coords.latitude,pos.coords.longitude);
+    });
+    // Watch position
+    watchId=navigator.geolocation.watchPosition(function(pos){
+        updateMyLocation(pos.coords.latitude,pos.coords.longitude);
+    },function(){},{enableHighAccuracy:true,maximumAge:10000,timeout:15000});
+}
+
+function updateMyLocation(lat,lng){
+    if(!fbDb||!user)return;
+    fbDb.ref("shipper_locations/"+user.id).set({
+        lat:lat,lng:lng,name:user.fullname||"Shipper",
+        avatar:user.avatar||"",ship:user.shipping_company||"",
+        ts:Date.now()
+    });
+}
+
+function stopSharing(){
+    if(watchId!==null){navigator.geolocation.clearWatch(watchId);watchId=null;}
+    if(fbDb&&user){fbDb.ref("shipper_locations/"+user.id).remove();}
+}
+
+// ============================================
+// FEATURE 4: HEATMAP (KHU VỰC NÓNG)
+// ============================================
+var heatLayer=null,heatOn=false;
+
+function toggleHeatmap(el){
+    heatOn=!heatOn;
+    el.classList.toggle("active");
+    if(heatOn){
+        el.style.background="#ff9800";el.style.color="#fff";
+        loadHeatmapData();
+    }else{
+        el.style.background="";el.style.color="#ff9800";
+        if(heatLayer){map.removeLayer(heatLayer);heatLayer=null;}
+    }
+}
+
+async function loadHeatmapData(){
+    try{
+        // Use posts with location + map pins as heat sources
+        var heatPoints=[];
+        
+        // 1. Posts with province/district → approximate coordinates
+        var r=await fetch("/api/posts.php?limit=200");var d=await r.json();
+        if(d.success&&d.data&&d.data.posts){
+            d.data.posts.forEach(function(p){
+                // Use pin locations that match province
+                if(p.province){
+                    var districtCoords=getDistrictCoords(p.province,p.district);
+                    if(districtCoords){
+                        var jitter=(Math.random()-0.5)*0.01;
+                        heatPoints.push([districtCoords[0]+jitter,districtCoords[1]+jitter,0.5]);
+                    }
+                }
+            });
+        }
+        
+        // 2. Map pins with more weight
+        var r2=await fetch("/api/map-pins.php");var d2=await r2.json();
+        if(d2.success&&d2.data){
+            d2.data.forEach(function(pin){
+                if(pin.lat&&pin.lng)heatPoints.push([parseFloat(pin.lat),parseFloat(pin.lng),1.0]);
+            });
+        }
+        
+        // 3. Traffic alerts with high weight
+        var r3=await fetch("/api/traffic.php");var d3=await r3.json();
+        if(d3.success&&d3.data){
+            d3.data.forEach(function(a){
+                var lat=parseFloat(a.latitude);var lng=parseFloat(a.longitude);
+                if(lat&&lng)heatPoints.push([lat,lng,0.8]);
+            });
+        }
+        
+        if(heatLayer){map.removeLayer(heatLayer);}
+        if(heatPoints.length>0){
+            heatLayer=L.heatLayer(heatPoints,{radius:35,blur:25,maxZoom:17,gradient:{0.2:"#ffffb2",0.4:"#fd8d3c",0.6:"#f03b20",0.8:"#bd0026",1:"#800026"}}).addTo(map);
+        }
+    }catch(e){console.error("Heatmap error:",e);}
+}
+
+// Approximate coordinates for Vietnamese provinces/districts
+var districtCoordsMap={
+    "TP. Hồ Chí Minh":[10.7769,106.7009],
+    "Hồ Chí Minh":[10.7769,106.7009],
+    "Hà Nội":[21.0285,105.8542],
+    "Đà Nẵng":[16.0544,108.2022],
+    "Cần Thơ":[10.0452,105.7469],
+    "Hải Phòng":[20.8449,106.6881],
+    "Bình Dương":[11.0753,106.6512],
+    "Đồng Nai":[10.9531,106.8242],
+    "Long An":[10.5364,106.4126],
+    "Bắc Ninh":[21.1861,106.0763],
+    "Quảng Ninh":[21.0064,107.2925],
+    "Thanh Hóa":[19.8067,105.7852],
+    "Nghệ An":[18.6789,105.6813],
+    "Khánh Hòa":[12.2388,109.1967],
+    "Lâm Đồng":[11.9465,108.4419],
+};
+function getDistrictCoords(province,district){
+    for(var key in districtCoordsMap){
+        if(province&&province.indexOf(key)!==-1)return districtCoordsMap[key];
+    }
+    return null;
+}
+
+// Cleanup on page leave
+window.addEventListener("beforeunload",function(){if(shareOn)stopSharing();});
 </script>
 <script src="js/post-modal.js"></script>
 <!-- ASK LOCATION MODAL -->
