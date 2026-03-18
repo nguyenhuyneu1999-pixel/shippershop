@@ -395,8 +395,10 @@ function verifyCsrfToken($token) {
 }
 
 /**
- * Rate limiting (simple implementation)
+ * Rate limiting (simple session-based implementation)
+ * Note: wallet-api.php has its own DB-based rateLimit() which takes priority
  */
+if (!function_exists('rateLimit')) {
 function rateLimit($identifier, $maxRequests = null, $timeWindow = 3600) {
     if ($maxRequests === null) {
         $maxRequests = API_RATE_LIMIT;
@@ -431,6 +433,7 @@ function rateLimit($identifier, $maxRequests = null, $timeWindow = 3600) {
     $_SESSION[$key]['count']++;
     
     return true;
+}
 }
 
 // ============================================
