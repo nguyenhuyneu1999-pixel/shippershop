@@ -30,7 +30,16 @@ css.textContent=".spm-overlay{position:fixed;inset:0;background:#fff;z-index:999
 +".spm-tool{width:40px;height:40px;border-radius:50%;border:none;background:none;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:20px;}"
 +".spm-tool:active{background:#f0f2f5;}"
 +".spm-divider{flex:1;}"
-+".spm-charcount{font-size:11px;color:#B0B3B8;}";
++".spm-charcount{font-size:11px;color:#B0B3B8;}"
++".spm-picker{position:fixed;bottom:0;left:0;right:0;z-index:10000;display:none;}"
++".spm-picker.open{display:block;}"
++".spm-picker-bg{position:fixed;inset:0;background:rgba(0,0,0,.4);}"
++".spm-picker-sheet{position:absolute;bottom:0;left:0;right:0;background:#fff;border-radius:16px 16px 0 0;padding:8px 0 calc(8px + env(safe-area-inset-bottom));transform:translateY(100%);transition:transform .3s cubic-bezier(.32,.72,0,1);}"
++".spm-picker.open .spm-picker-sheet{transform:translateY(0);}"
++".spm-picker-item{display:flex;align-items:center;gap:16px;padding:16px 20px;cursor:pointer;font-size:16px;color:#333;}"
++".spm-picker-item:active{background:#f5f5f5;}"
++".spm-picker-item i{width:28px;text-align:center;font-size:22px;color:#65676B;}"
++".spm-picker-close{position:absolute;top:12px;right:16px;width:36px;height:36px;border-radius:50%;background:#e4e6eb;border:none;font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;}";
 document.head.appendChild(css);
 
 var d=document.createElement("div");
@@ -54,8 +63,8 @@ d.innerHTML='<div class="spm-overlay" id="spmOverlay">'
 +'<div class="spm-media" id="spmMedia"></div>'
 +'</div>'
 +'<div class="spm-toolbar">'
-+'<button class="spm-tool" id="spmImgBtn" title="\u1ea2nh"><i class="fas fa-image" style="color:#45BD62"></i></button>'
-+'<button class="spm-tool" id="spmVidBtn" title="Video"><i class="fas fa-video" style="color:#E74C3C"></i></button>'
++'<button class="spm-tool" onclick="openMediaPicker(\'image\')" title="\u1ea2nh"><i class="fas fa-image" style="color:#45BD62"></i></button>'
++'<button class="spm-tool" onclick="openMediaPicker(\'video\')" title="Video"><i class="fas fa-video" style="color:#E74C3C"></i></button>'
 +'<button class="spm-tool" title="Emoji" onclick="insertSpmEmoji()"><i class="far fa-face-smile" style="color:#F7B928"></i></button>'
 +'<button class="spm-tool" title="V\u1ecb tr\u00ed" onclick="addSpmLocation()"><i class="fas fa-location-dot" style="color:#E74C3C"></i></button>'
 +'<button class="spm-tool" title="#Hashtag" onclick="addSpmHashtag()"><i class="fas fa-hashtag" style="color:#7C3AED"></i></button>'
@@ -63,14 +72,47 @@ d.innerHTML='<div class="spm-overlay" id="spmOverlay">'
 +'<span class="spm-charcount" id="spmCount">0</span>'
 +'</div>'
 +'</div>'
++'<div class="spm-picker" id="spmPicker" onclick="if(event.target.classList.contains(\'spm-picker-bg\'))closeMediaPicker()">'
++'<div class="spm-picker-bg"></div>'
++'<div class="spm-picker-sheet">'
++'<button class="spm-picker-close" onclick="closeMediaPicker()"><i class="fas fa-times"></i></button>'
++'<div class="spm-picker-item" onclick="pickCamera()"><i class="fas fa-camera"></i> Ch\u1ee5p \u1ea3nh</div>'
++'<div class="spm-picker-item" onclick="pickGallery()"><i class="fas fa-images"></i> Th\u01b0 vi\u1ec7n \u1ea3nh</div>'
++'<div class="spm-picker-item" id="spmPickerVideo" style="display:none" onclick="pickVideoFile()"><i class="fas fa-film"></i> Ch\u1ecdn video</div>'
++'</div>'
++'</div>'
 +'<input type="file" id="spmImg" style="display:none" accept="image/*" multiple>'
++'<input type="file" id="spmCam" style="display:none" accept="image/*" capture="environment">'
 +'<input type="file" id="spmVid" style="display:none" accept="video/*">';
 document.body.appendChild(d);
 
-document.getElementById("spmImgBtn").onclick=function(){document.getElementById("spmImg").click();};
-document.getElementById("spmVidBtn").onclick=function(){document.getElementById("spmVid").click();};
-document.getElementById("spmImg").onchange=function(){addSPMFiles(this);};
-document.getElementById("spmVid").onchange=function(){addSPMFiles(this);};
+document.getElementById("spmImg").onchange=function(){addSPMFiles(this);closeMediaPicker();};
+document.getElementById("spmCam").onchange=function(){addSPMFiles(this);closeMediaPicker();};
+document.getElementById("spmVid").onchange=function(){addSPMFiles(this);closeMediaPicker();};
+
+var _pickerType="image";
+window.openMediaPicker=function(type){
+  _pickerType=type||"image";
+  var vidItem=document.getElementById("spmPickerVideo");
+  if(type==="video"){vidItem.style.display="flex";}else{vidItem.style.display="none";}
+  var pk=document.getElementById("spmPicker");
+  pk.style.display="block";
+  requestAnimationFrame(function(){pk.classList.add("open");});
+};
+window.closeMediaPicker=function(){
+  var pk=document.getElementById("spmPicker");
+  pk.classList.remove("open");
+  setTimeout(function(){pk.style.display="none";},300);
+};
+window.pickCamera=function(){
+  document.getElementById("spmCam").click();
+};
+window.pickGallery=function(){
+  document.getElementById("spmImg").click();
+};
+window.pickVideoFile=function(){
+  document.getElementById("spmVid").click();
+};
 
 document.getElementById("spmText").addEventListener("input",function(){
   this.style.height="auto";
