@@ -125,8 +125,8 @@ if ($method === 'POST') {
     if ($price < 0) mError('Giá không hợp lệ');
     if (is_array($images)) $images = json_encode($images);
 
-    $db->query("INSERT INTO marketplace_listings (user_id,title,description,price,category,condition_type,images,location,phone,`status`,created_at) VALUES (?,?,?,?,?,?,?,?,?,?,NOW())",
-        [$uid, $title, $desc, $price, $cat, $cond, $images, $location, $phone, 'active']);
+    $db->query("INSERT INTO marketplace_listings (user_id,title,description,price,category,condition_type,images,location,`status`,created_at) VALUES (?,?,?,?,?,?,?,?,?,NOW())",
+        [$uid, $title, $desc, $price, $cat, $cond, $images, $location, 'active']);
     $listingId = $db->getLastInsertId();
     mSuccess('Đăng tin thành công!', ['id' => $listingId]);
 }
