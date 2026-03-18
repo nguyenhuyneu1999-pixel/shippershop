@@ -65,3 +65,4 @@ echo "TOTAL posts: ".$d->fetchOne("SELECT COUNT(*) as c FROM posts")['c']."\n";
 echo "TOTAL comments: ".$d->fetchOne("SELECT COUNT(*) as c FROM comments")['c']."\n";
 echo "TOTAL likes: ".$d->fetchOne("SELECT COUNT(*) as c FROM post_likes")['c']."\n";
 }catch(Exception $e){$pdo->rollback();echo "ERROR: ".$e->getMessage()."\n";}
+// Wed Mar 18 18:27:22 UTC 2026
