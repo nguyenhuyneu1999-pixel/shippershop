@@ -42,22 +42,46 @@ if ($method === 'GET') {
     ok('OK', $pins);
 }
 
-// POST - Create pin
+// POST - Create pin or Vote
 if ($method === 'POST') {
     $uid = auth(); if (!$uid) err('Đăng nhập để thêm ghim', 401);
     $raw = file_get_contents('php://input');
     $input = json_decode($raw, true) ?: $_POST;
+    
+    // VOTE on pin
+    if (($input['action'] ?? '') === 'vote') {
+        $pinId = intval($input['pin_id'] ?? 0);
+        $vote = intval($input['vote'] ?? 0);
+        if (!$pinId) err('Missing pin_id');
+        if ($vote > 0) {
+            $db->query("UPDATE map_pins SET upvotes = upvotes + 1 WHERE id = ?", [$pinId]);
+        } else {
+            $db->query("UPDATE map_pins SET downvotes = downvotes + 1 WHERE id = ?", [$pinId]);
+        }
+        $pin = $db->fetchOne("SELECT upvotes, downvotes FROM map_pins WHERE id = ?", [$pinId]);
+        ok('Voted', $pin);
+    }
+    
+    // CREATE pin
     $lat = floatval($input['lat'] ?? 0);
     $lng = floatval($input['lng'] ?? 0);
     $title = trim($input['title'] ?? '');
     if (!$lat || !$lng || !$title) err('Thiếu thông tin');
-    $id = $db->insert('map_pins', [
+    
+    $data = [
         'user_id'=>$uid, 'lat'=>$lat, 'lng'=>$lng, 'title'=>$title,
         'description'=>trim($input['description'] ?? ''),
         'pin_type'=>$input['pin_type'] ?? 'note',
         'address'=>trim($input['address'] ?? ''),
+        'rating'=>intval($input['rating'] ?? 0),
         'created_at'=>date('Y-m-d H:i:s')
-    ]);
+    ];
+    $diff = $input['difficulty'] ?? null;
+    if ($diff && in_array($diff, ['easy','medium','hard'])) {
+        $data['difficulty'] = $diff;
+    }
+    
+    $id = $db->insert('map_pins', $data);
     ok('Đã thêm ghim!', ['id'=>$id]);
 }
 
