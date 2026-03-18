@@ -318,7 +318,7 @@
                     <li><a href="#" class="active" onclick="showTab('overview',this);return false">
                         <i class="fas fa-home"></i> Tổng quan
                     </a></li>
-                    <li><a href="#" onclick="showTab('profile',this);return false">
+                    <li><a href="#" onclick="var u=JSON.parse(localStorage.getItem('user')||'{}');if(u.id)location.href='user.html?id='+u.id;return false;">
                         <i class="fas fa-user"></i> Thông tin cá nhân
                     </a></li>
                     <li><a href="#" onclick="showTab('orders',this);return false">
