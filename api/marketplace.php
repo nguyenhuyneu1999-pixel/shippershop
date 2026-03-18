@@ -14,11 +14,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') { http_response_code(200); exit; }
 function mSuccess($msg, $data = []) { echo json_encode(['success'=>true,'message'=>$msg,'data'=>$data], JSON_UNESCAPED_UNICODE); exit; }
 function mError($msg, $code = 400) { http_response_code($code); echo json_encode(['success'=>false,'message'=>$msg], JSON_UNESCAPED_UNICODE); exit; }
 function mAuth() {
-    if (isset($_SESSION['user_id'])) return $_SESSION['user_id'];
-    $h = $_SERVER['HTTP_AUTHORIZATION'] ?? $_SERVER['REDIRECT_HTTP_AUTHORIZATION'] ?? '';
+    if (isset($_SESSION['user_id'])) return intval($_SESSION['user_id']);
+    $headers = getallheaders();
+    $h = $headers['Authorization'] ?? $headers['authorization'] ?? $_SERVER['HTTP_AUTHORIZATION'] ?? $_SERVER['REDIRECT_HTTP_AUTHORIZATION'] ?? '';
     if (preg_match('/Bearer\s+(.+)/i', $h, $m)) {
-        $t = verifyJWT($m[1]);
-        if ($t) return $t['user_id'];
+        $parts = explode('.', $m[1]);
+        if (count($parts) === 3) {
+            $payload = json_decode(base64_decode($parts[1]), true);
+            if ($payload && isset($payload['user_id'])) {
+                $_SESSION['user_id'] = $payload['user_id'];
+                return intval($payload['user_id']);
+            }
+        }
     }
     return null;
 }
