@@ -172,11 +172,15 @@ function _gcCSS(){
   +".gc-av-ph{width:40px;height:40px;border-radius:50%;background:#EE4D2D;color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:14px;flex-shrink:0;}"
   +".gc-content{padding:8px 16px;font-size:15px;line-height:1.6;white-space:pre-wrap;word-break:break-word;}"
   +".gc-imgs{width:100%;}.gc-imgs img{width:100%;display:block;}"
-  +".gc-stats{display:flex;padding:6px 16px;font-size:12px;color:#65676B;gap:12px;}"
+  +".gc-stats{display:flex;padding:8px 16px 4px;font-size:12px;color:#65676B;}"
+  +".gc-stats span{flex:1;text-align:center;}"
+  +".gc-stats span:first-child{text-align:left;}"
+  +".gc-stats span:last-child{text-align:right;}"
   +".gc-actions{display:flex;border-top:1px solid #e4e6eb;border-bottom:1px solid #e4e6eb;}"
-  +".gc-abtn{flex:1;padding:10px 0;text-align:center;font-size:14px;font-weight:600;color:#555;background:none;border:none;cursor:pointer;}"
+  +".gc-abtn{flex:1;padding:10px 0;text-align:center;font-size:14px;font-weight:600;color:#65676B;background:none;border:none;border-right:1px solid #e4e6eb;cursor:pointer;}"
+  +".gc-abtn:last-child{border-right:none;}"
   +".gc-abtn:active{background:#f0f2f5;}"
-  +".gc-abtn.liked{color:#EE4D2D;}"
+  +".gc-abtn.liked{color:#EE4D2D;background:#FFF3EF;}"
   +".gc-sort{padding:10px 16px;font-size:14px;font-weight:700;color:#65676B;}"
   +".gc-cmt{display:flex;gap:6px;padding:4px 16px;}"
   +".gc-cmt-av{width:28px;height:28px;border-radius:50%;flex-shrink:0;object-fit:cover;}"
@@ -248,7 +252,7 @@ function _gcLoadPost(pid){
     var lk=p.user_liked;
     var h="<div class='gc-post-author'>"+av+"<div style='flex:1'><div style='font-weight:700;font-size:15px'>"+esc(p.user_name||"Ẩn danh")+"</div><div style='font-size:12px;color:#65676B;display:flex;align-items:center;gap:4px'>"+sh+(sh?"<span>·</span>":"")+"<span>"+ago(p.created_at)+"</span></div></div></div>";
     h+="<div class='gc-content'>"+esc(p.content||"")+"</div>"+imgs;
-    h+="<div class='gc-stats' id='gcStats'><span>"+(p.likes_count||0)+" đơn giao thành công</span><span>"+(p.comments_count||0)+" ghi chú</span></div>";
+    h+="<div class='gc-stats' id='gcStats'><span>"+(p.likes_count||0)+" đơn giao thành công</span><span>"+(p.comments_count||0)+" ghi chú</span><span>"+(p.shares_count||0)+" chuyển tiếp</span></div>";
     h+="<div class='gc-actions'><button class='gc-abtn"+(lk?" liked":"")+"' id='gcLkBtn' onclick='_gcLike()'>Thành công</button><button class='gc-abtn' onclick='document.getElementById(\"gcInput\").focus()'>Ghi chú</button><button class='gc-abtn' onclick='_gcShare()'>Chuyển tiếp</button></div>";
     h+="<div class='gc-sort'>Phù hợp nhất <i class='fas fa-chevron-down' style='font-size:11px'></i></div>";
     h+="<div id='gcCmts'><div class='gc-empty'><i class='fas fa-spinner fa-spin'></i></div></div>";
