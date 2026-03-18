@@ -7,30 +7,36 @@ require_once '/home/nhshiw2j/public_html/includes/config.php';
 require_once '/home/nhshiw2j/public_html/includes/db.php';
 $pdo = db()->getConnection();
 
+// Check login_attempts structure
 try {
-    $r = db()->fetchAll("SELECT ip, email, success, created_at FROM login_attempts ORDER BY created_at DESC LIMIT 3", []);
-    echo "Login attempts: " . count($r) . "\n";
-    foreach ($r as $row) echo "  {$row['ip']} | {$row['email']} | s={$row['success']}\n";
-} catch (Throwable $e) { echo "Login attempts ERR: " . $e->getMessage() . "\n"; }
+    $cols = $pdo->query("SHOW COLUMNS FROM login_attempts")->fetchAll(PDO::FETCH_ASSOC);
+    echo "login_attempts columns:\n";
+    foreach ($cols as $c) echo "  {$c['Field']} ({$c['Type']}) {$c['Null']} {$c['Default']}\n";
+} catch (Throwable $e) {
+    echo "login_attempts table missing: " . $e->getMessage() . "\n";
+    echo "Creating...\n";
+    try {
+        $pdo->exec("CREATE TABLE IF NOT EXISTS `login_attempts` (
+            `id` INT AUTO_INCREMENT PRIMARY KEY,
+            `ip` VARCHAR(45) NOT NULL,
+            `user_id` INT DEFAULT NULL,
+            `email` VARCHAR(255) DEFAULT NULL,
+            `success` TINYINT(1) NOT NULL DEFAULT 0,
+            `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP,
+            INDEX `idx_ip_time` (`ip`, `created_at`),
+            INDEX `idx_user_time` (`user_id`, `created_at`)
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4");
+        echo "Created OK\n";
+    } catch (Throwable $e2) {
+        echo "Create ERR: " . $e2->getMessage() . "\n";
+    }
+}
 
+// Test insert
 try {
-    $exp = $pdo->query("EXPLAIN SELECT p.id FROM posts p WHERE p.status='active' ORDER BY p.created_at DESC LIMIT 20")->fetchAll(PDO::FETCH_ASSOC);
-    echo "\nFeed EXPLAIN: type={$exp[0]['type']} key={$exp[0]['key']} rows={$exp[0]['rows']}\n";
-} catch (Throwable $e) { echo "Feed EXPLAIN ERR: " . $e->getMessage() . "\n"; }
-
-try {
-    $exp2 = $pdo->query("EXPLAIN SELECT post_id FROM likes WHERE user_id=2 AND post_id IN (1,2,3)")->fetchAll(PDO::FETCH_ASSOC);
-    echo "Likes batch: type={$exp2[0]['type']} key={$exp2[0]['key']} rows={$exp2[0]['rows']}\n";
-} catch (Throwable $e) { echo "Likes EXPLAIN ERR: " . $e->getMessage() . "\n"; }
-
-try {
-    $exp3 = $pdo->query("EXPLAIN SELECT id FROM posts WHERE province='HN' AND status='active' ORDER BY created_at DESC LIMIT 20")->fetchAll(PDO::FETCH_ASSOC);
-    echo "Location: type={$exp3[0]['type']} key={$exp3[0]['key']} rows={$exp3[0]['rows']}\n";
-} catch (Throwable $e) { echo "Location ERR: " . $e->getMessage() . "\n"; }
-
-try {
-    $cnt = $pdo->query("SELECT COUNT(DISTINCT INDEX_NAME) as c FROM information_schema.STATISTICS WHERE TABLE_SCHEMA=DATABASE()")->fetch(PDO::FETCH_ASSOC);
-    echo "\nTotal indexes: {$cnt['c']}\n";
-} catch (Throwable $e) { echo "Index count ERR: " . $e->getMessage() . "\n"; }
-
-echo "\nDONE\n";
+    $pdo->prepare("INSERT INTO login_attempts (ip, email, success, created_at) VALUES (?, ?, 0, NOW())")->execute(['127.0.0.1', 'test']);
+    echo "Insert OK\n";
+    $pdo->exec("DELETE FROM login_attempts WHERE ip='127.0.0.1' AND email='test'");
+} catch (Throwable $e) {
+    echo "Insert ERR: " . $e->getMessage() . "\n";
+}
