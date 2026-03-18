@@ -1,7 +1,7 @@
 function ytEmbed(u){if(u.indexOf("youtube.com/watch")!==-1)return"https://www.youtube.com/embed/"+u.split("v=")[1].split("&")[0];if(u.indexOf("youtu.be/")!==-1)return"https://www.youtube.com/embed/"+u.split("youtu.be/")[1].split("?")[0];return u;}
 /* ============================================
    FETCH INTERCEPTOR - Auto-add Bearer token to all /api/ calls
-   This fixes ALL auth issues across ALL functions in community.html
+   This fixes ALL auth issues across ALL functions in index.html
    ============================================ */
 (function(){
   var _fetch = window.fetch;

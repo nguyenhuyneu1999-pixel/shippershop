@@ -1,7 +1,7 @@
 function ytEmbed(u){if(u.indexOf("youtube.com/watch")!==-1)return"https://www.youtube.com/embed/"+u.split("v=")[1].split("&")[0];if(u.indexOf("youtu.be/")!==-1)return"https://www.youtube.com/embed/"+u.split("youtu.be/")[1].split("?")[0];return u;}
 /* ============================================
    FETCH INTERCEPTOR - Auto-add Bearer token to all /api/ calls
-   This fixes ALL auth issues across ALL functions in community.html
+   This fixes ALL auth issues across ALL functions in index.html
    ============================================ */
 (function(){
   var _fetch = window.fetch;
@@ -130,7 +130,7 @@ function sharePost(pid){
   // Update chuyển tiếp counter
   var card=document.getElementById('P'+pid);
   if(card){var s=card.querySelector('.pa3-stats');if(s){var spans=s.querySelectorAll('span');if(spans[2]){var cur=parseInt(spans[2].textContent)||0;spans[2].textContent=(cur+1)+' đơn chuyển tiếp';}}}
-  var url=location.origin+'/share.php?id='+pid;
+  var url=location.origin+'/post-detail.html?id='+pid;
   if(navigator.share){
     navigator.share({title:'ShipperShop',text:'Xem bài viết trên ShipperShop',url:url}).catch(function(){});
   }else{

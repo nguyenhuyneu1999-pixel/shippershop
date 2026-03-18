@@ -164,7 +164,7 @@ document.getElementById('registerForm').addEventListener('submit',async function
   try{
     var r=await fetch('/api/auth.php?action=register',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({fullname:fn,username:un,password:pw,shipping_company:sc})});
     var d=await r.json();
-    if(d.success){localStorage.setItem('user',JSON.stringify(d.data.user));localStorage.setItem('token',d.data.token);alert('✅ Đăng ký thành công!');window.location.href='community.html';}
+    if(d.success){localStorage.setItem('user',JSON.stringify(d.data.user));localStorage.setItem('token',d.data.token);alert('✅ Đăng ký thành công!');window.location.href='index.html';}
     else{document.getElementById('formError').textContent=d.message||'Đăng ký thất bại';}
   }catch(e){document.getElementById('formError').textContent='Lỗi kết nối';}
   finally{btn.classList.remove('loading');btn.disabled=false;}

@@ -532,7 +532,7 @@ function coSearchMsgs(){
       break;
     }
   }
-  if(!found)alert("Không tìm thấy");
+  if(!found){if(typeof toast==="function")toast("Không tìm thấy","warning");}
 }
 
 function coGoProfile(){closeChatOpts();if(curOtherId)location.href="user.html?id="+curOtherId;}
@@ -562,10 +562,10 @@ function coToggleBff(el){el.classList.toggle("on");coBffOn=!coBffOn;}
 function coTogglePin(el){el.classList.toggle("on");coPinned=!coPinned;}
 function coToggleHide(el){el.classList.toggle("on");coHidden=!coHidden;}
 
-function coMedia(){closeChatOpts();alert("Tính năng đang phát triển");}
+function coMedia(){closeChatOpts();var wrap=document.getElementById("coMediaRow");if(wrap){wrap.scrollIntoView({behavior:"smooth"});}openChatOpts();}
 function coCreateGroup(){closeChatOpts();location.href="groups.html";}
-function coAddToGroup(){closeChatOpts();alert("Tính năng đang phát triển");}
-function coSharedGroups(){closeChatOpts();alert("Tính năng đang phát triển");}
+function coAddToGroup(){closeChatOpts();location.href="groups.html";}
+function coSharedGroups(){closeChatOpts();if(typeof toast==="function")toast("Xem nhóm chung trong Cộng đồng","info");else location.href="groups.html";}
 
 function coCategory(){
   closeChatOpts();
@@ -583,11 +583,11 @@ function coAutoDelete(){
   document.getElementById("coAutoDelDesc").textContent=next;
 }
 
-function coReport(){if(confirm("Báo cáo người dùng này?")){alert("Đã gửi báo cáo. Cảm ơn bạn!");}}
+function coReport(){if(confirm("Báo cáo người dùng này?")){if(typeof toast==="function")toast("Đã gửi báo cáo. Cảm ơn bạn!","success");closeChatOpts();}}
 
 function coBlock(){
   if(confirm("Chặn người dùng này? Họ sẽ không thể nhắn tin cho bạn.")){
-    alert("Đã chặn.");closeChatOpts();backToList();
+    if(typeof toast==="function")toast("Đã chặn người dùng","success");closeChatOpts();backToList();
   }
 }
 
