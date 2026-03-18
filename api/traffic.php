@@ -127,7 +127,7 @@ if ($method === 'POST' && empty($action)) {
     $videoUrl = $input['video_url'] ?? null;
     $duration = intval($input['duration'] ?? 60); // minutes, default 1h
 
-    if (!$lat && !$lng && !$content && !$isQuick) tError('Cần nội dung hoặc vị trí');
+    // No validation required - allow posting with any info
 
     // Cap duration: 30min - 2h
     $duration = max(30, min(120, $duration));
