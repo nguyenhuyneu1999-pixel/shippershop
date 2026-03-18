@@ -353,21 +353,90 @@ function shareAlert(id){
   else{navigator.clipboard.writeText(url);alert("Đã copy link!");}
 }
 
+
 // REPORT MODAL
-function openReport(){
-  if(!CU){alert("Đăng nhập!");location.href="login.html";return;}
-  document.getElementById("reportOverlay").classList.add("open");
-  if(myAddr){document.getElementById("rAddress").value=myAddr;document.getElementById("rLocStatus").classList.add("show");document.getElementById("rLocText").textContent=myAddr;}
-  else if(navigator.geolocation){
-    document.getElementById("rLocStatus").classList.add("show");
-    document.getElementById("rLocText").textContent="Đang lấy vị trí...";
-    navigator.geolocation.getCurrentPosition(function(p){
-      myLat=p.coords.latitude;myLng=p.coords.longitude;
-      reverseGeo(myLat,myLng).then(function(){document.getElementById("rAddress").value=myAddr;document.getElementById("rLocText").textContent=myAddr;});
-    });
-  }
+var rMediaFiles=[];
+var rProvData2=[],rDistData2=[],rWardData2=[];
+var lastProvince="",lastDistrict="";
+
+(async function(){
+  try{
+    var r=await fetch("https://provinces.open-api.vn/api/?depth=1");
+    rProvData2=await r.json();
+    var sel=document.getElementById("rProvince");
+    if(sel){rProvData2.forEach(function(p){var o=document.createElement("option");o.value=p.name;o.textContent=p.name;o.dataset.code=p.code;sel.appendChild(o);});}
+  }catch(e){}
+  loadLastLocation();
+})();
+
+async function loadLastLocation(){
+  if(!CU) return;
+  try{
+    var r=await fetch("/api/posts.php?user_id="+CU.id+"&limit=1",{credentials:"include"});
+    var d=await r.json();
+    if(d.success&&d.data.posts&&d.data.posts.length){
+      var lp=d.data.posts[0];
+      if(lp.province){lastProvince=lp.province;}
+      if(lp.district){lastDistrict=lp.district;}
+    }
+  }catch(e){}
 }
-function closeReport(){document.getElementById("reportOverlay").classList.remove("open");}
+
+function openReport(){
+  if(!CU){alert("Vui l\u00f2ng \u0111\u0103ng nh\u1eadp!");location.href="login.html";return;}
+  document.getElementById("rPhotoInput").click();
+  document.getElementById("reportOverlay").classList.add("open");
+  if(lastProvince){var ps=document.getElementById("rProvince");if(ps&&!ps.value){ps.value=lastProvince;onRProvChange();}}
+  if(myLat){document.getElementById("rLocStatus").classList.add("show");document.getElementById("rLocText").textContent=myAddr||"GPS \u0111\u00e3 l\u1ea5y";}
+}
+function closeReport(){document.getElementById("reportOverlay").classList.remove("open");rMediaFiles=[];document.getElementById("rMediaPrev").innerHTML="";}
+
+function addRMedia(input,type){
+  if(!input.files||!input.files.length) return;
+  Array.from(input.files).forEach(function(f){
+    if(rMediaFiles.length>=5) return;
+    var idx=rMediaFiles.length;
+    rMediaFiles.push({file:f,type:type});
+    var reader=new FileReader();
+    reader.onload=function(e){
+      var prev=document.getElementById("rMediaPrev");
+      var div=document.createElement("div");div.className="r-media-item";div.id="rm"+idx;
+      if(type==="image") div.innerHTML='<img src="'+e.target.result+'"><button class="r-media-rm" onclick="rmRMedia('+idx+')"><i class="fas fa-times"></i></button>';
+      else div.innerHTML='<video src="'+e.target.result+'"></video><button class="r-media-rm" onclick="rmRMedia('+idx+')"><i class="fas fa-times"></i></button>';
+      prev.appendChild(div);
+    };
+    reader.readAsDataURL(f);
+  });
+  input.value="";
+}
+function rmRMedia(idx){rMediaFiles[idx]=null;var el=document.getElementById("rm"+idx);if(el)el.remove();}
+
+function onRProvChange(){
+  var name=document.getElementById("rProvince").value;
+  var dSel=document.getElementById("rDistrict");
+  var wSel=document.getElementById("rWard");
+  dSel.innerHTML='<option value="">Qu\u1eadn/Huy\u1ec7n</option>';
+  wSel.innerHTML='<option value="">X\u00e3/Ph\u01b0\u1eddng</option>';
+  if(!name) return;
+  var code=null;
+  for(var i=0;i<rProvData2.length;i++){if(rProvData2[i].name===name){code=rProvData2[i].code;break;}}
+  if(!code) return;
+  fetch("https://provinces.open-api.vn/api/p/"+code+"?depth=2").then(function(r){return r.json();}).then(function(d){
+    rDistData2=d.districts||[];
+    rDistData2.forEach(function(dt){var o=document.createElement("option");o.value=dt.name;o.textContent=dt.name;o.dataset.code=dt.code;dSel.appendChild(o);});
+    if(lastDistrict){dSel.value=lastDistrict;onRDistChange();lastDistrict="";}
+  });
+}
+function onRDistChange(){
+  var name=document.getElementById("rDistrict").value;
+  var wSel=document.getElementById("rWard");
+  wSel.innerHTML='<option value="">X\u00e3/Ph\u01b0\u1eddng</option>';
+  if(!name) return;
+  var dist=rDistData2.find(function(d){return d.name===name;});
+  if(dist){fetch("https://provinces.open-api.vn/api/d/"+dist.code+"?depth=2").then(function(r){return r.json();}).then(function(d){
+    (d.wards||[]).forEach(function(w){var o=document.createElement("option");o.value=w.name;o.textContent=w.name;wSel.appendChild(o);});
+  });}
+}
 
 function selCat(el,cat){rCat=cat;document.querySelectorAll("#rCatChips .tf-chip").forEach(function(c){c.classList.remove("sel");});el.classList.add("sel");}
 function selSev(el,sev){rSev=sev;document.querySelectorAll("#rSevChips .tf-chip").forEach(function(c){c.classList.remove("sel");});el.classList.add("sel");}
@@ -375,18 +444,42 @@ function selDur(el,dur){rDur=dur;document.querySelectorAll(".tf-dur button").for
 
 async function submitReport(){
   var content=document.getElementById("rContent").value.trim();
-  var address=document.getElementById("rAddress").value.trim();
+  var prov=document.getElementById("rProvince").value;
+  var dist=document.getElementById("rDistrict").value;
+  var ward=document.getElementById("rWard").value;
+  var street=document.getElementById("rStreet").value.trim();
+  var parts=[];
+  if(street) parts.push(street);
+  if(ward) parts.push(ward);
+  if(dist) parts.push(dist);
+  if(prov) parts.push(prov);
+  var address=parts.join(", ");
+
   var btn=document.getElementById("rSubmit");
-  btn.disabled=true;btn.textContent="Đang gửi...";
+  btn.disabled=true;btn.textContent="\u0110ang g\u1eedi...";
+
+  var imgUrls=[];
+  var active=rMediaFiles.filter(function(m){return m!==null;});
+  for(var i=0;i<active.length;i++){
+    if(active[i].type==="image"){
+      try{
+        var fd=new FormData();fd.append("image",active[i].file);
+        var ur=await fetch("/api/traffic.php?action=upload",{method:"POST",headers:{"Authorization":"Bearer "+(localStorage.getItem("token")||"")},credentials:"include",body:fd});
+        var ud=await ur.json();
+        if(ud.success&&ud.data.url) imgUrls.push(ud.data.url);
+      }catch(ue){}
+    }
+  }
+
   try{
     var r=await fetch("/api/traffic.php",{method:"POST",headers:{"Content-Type":"application/json","Authorization":"Bearer "+(localStorage.getItem("token")||"")},credentials:"include",
-      body:JSON.stringify({category:rCat,content:content,address:address,latitude:myLat||null,longitude:myLng||null,severity:rSev,duration:rDur,is_quick:0})
+      body:JSON.stringify({category:rCat,content:content,images:imgUrls,address:address,province:prov||null,district:dist||null,latitude:myLat||null,longitude:myLng||null,severity:rSev,duration:rDur,is_quick:0})
     });
     var d=await r.json();
-    if(d.success){alert("✅ Đã báo cáo thành công!");closeReport();document.getElementById("rContent").value="";loadAlerts();}
-    else alert("Lỗi: "+(d.message||""));
-  }catch(e){alert("Lỗi kết nối");}
-  btn.disabled=false;btn.innerHTML='<i class="fas fa-paper-plane" style="margin-right:6px"></i>Gửi báo cáo';
+    if(d.success){alert("\u2705 \u0110\u00e3 b\u00e1o c\u00e1o!");closeReport();document.getElementById("rContent").value="";document.getElementById("rStreet").value="";loadAlerts();}
+    else alert("L\u1ed7i: "+(d.message||""));
+  }catch(e){alert("L\u1ed7i k\u1ebft n\u1ed1i");}
+  btn.disabled=false;btn.innerHTML='<i class="fas fa-paper-plane" style="margin-right:6px"></i>\u0110\u0103ng b\u00e1o c\u00e1o';
 }
 
 // QUICK ALERT
