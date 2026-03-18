@@ -230,8 +230,8 @@ $reviewPosts = [
 $allPosts = [];
 foreach ($landscapePosts as $p) $allPosts[] = ['content' => $p, 'type' => 'post'];
 foreach ($shippingPosts as $p) $allPosts[] = ['content' => $p, 'type' => 'question'];
-foreach ($confessionPosts as $p) $allPosts[] = ['content' => $p, 'type' => 'confession'];
-foreach ($discussionPosts as $p) $allPosts[] = ['content' => $p, 'type' => 'discussion'];
+foreach ($confessionPosts as $p) $allPosts[] = ['content' => $p, 'type' => 'post'];
+foreach ($discussionPosts as $p) $allPosts[] = ['content' => $p, 'type' => 'post'];
 foreach ($reviewPosts as $p) $allPosts[] = ['content' => $p, 'type' => 'review'];
 
 // Extra posts to reach 100
@@ -245,7 +245,7 @@ $extraPosts = [
     ['content' => 'Hôm nay giao 72 đơn, kỷ lục mới của mình! 💪🔥', 'type' => 'post'],
     ['content' => 'Ae nào biết chỗ sửa xe máy uy tín ở quận 7 ko? Xe mình bị hư bugi', 'type' => 'question'],
     ['content' => 'Trời nắng 40 độ mà vẫn phải chạy, uống nước nhiều vào ae 🥤', 'type' => 'post'],
-    ['content' => 'Confession: Ship 3 năm rồi, tích được ít vốn mở quán trà sữa nhỏ bên đường 🧋', 'type' => 'confession'],
+    ['content' => 'Confession: Ship 3 năm rồi, tích được ít vốn mở quán trà sữa nhỏ bên đường 🧋', 'type' => 'post'],
     ['content' => 'Đường Cầu Giấy sáng nay ngập nặng sau trận mưa đêm qua, ae tránh nha', 'type' => 'tip'],
     ['content' => 'Ae cho hỏi xe Wave Alpha có phù hợp chạy ship không? Mình đang tính mua', 'type' => 'question'],
     ['content' => 'Weekend rồi mà vẫn phải chạy ship. Nhưng mà cuối tuần đơn ít, đường thoáng cũng thích 😌', 'type' => 'post'],
@@ -254,7 +254,7 @@ $extraPosts = [
     ['content' => 'Mới vào nghề 1 tháng, cảm ơn ae trong group đã giúp đỡ nhiều. Yêu thương ae 🥰', 'type' => 'post'],
     ['content' => 'Đèo Ô Quy Hồ sáng nay sương mù dày, ae chạy tuyến Lào Cai - Lai Châu cẩn thận', 'type' => 'tip'],
     ['content' => 'Có ae nào muốn đổi ca ship khu Thủ Đức không? Mình cần đổi sang ca sáng', 'type' => 'question'],
-    ['content' => 'Confession: Giao hàng cho nhà giàu, nhìn biệt thự mà ước mơ. Cố gắng thôi ae 💪', 'type' => 'confession'],
+    ['content' => 'Confession: Giao hàng cho nhà giàu, nhìn biệt thự mà ước mơ. Cố gắng thôi ae 💪', 'type' => 'post'],
     ['content' => 'Tổng kết tháng: 1500 đơn, thu nhập 18tr. Tháng sau cố gắng hơn nữa 📈', 'type' => 'post'],
 ];
 
