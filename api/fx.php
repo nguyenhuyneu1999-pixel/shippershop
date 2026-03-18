@@ -389,4 +389,3 @@ echo "Total posts now: ".$d->fetchOne("SELECT COUNT(*) as c FROM posts")['c']."\
     $pdo->rollback();
     echo "ERROR: ".$e->getMessage()."\n";
 }
-test
