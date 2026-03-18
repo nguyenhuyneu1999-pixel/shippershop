@@ -280,10 +280,15 @@ foreach ($allPosts as $idx => $post) {
     $isAnon = ($post['type'] === 'confession') ? 1 : 0;
 
     try {
-        // Try simple insert first
-        $db->query("INSERT INTO posts (user_id, content, type, `status`, created_at) VALUES (?,?,?,?,?)",
-            [$uid, $post['content'], $post['type'], 'active', $createdAt]);
-        $pid = $db->getLastInsertId();
+        $pid = $db->insert('posts', [
+            'user_id' => $uid,
+            'content' => $post['content'],
+            'images' => $images,
+            'type' => $post['type'],
+            'province' => $prov,
+            'status' => 'active',
+            'created_at' => $createdAt
+        ]);
         $postIds[] = $pid;
         $postCount++;
         echo "Post $pid (by $uid): " . mb_substr($post['content'], 0, 50) . "...\n";
@@ -354,8 +359,7 @@ foreach ($postIds as $pid) {
         $cmtTime = date('Y-m-d H:i:s', strtotime('-' . rand(0, 48) . ' hours -' . rand(0, 59) . ' minutes'));
 
         try {
-            $db->query("INSERT INTO comments (post_id, user_id, content, `status`, created_at) VALUES (?,?,?,?,?)",
-                [$pid, $cmtUid, $tpl, 'active', $cmtTime]);
+            $db->insert('comments', ['post_id'=>$pid, 'user_id'=>$cmtUid, 'content'=>$tpl, 'status'=>'active', 'created_at'=>$cmtTime]);
             $cmtCount++;
         } catch (Throwable $e) {}
     }
