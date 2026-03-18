@@ -4,99 +4,428 @@
 <meta charset="UTF-8">
 <meta name="theme-color" content="#ffffff">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Hội nhóm - ShipperShop</title>
-<link rel="stylesheet" href="css/style.css">
+<title>Nhóm - ShipperShop</title>
+<link rel="stylesheet" href="css/style-v2.css">
 <link rel="stylesheet" href="mobile.css">
 <link rel="preload" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
 <noscript><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"></noscript>
 <style>
-:root{--primary:#EE4D2D;--bg:#f0f2f5;--card:#fff;--border:#e4e6eb;--text:#1C1C1C;--muted:#65676B;}
-*{margin:0;padding:0;box-sizing:border-box;}
-body{background:var(--bg);font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;color:var(--text);padding-bottom:80px;}
-.back-nav{position:fixed;top:0;left:0;right:0;z-index:100;background:rgba(255,255,255,.95);backdrop-filter:blur(10px);padding:10px 16px;display:flex;align-items:center;gap:12px;border-bottom:1px solid #f0f0f0;}
-.back-btn{background:none;border:none;font-size:20px;cursor:pointer;padding:4px;color:#333;}
-.back-nav h1{font-size:17px;font-weight:700;flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-.group-banner{margin-top:48px;background:linear-gradient(135deg,var(--primary),#ff8a65);height:120px;}
-.group-meta{background:#fff;padding:16px;border-bottom:1px solid var(--border);}
-.group-icon-wrap{display:flex;gap:14px;align-items:flex-start;}
-.g-icon{width:64px;height:64px;border-radius:16px;background:#fff;border:3px solid #fff;box-shadow:0 2px 8px rgba(0,0,0,.15);margin-top:-36px;display:flex;align-items:center;justify-content:center;font-size:28px;flex-shrink:0;}
-.g-info{flex:1;min-width:0;}
-.g-name{font-size:20px;font-weight:800;margin-bottom:2px;}
-.g-desc{font-size:13px;color:var(--muted);margin-bottom:8px;}
-.g-stats{display:flex;gap:16px;font-size:13px;color:var(--muted);margin-bottom:10px;}
-.g-stats b{color:var(--text);}
-.join-btn{padding:8px 24px;border-radius:20px;font-size:14px;font-weight:700;cursor:pointer;border:2px solid var(--primary);background:var(--primary);color:#fff;}
-.join-btn.joined{background:#fff;color:var(--primary);}
-.tabs{display:flex;background:#fff;border-bottom:1px solid var(--border);position:sticky;top:48px;z-index:50;}
-.tab{flex:1;padding:12px;text-align:center;font-size:13px;font-weight:700;color:var(--muted);cursor:pointer;border-bottom:3px solid transparent;}
-.tab.active{color:var(--primary);border-bottom-color:var(--primary);}
-.create-post{background:#fff;padding:12px;margin:8px;border-radius:12px;display:flex;gap:10px;align-items:center;border:1px solid var(--border);}
-.create-post input{flex:1;padding:10px 14px;border:1px solid var(--border);border-radius:24px;font-size:14px;background:#f0f2f5;cursor:pointer;outline:none;}
-.post-card{background:#fff;margin:0 0 8px;padding:12px 16px;}
-.post-head{display:flex;align-items:center;gap:10px;margin-bottom:8px;}
-.post-av{width:36px;height:36px;border-radius:50%;object-fit:cover;background:var(--primary);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:14px;flex-shrink:0;}
-.post-author{font-weight:700;font-size:14px;}
-.post-time{font-size:12px;color:var(--muted);}
-.ship-badge{font-size:11px;font-weight:700;padding:1px 6px;border-radius:10px;}
-.post-content{font-size:14px;line-height:1.6;margin-bottom:8px;white-space:pre-wrap;word-break:break-word;}
-.post-actions{display:flex;gap:4px;border-top:1px solid var(--border);padding-top:8px;}
-.act-btn{flex:1;display:flex;align-items:center;justify-content:center;gap:6px;padding:8px;border:none;background:none;cursor:pointer;font-size:13px;font-weight:600;color:var(--muted);border-radius:8px;}
-.act-btn:hover{background:#f0f2f5;}
-.rules-section{background:#fff;margin:8px;border-radius:12px;padding:16px;border:1px solid var(--border);}
-.rules-section h3{font-size:15px;font-weight:700;margin-bottom:10px;}
-.rule-item{padding:8px 0;border-bottom:1px solid #f0f0f0;font-size:13px;line-height:1.5;}
-.rule-item:last-child{border:none;}
-.member-item{display:flex;align-items:center;gap:12px;padding:10px 16px;background:#fff;margin-bottom:1px;}
-.member-av{width:44px;height:44px;border-radius:50%;object-fit:cover;flex-shrink:0;}
-.member-name{font-weight:600;font-size:14px;}
-.member-role{font-size:11px;color:var(--primary);font-weight:700;background:#FFF0EB;padding:2px 8px;border-radius:10px;}
-.empty{text-align:center;padding:40px 20px;color:var(--muted);}
-.empty i{font-size:36px;display:block;margin-bottom:8px;color:#ddd;}
-.spin{animation:spin 1s linear infinite;}@keyframes spin{to{transform:rotate(360deg);}}
-.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:1000;display:none;align-items:flex-end;justify-content:center;}
-.modal-overlay.open{display:flex;}
-.modal{background:#fff;border-radius:16px 16px 0 0;width:100%;max-width:500px;max-height:80vh;display:flex;flex-direction:column;}
-.modal-head{padding:16px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--border);}
-.modal-head h2{font-size:17px;font-weight:700;}
-.modal-x{background:none;border:none;font-size:24px;cursor:pointer;color:var(--muted);}
-.modal-body{padding:16px;overflow-y:auto;flex:1;}
-.modal-body textarea{width:100%;min-height:120px;padding:12px;border:1px solid var(--border);border-radius:8px;font-size:14px;font-family:inherit;resize:vertical;outline:none;}
-.submit-btn{width:100%;padding:12px;background:var(--primary);color:#fff;border:none;border-radius:8px;font-size:15px;font-weight:700;cursor:pointer;margin-top:12px;}
-.toast{position:fixed;bottom:90px;left:50%;transform:translateX(-50%) translateY(100px);background:#333;color:#fff;padding:12px 20px;border-radius:8px;font-size:14px;z-index:3000;opacity:0;transition:.3s;}
-.toast.show{transform:translateX(-50%) translateY(0);opacity:1;}
+:root{--primary:#EE4D2D;--bg:#f0f2f5;--card:#fff;--border:#e4e6eb;--text:#1C1C1C;--muted:#65676B}
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:var(--bg);font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;color:var(--text);padding-bottom:80px}
+
+/* Header */
+.gh{position:fixed;top:0;left:0;right:0;z-index:100;background:#fff;display:flex;align-items:center;padding:10px 12px;gap:10px;border-bottom:1px solid var(--border)}
+.gh-back{background:none;border:none;font-size:18px;padding:4px;cursor:pointer;color:var(--text)}
+.gh-name{flex:1;font-size:16px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.gh-meta{font-size:11px;color:var(--muted);font-weight:400}
+.gh-icons{display:flex;gap:6px}
+.gh-icon{width:34px;height:34px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:var(--bg);font-size:16px;color:var(--text);border:none;cursor:pointer}
+.gh-join{padding:6px 18px;border-radius:20px;font-size:13px;font-weight:700;border:none;cursor:pointer}
+.gh-join.join{background:var(--primary);color:#fff}
+.gh-join.joined{background:var(--bg);color:var(--muted);border:1px solid var(--border)}
+
+/* Group banner/info */
+.g-banner{padding-top:56px;background:#fff;border-bottom:1px solid var(--border)}
+.g-banner-info{padding:16px;display:flex;gap:14px;align-items:flex-start}
+.g-banner-icon{width:64px;height:64px;border-radius:16px;display:flex;align-items:center;justify-content:center;font-size:28px;color:#fff;flex-shrink:0}
+.g-banner-text h1{font-size:20px;font-weight:800;margin-bottom:2px}
+.g-banner-text .gm{font-size:13px;color:var(--muted)}
+
+/* Tabs */
+.g-tabs{display:flex;background:#fff;border-bottom:2px solid var(--border);position:sticky;top:56px;z-index:50}
+.g-tab{flex:1;padding:12px 8px;text-align:center;font-size:13px;font-weight:600;color:var(--muted);cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-2px;transition:all .2s}
+.g-tab.active{color:var(--primary);border-bottom-color:var(--primary)}
+
+/* Posts */
+.post-card{background:#fff;margin-top:8px;padding:12px 16px}
+.post-head{display:flex;gap:10px;margin-bottom:8px}
+.post-av{width:36px;height:36px;border-radius:50%;background:var(--primary);color:#fff;display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0;overflow:hidden}
+.post-av img{width:100%;height:100%;object-fit:cover}
+.post-author{font-size:14px;font-weight:600}
+.post-author a{color:var(--text);text-decoration:none}
+.post-time{font-size:12px;color:var(--muted)}
+.post-body{font-size:14px;line-height:1.5;margin-bottom:10px;white-space:pre-wrap}
+.post-stats{display:flex;gap:16px;font-size:12px;color:var(--muted);padding:8px 0;border-top:1px solid #f0f0f0;border-bottom:1px solid #f0f0f0}
+.post-actions{display:flex}
+.post-act{flex:1;padding:8px;text-align:center;font-size:13px;color:var(--muted);font-weight:600;border:none;background:none;cursor:pointer;border-radius:4px}
+.post-act:active{background:var(--bg)}
+.post-act.liked{color:var(--primary)}
+.post-act i{margin-right:4px}
+
+/* About tab */
+.about-section{background:#fff;margin-top:8px;padding:16px}
+.about-section h3{font-size:15px;font-weight:700;margin-bottom:12px}
+.rule-item{display:flex;gap:10px;padding:10px 0;border-bottom:1px solid #f5f5f5}
+.rule-item:last-child{border-bottom:none}
+.rule-num{width:28px;height:28px;border-radius:50%;background:var(--bg);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;color:var(--muted);flex-shrink:0}
+.rule-title{font-size:14px;font-weight:600}
+.rule-desc{font-size:13px;color:var(--muted);margin-top:2px}
+.mod-item{display:flex;gap:10px;align-items:center;padding:8px 0}
+.mod-av{width:36px;height:36px;border-radius:50%;background:var(--primary);color:#fff;display:flex;align-items:center;justify-content:center;font-size:14px;overflow:hidden}
+.mod-av img{width:100%;height:100%;object-fit:cover}
+.mod-name{font-size:14px;font-weight:600}
+.mod-role{font-size:12px;color:var(--muted)}
+.msg-mod-btn{display:block;width:100%;padding:12px;text-align:center;border-radius:8px;border:1px solid var(--border);background:#fff;font-size:14px;font-weight:600;cursor:pointer;margin-top:12px;color:var(--text)}
+.msg-mod-btn:active{background:var(--bg)}
+
+/* Leaderboard */
+.lb-tabs{display:flex;gap:8px;padding:12px 16px;background:#fff}
+.lb-tab{padding:8px 16px;border-radius:20px;font-size:13px;font-weight:600;border:1px solid var(--border);background:var(--bg);cursor:pointer}
+.lb-tab.active{background:var(--text);color:#fff;border-color:var(--text)}
+.lb-month{padding:8px 16px;font-size:15px;font-weight:700;background:#fff}
+.lb-note{padding:4px 16px 12px;font-size:12px;color:var(--muted);background:#fff;border-bottom:1px solid var(--border)}
+.lb-section{background:#fff;margin-top:2px;padding:8px 16px}
+.lb-section-title{font-size:12px;font-weight:700;color:var(--muted);padding:8px 0;display:flex;justify-content:space-between}
+.lb-row{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid #f5f5f5}
+.lb-row:last-child{border-bottom:none}
+.lb-rank{width:24px;font-size:15px;font-weight:700;text-align:center;color:var(--text)}
+.lb-av{width:32px;height:32px;border-radius:50%;background:var(--primary);color:#fff;display:flex;align-items:center;justify-content:center;font-size:13px;overflow:hidden}
+.lb-av img{width:100%;height:100%;object-fit:cover}
+.lb-name{flex:1;font-size:14px}
+.lb-score{font-size:14px;font-weight:600;color:var(--muted)}
+
+/* Create post area */
+.create-area{background:#fff;margin-top:8px;padding:12px 16px;display:flex;gap:10px;align-items:center;cursor:pointer}
+.create-area .post-av{width:36px;height:36px}
+.create-placeholder{flex:1;padding:8px 14px;border-radius:20px;background:var(--bg);font-size:14px;color:var(--muted)}
+
+/* Post modal */
+.pm-overlay{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:200;display:none;align-items:flex-end;justify-content:center}
+.pm-overlay.open{display:flex}
+.pm-modal{background:#fff;border-radius:16px 16px 0 0;width:100%;max-height:80vh;overflow:auto;padding:16px}
+.pm-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
+.pm-head h3{font-size:16px;font-weight:700}
+.pm-close{background:none;border:none;font-size:20px;cursor:pointer;color:var(--muted)}
+.pm-ta{width:100%;border:none;font-size:15px;resize:none;min-height:120px;outline:none;line-height:1.5}
+.pm-submit{width:100%;padding:12px;border-radius:8px;background:var(--primary);color:#fff;border:none;font-size:15px;font-weight:700;cursor:pointer;margin-top:12px}
+.pm-submit:disabled{opacity:.5}
+
+/* Sort bar */
+.sort-bar{background:#fff;padding:8px 16px;display:flex;gap:8px;border-bottom:1px solid var(--border)}
+.sort-btn{padding:6px 14px;border-radius:16px;font-size:12px;font-weight:600;border:1px solid var(--border);background:var(--bg);cursor:pointer}
+.sort-btn.active{background:var(--primary);color:#fff;border-color:var(--primary)}
+
+/* Bottom nav */
+.bnav{position:fixed;bottom:0;left:0;right:0;background:#fff;display:flex;border-top:1px solid var(--border);z-index:100;padding:4px 0 calc(4px + env(safe-area-inset-bottom))}
+.bnav a{flex:1;text-align:center;padding:6px 0;text-decoration:none;font-size:10px;color:var(--muted);display:flex;flex-direction:column;align-items:center;gap:2px}
+.bnav a i{font-size:20px}
+.bnav a.active{color:var(--primary)}
+
+.toast{position:fixed;bottom:90px;left:50%;transform:translateX(-50%);background:#333;color:#fff;padding:10px 20px;border-radius:20px;font-size:13px;opacity:0;transition:opacity .3s;z-index:999;pointer-events:none}
+.toast.show{opacity:1}
+.empty-msg{text-align:center;padding:40px 20px;color:var(--muted);font-size:14px}
 </style>
-<link rel="manifest" href="/manifest.json"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="default"><meta name="apple-mobile-web-app-title" content="ShipperShop"><link rel="apple-touch-icon" href="/icons/icon-192.png"></head>
+</head>
 <body>
-<div class="back-nav"><button class="back-btn" onclick="history.back()"><i class="fas fa-arrow-left"></i></button><h1 id="navTitle">Hội nhóm</h1></div>
-<div class="group-banner" id="banner"></div>
-<div class="group-meta"><div class="group-icon-wrap"><div class="g-icon" id="gIcon">👥</div><div class="g-info"><div class="g-name" id="gName">...</div><div class="g-desc" id="gDesc"></div><div class="g-stats"><span><b id="gMembers">0</b> thành viên</span><span><b id="gPosts">0</b> bài viết</span></div><div><button class="join-btn" id="joinBtn" onclick="toggleJoin()">Tham gia</button></div></div></div></div>
-<div class="tabs"><div class="tab active" onclick="setTab('posts',this)">Bài đăng</div><div class="tab" onclick="setTab('rules',this)">Nội quy</div><div class="tab" onclick="setTab('members',this)">Thành viên</div></div>
-<div id="tabContent"><div class="empty"><i class="fas fa-spinner spin"></i></div></div>
-<div class="modal-overlay" id="postModal"><div class="modal"><div class="modal-head"><h2>Đăng bài trong nhóm</h2><button class="modal-x" onclick="closePostModal()">×</button></div><div class="modal-body"><textarea id="postContent" placeholder="Chia sẻ trong nhóm..."></textarea><button class="submit-btn" onclick="submitPost()"><i class="fas fa-paper-plane"></i> Đăng bài</button></div></div></div>
+<!-- Header -->
+<div class="gh" id="groupHeader">
+<button class="gh-back" onclick="history.back()"><i class="fas fa-arrow-left"></i></button>
+<div style="flex:1"><div class="gh-name" id="ghName">...</div></div>
+<div class="gh-icons">
+<button class="gh-icon" onclick="shareGroup()"><i class="fas fa-share-alt"></i></button>
+<button class="gh-join join" id="ghJoin" onclick="toggleJoin()">Tham gia</button>
+</div>
+</div>
+
+<!-- Banner -->
+<div class="g-banner" id="gBanner"></div>
+
+<!-- Tabs -->
+<div class="g-tabs">
+<div class="g-tab active" onclick="switchTab('posts',this)">Bài viết</div>
+<div class="g-tab" onclick="switchTab('about',this)">Giới thiệu</div>
+<div class="g-tab" onclick="switchTab('leaderboard',this)">Xếp hạng</div>
+</div>
+
+<!-- Tab contents -->
+<div id="tabPosts"></div>
+<div id="tabAbout" style="display:none"></div>
+<div id="tabLeaderboard" style="display:none"></div>
+
+<!-- Post modal -->
+<div class="pm-overlay" id="pmOverlay" onclick="if(event.target===this)closePM()">
+<div class="pm-modal">
+<div class="pm-head"><h3>Tạo bài viết</h3><button class="pm-close" onclick="closePM()"><i class="fas fa-times"></i></button></div>
+<textarea class="pm-ta" id="pmText" placeholder="Bạn đang nghĩ gì?" oninput="document.getElementById('pmSend').disabled=!this.value.trim()"></textarea>
+<button class="pm-submit" id="pmSend" disabled onclick="submitPost()">Đăng bài</button>
+</div>
+</div>
+
+<!-- Bottom nav -->
+<div class="bnav" id="mobileBottomNav">
+<a href="index.html"><i class="fas fa-home"></i>Trang chủ</a>
+<a href="groups.html" class="active"><i class="fas fa-users"></i>Cộng đồng</a>
+<a href="index.html?create=1"><i class="fas fa-plus-circle"></i>Tạo</a>
+<a href="notifications.html"><i class="far fa-bell"></i>Hộp thư đến</a>
+<a href="profile.html"><i class="far fa-user"></i>Bạn</a>
+</div>
+
 <div class="toast" id="toast"></div>
-<script src="js/reddit-mkpost.js"></script>
-<script src="js/mobile.js"></script>
+
 <script>
-var CU=JSON.parse(localStorage.getItem('user')||'null');var slug=new URLSearchParams(location.search).get('slug');var groupData=null,curTab='posts';
-var shipColors={'GHTK':'#00b14f','J&T':'#d32f2f','GHN':'#ff6600','SPX':'#EE4D2D','Grab':'#00b14f','Be':'#5bc500','Gojek':'#00aa13','Ninja Van':'#c41230','Viettel Post':'#e21a1a','Lalamove':'#f5a623','Ahamove':'#f5a623','BEST':'#ffc107'};
-async function loadGroup(){if(!slug){location.href='groups.html';return;}try{var r=await fetch('/api/groups.php?action=detail&slug='+encodeURIComponent(slug),{credentials:'include'});var d=await r.json();if(!d.success){location.href='groups.html';return;}groupData=d.data;document.title=groupData.name+' - ShipperShop';document.getElementById('navTitle').textContent=groupData.name;document.getElementById('gName').textContent=groupData.name;document.getElementById('gDesc').textContent=groupData.description||'';document.getElementById('gMembers').textContent=fN(groupData.member_count);document.getElementById('gPosts').textContent=fN(groupData.post_count);var catIcon={'shipping':'🚚','location':'📍','review':'⭐','confession':'🎭','tips':'💡'}[groupData.category]||'👥';document.getElementById('gIcon').innerHTML=catIcon;updateJoinBtn();loadTab('posts');}catch(e){document.getElementById('tabContent').innerHTML='<div class="empty"><p>Lỗi kết nối</p></div>';}}
-function updateJoinBtn(){var btn=document.getElementById('joinBtn');if(groupData.is_member){btn.classList.add('joined');btn.textContent='Đã tham gia';}else{btn.classList.remove('joined');btn.textContent='Tham gia';}}
-async function toggleJoin(){if(!CU){toast('Đăng nhập!');return;}try{var r=await fetch('/api/groups.php?action=join',{method:'POST',headers:{'Content-Type':'application/json'},credentials:'include',body:JSON.stringify({group_id:groupData.id})});var d=await r.json();if(d.success){groupData.is_member=d.joined;updateJoinBtn();toast(d.joined?'Đã tham gia!':'Đã rời nhóm');}}catch(e){toast('Lỗi');}}
-function setTab(tab,el){curTab=tab;document.querySelectorAll('.tab').forEach(function(t){t.classList.remove('active');});el.classList.add('active');loadTab(tab);}
-async function loadTab(tab){var c=document.getElementById('tabContent');c.innerHTML='<div class="empty"><i class="fas fa-spinner spin"></i></div>';
-if(tab==='posts'){var html='';if(groupData.is_member){html='<div class="create-post"><input type="text" placeholder="Đăng bài trong nhóm..." readonly onclick="openPostModal()"></div>';}
-try{var r=await fetch('/api/groups.php?action=posts&group_id='+groupData.id,{credentials:'include'});var d=await r.json();if(d.success&&d.data.posts.length){d.data.posts.forEach(function(p){var av=p.user_avatar?'<img src="'+p.user_avatar+'" class="post-av" onerror="this.outerHTML=\'<div class=post-av>'+((p.user_name||'U').charAt(0))+'</div>\'">':'<div class="post-av">'+((p.user_name||'U').charAt(0))+'</div>';var ship=p.shipping_company?'<span class="ship-badge" style="color:'+(shipColors[p.shipping_company]||'#999')+'">'+esc(p.shipping_company)+'</span>':'';html+='<div class="post-card"><div class="post-head">'+av+'<div><div class="post-author">'+esc(p.user_name)+' '+ship+'</div><div class="post-time">'+ago(p.created_at)+'</div></div></div><div class="post-content">'+esc(p.content)+'</div><div class="post-actions"><button class="act-btn"><i class="far fa-heart"></i> '+fN(p.likes_count)+'</button><button class="act-btn"><i class="far fa-comment"></i> '+fN(p.comments_count)+'</button><button class="act-btn"><i class="far fa-share-square"></i> Chia sẻ</button></div></div>';});}else html+='<div class="empty"><i class="fas fa-file-lines"></i><p>Chưa có bài viết</p></div>';}catch(e){html+='<div class="empty"><p>Lỗi</p></div>';}c.innerHTML=html;}
-if(tab==='rules'){var rules=(groupData.rules||'Chưa có nội quy').split('\n');c.innerHTML='<div class="rules-section"><h3>📋 Nội quy nhóm</h3>'+rules.map(function(r){return '<div class="rule-item">'+esc(r)+'</div>';}).join('')+'</div>';}
-if(tab==='members'){try{var r=await fetch('/api/groups.php?action=members&group_id='+groupData.id,{credentials:'include'});var d=await r.json();if(d.success&&d.data.length){var roleLabel={'admin':'👑 Trưởng nhóm','moderator':'🛡 Kiểm duyệt','member':''};c.innerHTML=d.data.map(function(m){var av=m.avatar?'<img src="'+m.avatar+'" class="member-av" onerror="this.outerHTML=\'<div class=member-av style=background:var(--primary);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:16px>'+((m.fullname||'U').charAt(0))+'</div>\'">':'<div class="member-av" style="background:var(--primary);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:16px">'+((m.fullname||'U').charAt(0))+'</div>';var role=roleLabel[m.role]?'<span class="member-role">'+roleLabel[m.role]+'</span>':'';var online=m.is_online?'<span style="color:#22c55e;font-size:11px">● Online</span>':'';return '<div class="member-item" onclick="location.href=\'user.html?id='+m.id+'\'">'+av+'<div style="flex:1"><div class="member-name">'+esc(m.fullname)+' '+role+'</div><div style="font-size:12px;color:var(--muted)">'+esc(m.shipping_company||'')+' '+online+'</div></div></div>';}).join('');}else c.innerHTML='<div class="empty"><p>Chưa có thành viên</p></div>';}catch(e){c.innerHTML='<div class="empty"><p>Lỗi</p></div>';}}}
-function openPostModal(){document.getElementById('postModal').classList.add('open');setTimeout(function(){document.getElementById('postContent').focus();},100);}
-function closePostModal(){document.getElementById('postModal').classList.remove('open');}
-async function submitPost(){var content=document.getElementById('postContent').value.trim();if(!content){toast('Nhập nội dung!');return;}try{var r=await fetch('/api/groups.php?action=post',{method:'POST',headers:{'Content-Type':'application/json'},credentials:'include',body:JSON.stringify({group_id:groupData.id,content:content})});var d=await r.json();if(d.success){toast('Đã đăng bài!');closePostModal();document.getElementById('postContent').value='';loadTab('posts');}else toast(d.message||'Lỗi');}catch(e){toast('Lỗi');}}
-function esc(t){if(!t)return'';return String(t).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
-function fN(n){n=parseInt(n)||0;if(n>=1000)return(n/1000).toFixed(1)+'K';return n.toString();}
-function ago(dt){if(!dt)return'';var s=Math.floor((new Date()-new Date(dt.replace(' ','T')))/1000);if(s<60)return s+'s';if(s<3600)return Math.floor(s/60)+'m';if(s<86400)return Math.floor(s/3600)+'h';if(s<604800)return Math.floor(s/86400)+'d';return new Date(dt).toLocaleDateString('vi-VN');}
-function toast(msg){var t=document.getElementById('toast');t.textContent=msg;t.className='toast show';setTimeout(function(){t.classList.remove('show');},2500);}
-loadGroup();
+var CU=JSON.parse(localStorage.getItem("user")||"null");
+var P=new URLSearchParams(location.search);
+var groupSlug=P.get("slug")||"";
+var groupId=parseInt(P.get("id"))||0;
+var GROUP=null;
+var curSort="new";
+var lbType="posts";
+
+function toast(m){var t=document.getElementById("toast");t.textContent=m;t.className="toast show";setTimeout(function(){t.className="toast";},2500);}
+function esc(s){if(!s)return"";return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");}
+function fN(n){n=parseInt(n)||0;if(n>=1000000)return(n/1000000).toFixed(1)+"tr";if(n>=1000)return(n/1000).toFixed(1)+"k";return n;}
+function ago(dt){if(!dt)return"";var s=Math.floor((new Date()-new Date(dt.replace(" ","T")))/1000);if(s<60)return s+" giây";if(s<3600)return Math.floor(s/60)+" phút";if(s<86400)return Math.floor(s/3600)+" giờ";if(s<604800)return Math.floor(s/86400)+" ngày";return new Date(dt).toLocaleDateString("vi-VN");}
+
+function apiFetch(url,opts){
+  opts=opts||{};
+  opts.credentials="include";
+  if(!opts.headers)opts.headers={};
+  var tk=localStorage.getItem("token");
+  if(tk)opts.headers["Authorization"]="Bearer "+tk;
+  return fetch(url,opts).then(function(r){return r.json();});
+}
+
+// Load group
+function loadGroup(){
+  var q=groupSlug?"slug="+encodeURIComponent(groupSlug):"id="+groupId;
+  apiFetch("/api/groups.php?action=detail&"+q).then(function(d){
+    if(!d.success){document.getElementById("gBanner").innerHTML="<p class='empty-msg'>Không tìm thấy nhóm</p>";return;}
+    GROUP=d.data;
+    renderHeader();
+    loadPosts();
+    renderAbout();
+    loadLeaderboard();
+  });
+}
+
+function renderHeader(){
+  var g=GROUP;
+  document.title=g.name+" - ShipperShop";
+  document.getElementById("ghName").textContent=g.name;
+  var jb=document.getElementById("ghJoin");
+  if(g.is_member){jb.className="gh-join joined";jb.textContent="Đã tham gia";}
+  else{jb.className="gh-join join";jb.textContent="Tham gia";}
+
+  var icon=g.icon_image?"<img src='"+esc(g.icon_image)+"' style='width:100%;height:100%;object-fit:cover;border-radius:16px'>":"<span>"+esc(g.name[0])+"</span>";
+  document.getElementById("gBanner").innerHTML=
+    "<div class='g-banner-info'>"+
+      "<div class='g-banner-icon' style='background:"+(g.banner_color||"var(--primary)")+"'>"+icon+"</div>"+
+      "<div class='g-banner-text'><h1>"+esc(g.name)+"</h1><div class='gm'>"+fN(g.member_count)+" thành viên"+(g.cat_name?" · "+esc(g.cat_name):"")+"</div></div>"+
+    "</div>";
+}
+
+function toggleJoin(){
+  if(!CU){location.href="login.html";return;}
+  if(!GROUP)return;
+  apiFetch("/api/groups.php?action=join",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({group_id:GROUP.id})})
+  .then(function(d){
+    if(d.success){
+      GROUP.is_member=d.data.joined;
+      if(d.data.joined){GROUP.member_count++;toast("Đã tham gia!");}
+      else{GROUP.member_count--;toast("Đã rời nhóm");}
+      renderHeader();
+    }else{toast(d.message);}
+  });
+}
+
+function shareGroup(){
+  var url=location.origin+"/group.html?slug="+(GROUP?GROUP.slug:"");
+  if(navigator.share)navigator.share({url:url,title:GROUP?GROUP.name:"Nhóm"});
+  else{navigator.clipboard.writeText(url);toast("Đã copy link!");}
+}
+
+// Tabs
+function switchTab(tab,el){
+  document.querySelectorAll(".g-tab").forEach(function(t){t.classList.remove("active");});
+  el.classList.add("active");
+  document.getElementById("tabPosts").style.display=tab==="posts"?"block":"none";
+  document.getElementById("tabAbout").style.display=tab==="about"?"block":"none";
+  document.getElementById("tabLeaderboard").style.display=tab==="leaderboard"?"block":"none";
+}
+
+// Posts tab
+function loadPosts(){
+  if(!GROUP)return;
+  var html="";
+  // Create post area
+  if(GROUP.is_member&&CU){
+    var av=CU.avatar?"<img src='"+CU.avatar+"'>":esc((CU.fullname||"?")[0]);
+    html+="<div class='create-area' onclick='openPM()'><div class='post-av'>"+av+"</div><div class='create-placeholder'>Bạn đang nghĩ gì?</div></div>";
+  }
+  // Sort bar
+  html+="<div class='sort-bar'>";
+  html+="<div class='sort-btn"+(curSort==="hot"?" active":"")+"' onclick='changeSort(\"hot\",this)'>🔥 Nổi bật</div>";
+  html+="<div class='sort-btn"+(curSort==="new"?" active":"")+"' onclick='changeSort(\"new\",this)'>🆕 Mới nhất</div>";
+  html+="<div class='sort-btn"+(curSort==="top"?" active":"")+"' onclick='changeSort(\"top\",this)'>⬆ Nhiều thích</div>";
+  html+="</div>";
+  html+="<div id='postsContainer'><div class='empty-msg'><i class='fas fa-spinner fa-spin'></i></div></div>";
+  document.getElementById("tabPosts").innerHTML=html;
+
+  fetchPosts();
+}
+
+function changeSort(s,el){
+  curSort=s;
+  document.querySelectorAll(".sort-btn").forEach(function(b){b.classList.remove("active");});
+  el.classList.add("active");
+  fetchPosts();
+}
+
+function fetchPosts(){
+  apiFetch("/api/groups.php?action=posts&group_id="+GROUP.id+"&sort="+curSort).then(function(d){
+    if(!d.success||!d.data.posts.length){
+      document.getElementById("postsContainer").innerHTML="<p class='empty-msg'>Chưa có bài viết nào. Hãy là người đầu tiên!</p>";return;
+    }
+    document.getElementById("postsContainer").innerHTML=d.data.posts.map(function(p){return mkPost(p);}).join("");
+  });
+}
+
+function mkPost(p){
+  var av=p.user_avatar?"<img src='"+esc(p.user_avatar)+"'>":esc((p.user_name||"?")[0]);
+  var liked=p.user_liked;
+  return "<div class='post-card'>"+
+    "<div class='post-head'>"+
+      "<div class='post-av'>"+av+"</div>"+
+      "<div><div class='post-author'><a href='user.html?id="+p.user_id+"'>"+esc(p.user_name)+"</a></div>"+
+      "<div class='post-time'>"+ago(p.created_at)+"</div></div>"+
+    "</div>"+
+    "<div class='post-body'>"+esc(p.content)+"</div>"+
+    "<div class='post-stats'>"+
+      "<span>"+(p.likes_count||0)+" thành công</span>"+
+      "<span>"+(p.comments_count||0)+" ghi chú</span>"+
+    "</div>"+
+    "<div class='post-actions'>"+
+      "<button class='post-act"+(liked?" liked":"")+"' onclick='likePost("+p.id+",this)'><i class='fa"+(liked?"s":"r")+" fa-heart'></i> Thành công</button>"+
+      "<button class='post-act'><i class='far fa-comment'></i> Ghi chú</button>"+
+      "<button class='post-act'><i class='fas fa-share'></i> Chuyển tiếp</button>"+
+    "</div>"+
+  "</div>";
+}
+
+function likePost(pid,btn){
+  if(!CU){location.href="login.html";return;}
+  apiFetch("/api/groups.php?action=like_post",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({post_id:pid})})
+  .then(function(d){
+    if(d.success){
+      if(d.data.liked){btn.className="post-act liked";btn.innerHTML="<i class='fas fa-heart'></i> Thành công";}
+      else{btn.className="post-act";btn.innerHTML="<i class='far fa-heart'></i> Thành công";}
+    }
+  });
+}
+
+// About tab
+function renderAbout(){
+  if(!GROUP)return;
+  var g=GROUP;
+  var html="";
+
+  // Description
+  html+="<div class='about-section'><h3>Mô tả</h3><p style='font-size:14px;line-height:1.6'>"+esc(g.description||"Chưa có mô tả")+"</p></div>";
+
+  // Rules
+  if(g.rules&&g.rules.length){
+    html+="<div class='about-section'><h3>Quy tắc của nhóm</h3>";
+    g.rules.forEach(function(r){
+      html+="<div class='rule-item'><div class='rule-num'>"+r.rule_order+"</div><div><div class='rule-title'>"+esc(r.title)+"</div>"+(r.description?"<div class='rule-desc'>"+esc(r.description)+"</div>":"")+"</div></div>";
+    });
+    html+="</div>";
+  }
+
+  // Moderators
+  if(g.moderators&&g.moderators.length){
+    html+="<div class='about-section'><h3>Kiểm duyệt viên</h3>";
+    g.moderators.forEach(function(m){
+      var mav=m.avatar?"<img src='"+esc(m.avatar)+"'>":esc((m.fullname||"?")[0]);
+      var rl=m.role==="admin"?"Quản trị viên":"Kiểm duyệt viên";
+      html+="<div class='mod-item'><div class='mod-av'>"+mav+"</div><div><div class='mod-name'>"+esc(m.fullname)+"</div><div class='mod-role'>"+rl+"</div></div></div>";
+    });
+    html+="<button class='msg-mod-btn' onclick='msgMod()'><i class='fas fa-envelope' style='margin-right:6px'></i>Nhắn tin cho kiểm duyệt viên</button>";
+    html+="</div>";
+  }
+
+  document.getElementById("tabAbout").innerHTML=html;
+}
+
+function msgMod(){
+  if(!GROUP||!GROUP.moderators||!GROUP.moderators.length)return;
+  location.href="messages.html?to="+GROUP.moderators[0].id;
+}
+
+// Leaderboard tab
+function loadLeaderboard(){
+  if(!GROUP)return;
+  var html="<div class='lb-tabs'>"+
+    "<div class='lb-tab"+(lbType==="posts"?" active":"")+"' onclick='changeLbType(\"posts\",this)'>Người đăng nhiều nhất</div>"+
+    "<div class='lb-tab"+(lbType==="comments"?" active":"")+"' onclick='changeLbType(\"comments\",this)'>Người bình luận nhiều nhất</div>"+
+  "</div>";
+
+  var now=new Date();
+  var months=["Tháng 01","Tháng 02","Tháng 03","Tháng 04","Tháng 05","Tháng 06","Tháng 07","Tháng 08","Tháng 09","Tháng 10","Tháng 11","Tháng 12"];
+  html+="<div class='lb-month'>"+months[now.getMonth()]+" "+now.getFullYear()+"</div>";
+  html+="<div class='lb-note'>Dựa trên số bình chọn được tính trong tháng.</div>";
+  html+="<div id='lbContent'><div class='empty-msg'><i class='fas fa-spinner fa-spin'></i></div></div>";
+  document.getElementById("tabLeaderboard").innerHTML=html;
+
+  fetchLeaderboard();
+}
+
+function changeLbType(t,el){
+  lbType=t;
+  document.querySelectorAll(".lb-tab").forEach(function(b){b.classList.remove("active");});
+  el.classList.add("active");
+  fetchLeaderboard();
+}
+
+function fetchLeaderboard(){
+  apiFetch("/api/groups.php?action=leaderboard&group_id="+GROUP.id+"&type="+lbType).then(function(d){
+    if(!d.success||!d.data.leaderboard.length){
+      document.getElementById("lbContent").innerHTML="<p class='empty-msg'>Chưa có dữ liệu tháng này</p>";return;
+    }
+    var leaders=d.data.leaderboard;
+    var html="<div class='lb-section'><div class='lb-section-title'><span>"+(lbType==="posts"?"% người đăng nhiều nhất":"% người bình luận nhiều nhất")+"</span><span>Lượt thích</span></div>";
+    leaders.forEach(function(l,i){
+      var av=l.avatar?"<img src='"+esc(l.avatar)+"'>":esc((l.fullname||"?")[0]);
+      html+="<div class='lb-row'>"+
+        "<div class='lb-rank'>"+(i+1)+"</div>"+
+        "<div class='lb-av'>"+av+"</div>"+
+        "<div class='lb-name'>"+esc(l.fullname)+"</div>"+
+        "<div class='lb-score'>"+fN(l.total_likes)+"</div>"+
+      "</div>";
+    });
+    html+="</div>";
+    document.getElementById("lbContent").innerHTML=html;
+  });
+}
+
+// Post modal
+function openPM(){
+  if(!CU){location.href="login.html";return;}
+  document.getElementById("pmOverlay").classList.add("open");
+  setTimeout(function(){document.getElementById("pmText").focus();},200);
+}
+function closePM(){
+  document.getElementById("pmOverlay").classList.remove("open");
+  document.getElementById("pmText").value="";
+  document.getElementById("pmSend").disabled=true;
+}
+function submitPost(){
+  var content=document.getElementById("pmText").value.trim();
+  if(!content||!GROUP)return;
+  var btn=document.getElementById("pmSend");
+  btn.disabled=true;btn.textContent="Đang đăng...";
+  apiFetch("/api/groups.php?action=post",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({group_id:GROUP.id,content:content})})
+  .then(function(d){
+    if(d.success){closePM();toast("Đã đăng bài!");fetchPosts();}
+    else{toast(d.message||"Lỗi");}
+    btn.disabled=false;btn.textContent="Đăng bài";
+  }).catch(function(){btn.disabled=false;btn.textContent="Đăng bài";toast("Lỗi kết nối");});
+}
+
+// Init
+if(groupSlug||groupId){loadGroup();}
+else{document.getElementById("gBanner").innerHTML="<p class='empty-msg'>Không tìm thấy nhóm</p>";}
 </script>
-<nav id="mobileBottomNav" role="navigation"><a href="index.html" class="mnav-item"><i class="fas fa-home"></i><span>Trang chủ</span></a><a href="marketplace.html" class="mnav-item"><i class="fas fa-store"></i><span>Mua sắm</span></a><button class="mnav-item mnav-fab-wrap" onclick="handleFab()"><div class="mnav-fab"><i class="fas fa-camera"></i></div></button><a href="map.html" class="mnav-item"><i class="fas fa-map-marked-alt"></i><span>Bản đồ</span></a><a href="profile.html" class="mnav-item"><i class="fas fa-user"></i><span>Tài khoản</span></a></nav>
-<script>if("serviceWorker" in navigator)navigator.serviceWorker.register("/sw.js");</script><script src="js/post-modal.js"></script>
-</body></html>
+<script src="js/mobile.js"></script>
+</body>
+</html>
