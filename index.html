@@ -730,10 +730,8 @@ async function scrollTo2(id){
 
 // MODAL
 function openModal(type){
-  if(!CU){toast('Đăng nhập để đăng bài!','warning');setTimeout(()=>location='login.html',1000);return;}
-  setPType(type,document.querySelector('.type-tab'));
-  document.getElementById('modal').classList.add('open');
-  setTimeout(()=>document.getElementById('mContent').focus(),100);
+  if(!CU){toast('Đăng nhập để đăng bài!','warning');setTimeout(function(){location='login.html'},1000);return;}
+  if(typeof openSPM==="function"){openSPM();return;}
 }
 function closeModal(){document.getElementById('modal').classList.remove('open');imgs=[];document.getElementById('mImgPrev').innerHTML='';document.getElementById('mContent').value='';document.getElementById('mTitle2').value='';document.getElementById('cnt').textContent=0;}
 function setPType(t,btn){
@@ -803,7 +801,7 @@ function toast(msg,type='success'){const t=document.getElementById('toast');t.te
 const up=new URLSearchParams(location.search);
 if(up.get('post'))setTimeout(function(){scrollTo2(parseInt(up.get('post')));},2000);
 if(up.get('type'))fType(up.get('type'));
-function handleFab(){if(!CU){toast('Đăng nhập để đăng bài!','warning');setTimeout(function(){location='login.html'},1000);return;}openModal('post');}
+function handleFab(){if(!CU){toast('Đăng nhập để đăng bài!','warning');setTimeout(function(){location='login.html'},1000);return;}if(typeof openSPM==="function")openSPM();}
 </script>
     <script src="js/mobile.js"></script>
 
