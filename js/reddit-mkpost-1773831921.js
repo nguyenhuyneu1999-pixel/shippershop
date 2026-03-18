@@ -77,7 +77,7 @@ function mkPost(p){
   +'<div class="pa3-stats"><span>'+(likes>0?fN(likes)+' đơn giao thành công':'')+'</span><span>'+(parseInt(p.comments_count||0)>0?fN(p.comments_count||0)+' ghi chú':'')+'</span><span></span></div>'
   +'<div class="post-actions-3">'
   +'<button class="pa3-btn'+(isLiked?' pa3-active':'')+'" id="lk'+p.id+'" onclick="likePost('+p.id+',this)"><span>Thành công</span></button>'
-  +'<button class="pa3-btn" onclick="openPostSheet('+p.id+')"><span id="nc'+p.id+'">Ghi chú</span></button>'
+  +'<button class="pa3-btn" onclick="location.href=\'post-detail.html?id='+p.id+'\'"><span id="nc'+p.id+'">Ghi chú</span></button>'
   +'<button class="pa3-btn" onclick="sharePost('+p.id+')"><span>Chuyển tiếp</span></button>'
   +'</div>'
   +'</div>';
