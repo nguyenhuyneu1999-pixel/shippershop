@@ -98,20 +98,20 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;h
 <button class="map-locate" onclick="locateMe()"><i class="fas fa-crosshairs"></i></button>
 
 <!-- ADD PIN FAB -->
-<button class="map-fab" onclick="startAddPin()"><i class="fas fa-map-pin"></i></button>
+<button class="map-fab" onclick="startAddPin()" title="Thêm địa điểm tại đây"><i class="fas fa-plus"></i></button>
 
 <!-- ADD PIN MODAL -->
 <div class="pin-modal" id="pinModal">
-<div class="pin-modal-hd"><h3>📌 Thêm ghim mới</h3><button class="pin-modal-close" onclick="closePinModal()"><i class="fas fa-times"></i></button></div>
+<div class="pin-modal-hd"><h3>📌 Thêm địa điểm</h3><button class="pin-modal-close" onclick="closePinModal()"><i class="fas fa-times"></i></button></div>
 <div class="pin-modal-bd">
-<div id="pinCoords" style="font-size:12px;color:var(--text2);margin-bottom:10px;padding:6px 10px;background:var(--bg);border-radius:8px"><i class="fas fa-map-marker-alt" style="color:var(--primary)"></i> <span id="pinLatLng">Đang lấy tọa độ...</span></div>
+<div id="pinCoords" style="font-size:12px;color:var(--text2);margin-bottom:10px;padding:6px 10px;background:var(--bg);border-radius:8px"><i class="fas fa-map-marker-alt" style="color:var(--primary)"></i> <span id="pinLatLng">Đang lấy tọa độ...</span> <span style="font-size:11px;color:#999">· Kéo ghim để chỉnh vị trí</span></div>
+<div class="pf"><label>Tên địa điểm *</label><input type="text" id="pinTitle" placeholder="VD: Quán phở Hùng, Toà nhà ABC, Kho hàng Q7..." autofocus></div>
+<div class="pf"><label>Ghi chú về địa điểm</label><textarea id="pinDesc" placeholder="VD: Giao buổi sáng, gọi trước 15p, cổng bên hông, tầng 3 phòng 302..." rows="3"></textarea></div>
+<div class="pf"><label>Địa chỉ</label><input type="text" id="pinAddress" placeholder="Tự động điền khi chọn vị trí..."></div>
 <div class="pf"><label>Loại ghim</label>
-<select id="pinType"><option value="delivery">📦 Giao hàng</option><option value="warning">⚠️ Cảnh báo</option><option value="note" selected>📝 Ghi chú</option><option value="favorite">⭐ Yêu thích</option></select></div>
-<div class="pf"><label>Tiêu đề *</label><input type="text" id="pinTitle" placeholder="VD: Nhà khách KT quen, tầng 3"></div>
-<div class="pf"><label>Mô tả chi tiết</label><textarea id="pinDesc" placeholder="VD: Giao buổi sáng, gọi trước 15p, cổng sau..." rows="3"></textarea></div>
-<div class="pf"><label>Địa chỉ</label><input type="text" id="pinAddress" placeholder="Số nhà, đường, phường..."></div>
+<select id="pinType"><option value="note" selected>📝 Ghi chú</option><option value="delivery">📦 Điểm giao hàng</option><option value="warning">⚠️ Cảnh báo</option><option value="favorite">⭐ Yêu thích</option></select></div>
 </div>
-<div class="pin-modal-ft"><button class="pbtn" id="pinSubmit" onclick="savePin()">Lưu ghim</button></div>
+<div class="pin-modal-ft"><button class="pbtn" id="pinSubmit" onclick="savePin()"><i class="fas fa-check" style="margin-right:6px"></i>Lưu địa điểm</button></div>
 </div>
 
 <!-- BOTTOM NAV -->
@@ -126,7 +126,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;h
 <script>
 var token=localStorage.getItem("token")||"";
 var user=JSON.parse(localStorage.getItem("user")||"null");
-var map,markers=[],addingPin=false,tempMarker=null,currentFilter="";
+var map,markers=[],tempMarker=null,currentFilter="";
 var pinLat=0,pinLng=0;
 
 // Pin type config
@@ -143,18 +143,19 @@ function initMap(){
     L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",{attribution:"© OpenStreetMap",maxZoom:19}).addTo(map);
     L.control.zoom({position:"bottomright"}).addTo(map);
     
-    // Click to add pin
+    // Click to add pin - always allow, show modal immediately
     map.on("click",function(e){
-        if(!addingPin)return;
+        if(!user||!token){var r=confirm("Đăng nhập để thêm địa điểm?");if(r)location.href="login.html";return;}
         pinLat=e.latlng.lat;pinLng=e.latlng.lng;
         if(tempMarker)map.removeLayer(tempMarker);
         tempMarker=L.marker([pinLat,pinLng],{draggable:true}).addTo(map);
         tempMarker.on("dragend",function(ev){pinLat=ev.target.getLatLng().lat;pinLng=ev.target.getLatLng().lng;document.getElementById("pinLatLng").textContent=pinLat.toFixed(5)+", "+pinLng.toFixed(5);reverseGeocode(pinLat,pinLng);});
         document.getElementById("pinLatLng").textContent=pinLat.toFixed(5)+", "+pinLng.toFixed(5);
+        document.getElementById("pinTitle").value="";
+        document.getElementById("pinDesc").value="";
+        document.getElementById("pinAddress").value="";
         reverseGeocode(pinLat,pinLng);
         document.getElementById("pinModal").classList.add("active");
-        addingPin=false;
-        map.getContainer().style.cursor="";
     });
 
     loadPins();
@@ -163,7 +164,7 @@ function initMap(){
 
 // LOCATE ME
 function locateMe(){
-    if(!navigator.geolocation){alert("Trình duyệt không hỗ trợ GPS");return;}
+    if(!navigator.geolocation)return;
     navigator.geolocation.getCurrentPosition(function(pos){
         map.setView([pos.coords.latitude,pos.coords.longitude],15);
         L.circle([pos.coords.latitude,pos.coords.longitude],{radius:50,color:"#d32f2f",fillOpacity:.15,weight:2}).addTo(map);
@@ -208,12 +209,20 @@ function filterPins(type,el){
     loadPins();
 }
 
-// ADD PIN
+// ADD PIN - at map center
 function startAddPin(){
-    if(!user||!token){alert("Đăng nhập để thêm ghim");window.location="login.html";return;}
-    addingPin=true;
-    map.getContainer().style.cursor="crosshair";
-    alert("👆 Chạm vào bản đồ để đặt ghim");
+    if(!user||!token){var r=confirm("Đăng nhập để thêm địa điểm?");if(r)location.href="login.html";return;}
+    var center=map.getCenter();
+    pinLat=center.lat;pinLng=center.lng;
+    if(tempMarker)map.removeLayer(tempMarker);
+    tempMarker=L.marker([pinLat,pinLng],{draggable:true}).addTo(map);
+    tempMarker.on("dragend",function(ev){pinLat=ev.target.getLatLng().lat;pinLng=ev.target.getLatLng().lng;document.getElementById("pinLatLng").textContent=pinLat.toFixed(5)+", "+pinLng.toFixed(5);reverseGeocode(pinLat,pinLng);});
+    document.getElementById("pinLatLng").textContent=pinLat.toFixed(5)+", "+pinLng.toFixed(5);
+    document.getElementById("pinTitle").value="";
+    document.getElementById("pinDesc").value="";
+    document.getElementById("pinAddress").value="";
+    reverseGeocode(pinLat,pinLng);
+    document.getElementById("pinModal").classList.add("active");
 }
 
 function closePinModal(){
@@ -223,28 +232,29 @@ function closePinModal(){
 
 async function savePin(){
     var title=document.getElementById("pinTitle").value.trim();
-    if(!title){alert("Nhập tiêu đề");return;}
-    if(!pinLat||!pinLng){alert("Chọn vị trí trên bản đồ");return;}
+    if(!title){document.getElementById("pinTitle").focus();document.getElementById("pinTitle").style.borderColor="#f44";return;}
+    document.getElementById("pinTitle").style.borderColor="#ddd";
+    if(!pinLat||!pinLng){return;}
     var btn=document.getElementById("pinSubmit");
-    btn.disabled=true;btn.textContent="Đang lưu...";
+    btn.disabled=true;btn.innerHTML="<i class='fas fa-spinner fa-spin'></i> Đang lưu...";
     try{
         var r=await fetch("/api/map-pins.php",{method:"POST",headers:{"Content-Type":"application/json","Authorization":"Bearer "+token},body:JSON.stringify({lat:pinLat,lng:pinLng,title:title,description:document.getElementById("pinDesc").value.trim(),pin_type:document.getElementById("pinType").value,address:document.getElementById("pinAddress").value.trim()})});
         var d=await r.json();
         if(d.success){
-            alert("✅ Đã thêm ghim!");closePinModal();
+            closePinModal();
             document.getElementById("pinTitle").value="";document.getElementById("pinDesc").value="";document.getElementById("pinAddress").value="";
             loadPins();
-        }else{alert("❌ "+(d.message||"Lỗi"));}
-    }catch(e){alert("Lỗi kết nối");}
-    btn.disabled=false;btn.textContent="Lưu ghim";
+        }else{document.getElementById("pinTitle").focus();}
+    }catch(e){}
+    btn.disabled=false;btn.innerHTML="<i class='fas fa-check' style='margin-right:6px'></i>Lưu địa điểm";
 }
 
 async function deletePin(id){
-    if(!confirm("Xóa ghim này?"))return;
+    if(!confirm("Xóa địa điểm này?"))return;
     try{
         await fetch("/api/map-pins.php?id="+id,{method:"DELETE",headers:{"Authorization":"Bearer "+token}});
         loadPins();
-    }catch(e){alert("Lỗi");}
+    }catch(e){}
 }
 
 // SEARCH
@@ -254,9 +264,13 @@ async function searchLocation(){
     try{
         var r=await fetch("https://nominatim.openstreetmap.org/search?format=json&q="+encodeURIComponent(q)+"&countrycodes=vn&limit=1");
         var d=await r.json();
-        if(d.length>0){map.setView([d[0].lat,d[0].lon],16);}
-        else{alert("Không tìm thấy: "+q);}
-    }catch(e){alert("Lỗi tìm kiếm");}
+        if(d.length>0){map.setView([d[0].lat,d[0].lon],16);
+            // Show temporary marker at search result
+            if(tempMarker)map.removeLayer(tempMarker);
+            tempMarker=L.marker([d[0].lat,d[0].lon]).addTo(map).bindPopup("<strong>"+esc(q)+"</strong><br><small>"+esc(d[0].display_name||"")+"</small>").openPopup();
+        }
+        else{document.getElementById("mapSearch").style.borderColor="#f44";setTimeout(function(){document.getElementById("mapSearch").style.borderColor="#ddd";},2000);}
+    }catch(e){console.error("Search error:",e);}
 }
 
 // REVERSE GEOCODE
