@@ -304,7 +304,7 @@ if ($method === 'POST') {
          */
         try {
             // Begin transaction
-            $pdo = $db->getPdo();
+            $pdo = db()->getConnection();
             $pdo->beginTransaction();
             
             // Lock wallet row
