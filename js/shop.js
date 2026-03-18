@@ -102,7 +102,7 @@ const PRODUCTS = [
         image: 'https://via.placeholder.com/600x600/7C3AED/FFFFFF?text=Ao+Thun+Nam',
         gallery: [
             'https://via.placeholder.com/600x600/7C3AED/FFFFFF?text=Ao+Thun',
-            'https://via.placeholder.com/600x600/FF6B4A/FFFFFF?text=Detail',
+            'https://via.placeholder.com/600x600/A78BFA/FFFFFF?text=Detail',
             'https://via.placeholder.com/600x600/FFB84D/FFFFFF?text=Model'
         ],
         rating: 4.5,
@@ -126,10 +126,10 @@ const PRODUCTS = [
         categoryName: 'Mỹ Phẩm',
         price: 1290000,
         salePrice: 990000,
-        image: 'https://via.placeholder.com/600x600/FF6B4A/FFFFFF?text=Dior+999',
+        image: 'https://via.placeholder.com/600x600/A78BFA/FFFFFF?text=Dior+999',
         gallery: [
-            'https://via.placeholder.com/600x600/FF6B4A/FFFFFF?text=Dior+999',
-            'https://via.placeholder.com/600x600/D73211/FFFFFF?text=Swatch',
+            'https://via.placeholder.com/600x600/A78BFA/FFFFFF?text=Dior+999',
+            'https://via.placeholder.com/600x600/7C3AED/FFFFFF?text=Swatch',
             'https://via.placeholder.com/600x600/7C3AED/FFFFFF?text=Packaging'
         ],
         rating: 4.9,
@@ -389,7 +389,7 @@ function addToCart(productId) {
 
 function addToWishlist(productId) {
     // TODO: Implement wishlist
-    alert('Tính năng Yêu thích đang phát triển!');
+    if(typeof toast==='function')toast('Đã thêm vào yêu thích');;
 }
 
 function quickView(productId) {
