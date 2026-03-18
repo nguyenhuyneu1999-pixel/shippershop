@@ -384,15 +384,26 @@ async function loadLastLocation(){
 
 function openReport(){
   if(!CU){alert("Vui l\u00f2ng \u0111\u0103ng nh\u1eadp!");location.href="login.html";return;}
+  // Camera first - modal opens after capture in addRMedia callback
   document.getElementById("rPhotoInput").click();
+}
+function showReportModal(){
   document.getElementById("reportOverlay").classList.add("open");
-  if(lastProvince){var ps=document.getElementById("rProvince");if(ps&&!ps.value){ps.value=lastProvince;onRProvChange();}}
-  if(myLat){document.getElementById("rLocStatus").classList.add("show");document.getElementById("rLocText").textContent=myAddr||"GPS \u0111\u00e3 l\u1ea5y";}
+  if(lastProvince){
+    setTimeout(function(){
+      var ps=document.getElementById("rProvince");
+      if(ps&&!ps.value){ps.value=lastProvince;onRProvChange();}
+    },300);
+  }
 }
 function closeReport(){document.getElementById("reportOverlay").classList.remove("open");rMediaFiles=[];document.getElementById("rMediaPrev").innerHTML="";}
 
 function addRMedia(input,type){
-  if(!input.files||!input.files.length) return;
+  if(!input.files||!input.files.length){
+    // No file selected - still show modal if not open
+    if(!document.getElementById("reportOverlay").classList.contains("open")) showReportModal();
+    return;
+  }
   Array.from(input.files).forEach(function(f){
     if(rMediaFiles.length>=5) return;
     var idx=rMediaFiles.length;
@@ -408,6 +419,8 @@ function addRMedia(input,type){
     reader.readAsDataURL(f);
   });
   input.value="";
+  // Show modal after capture
+  if(!document.getElementById("reportOverlay").classList.contains("open")) showReportModal();
 }
 function rmRMedia(idx){rMediaFiles[idx]=null;var el=document.getElementById("rm"+idx);if(el)el.remove();}
 
