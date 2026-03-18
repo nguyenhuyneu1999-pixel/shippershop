@@ -243,7 +243,7 @@ async function loadListings(append) {
                 var imgs = []; try { imgs = JSON.parse(item.images || '[]'); } catch(e) {}
                 var img = imgs.length > 0 ? imgs[0] : '';
                 var priceStr = item.price > 0 ? Number(item.price).toLocaleString('vi-VN') + ' ₫' : 'Miễn phí';
-                return '<div class="mk-item" onclick="openDetail(' + item.id + ')">'
+                return '<div class="mk-item" onclick="location.href='listing.html?id=' + item.id">'
                     + (img ? '<img class="mk-item-img" src="' + img + '" onerror="this.src=\'data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 1 1%22><rect fill=%22%23e4e6eb%22 width=%221%22 height=%221%22/></svg>\'" loading="lazy">' : '<div class="mk-item-img" style="display:flex;align-items:center;justify-content:center;font-size:40px;color:#ccc"><i class="fas fa-image"></i></div>')
                     + '<div class="mk-item-info">'
                     + '<div class="mk-item-price">' + priceStr + '</div>'
@@ -443,7 +443,7 @@ function openMyListings() {
                     var imgs = []; try { imgs = JSON.parse(item.images || '[]'); } catch(e) {}
                     var img = imgs.length > 0 ? imgs[0] : '';
                     var priceStr = item.price > 0 ? Number(item.price).toLocaleString('vi-VN') + ' ₫' : 'Miễn phí';
-                    return '<div class="mk-item" onclick="openDetail(' + item.id + ')">' + (img ? '<img class="mk-item-img" src="' + img + '" loading="lazy">' : '<div class="mk-item-img" style="display:flex;align-items:center;justify-content:center;font-size:40px;color:#ccc"><i class="fas fa-image"></i></div>') + '<div class="mk-item-info"><div class="mk-item-price">' + priceStr + '</div><div class="mk-item-title">' + esc(item.title) + '</div></div></div>';
+                    return '<div class="mk-item" onclick="location.href='listing.html?id=' + item.id">' + (img ? '<img class="mk-item-img" src="' + img + '" loading="lazy">' : '<div class="mk-item-img" style="display:flex;align-items:center;justify-content:center;font-size:40px;color:#ccc"><i class="fas fa-image"></i></div>') + '<div class="mk-item-info"><div class="mk-item-price">' + priceStr + '</div><div class="mk-item-title">' + esc(item.title) + '</div></div></div>';
                 }).join('');
             }
         }
