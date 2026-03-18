@@ -149,6 +149,14 @@ foreach ($landscapeImgs as $idx => $url) {
 // ================================================
 // 3. CREATE 100 POSTS
 // ================================================
+echo "\n=== TEST INSERT FIRST ===\n";
+try {
+    $testId = $db->insert('posts', ['user_id'=>$userIds[0], 'content'=>'seed test', 'type'=>'post', 'status'=>'active']);
+    echo "Test OK, id=$testId\n";
+    $db->query("DELETE FROM posts WHERE id=?", [$testId]);
+} catch (Throwable $te) {
+    echo "Test FAIL: " . $te->getMessage() . "\n";
+}
 echo "\n=== CREATING 100 POSTS ===\n";
 
 // Realistic Vietnamese content
