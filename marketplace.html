@@ -132,7 +132,7 @@
 </div>
 
 <!-- FAB CREATE -->
-<button class="mk-fab" onclick="if(typeof openSPM==='function'){openSPM();}else{openCreate();}"><i class="fas fa-camera"></i></button>
+<button class="mk-fab" onclick="openCreate()"><i class="fas fa-camera"></i></button>
 
 <!-- CREATE MODAL -->
 <div class="mk-overlay" id="createOverlay" onclick="closeCreate()"></div>
@@ -218,7 +218,7 @@
 <nav class="mk-bnav">
     <a href="index.html"><i class="fas fa-home"></i><span>Trang chủ</span></a>
     <a href="marketplace.html" class="active"><i class="fas fa-store"></i><span>Mua sắm</span></a>
-    <div class="fab-space"><div class="mk-fab-nav" onclick="handleFab()"><i class="fas fa-camera"></i></div></div>
+    <div class="fab-space"><div class="mk-fab-nav" onclick="openCreate()"><i class="fas fa-plus"></i></div></div>
     <a href="map.html"><i class="fas fa-map-marked-alt"></i><span>Bản đồ</span></a>
     <a href="profile.html"><i class="fas fa-user"></i><span>Tài khoản</span></a>
 </nav>
