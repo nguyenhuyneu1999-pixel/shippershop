@@ -113,6 +113,11 @@ body{background:var(--bg);font-family:-apple-system,BlinkMacSystemFont,'Segoe UI
 .qk-close{position:absolute;top:16px;right:16px;background:rgba(255,255,255,.2);border:none;color:#fff;width:40px;height:40px;border-radius:50%;font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;}
 .qk-loc{color:rgba(255,255,255,.7);font-size:11px;margin-top:8px;text-align:center;max-width:280px;}
 
+
+.r-media-item{position:relative;width:80px;height:80px;border-radius:8px;overflow:hidden;flex-shrink:0;}
+.r-media-item img,.r-media-item video{width:100%;height:100%;object-fit:cover;}
+.r-media-rm{position:absolute;top:2px;right:2px;width:20px;height:20px;border-radius:50%;background:rgba(0,0,0,.6);color:#fff;border:none;font-size:10px;cursor:pointer;display:flex;align-items:center;justify-content:center;}
+
 /* Bottom nav */
 .tf-bnav{position:fixed;bottom:0;left:0;right:0;z-index:100;background:#fff;display:flex;align-items:flex-end;border-top:1px solid var(--border);padding:6px 0 max(6px,env(safe-area-inset-bottom));}
 .tf-bnav .mnav-item{flex:1;display:flex;flex-direction:column;align-items:center;gap:2px;font-size:10px;color:#999;padding:4px 0;text-decoration:none;-webkit-tap-highlight-color:transparent;}
@@ -164,28 +169,62 @@ body{background:var(--bg);font-family:-apple-system,BlinkMacSystemFont,'Segoe UI
 <!-- REPORT MODAL -->
 <div class="tf-overlay" id="reportOverlay" onclick="if(event.target===this)closeReport()">
 <div class="tf-modal">
-  <div class="tf-modal-head"><h3><i class="fas fa-exclamation-circle" style="color:#d32f2f;margin-right:6px"></i>Báo cáo</h3><button class="tf-modal-close" onclick="closeReport()"><i class="fas fa-times"></i></button></div>
+  <div class="tf-modal-head"><h3><i class="fas fa-exclamation-circle" style="color:#d32f2f;margin-right:6px"></i>Báo cáo giao thông</h3><button class="tf-modal-close" onclick="closeReport()"><i class="fas fa-times"></i></button></div>
   <div class="tf-modal-body">
-    <div class="tf-loc-status" id="rLocStatus"><i class="fas fa-map-marker-alt"></i> <span id="rLocText">Đang lấy vị trí...</span></div>
+
+    <!-- PHOTO/VIDEO PREVIEW -->
+    <div style="margin-bottom:12px">
+      <div id="rMediaPrev" style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px"></div>
+      <div style="display:flex;gap:8px">
+        <label style="flex:1;display:flex;align-items:center;justify-content:center;gap:6px;padding:10px;border:1.5px dashed #ddd;border-radius:10px;cursor:pointer;font-size:13px;font-weight:600;color:#1976d2">
+          <i class="fas fa-camera"></i> Chụp/Thêm ảnh
+          <input type="file" accept="image/*" capture="environment" multiple style="display:none" id="rPhotoInput" onchange="addRMedia(this,'image')">
+        </label>
+        <label style="flex:1;display:flex;align-items:center;justify-content:center;gap:6px;padding:10px;border:1.5px dashed #ddd;border-radius:10px;cursor:pointer;font-size:13px;font-weight:600;color:#e65100">
+          <i class="fas fa-video"></i> Quay/Thêm video
+          <input type="file" accept="video/*" capture="environment" style="display:none" id="rVideoInput" onchange="addRMedia(this,'video')">
+        </label>
+      </div>
+    </div>
+
+    <!-- CATEGORY -->
     <div class="tf-field"><label>Loại cảnh báo</label>
       <div class="tf-chips" id="rCatChips">
-        <div class="tf-chip sel" onclick="selCat(this,'traffic')"><i class="fas fa-car-crash"></i> Giao thông</div>
-        <div class="tf-chip" onclick="selCat(this,'weather')"><i class="fas fa-cloud-showers-heavy"></i> Thời tiết</div>
-        <div class="tf-chip" onclick="selCat(this,'terrain')"><i class="fas fa-mountain"></i> Địa hình</div>
-        <div class="tf-chip" onclick="selCat(this,'warning')"><i class="fas fa-triangle-exclamation"></i> Cảnh báo</div>
-        <div class="tf-chip" onclick="selCat(this,'other')"><i class="fas fa-circle-info"></i> Khác</div>
+        <div class="tf-chip sel" onclick="selCat(this,&apos;traffic&apos;)"><i class="fas fa-car-crash"></i> Giao thông</div>
+        <div class="tf-chip" onclick="selCat(this,&apos;weather&apos;)"><i class="fas fa-cloud-showers-heavy"></i> Thời tiết</div>
+        <div class="tf-chip" onclick="selCat(this,&apos;terrain&apos;)"><i class="fas fa-mountain"></i> Địa hình</div>
+        <div class="tf-chip" onclick="selCat(this,&apos;warning&apos;)"><i class="fas fa-triangle-exclamation"></i> Cảnh báo</div>
+        <div class="tf-chip" onclick="selCat(this,&apos;other&apos;)"><i class="fas fa-circle-info"></i> Khác</div>
       </div>
     </div>
+
+    <!-- SEVERITY -->
     <div class="tf-field"><label>Mức độ</label>
       <div class="tf-chips" id="rSevChips">
-        <div class="tf-chip" onclick="selSev(this,'low')">🟢 Nhẹ</div>
-        <div class="tf-chip sel" onclick="selSev(this,'medium')">🟡 Trung bình</div>
-        <div class="tf-chip" onclick="selSev(this,'high')">🔴 Nghiêm trọng</div>
-        <div class="tf-chip" onclick="selSev(this,'critical')">🆘 Khẩn cấp</div>
+        <div class="tf-chip" onclick="selSev(this,&apos;low&apos;)">&#x1f7e2; Nhẹ</div>
+        <div class="tf-chip sel" onclick="selSev(this,&apos;medium&apos;)">&#x1f7e1; Trung bình</div>
+        <div class="tf-chip" onclick="selSev(this,&apos;high&apos;)">&#x1f534; Nghiêm trọng</div>
+        <div class="tf-chip" onclick="selSev(this,&apos;critical&apos;)">&#x1f198; Khẩn cấp</div>
       </div>
     </div>
-    <div class="tf-field"><label>Mô tả</label><textarea id="rContent" placeholder="Mô tả tình trạng..."></textarea></div>
-    <div class="tf-field"><label>Địa chỉ</label><input id="rAddress" type="text" placeholder="Tự động lấy từ GPS hoặc nhập tay"></div>
+
+    <!-- DESCRIPTION -->
+    <div class="tf-field"><label>Mô tả tình trạng</label><textarea id="rContent" placeholder="Ùn tắc, ngập nước, sạt lở, tai nạn..." rows="3"></textarea></div>
+
+    <!-- LOCATION SELECTORS -->
+    <div class="tf-field"><label><i class="fas fa-map-marker-alt" style="color:#d32f2f;margin-right:4px"></i>Địa điểm</label>
+      <div style="display:flex;gap:6px;margin-bottom:6px">
+        <select id="rProvince" onchange="onRProvChange()" style="flex:1"><option value="">Tỉnh/TP</option></select>
+        <select id="rDistrict" onchange="onRDistChange()" style="flex:1"><option value="">Quận/Huyện</option></select>
+      </div>
+      <div style="display:flex;gap:6px;margin-bottom:6px">
+        <select id="rWard" style="flex:1"><option value="">Xã/Phường</option></select>
+        <input id="rStreet" type="text" placeholder="Đường, khu vực..." style="flex:1">
+      </div>
+      <div id="rLocStatus" class="tf-loc-status"><i class="fas fa-check-circle"></i> <span id="rLocText">GPS đã lấy</span></div>
+    </div>
+
+    <!-- DURATION -->
     <div class="tf-field"><label>Thời gian hiệu lực</label>
       <div class="tf-dur">
         <button onclick="selDur(this,30)">30 phút</button>
@@ -194,8 +233,9 @@ body{background:var(--bg);font-family:-apple-system,BlinkMacSystemFont,'Segoe UI
         <button onclick="selDur(this,120)">2 giờ</button>
       </div>
     </div>
+
   </div>
-  <div class="tf-modal-foot"><button class="tf-submit" id="rSubmit" onclick="submitReport()"><i class="fas fa-paper-plane" style="margin-right:6px"></i>Gửi báo cáo</button></div>
+  <div class="tf-modal-foot"><button class="tf-submit" id="rSubmit" onclick="submitReport()"><i class="fas fa-paper-plane" style="margin-right:6px"></i>Đăng báo cáo</button></div>
 </div>
 </div>
 
