@@ -1,14 +1,13 @@
 <?php
 require_once '/home/nhshiw2j/public_html/includes/db.php';
 $d=db();
-echo "=== groups table ===\n";
-$cols=$d->fetchAll("SHOW COLUMNS FROM `groups`");
-foreach($cols as $c) echo $c['Field']." | ".$c['Type']." | ".$c['Default']."\n";
-echo "\n=== group_categories ===\n";
-$cats=$d->fetchAll("SELECT * FROM group_categories LIMIT 20");
-foreach($cats as $c) echo $c['id']." | ".$c['slug']." | ".$c['name']." | ".$c['icon']."\n";
-echo "\n=== groups sample ===\n";
-$gs=$d->fetchAll("SELECT id,name,slug,category_id,member_count,icon_image,banner_image,banner_color,privacy FROM `groups` LIMIT 5");
-foreach($gs as $g) echo json_encode($g,JSON_UNESCAPED_UNICODE)."\n";
-echo "\n=== group_members count ===\n";
-echo $d->fetchOne("SELECT COUNT(*) as c FROM group_members")['c']."\n";
+echo "=== ALL groups ===\n";
+$gs=$d->fetchAll("SELECT id,name,slug,category_id,member_count,icon_image,banner_image,banner_color,privacy,cover_image FROM `groups` WHERE `status`='active'");
+foreach($gs as $g) echo $g['id']." | ".$g['name']." | cat=".$g['category_id']." | members=".$g['member_count']." | icon=".($g['icon_image']?'yes':'no')." | banner=".($g['banner_color']?$g['banner_color']:'none')." | cover=".($g['cover_image']?'yes':'no')."\n";
+echo "\n=== groups.php API actions ===\n";
+$f=file_get_contents('/home/nhshiw2j/public_html/api/groups.php');
+preg_match_all("/action['\"]?\s*===?\s*['\"]([a-z_]+)/", $f, $m);
+echo implode(", ", array_unique($m[1]))."\n";
+echo "\n=== banner_image col type ===\n";
+$col=$d->fetchOne("SHOW COLUMNS FROM `groups` WHERE Field='banner_image'");
+echo ($col ? $col['Type'] : 'NOT EXISTS')."\n";
