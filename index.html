@@ -190,6 +190,13 @@ body{background:var(--bg);font-family:-apple-system,BlinkMacSystemFont,'Segoe UI
 .pa3-btn:active,.pa3-btn.pa3-active{background:#FFF3EF;color:#EE4D2D;}
 
 video{width:100%;max-height:600px;display:block;background:#000;}
+
+.loc-filter{background:#fff;padding:6px 12px;display:flex;align-items:center;gap:6px;border-bottom:1px solid #f0f0f0;flex-wrap:nowrap;overflow-x:auto;-webkit-overflow-scrolling:touch;}
+.loc-filter::-webkit-scrollbar{display:none;}
+.loc-filter select{padding:6px 10px;border:1.5px solid #ddd;border-radius:20px;font-size:12px;background:#fff;color:#333;outline:none;min-width:0;max-width:150px;appearance:auto;cursor:pointer;}
+.loc-filter select:focus{border-color:#1976d2;}
+.loc-filter .loc-icon{color:#1976d2;font-size:14px;flex-shrink:0;}
+.loc-filter .loc-clear{background:none;border:1px solid #ddd;border-radius:20px;padding:4px 10px;font-size:11px;cursor:pointer;color:#999;flex-shrink:0;}
 </style>
 
 <style id="fabFix">
@@ -260,6 +267,13 @@ video{width:100%;max-height:600px;display:block;background:#000;}
 .pa3-btn:active,.pa3-btn.pa3-active{background:#FFF3EF;color:#EE4D2D;}
 
 video{width:100%;max-height:600px;display:block;background:#000;}
+
+.loc-filter{background:#fff;padding:6px 12px;display:flex;align-items:center;gap:6px;border-bottom:1px solid #f0f0f0;flex-wrap:nowrap;overflow-x:auto;-webkit-overflow-scrolling:touch;}
+.loc-filter::-webkit-scrollbar{display:none;}
+.loc-filter select{padding:6px 10px;border:1.5px solid #ddd;border-radius:20px;font-size:12px;background:#fff;color:#333;outline:none;min-width:0;max-width:150px;appearance:auto;cursor:pointer;}
+.loc-filter select:focus{border-color:#1976d2;}
+.loc-filter .loc-icon{color:#1976d2;font-size:14px;flex-shrink:0;}
+.loc-filter .loc-clear{background:none;border:1px solid #ddd;border-radius:20px;padding:4px 10px;font-size:11px;cursor:pointer;color:#999;flex-shrink:0;}
 </style>
 
 <link rel="manifest" href="/manifest.json">
@@ -377,6 +391,12 @@ if("serviceWorker" in navigator){
     <button class="sort-btn" id="s-rising" onclick="setSort('rising',this)"><i class="fas fa-user-check" style="color:#ff585b"></i> Theo dõi</button>
     
   </div>
+  <div class="loc-filter" id="locFilter">
+    <i class="fas fa-map-marker-alt loc-icon"></i>
+    <select id="fProvince" onchange="onProvChange()"><option value="">Tỉnh/TP</option></select>
+    <select id="fDistrict" onchange="onDistChange()" style="display:none"><option value="">Quận/Huyện</option></select>
+    <button class="loc-clear" id="locClear" onclick="clearLocFilter()" style="display:none"><i class="fas fa-times"></i> Xóa</button>
+  </div>
   <div id="feed" style="background:#f0f2f5"><div class="empty"><i class="fas fa-spinner spin"></i><p>Đang tải...</p></div></div>
   <button class="load-more" id="loadMoreBtn" onclick="loadMore()" style="display:none">⬇ Tải thêm bài viết</button>
 </main>
@@ -483,7 +503,7 @@ function setProv(p,el){ prov=p; page=1; document.querySelectorAll('.province-ite
 
 async function loadPosts(append=false){
   if(!append){ document.getElementById('feed').innerHTML='<div class="empty"><i class="fas fa-spinner spin"></i><p style="margin-top:8px">Đang tải...</p></div>'; page=1; }
-  let url=`/api/posts.php?sort=${sort}&page=${page}&limit=15`;
+  var fp=document.getElementById('fProvince')?document.getElementById('fProvince').value:'';var fd=document.getElementById('fDistrict')?document.getElementById('fDistrict').value:'';let url='/api/posts.php?sort='+sort+'&page='+page+'&limit=15'+(fp?'&province='+encodeURIComponent(fp):'')+(fd?'&district='+encodeURIComponent(fd):'');
   if(type&&type!=='all') url+=`&type=${type}`;
   if(prov) url+=`&province=${encodeURIComponent(prov)}`;
   const q=document.getElementById('q').value.trim();
@@ -507,6 +527,23 @@ async function loadPosts(append=false){
 function loadMore(){ page++; loadPosts(true); }
 function search(){ page=1; loadPosts(); }
 function fType(t){ type=t; page=1; document.querySelectorAll('[id^="t-"]').forEach(i=>i.classList.remove('active')); const el=document.getElementById('t-'+t); if(el)el.classList.add('active'); loadPosts(); }
+// === LOCATION FILTER ===
+var fProvData=[],fDistData=[];
+(async function(){try{var r=await fetch("https://provinces.open-api.vn/api/?depth=1");fProvData=await r.json();var sel=document.getElementById("fProvince");fProvData.forEach(function(p){var o=document.createElement("option");o.value=p.name;o.textContent=p.name;sel.appendChild(o);});}catch(e){}})();
+
+function onProvChange(){
+  var name=document.getElementById("fProvince").value;
+  var dSel=document.getElementById("fDistrict");
+  dSel.innerHTML='<option value="">Qu\u1eadn/Huy\u1ec7n</option>';
+  if(!name){dSel.style.display="none";document.getElementById("locClear").style.display="none";loadFeed();return;}
+  dSel.style.display="";document.getElementById("locClear").style.display="";
+  var prov=fProvData.find(function(p){return p.name===name;});
+  if(prov){fetch("https://provinces.open-api.vn/api/p/"+prov.code+"?depth=2").then(function(r){return r.json();}).then(function(d){fDistData=d.districts||[];fDistData.forEach(function(dt){var o=document.createElement("option");o.value=dt.name;o.textContent=dt.name;dSel.appendChild(o);});});}
+  loadFeed();
+}
+function onDistChange(){loadFeed();}
+function clearLocFilter(){document.getElementById("fProvince").value="";document.getElementById("fDistrict").value="";document.getElementById("fDistrict").style.display="none";document.getElementById("locClear").style.display="none";loadFeed();}
+
 function setSort(s,btn){ sort=s; page=1; document.querySelectorAll('.sort-btn').forEach(b=>b.classList.remove('active')); btn.classList.add('active'); loadPosts(); }
 
 function tryParse(s){try{return JSON.parse(s);}catch{return null;}}
@@ -735,7 +772,7 @@ function handleFab(){if(!CU){toast('Đăng nhập để đăng bài!','warning')
     <span>Kéo xuống để làm mới</span>
   </div>
 
-<script src="js/reddit-mkpost-1773592932.js">
+<script src="js/reddit-mkpost-1773810843.js">
     function renderComments(comments, postId) {
         if (!comments || comments.length === 0) return '<p style="text-align:center;color:#999;padding:20px;font-size:13px">Chưa có bình luận</p>';
         // Group: top-level and replies
@@ -1030,6 +1067,13 @@ if("serviceWorker" in navigator){
 .pa3-btn:active,.pa3-btn.pa3-active{background:#FFF3EF;color:#EE4D2D;}
 
 video{width:100%;max-height:600px;display:block;background:#000;}
+
+.loc-filter{background:#fff;padding:6px 12px;display:flex;align-items:center;gap:6px;border-bottom:1px solid #f0f0f0;flex-wrap:nowrap;overflow-x:auto;-webkit-overflow-scrolling:touch;}
+.loc-filter::-webkit-scrollbar{display:none;}
+.loc-filter select{padding:6px 10px;border:1.5px solid #ddd;border-radius:20px;font-size:12px;background:#fff;color:#333;outline:none;min-width:0;max-width:150px;appearance:auto;cursor:pointer;}
+.loc-filter select:focus{border-color:#1976d2;}
+.loc-filter .loc-icon{color:#1976d2;font-size:14px;flex-shrink:0;}
+.loc-filter .loc-clear{background:none;border:1px solid #ddd;border-radius:20px;padding:4px 10px;font-size:11px;cursor:pointer;color:#999;flex-shrink:0;}
 </style>
 <script>
 var deferredPrompt=null;

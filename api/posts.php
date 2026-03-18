@@ -144,6 +144,17 @@ if ($method === 'GET') {
         $params[] = "%$search%";
     }
     
+    // Filter by province
+    if (!empty($_GET['province'])) {
+        $where[] = "p.province = ?";
+        $params[] = $_GET['province'];
+    }
+    // Filter by district
+    if (!empty($_GET['district'])) {
+        $where[] = "p.district = ?";
+        $params[] = $_GET['district'];
+    }
+    
     $whereClause = implode(' AND ', $where);
     
     // Count total
@@ -282,13 +293,20 @@ if ($method === 'POST') {
 
     try {
         // Create post
+        $province = $jsonInput['province'] ?? ($_POST['province'] ?? null);
+        $district = $jsonInput['district'] ?? ($_POST['district'] ?? null);
+        $ward = $jsonInput['ward'] ?? ($_POST['ward'] ?? null);
+        
         $postId = $db->insert('posts', [
             'user_id' => $userId,
             'content' => $content,
             'images' => $imagesJson,
             'type' => $type,
             'status' => 'active',
-            'video_url' => $videoUrl
+            'video_url' => $videoUrl,
+            'province' => $province,
+            'district' => $district,
+            'ward' => $ward
         ]);
         
         // Extract and save hashtags (optional, won't break post if fails)
