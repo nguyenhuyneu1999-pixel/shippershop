@@ -26,6 +26,14 @@ $bios = [
 ];
 
 // ===== STEP 1: CREATE 100 USERS =====
+// Check if seed users already exist
+$existingCount = $db->fetchOne("SELECT COUNT(*) as c FROM users WHERE id > 10", []);
+if (intval($existingCount['c'] ?? 0) >= 100) {
+    echo "Step 1: SKIP - 100+ users already exist\n";
+    $userIds = [];
+    // Jump ahead - dont create users
+    goto STEP2;
+}
 echo "Step 1: Creating 100 users...\n";
 $userIds = [];
 $avatarDir = __DIR__ . '/../uploads/avatars/';
@@ -86,6 +94,7 @@ if (empty($seedUsers)) {
 $userIds = array_map(function($u) { return intval($u['id']); }, $seedUsers);
 echo "\nFound " . count($userIds) . " user IDs in DB\n\n";
 
+STEP2:
 // ===== STEP 2: Download post images from Unsplash (Vietnamese landscapes) =====
 echo "Step 2: Downloading post images...\n";
 $postImgDir = __DIR__ . '/../uploads/posts/';
