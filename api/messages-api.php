@@ -313,6 +313,17 @@ if($action==='send'){
     $d->query("INSERT INTO messages (conversation_id,sender_id,content,type,created_at) VALUES (?,?,?,'text',NOW())",[$gid,$userId,$ct]);
     $mid=$d->getLastInsertId();
     $d->query("UPDATE conversations SET last_message=?,last_message_at=NOW() WHERE id=?",[$ct,$gid]);
+    // Push to group members (except sender)
+    try{
+      require_once __DIR__.'/../includes/push-helper.php';
+      $sender=$d->fetchOne("SELECT fullname FROM users WHERE id=?",[$userId]);
+      $grp=$d->fetchOne("SELECT name FROM conversations WHERE id=?",[$gid]);
+      $members=$d->fetchAll("SELECT user_id FROM conversation_members WHERE conversation_id=? AND user_id!=?",[$gid,$userId]);
+      $sName=$sender?$sender['fullname']:'Ai đó';
+      $gName=$grp?$grp['name']:'Nhóm';
+      $preview=mb_substr($ct,0,50);
+      foreach($members as $m){notifyUser($m['user_id'],'Nhóm: '.$gName,$sName.': '.$preview,'message','/messages.html?group='.$gid);}
+    }catch(Throwable $e){}
     echo json_encode(['success'=>true,'data'=>['id'=>$mid,'conversation_id'=>$gid]]);exit;
   }
   
@@ -329,6 +340,14 @@ if($action==='send'){
   }else{$cid=$cv['id'];$d->query("UPDATE conversations SET last_message=?,last_message_at=NOW() WHERE id=?",[$ct,$cid]);}
   $d->query("INSERT INTO messages (conversation_id,sender_id,content,created_at) VALUES (?,?,?,NOW())",[$cid,$userId,$ct]);
   $mid=$d->getLastInsertId();
+  // Push notification to recipient
+  try{
+    require_once __DIR__.'/../includes/push-helper.php';
+    $sender=$d->fetchOne("SELECT fullname,avatar FROM users WHERE id=?",[$userId]);
+    $sName=$sender?$sender['fullname']:'Ai đó';
+    $preview=mb_substr($ct,0,60);
+    notifyUser($oid,'Tin nhắn: '.$sName,$preview,'message','/messages.html?user='.$userId);
+  }catch(Throwable $e){}
   echo json_encode(['success'=>true,'data'=>['id'=>$mid,'conversation_id'=>$cid]]);exit;
 }
 if($action==='accept'){

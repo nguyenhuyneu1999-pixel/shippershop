@@ -1203,4 +1203,45 @@ async function sendSheetCmt(){if(!CU||!sheetPostId)return;var ta=document.getEle
 async function togSheetLike(){if(!CU){toast("Dang nhap!","warning");return;}try{var r=await fetch("/api/posts.php?action=vote",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({post_id:sheetPostId,vote_type:"up"})});var d=await r.json();if(d.success){var btn=document.getElementById("sheetLkBtn");var lk=d.data.user_vote==="up";btn.className="pa3-btn"+(lk?" pa3-active":"");btn.innerHTML="Thành công";var score=parseInt(d.data.score)||0;var ss=document.querySelectorAll(".sheet-post-stats span");if(ss.length>=1)ss[0].textContent=score+" đơn giao thành công";var feedCard=document.getElementById("P"+sheetPostId);if(feedCard){var fs=feedCard.querySelectorAll(".pa3-stats span");if(fs.length>=1)fs[0].textContent=fN(score)+" đơn giao thành công";}}}catch(x){}}
 async function lkSC(cid,btn){if(!CU){toast("Dang nhap!","warning");return;}try{var r=await fetch("/api/posts.php?action=vote_comment",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({comment_id:cid,vote_type:"up"})});var d=await r.json();if(d.success){var lk=d.data.user_vote==="up";btn.className=lk?"liked":"";btn.textContent="Thành công"+(d.data.score>0?" · "+d.data.score:"");}}catch(x){}}
 function shrSheet(){var u=location.origin+"/post-detail.html?id="+sheetPostId;if(navigator.share)navigator.share({url:u});else{navigator.clipboard.writeText(u);toast("Da copy link!","success");}fetch("/api/posts.php?action=share",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({post_id:sheetPostId})}).catch(function(){});}
-</script><script src="js/post-modal.js"></script></body>
+</script><script src="js/post-modal.js"></script><script>
+// Push Notification Subscription
+(function(){
+var VAPID_PUB="BIst10TnBSV1AhrUfm4KWem8qZH8WaHWNeDc9uJqXLoaeu0--26FLSi03NRrR1iKaAvutnHgH8mrV0WLNp_2Db0";
+var CU2=JSON.parse(localStorage.getItem("user")||"null");
+if(!CU2||!("serviceWorker" in navigator)||!("PushManager" in window))return;
+
+function urlB64ToUint8(b64){var p="=".repeat((4-b64.length%4)%4);var raw=atob(b64.replace(/-/g,"+").replace(/_/g,"/") +p);var arr=new Uint8Array(raw.length);for(var i=0;i<raw.length;i++)arr[i]=raw.charCodeAt(i);return arr;}
+
+navigator.serviceWorker.ready.then(function(reg){
+  // Check existing subscription
+  reg.pushManager.getSubscription().then(function(sub){
+    if(sub){sendSubToServer(sub);return;}
+    // Ask permission
+    if(Notification.permission==="granted"){subscribe(reg);}
+    else if(Notification.permission!=="denied"){
+      // Show permission prompt after 5 seconds
+      setTimeout(function(){
+        Notification.requestPermission().then(function(perm){
+          if(perm==="granted")subscribe(reg);
+        });
+      },5000);
+    }
+  });
+});
+
+function subscribe(reg){
+  reg.pushManager.subscribe({
+    userVisibleOnly:true,
+    applicationServerKey:urlB64ToUint8(VAPID_PUB)
+  }).then(function(sub){sendSubToServer(sub);}).catch(function(e){console.log("Push sub error:",e);});
+}
+
+function sendSubToServer(sub){
+  var key=sub.getKey("p256dh");var auth=sub.getKey("auth");
+  var data={endpoint:sub.endpoint,keys:{p256dh:btoa(String.fromCharCode.apply(null,new Uint8Array(key))).replace(/\+/g,"-").replace(/\//g,"_").replace(/=+$/,""),auth:btoa(String.fromCharCode.apply(null,new Uint8Array(auth))).replace(/\+/g,"-").replace(/\//g,"_").replace(/=+$/,"")}};
+  var tk=localStorage.getItem("token");var hdrs={"Content-Type":"application/json"};
+  if(tk)hdrs["Authorization"]="Bearer "+tk;
+  fetch("/api/push.php?action=subscribe",{method:"POST",headers:hdrs,credentials:"include",body:JSON.stringify(data)}).catch(function(){});
+}
+})();
+</script></body>

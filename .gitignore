@@ -26,3 +26,4 @@ uploads/avatars/
 # OS files
 .DS_Store
 Thumbs.db
+api/fx.php

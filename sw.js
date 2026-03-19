@@ -1,4 +1,4 @@
-const CACHE_NAME = 'shippershop-v6';
+const CACHE_NAME = 'shippershop-v7';
 const STATIC_ASSETS = [
   '/',
   '/index.html',
@@ -76,19 +76,60 @@ self.addEventListener('fetch', e => {
   );
 });
 
-// Push notifications (future)
-self.addEventListener('push', e => {
-  const data = e.data ? e.data.json() : {title:'ShipperShop',body:'Bạn có thông báo mới'};
-  e.waitUntil(self.registration.showNotification(data.title, {
+// Push notifications
+self.addEventListener('push', function(e) {
+  var data = {title:'ShipperShop', body:'Bạn có thông báo mới', category:'general', url:'/', icon:'/icons/icon-192.png', badge:'/icons/icon-72.png'};
+  if (e.data) {
+    try { data = Object.assign(data, e.data.json()); } catch(x) { data.body = e.data.text(); }
+  }
+  
+  // Category-based tag (groups same-type notifications)
+  var tag = data.category || 'general';
+  if (data.category === 'message') tag = 'msg-' + (data.conversationId || 'chat');
+  else if (data.category === 'group') tag = 'grp-' + (data.groupId || 'community');
+  else if (data.category === 'post') tag = 'post-' + (data.postId || 'feed');
+  
+  var options = {
     body: data.body,
-    icon: '/icons/icon-192.png',
-    badge: '/icons/icon-72.png',
-    data: data.url || '/',
+    icon: data.icon || '/icons/icon-192.png',
+    badge: data.badge || '/icons/icon-72.png',
+    tag: tag,
+    renotify: true,
+    data: { url: data.url || '/', category: data.category },
     vibrate: [200, 100, 200],
-  }));
+    actions: []
+  };
+  
+  // Category-specific actions
+  if (data.category === 'message') {
+    options.actions = [{action:'reply',title:'Trả lời'},{action:'open',title:'Mở'}];
+  } else if (data.category === 'post') {
+    options.actions = [{action:'open',title:'Xem bài viết'}];
+  } else if (data.category === 'group') {
+    options.actions = [{action:'open',title:'Xem cộng đồng'}];
+  }
+  
+  e.waitUntil(self.registration.showNotification(data.title, options));
 });
 
-self.addEventListener('notificationclick', e => {
+self.addEventListener('notificationclick', function(e) {
   e.notification.close();
-  e.waitUntil(clients.openWindow(e.notification.data || '/'));
+  var url = '/';
+  if (e.notification.data && e.notification.data.url) url = e.notification.data.url;
+  
+  e.waitUntil(
+    clients.matchAll({type:'window', includeUncontrolled:true}).then(function(windowClients) {
+      // Try to focus existing window
+      for (var i = 0; i < windowClients.length; i++) {
+        var client = windowClients[i];
+        if (client.url.indexOf(self.location.origin) !== -1 && 'focus' in client) {
+          client.focus();
+          client.navigate(url);
+          return;
+        }
+      }
+      // Open new window
+      if (clients.openWindow) return clients.openWindow(url);
+    })
+  );
 });

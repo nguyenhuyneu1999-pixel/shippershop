@@ -182,6 +182,17 @@ if ($method === 'POST') {
         $imgs = isset($input['images']) ? json_encode($input['images']) : null;
         $d->query("INSERT INTO group_posts (group_id, user_id, content, title, images, type) VALUES (?, ?, ?, ?, ?, ?)", [$gid, $uid, $content, $input['title'] ?? null, $imgs, $input['type'] ?? 'post']);
         $d->query("UPDATE `groups` SET post_count = post_count + 1 WHERE id = ?", [$gid]);
+        // Push to group members (max 50)
+        try{
+            require_once __DIR__.'/../includes/push-helper.php';
+            $grp=$d->fetchOne("SELECT name FROM `groups` WHERE id=?",[$gid]);
+            $me=$d->fetchOne("SELECT fullname FROM users WHERE id=?",[$uid]);
+            $gName=$grp?$grp['name']:'Cộng đồng';
+            $mName=$me?$me['fullname']:'Ai đó';
+            $preview=mb_substr($content,0,50);
+            $members=$d->fetchAll("SELECT user_id FROM group_members WHERE group_id=? AND user_id!=? LIMIT 50",[$gid,$uid]);
+            foreach($members as $m){notifyUser($m['user_id'],'Cộng đồng: '.$gName,$mName.': '.$preview,'group','/group.html?id='.$gid);}
+        }catch(Throwable $e){}
         gOk('Da dang bai');
     }
 
@@ -205,6 +216,17 @@ if ($method === 'POST') {
         if (!$content) gErr('Noi dung trong');
         $d->query("INSERT INTO group_post_comments (post_id, user_id, parent_id, content) VALUES (?, ?, ?, ?)", [$pid, $uid, $input['parent_id'] ?? null, $content]);
         $d->query("UPDATE group_posts SET comments_count = comments_count + 1 WHERE id = ?", [$pid]);
+        try{
+            require_once __DIR__.'/../includes/push-helper.php';
+            $gpost=$d->fetchOne("SELECT user_id,group_id FROM group_posts WHERE id=?",[$pid]);
+            if($gpost&&intval($gpost['user_id'])!==$uid){
+                $me=$d->fetchOne("SELECT fullname FROM users WHERE id=?",[$uid]);
+                $grp=$d->fetchOne("SELECT name FROM `groups` WHERE id=?",[$gpost['group_id']]);
+                $mName=$me?$me['fullname']:'Ai đó';
+                $gName=$grp?$grp['name']:'Cộng đồng';
+                notifyUser(intval($gpost['user_id']),$gName.': '.$mName.' đã ghi chú',mb_substr($content,0,50),'group','/group.html?id='.$gpost['group_id']);
+            }
+        }catch(Throwable $e){}
         gOk('Da binh luan');
     }
 
