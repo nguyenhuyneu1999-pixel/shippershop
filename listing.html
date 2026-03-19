@@ -239,10 +239,10 @@ function renderItem(){
   // === DESCRIPTION (Collapsible) ===
   // === SHOWCASE IMAGES (Amazon A+ Content) ===
   // Full-width images - user just scrolls to see all product details
-  var showImgs=[];try{showImgs=JSON.parse(p.showcase_images||"[]");}catch(e){}
-  var descImgs=[];try{descImgs=JSON.parse(p.description_images||"[]");}catch(e){}
-  var allShowcase=[].concat(showImgs,descImgs);
-  if(allShowcase.length>0){
+  var allShowcase=[];
+  try{allShowcase=JSON.parse(p.showcase_images||"[]");}catch(e){}
+  if((!allShowcase||!allShowcase.length)&&p.description_images){try{allShowcase=JSON.parse(p.description_images);}catch(e){}}
+  if(allShowcase&&allShowcase.length>0){
     h+='<div style="background:#fff;margin-top:8px">';
     h+='<div style="padding:14px 16px 8px;font-size:15px;font-weight:700"><i class="fas fa-images" style="color:var(--primary);margin-right:6px"></i>Chi tiết sản phẩm</div>';
     allShowcase.forEach(function(si){
