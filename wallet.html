@@ -79,6 +79,7 @@ body{background:var(--bg);font-family:-apple-system,BlinkMacSystemFont,'Segoe UI
 .loading{text-align:center;padding:40px;color:var(--muted);}
 @media(min-width:769px){.hd{max-width:680px;left:50%!important;transform:translateX(-50%);}.bal-card,.section{max-width:656px;margin-left:auto;margin-right:auto;}body{padding-bottom:0!important;}}
 </style>
+<link rel="stylesheet" href="css/style-v2.css">
 </head>
 <body>
 <div class="hd"><button class="hd-back" onclick="history.back()"><i class="fas fa-arrow-left"></i></button><h1><i class="fas fa-wallet" style="color:var(--primary)"></i> Ví tiền</h1></div>
@@ -184,5 +185,23 @@ async function startPayOS(){
 function esc(t){return t?String(t).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;"):"";}
 function fmtD(d){if(!d)return"";try{return new Date(d.replace(" ","T")).toLocaleDateString("vi-VN",{day:"2-digit",month:"2-digit",year:"numeric",hour:"2-digit",minute:"2-digit"});}catch(e){return d;}}
 </script>
-<script src="/js/analytics.js"></script></body>
+<script src="/js/analytics.js"></script><nav id="mobileBottomNav" role="navigation" aria-label="Mobile navigation">
+    <a href="index.html" class="mnav-item" data-page="index.html">
+      <i class="fas fa-home"></i><span>Trang chủ</span>
+    </a>
+    <a href="marketplace.html" class="mnav-item" data-page="marketplace.html">
+      <i class="fas fa-store"></i><span>Mua sắm</span>
+    </a>
+    <button class="mnav-item mnav-fab-wrap" onclick="handleFab()" aria-label="Hành động nhanh">
+      <div class="mnav-fab"><i class="fas fa-search" id="fabIcon"></i></div>
+    </button>
+    <a href="map.html" class="mnav-item" data-page="map.html">
+      <i class="fas fa-map-marked-alt"></i><span>Bản đồ</span>
+    </a>
+    <a href="profile.html" class="mnav-item" data-page="profile.html" id="navProfileItem">
+      <i class="fas fa-user" id="navProfileIcon"></i><span id="navProfileName">Tài khoản</span>
+    </a>
+  </nav>
+<script src="js/mobile.js"></script>
+</body>
 </html>
