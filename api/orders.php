@@ -104,7 +104,7 @@ if ($method === 'POST') {
     
     // Get cart items
     $cartItems = $db->fetchAll(
-        "SELECT c.*, p.name, p.sale_price, p.main_image, p.stock 
+        "SELECT c.*, p.name, p.price, p.thumbnail, p.stock 
          FROM cart c 
          JOIN products p ON c.product_id = p.id 
          WHERE c.user_id = ? AND p.status = 'active'",
@@ -118,7 +118,7 @@ if ($method === 'POST') {
     // Calculate totals
     $subtotal = 0;
     foreach ($cartItems as $item) {
-        $subtotal += $item['sale_price'] * $item['quantity'];
+        $subtotal += $item['price'] * $item['quantity'];
         
         // Check stock
         if ($item['quantity'] > $item['stock']) {
@@ -172,10 +172,10 @@ if ($method === 'POST') {
                 'order_id' => $orderId,
                 'product_id' => $item['product_id'],
                 'product_name' => $item['name'],
-                'product_image' => $item['main_image'],
-                'price' => $item['sale_price'],
+                'product_image' => $item['thumbnail'],
+                'price' => $item['price'],
                 'quantity' => $item['quantity'],
-                'subtotal' => $item['sale_price'] * $item['quantity']
+                'subtotal' => $item['price'] * $item['quantity']
             ]);
             
             // Update product stock and sales count

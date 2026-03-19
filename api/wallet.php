@@ -40,7 +40,7 @@ if ($action === 'balance') {
     }
     
     // Get wallet
-    $wallet = $db->fetchOne("SELECT * FROM wallet WHERE user_id = ?", [$userId]);
+    $wallet = $db->fetchOne("SELECT * FROM wallets WHERE user_id = ?", [$userId]);
     
     if (!$wallet) {
         // Create wallet if doesn't exist
@@ -108,7 +108,7 @@ if ($action === 'deposit') {
         $db->beginTransaction();
         
         // Get current balance
-        $wallet = $db->fetchOne("SELECT balance FROM wallet WHERE user_id = ?", [$userId]);
+        $wallet = $db->fetchOne("SELECT balance FROM wallets WHERE user_id = ?", [$userId]);
         
         if (!$wallet) {
             // Create wallet
@@ -183,7 +183,7 @@ if ($action === 'withdraw') {
         $db->beginTransaction();
         
         // Get current balance
-        $wallet = $db->fetchOne("SELECT balance FROM wallet WHERE user_id = ?", [$userId]);
+        $wallet = $db->fetchOne("SELECT balance FROM wallets WHERE user_id = ?", [$userId]);
         
         if (!$wallet || $wallet['balance'] < $amount) {
             error('Số dư không đủ', 400);
@@ -266,7 +266,7 @@ if ($action === 'approve_deposit') {
         }
         
         // Get wallet
-        $wallet = $db->fetchOne("SELECT balance FROM wallet WHERE user_id = ?", [$transaction['user_id']]);
+        $wallet = $db->fetchOne("SELECT balance FROM wallets WHERE user_id = ?", [$transaction['user_id']]);
         $currentBalance = $wallet['balance'];
         $newBalance = $currentBalance + $transaction['amount'];
         
@@ -428,7 +428,7 @@ if ($action === 'reject_withdraw') {
         }
         
         // Refund to wallet
-        $wallet = $db->fetchOne("SELECT balance FROM wallet WHERE user_id = ?", [$transaction['user_id']]);
+        $wallet = $db->fetchOne("SELECT balance FROM wallets WHERE user_id = ?", [$transaction['user_id']]);
         $newBalance = $wallet['balance'] + $transaction['amount'];
         
         $db->update('wallet',

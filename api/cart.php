@@ -38,19 +38,18 @@ if ($method === 'GET') {
     $sql = "SELECT 
                 c.id as cart_id,
                 c.quantity,
-                c.added_at,
+                c.created_at as added_at,
                 p.id as product_id,
                 p.name,
-                p.slug,
                 p.price,
-                p.sale_price,
-                p.main_image,
+                COALESCE(p.original_price, p.price) as sale_price,
+                p.thumbnail as main_image,
                 p.stock,
-                (p.sale_price * c.quantity) as subtotal
+                (p.price * c.quantity) as subtotal
             FROM cart c
             JOIN products p ON c.product_id = p.id
-            WHERE c.user_id = ? AND p.status = 'active'
-            ORDER BY c.added_at DESC";
+            WHERE c.user_id = ? AND p.`status` = 'active'
+            ORDER BY c.created_at DESC";
     
     $cartItems = $db->fetchAll($sql, [$userId]);
     
