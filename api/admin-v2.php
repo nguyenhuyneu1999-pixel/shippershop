@@ -370,8 +370,8 @@ if ($action === 'reject_deposit' && $method === 'POST') {
 // ============================================================
 if ($action === 'traffic_list') {
     $alerts = $d->fetchAll("SELECT ta.*, u.fullname as reporter_name,
-        (SELECT COUNT(*) FROM traffic_confirms WHERE alert_id=ta.id AND type='confirm') as confirms,
-        (SELECT COUNT(*) FROM traffic_confirms WHERE alert_id=ta.id AND type='deny') as denies
+        (SELECT COUNT(*) FROM traffic_confirms WHERE alert_id=ta.id AND vote='confirm') as confirms,
+        (SELECT COUNT(*) FROM traffic_confirms WHERE alert_id=ta.id AND vote='deny') as denies
         FROM traffic_alerts ta JOIN users u ON ta.user_id=u.id ORDER BY ta.id DESC LIMIT 50");
     ok($alerts);
 }
@@ -497,6 +497,14 @@ if ($action === 'comment_delete' && $method === 'POST') {
     $id = intval($in['id'] ?? 0);
     $d->query("DELETE FROM comments WHERE id=?", [$id]);
     ok(null, 'Comment deleted');
+}
+
+if ($action === 'broadcast' && $method === 'POST') {
+    $in = input();
+    $title = trim($in['title'] ?? '');
+    $body = trim($in['body'] ?? '');
+    if (!$title || !$body) err('Cần title và body');
+    ok(null, 'Broadcast queued (push not yet implemented)');
 }
 
 err('Unknown action: ' . $action, 404);
