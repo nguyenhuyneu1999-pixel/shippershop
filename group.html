@@ -257,7 +257,7 @@ function toggleJoin(){
       if(d.data.joined){GROUP.member_count++;toast("\u0110\u00e3 tham gia nh\u00f3m!");}
       else{GROUP.member_count--;toast("\u0110\u00e3 r\u1eddi nh\u00f3m");}
       renderHeader();
-    }else{toast(d.message);}
+    }else{if((d.message||'').indexOf('Shipper Plus')>-1){if(confirm(d.message+'\n\nN\u00e2ng c\u1ea5p ngay?'))location.href='/wallet.html';}else toast(d.message);}
   });
 }
 

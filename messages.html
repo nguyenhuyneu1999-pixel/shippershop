@@ -260,7 +260,7 @@ var empty=c.querySelector(".empty");if(empty)empty.remove();
 c.insertAdjacentHTML("beforeend","<div class='msg-row mine'><div class=msg-bubble>"+esc(ct)+"</div></div>");
 c.scrollTop=c.scrollHeight;
 try{var r=await fetch("/api/messages-api.php?action=send",{method:"POST",headers:{"Content-Type":"application/json"},credentials:"include",body:JSON.stringify({to_user_id:curOtherId,content:ct})});
-var d=await r.json();if(d.success&&!curConvId){curConvId=d.data.conversation_id;startPoll();}}catch(e){}}
+var d=await r.json();if(d.success&&!curConvId){curConvId=d.data.conversation_id;startPoll();}else if(!d.success){if(typeof handleApiError==="function"&&handleApiError(d)){}else if(typeof toast==="function")toast(d.message||"Lỗi","error");}}catch(e){}}
 
 function startPoll(){if(pollTimer)clearInterval(pollTimer);
 if(curConvId)pollTimer=setInterval(function(){loadMsgs();},5000);}

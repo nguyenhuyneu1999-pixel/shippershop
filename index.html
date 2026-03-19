@@ -803,7 +803,7 @@ async function submitPost(){
     const r=await fetch('/api/posts.php',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+localStorage.getItem('token')},credentials:'include',body:JSON.stringify({content:ct,type:ptype,title:document.getElementById('mTitle2').value.trim()||null,province:document.getElementById('mProv').value||null,district:document.getElementById('mDist')?document.getElementById('mDist').value||null:null,ward:document.getElementById('mWard')?document.getElementById('mWard').value||null:null,is_anonymous:document.getElementById('mAnon').checked?1:0,video_url:videoUrl,images:imgs.length?imgs:null})});
     const d=await r.json();
     if(d.success){toast('🎉 Đăng bài thành công!','success');closeModal();setTimeout(()=>loadPosts(),600);}
-    else toast(d.message||'Lỗi','error');
+    else if(!handleApiError(d))toast(d.message||'Lỗi','error');
   }catch{toast('Lỗi kết nối','error');}
   finally{btn.disabled=false;btn.innerHTML='<i class="fas fa-paper-plane"></i> Đăng bài';}
 }

@@ -212,7 +212,7 @@ function joinGroup(gid,btn){
     if(d.success){
       if(d.data.joined){btn.className="g-join joined";btn.textContent="Đã tham gia";toast("Đã tham gia nhóm!");}
       else{btn.className="g-join join";btn.textContent="Tham gia";toast("Đã rời nhóm");}
-    }else{toast(d.message||"Lỗi");}
+    }else{if((d.message||'').indexOf('Shipper Plus')>-1){if(confirm(d.message+'\n\nNâng cấp ngay?'))location.href='/wallet.html';}else toast(d.message||"Lỗi");}
   }).catch(function(){toast("Lỗi kết nối");});
 }
 

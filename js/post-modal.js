@@ -199,7 +199,7 @@ window.submitSPM=function(){
   var tk=localStorage.getItem("token");var hdrs={};if(tk)hdrs["Authorization"]="Bearer "+tk;
   fetch("/api/posts.php",{method:"POST",headers:hdrs,credentials:"include",body:fd})
   .then(function(r){return r.json();})
-  .then(function(d){if(d.success){closeSPM();if(typeof loadPosts==="function")loadPosts();else location.reload();}else{if(typeof toast==="function")toast(d.message||"L\u1ed7i","error");}})
+  .then(function(d){if(d.success){closeSPM();if(typeof loadPosts==="function")loadPosts();else location.reload();}else{if(typeof handleApiError==="function"&&handleApiError(d)){}else if(typeof toast==="function")toast(d.message||"L\u1ed7i","error");}})
   .catch(function(){if(typeof toast==="function")toast("L\u1ed7i k\u1ebft n\u1ed1i","error");})
   .finally(function(){btn.disabled=false;btn.textContent="\u0110\u0103ng";});
 };

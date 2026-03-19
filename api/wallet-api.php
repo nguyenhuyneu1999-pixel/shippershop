@@ -233,6 +233,23 @@ if ($method === 'GET') {
         $txns = $db->fetchAll("SELECT * FROM wallet_transactions WHERE user_id=? ORDER BY created_at DESC LIMIT 20 OFFSET $offset", [$uid]);
         wOk('OK', $txns ?: []);
     }
+
+    // USER PLAN + USAGE (for frontend to show remaining limits)
+    if ($action === 'usage') {
+        $uid = wAuth();
+        if (!$uid) wErr('Đăng nhập', 401);
+        require_once __DIR__ . '/../includes/functions.php';
+        $plan = getUserPlan($uid);
+        $usage = getUserUsage($uid);
+        wOk('OK', [
+            'plan' => $plan['plan'],
+            'is_plus' => $plan['is_plus'],
+            'badge' => $plan['badge'],
+            'limits' => $plan['limits'],
+            'usage' => $usage,
+        ]);
+    }
+
     // PAYOS: CHECK PAYMENT STATUS (GET request from frontend polling)
     if ($action === 'payos_check') {
         $uid = wAuth();

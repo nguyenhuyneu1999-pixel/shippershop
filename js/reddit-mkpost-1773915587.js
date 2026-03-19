@@ -410,3 +410,57 @@ function sendGC(){
     }else{inp.value=ct;toast(d.message||"Lỗi","error");}
   }).catch(function(){inp.value=ct;toast("Lỗi kết nối","error");});
 }
+
+/* ========================================
+   UPGRADE PROMPT - shown when user hits free limit
+   ======================================== */
+function showUpgradePrompt(msg){
+  var existing=document.getElementById("ssUpgradeOvl");
+  if(existing)existing.remove();
+  var ovl=document.createElement("div");
+  ovl.id="ssUpgradeOvl";
+  ovl.style.cssText="position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:9999;display:flex;align-items:center;justify-content:center;padding:20px;animation:ssUpFade .2s ease";
+  ovl.onclick=function(e){if(e.target===ovl)ovl.remove();};
+  var modal=document.createElement("div");
+  modal.style.cssText="background:#fff;border-radius:16px;max-width:360px;width:100%;overflow:hidden;transform:scale(.9);animation:ssUpScale .25s ease forwards";
+  var head=document.createElement("div");
+  head.style.cssText="background:linear-gradient(135deg,#7C3AED,#5B21B6);color:#fff;padding:20px;text-align:center";
+  head.innerHTML="<div style='font-size:32px;margin-bottom:8px'>\uD83D\uDC9C</div><div style='font-size:17px;font-weight:700'>Shipper Plus</div><div style='font-size:13px;opacity:.85;margin-top:4px'>29.000\u0111/th\u00e1ng</div>";
+  var body=document.createElement("div");
+  body.style.cssText="padding:16px 20px;text-align:center";
+  body.innerHTML="<div style='font-size:14px;color:#333;line-height:1.6;margin-bottom:16px'>"+esc(msg)+"</div><div style='font-size:12px;color:#65676B;margin-bottom:16px'>N\u00e2ng c\u1ea5p \u0111\u1ec3 m\u1edf kh\u00f3a t\u1ea5t c\u1ea3 t\u00ednh n\u0103ng kh\u00f4ng gi\u1edbi h\u1ea1n</div>";
+  var btnWrap=document.createElement("div");
+  btnWrap.style.cssText="display:flex;gap:8px;padding:0 20px 20px";
+  var closeBtn=document.createElement("button");
+  closeBtn.style.cssText="flex:1;padding:10px;border-radius:10px;border:1.5px solid #e0e0e0;background:#fff;color:#333;font-size:14px;font-weight:600;cursor:pointer";
+  closeBtn.textContent="\u0110\u1ec3 sau";
+  closeBtn.onclick=function(){ovl.remove();};
+  var upgradeBtn=document.createElement("button");
+  upgradeBtn.style.cssText="flex:1;padding:10px;border-radius:10px;border:none;background:#7C3AED;color:#fff;font-size:14px;font-weight:700;cursor:pointer";
+  upgradeBtn.textContent="N\u00e2ng c\u1ea5p ngay";
+  upgradeBtn.onclick=function(){location.href="/wallet.html";};
+  btnWrap.appendChild(closeBtn);
+  btnWrap.appendChild(upgradeBtn);
+  modal.appendChild(head);
+  modal.appendChild(body);
+  modal.appendChild(btnWrap);
+  ovl.appendChild(modal);
+  document.body.appendChild(ovl);
+  // Inject animation CSS
+  if(!document.getElementById("ssUpCSS")){
+    var st=document.createElement("style");
+    st.id="ssUpCSS";
+    st.textContent="@keyframes ssUpFade{from{opacity:0}to{opacity:1}}@keyframes ssUpScale{from{transform:scale(.9);opacity:0}to{transform:scale(1);opacity:1}}";
+    document.head.appendChild(st);
+  }
+}
+
+/* Check if error is an upgrade prompt */
+function handleApiError(d, fallbackMsg){
+  var msg=d.message||fallbackMsg||"Lỗi";
+  if(d.upgrade||msg.indexOf("Shipper Plus")>-1||msg.indexOf("Nâng cấp")>-1){
+    showUpgradePrompt(msg);
+    return true;
+  }
+  return false;
+}

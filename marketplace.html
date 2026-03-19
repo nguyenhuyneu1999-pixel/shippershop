@@ -463,7 +463,7 @@ async function submitListing() {
             document.getElementById('cPhone').value = '';
             renderImgPreviews();
             loadListings();
-        } else { alert('❌ ' + (d.message || 'Lỗi')); }
+        } else { if((d.message||'').indexOf('Shipper Plus')>-1){if(confirm(d.message+'\n\nNâng cấp ngay?'))location.href='/wallet.html';}else alert('❌ ' + (d.message || 'Lỗi')); }
     } catch(e) { alert('Lỗi kết nối'); }
     btn.disabled = false; btn.textContent = 'Đăng tin';
 }
