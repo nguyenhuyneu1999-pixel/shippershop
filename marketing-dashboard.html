@@ -89,13 +89,39 @@ body{font-family:-apple-system,system-ui,sans-serif;background:#0f0f23;color:#e0
   <div id="topShippers"></div>
 </div>
 
+<div class="section">
+  <h2><i class="fas fa-chart-bar"></i> Visitor Analytics (7 ngày)</h2>
+  <div id="analytics"><div style="text-align:center;color:#888;padding:20px"><i class="fas fa-spinner fa-spin"></i></div></div>
+</div>
+
 </div>
 
 <script>
 var TK=localStorage.getItem("token");
 var KEY="";
 
-function api(url,opts){opts=opts||{};opts.headers=opts.headers||{};if(TK)opts.headers["Authorization"]="Bearer "+TK;return fetch(url,opts).then(function(r){return r.json();});}
+function api(url,opts){opts=opts||{};opts.headers=opts.headers||{};if(TK)opts.headers["Authorization"]="Bearer "+TK;return fetch(url,opts).then(function(r){return r.json();
+  // Analytics
+  fetch("/api/analytics-report.php?days=7",{headers:{"Authorization":"Bearer "+TK}}).then(function(r){return r.json();}).then(function(d){
+    if(!d.success)return;
+    var el=document.getElementById("analytics");
+    var html='<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:6px;font-size:12px">';
+    var totalViews=0,totalUniq=0;
+    (d.data||[]).forEach(function(day){totalViews+=day.views;totalUniq+=day.unique_visitors;});
+    html+='<div style="background:#16213e;padding:8px;border-radius:6px;text-align:center"><div style="font-size:16px;font-weight:700;color:#2196F3">'+totalViews+'</div>Views 7d</div>';
+    html+='<div style="background:#16213e;padding:8px;border-radius:6px;text-align:center"><div style="font-size:16px;font-weight:700;color:#00b14f">'+totalUniq+'</div>Unique 7d</div>';
+    html+='<div style="background:#16213e;padding:8px;border-radius:6px;text-align:center"><div style="font-size:16px;font-weight:700;color:#ff9800">'+Math.round(totalViews/7)+'</div>Views/ngày</div>';
+    html+='</div>';
+    
+    // Daily breakdown
+    html+='<div style="margin-top:10px">';
+    (d.data||[]).slice(0,7).forEach(function(day){
+      html+='<div class="log-item"><span>'+day.date+'</span><span>'+day.views+' views / '+day.unique_visitors+' unique</span></div>';
+    });
+    html+='</div>';
+    el.innerHTML=html;
+  }).catch(function(){document.getElementById("analytics").innerHTML='<div style="color:#666;font-size:12px">Chưa có dữ liệu</div>';});
+});}
 
 api("/api/marketing-engine.php?action=stats").then(function(d){
   if(!d.success)return;
@@ -119,7 +145,28 @@ api("/api/marketing-engine.php?action=stats").then(function(d){
       '<div style="background:#16213e;padding:8px;border-radius:6px;text-align:center"><div style="font-size:16px;font-weight:700;color:#7C3AED">'+s.referrals+'</div>Referrals</div>'+
       '<div style="background:#16213e;padding:8px;border-radius:6px;text-align:center"><div style="font-size:16px;font-weight:700;color:#4CAF50">'+s.xp_awarded+'</div>XP</div>'+
     '</div>';
-  });
+  
+  // Analytics
+  fetch("/api/analytics-report.php?days=7",{headers:{"Authorization":"Bearer "+TK}}).then(function(r){return r.json();}).then(function(d){
+    if(!d.success)return;
+    var el=document.getElementById("analytics");
+    var html='<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:6px;font-size:12px">';
+    var totalViews=0,totalUniq=0;
+    (d.data||[]).forEach(function(day){totalViews+=day.views;totalUniq+=day.unique_visitors;});
+    html+='<div style="background:#16213e;padding:8px;border-radius:6px;text-align:center"><div style="font-size:16px;font-weight:700;color:#2196F3">'+totalViews+'</div>Views 7d</div>';
+    html+='<div style="background:#16213e;padding:8px;border-radius:6px;text-align:center"><div style="font-size:16px;font-weight:700;color:#00b14f">'+totalUniq+'</div>Unique 7d</div>';
+    html+='<div style="background:#16213e;padding:8px;border-radius:6px;text-align:center"><div style="font-size:16px;font-weight:700;color:#ff9800">'+Math.round(totalViews/7)+'</div>Views/ngày</div>';
+    html+='</div>';
+    
+    // Daily breakdown
+    html+='<div style="margin-top:10px">';
+    (d.data||[]).slice(0,7).forEach(function(day){
+      html+='<div class="log-item"><span>'+day.date+'</span><span>'+day.views+' views / '+day.unique_visitors+' unique</span></div>';
+    });
+    html+='</div>';
+    el.innerHTML=html;
+  }).catch(function(){document.getElementById("analytics").innerHTML='<div style="color:#666;font-size:12px">Chưa có dữ liệu</div>';});
+});
   
   // Load queue
   fetch("/api/auto-content.php?action=queue_status&key="+KEY).then(function(r){return r.json();}).then(function(d){
@@ -131,9 +178,51 @@ api("/api/marketing-engine.php?action=stats").then(function(d){
       var icon=i.type==="facebook"?"📘":i.type==="tiktok"?"🎵":i.type==="blog"?"📝":"🔔";
       var badge=i.status==="published"?"b-ok":i.status==="failed"?"b-err":"b-wait";
       html+='<div class="log-item"><span>'+icon+' '+(i.title||"").substring(0,40)+'</span><span class="badge '+badge+'">'+i.status+'</span></div>';
+    
+  // Analytics
+  fetch("/api/analytics-report.php?days=7",{headers:{"Authorization":"Bearer "+TK}}).then(function(r){return r.json();}).then(function(d){
+    if(!d.success)return;
+    var el=document.getElementById("analytics");
+    var html='<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:6px;font-size:12px">';
+    var totalViews=0,totalUniq=0;
+    (d.data||[]).forEach(function(day){totalViews+=day.views;totalUniq+=day.unique_visitors;});
+    html+='<div style="background:#16213e;padding:8px;border-radius:6px;text-align:center"><div style="font-size:16px;font-weight:700;color:#2196F3">'+totalViews+'</div>Views 7d</div>';
+    html+='<div style="background:#16213e;padding:8px;border-radius:6px;text-align:center"><div style="font-size:16px;font-weight:700;color:#00b14f">'+totalUniq+'</div>Unique 7d</div>';
+    html+='<div style="background:#16213e;padding:8px;border-radius:6px;text-align:center"><div style="font-size:16px;font-weight:700;color:#ff9800">'+Math.round(totalViews/7)+'</div>Views/ngày</div>';
+    html+='</div>';
+    
+    // Daily breakdown
+    html+='<div style="margin-top:10px">';
+    (d.data||[]).slice(0,7).forEach(function(day){
+      html+='<div class="log-item"><span>'+day.date+'</span><span>'+day.views+' views / '+day.unique_visitors+' unique</span></div>';
     });
+    html+='</div>';
+    el.innerHTML=html;
+  }).catch(function(){document.getElementById("analytics").innerHTML='<div style="color:#666;font-size:12px">Chưa có dữ liệu</div>';});
+});
     el.innerHTML=html||'<div style="color:#666;font-size:12px">Trống</div>';
-  });
+  
+  // Analytics
+  fetch("/api/analytics-report.php?days=7",{headers:{"Authorization":"Bearer "+TK}}).then(function(r){return r.json();}).then(function(d){
+    if(!d.success)return;
+    var el=document.getElementById("analytics");
+    var html='<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:6px;font-size:12px">';
+    var totalViews=0,totalUniq=0;
+    (d.data||[]).forEach(function(day){totalViews+=day.views;totalUniq+=day.unique_visitors;});
+    html+='<div style="background:#16213e;padding:8px;border-radius:6px;text-align:center"><div style="font-size:16px;font-weight:700;color:#2196F3">'+totalViews+'</div>Views 7d</div>';
+    html+='<div style="background:#16213e;padding:8px;border-radius:6px;text-align:center"><div style="font-size:16px;font-weight:700;color:#00b14f">'+totalUniq+'</div>Unique 7d</div>';
+    html+='<div style="background:#16213e;padding:8px;border-radius:6px;text-align:center"><div style="font-size:16px;font-weight:700;color:#ff9800">'+Math.round(totalViews/7)+'</div>Views/ngày</div>';
+    html+='</div>';
+    
+    // Daily breakdown
+    html+='<div style="margin-top:10px">';
+    (d.data||[]).slice(0,7).forEach(function(day){
+      html+='<div class="log-item"><span>'+day.date+'</span><span>'+day.views+' views / '+day.unique_visitors+' unique</span></div>';
+    });
+    html+='</div>';
+    el.innerHTML=html;
+  }).catch(function(){document.getElementById("analytics").innerHTML='<div style="color:#666;font-size:12px">Chưa có dữ liệu</div>';});
+});
   
   // Load top shippers
   fetch("/api/gamification.php?action=leaders&period=week",{headers:{"Authorization":"Bearer "+TK}}).then(function(r){return r.json();}).then(function(d){
@@ -143,9 +232,72 @@ api("/api/marketing-engine.php?action=stats").then(function(d){
     (d.data||[]).slice(0,5).forEach(function(u,i){
       var medal=i===0?"🥇":i===1?"🥈":i===2?"🥉":"#"+(i+1);
       html+='<div class="log-item"><span>'+medal+' '+(u.fullname||"Shipper")+'</span><span style="color:#7C3AED;font-weight:700">'+(u.total_xp||0)+' XP</span></div>';
+    
+  // Analytics
+  fetch("/api/analytics-report.php?days=7",{headers:{"Authorization":"Bearer "+TK}}).then(function(r){return r.json();}).then(function(d){
+    if(!d.success)return;
+    var el=document.getElementById("analytics");
+    var html='<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:6px;font-size:12px">';
+    var totalViews=0,totalUniq=0;
+    (d.data||[]).forEach(function(day){totalViews+=day.views;totalUniq+=day.unique_visitors;});
+    html+='<div style="background:#16213e;padding:8px;border-radius:6px;text-align:center"><div style="font-size:16px;font-weight:700;color:#2196F3">'+totalViews+'</div>Views 7d</div>';
+    html+='<div style="background:#16213e;padding:8px;border-radius:6px;text-align:center"><div style="font-size:16px;font-weight:700;color:#00b14f">'+totalUniq+'</div>Unique 7d</div>';
+    html+='<div style="background:#16213e;padding:8px;border-radius:6px;text-align:center"><div style="font-size:16px;font-weight:700;color:#ff9800">'+Math.round(totalViews/7)+'</div>Views/ngày</div>';
+    html+='</div>';
+    
+    // Daily breakdown
+    html+='<div style="margin-top:10px">';
+    (d.data||[]).slice(0,7).forEach(function(day){
+      html+='<div class="log-item"><span>'+day.date+'</span><span>'+day.views+' views / '+day.unique_visitors+' unique</span></div>';
     });
+    html+='</div>';
+    el.innerHTML=html;
+  }).catch(function(){document.getElementById("analytics").innerHTML='<div style="color:#666;font-size:12px">Chưa có dữ liệu</div>';});
+});
     el.innerHTML=html||'<div style="color:#666;font-size:12px">Chưa có dữ liệu tuần này</div>';
-  });
+  
+  // Analytics
+  fetch("/api/analytics-report.php?days=7",{headers:{"Authorization":"Bearer "+TK}}).then(function(r){return r.json();}).then(function(d){
+    if(!d.success)return;
+    var el=document.getElementById("analytics");
+    var html='<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:6px;font-size:12px">';
+    var totalViews=0,totalUniq=0;
+    (d.data||[]).forEach(function(day){totalViews+=day.views;totalUniq+=day.unique_visitors;});
+    html+='<div style="background:#16213e;padding:8px;border-radius:6px;text-align:center"><div style="font-size:16px;font-weight:700;color:#2196F3">'+totalViews+'</div>Views 7d</div>';
+    html+='<div style="background:#16213e;padding:8px;border-radius:6px;text-align:center"><div style="font-size:16px;font-weight:700;color:#00b14f">'+totalUniq+'</div>Unique 7d</div>';
+    html+='<div style="background:#16213e;padding:8px;border-radius:6px;text-align:center"><div style="font-size:16px;font-weight:700;color:#ff9800">'+Math.round(totalViews/7)+'</div>Views/ngày</div>';
+    html+='</div>';
+    
+    // Daily breakdown
+    html+='<div style="margin-top:10px">';
+    (d.data||[]).slice(0,7).forEach(function(day){
+      html+='<div class="log-item"><span>'+day.date+'</span><span>'+day.views+' views / '+day.unique_visitors+' unique</span></div>';
+    });
+    html+='</div>';
+    el.innerHTML=html;
+  }).catch(function(){document.getElementById("analytics").innerHTML='<div style="color:#666;font-size:12px">Chưa có dữ liệu</div>';});
+});
+
+  // Analytics
+  fetch("/api/analytics-report.php?days=7",{headers:{"Authorization":"Bearer "+TK}}).then(function(r){return r.json();}).then(function(d){
+    if(!d.success)return;
+    var el=document.getElementById("analytics");
+    var html='<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:6px;font-size:12px">';
+    var totalViews=0,totalUniq=0;
+    (d.data||[]).forEach(function(day){totalViews+=day.views;totalUniq+=day.unique_visitors;});
+    html+='<div style="background:#16213e;padding:8px;border-radius:6px;text-align:center"><div style="font-size:16px;font-weight:700;color:#2196F3">'+totalViews+'</div>Views 7d</div>';
+    html+='<div style="background:#16213e;padding:8px;border-radius:6px;text-align:center"><div style="font-size:16px;font-weight:700;color:#00b14f">'+totalUniq+'</div>Unique 7d</div>';
+    html+='<div style="background:#16213e;padding:8px;border-radius:6px;text-align:center"><div style="font-size:16px;font-weight:700;color:#ff9800">'+Math.round(totalViews/7)+'</div>Views/ngày</div>';
+    html+='</div>';
+    
+    // Daily breakdown
+    html+='<div style="margin-top:10px">';
+    (d.data||[]).slice(0,7).forEach(function(day){
+      html+='<div class="log-item"><span>'+day.date+'</span><span>'+day.views+' views / '+day.unique_visitors+' unique</span></div>';
+    });
+    html+='</div>';
+    el.innerHTML=html;
+  }).catch(function(){document.getElementById("analytics").innerHTML='<div style="color:#666;font-size:12px">Chưa có dữ liệu</div>';});
 });
 </script>
 <script src="/js/analytics.js"></script>
