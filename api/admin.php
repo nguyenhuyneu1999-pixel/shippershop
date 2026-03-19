@@ -168,14 +168,13 @@ if ($action === 'users') {
          ORDER BY u.created_at DESC LIMIT $limit OFFSET $offset", $params
     );
     
-    // Mark seed users
+    // Mark seed users (seed = id 3-102)
     foreach ($users as &$u) {
-        $isReal = (stripos($u['email']??'', '@shippershop.local') !== false || $u['email'] === 'nguyenhuyneu1999@gmail.com' || $u['email'] === 'nguyenvanhuy12123@gmail.com');
-        $u['is_seed'] = $isReal ? 0 : 1;
+        $u['is_seed'] = ($u['id'] >= $seedMin && $u['id'] <= $seedMax) ? 1 : 0;
     }
     
-    $realCount = $db->fetchOne("SELECT COUNT(*) as c FROM users WHERE id > 1 AND $realWhere")['c'];
-    $seedCount = $db->fetchOne("SELECT COUNT(*) as c FROM users WHERE id > 1 AND NOT $realWhere")['c'];
+    $realCount = $db->fetchOne("SELECT COUNT(*) as c FROM users WHERE (id = 2 OR id > $seedMax)")['c'];
+    $seedCount = $db->fetchOne("SELECT COUNT(*) as c FROM users WHERE id >= $seedMin AND id <= $seedMax")['c'];
     
     success('Success', [
         'users' => $users,
@@ -437,7 +436,7 @@ if ($action === 'update_order_status') {
             $db->beginTransaction();
             
             // Get wallet
-            $wallet = $db->fetchOne("SELECT balance FROM wallet WHERE user_id = ?", [$order['user_id']]);
+            $wallet = $db->fetchOne("SELECT balance FROM wallets WHERE user_id = ?", [$order['user_id']]);
             $newBalance = $wallet['balance'] + $order['total'];
             
             // Refund to wallet
@@ -476,33 +475,6 @@ if ($action === 'update_order_status') {
 // GET ALL USERS (ADMIN)
 // ============================================
 
-if ($action === 'users') {
-    if (getRequestMethod() !== 'GET') {
-        error('Method not allowed', 405);
-    }
-    
-    $limit = isset($_GET['limit']) ? min(intval($_GET['limit']), 100) : 50;
-    
-    $sql = "SELECT 
-                u.id,
-                u.fullname,
-                u.email,
-                u.phone,
-                u.role,
-                u.status,
-                u.created_at,
-                w.balance as wallet_balance,
-                (SELECT COUNT(*) FROM orders WHERE user_id = u.id) as total_orders,
-                (SELECT COALESCE(SUM(total), 0) FROM orders WHERE user_id = u.id AND status != 'cancelled') as total_spent
-            FROM users u
-            LEFT JOIN wallet w ON u.id = w.user_id
-            ORDER BY u.created_at DESC
-            LIMIT $limit";
-    
-    $users = $db->fetchAll($sql);
-    
-    success('Success', $users);
-}
 
 // ============================================
 // GET ALL PRODUCTS (ADMIN)
