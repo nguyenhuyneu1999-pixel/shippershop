@@ -1,0 +1,397 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Marketing Setup - ShipperShop</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,system-ui,sans-serif;background:#0f0f23;color:#e0e0e0;min-height:100vh}
+.container{max-width:800px;margin:0 auto;padding:20px}
+h1{color:#7C3AED;font-size:24px;margin-bottom:8px}
+.subtitle{color:#888;margin-bottom:24px}
+.card{background:#1a1a2e;border-radius:16px;padding:20px;margin-bottom:16px;border:1px solid #2a2a4a}
+.card-head{display:flex;align-items:center;gap:12px;margin-bottom:16px;cursor:pointer}
+.card-head .num{width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:14px;flex-shrink:0}
+.card-head h2{font-size:16px;flex:1}
+.status-badge{font-size:11px;padding:3px 10px;border-radius:12px;font-weight:600}
+.status-done{background:#00b14f20;color:#00b14f}
+.status-todo{background:#EE4D2D20;color:#EE4D2D}
+.status-auto{background:#7C3AED20;color:#7C3AED}
+.card-body{padding-left:48px}
+.step{background:#16213e;border-radius:10px;padding:14px;margin-bottom:10px;font-size:14px;line-height:1.7}
+.step b{color:#7C3AED}
+.step a{color:#60a5fa;text-decoration:none}
+.step a:hover{text-decoration:underline}
+.step code{background:#0d1117;padding:2px 6px;border-radius:4px;font-size:12px;color:#f0f;word-break:break-all;display:inline-block;max-width:100%}
+.step .url-box{background:#0d1117;padding:10px;border-radius:8px;margin:8px 0;font-size:12px;color:#0f0;word-break:break-all;position:relative}
+.step .url-box .copy-btn{position:absolute;top:6px;right:6px;background:#333;color:#fff;border:none;border-radius:6px;padding:4px 10px;font-size:11px;cursor:pointer}
+.step .url-box .copy-btn:hover{background:#555}
+.step img{max-width:100%;border-radius:8px;margin:8px 0}
+.btn{display:inline-flex;align-items:center;gap:6px;padding:10px 20px;border-radius:10px;border:none;font-size:14px;font-weight:600;cursor:pointer;transition:all .2s}
+.btn-primary{background:#7C3AED;color:#fff}
+.btn-primary:hover{background:#6d28d9}
+.btn-success{background:#00b14f;color:#fff}
+.btn-success:hover{background:#009a43}
+.btn-sm{padding:6px 14px;font-size:12px}
+.btn-outline{background:transparent;border:1px solid #444;color:#ccc}
+.btn-outline:hover{border-color:#7C3AED;color:#7C3AED}
+.input-group{display:flex;gap:8px;margin:10px 0}
+.input-group input{flex:1;background:#0d1117;border:1px solid #333;border-radius:8px;padding:10px;color:#fff;font-size:13px}
+.input-group input:focus{outline:none;border-color:#7C3AED}
+.result{background:#0d1117;border-radius:8px;padding:12px;margin:10px 0;font-size:13px;display:none}
+.result.show{display:block}
+.result.ok{border-left:3px solid #00b14f}
+.result.err{border-left:3px solid #EE4D2D}
+.checklist{list-style:none;padding:0}
+.checklist li{padding:8px 0;display:flex;align-items:center;gap:10px;font-size:14px}
+.checklist .icon{font-size:18px}
+.live-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:16px 0}
+.stat-box{background:#16213e;border-radius:10px;padding:14px;text-align:center}
+.stat-box .val{font-size:24px;font-weight:700;color:#7C3AED}
+.stat-box .label{font-size:11px;color:#888;margin-top:4px}
+.divider{height:1px;background:#2a2a4a;margin:20px 0}
+.collapse{display:none}
+.collapse.open{display:block}
+.arrow{transition:transform .2s}
+.arrow.open{transform:rotate(180deg)}
+</style>
+</head>
+<body>
+<div class="container">
+<h1><i class="fas fa-rocket"></i> Marketing Automation Setup</h1>
+<p class="subtitle">Thiết lập hệ thống chạy tự động 24/7 cho ShipperShop</p>
+
+<!-- LIVE STATS -->
+<div class="live-stats" id="liveStats">
+  <div class="stat-box"><div class="val" id="sPending">-</div><div class="label">Content đang chờ</div></div>
+  <div class="stat-box"><div class="val" id="sPublished">-</div><div class="label">Đã publish</div></div>
+  <div class="stat-box"><div class="val" id="sXpUsers">-</div><div class="label">Users có XP</div></div>
+</div>
+
+<!-- STEP 1: CRON-JOB.ORG -->
+<div class="card">
+  <div class="card-head" onclick="toggle('s1')">
+    <div class="num" style="background:#EE4D2D">1</div>
+    <h2>Đăng ký Cron 24/7 (cron-job.org)</h2>
+    <span class="status-badge status-todo" id="badge1">Cần setup</span>
+    <i class="fas fa-chevron-down arrow" id="arrow1"></i>
+  </div>
+  <div class="card-body collapse" id="s1">
+    <div class="step">
+      <b>Bước 1:</b> Vào <a href="https://cron-job.org/en/signup/" target="_blank">cron-job.org/signup</a> → Đăng ký miễn phí (email + mật khẩu)
+    </div>
+    <div class="step">
+      <b>Bước 2:</b> Sau khi đăng nhập → bấm <b>"Create cronjob"</b>
+    </div>
+    <div class="step">
+      <b>Bước 3:</b> Tạo <b>3 cron jobs</b> với thông tin sau:<br><br>
+      
+      <b>Job 1: Marketing Engine (mỗi giờ)</b><br>
+      Title: <code>ShipperShop Hourly</code><br>
+      URL: 
+      <div class="url-box" id="url1">
+        <span id="cronUrl1">Đang tải...</span>
+        <button class="copy-btn" onclick="copyUrl('cronUrl1')">Copy</button>
+      </div>
+      Schedule: <code>Every 1 hour</code><br><br>
+      
+      <b>Job 2: AI Content (3x/ngày)</b><br>
+      Title: <code>ShipperShop Content</code><br>
+      URL:
+      <div class="url-box" id="url2">
+        <span id="cronUrl2">Đang tải...</span>
+        <button class="copy-btn" onclick="copyUrl('cronUrl2')">Copy</button>
+      </div>
+      Schedule: Custom → <code>0 6,12,18 * * *</code> (chọn "Minutes: 0", "Hours: 6,12,18")<br><br>
+
+      <b>Job 3: Weekly Report (Thứ 2)</b><br>
+      Title: <code>ShipperShop Weekly</code><br>
+      URL:
+      <div class="url-box" id="url3">
+        <span id="cronUrl3">Đang tải...</span>
+        <button class="copy-btn" onclick="copyUrl('cronUrl3')">Copy</button>
+      </div>
+      Schedule: Custom → <code>0 9 * * 1</code> (Monday 9:00 AM)
+    </div>
+    <div class="step">
+      <b>Bước 4:</b> Bấm <b>"Create"</b> cho mỗi job → <b>Done!</b> ✅<br>
+      Hệ thống sẽ tự chạy 24/7, kể cả khi không ai vào web.
+    </div>
+    <button class="btn btn-primary btn-sm" onclick="testCron()"><i class="fas fa-play"></i> Test Cron ngay</button>
+    <div class="result" id="cronResult"></div>
+  </div>
+</div>
+
+<!-- STEP 2: FACEBOOK AUTO-POST -->
+<div class="card">
+  <div class="card-head" onclick="toggle('s2')">
+    <div class="num" style="background:#1877f2">2</div>
+    <h2>Facebook Auto-Post (Fanpage)</h2>
+    <span class="status-badge status-todo" id="badge2">Cần setup</span>
+    <i class="fas fa-chevron-down arrow" id="arrow2"></i>
+  </div>
+  <div class="card-body collapse" id="s2">
+    <div class="step">
+      <b>Bước 1:</b> Vào <a href="https://developers.facebook.com/apps/" target="_blank">developers.facebook.com/apps</a> → <b>"Tạo ứng dụng"</b><br>
+      Chọn loại: <b>"Business"</b> hoặc <b>"None"</b> → Đặt tên: <code>ShipperShop Bot</code>
+    </div>
+    <div class="step">
+      <b>Bước 2:</b> Vào <a href="https://developers.facebook.com/tools/explorer/" target="_blank">Graph API Explorer</a><br>
+      → Chọn App vừa tạo → <b>"Get Token"</b> → <b>"Get Page Access Token"</b><br>
+      → Chọn Fanpage ShipperShop → Tick quyền: <code>pages_manage_posts</code>, <code>pages_read_engagement</code><br>
+      → Bấm <b>"Generate Access Token"</b> → Copy token
+    </div>
+    <div class="step">
+      <b>Bước 3:</b> Extend token (để dùng lâu dài):<br>
+      Vào <a href="https://developers.facebook.com/tools/debug/" target="_blank">Access Token Debugger</a> → Paste token → <b>"Extend Access Token"</b> → Copy token mới
+    </div>
+    <div class="step">
+      <b>Bước 4:</b> Dán thông tin vào đây:<br>
+      <div class="input-group">
+        <input type="text" id="fbPageId" placeholder="Page ID (VD: 123456789)">
+      </div>
+      <div class="input-group">
+        <input type="text" id="fbToken" placeholder="Page Access Token (dài)">
+      </div>
+      <button class="btn btn-primary" onclick="saveFbToken()"><i class="fab fa-facebook"></i> Lưu & Kích hoạt</button>
+      <div class="result" id="fbResult"></div>
+    </div>
+    <div class="step">
+      <b>Bước 5:</b> Test post:
+      <button class="btn btn-outline btn-sm" onclick="testFbPost()"><i class="fas fa-paper-plane"></i> Gửi bài test lên Fanpage</button>
+      <div class="result" id="fbTestResult"></div>
+    </div>
+  </div>
+</div>
+
+<!-- STEP 3: CPANEL CRON (Backup) -->
+<div class="card">
+  <div class="card-head" onclick="toggle('s3')">
+    <div class="num" style="background:#ff6600">3</div>
+    <h2>cPanel Cron (Backup - tùy chọn)</h2>
+    <span class="status-badge status-auto" id="badge3">Tùy chọn</span>
+    <i class="fas fa-chevron-down arrow" id="arrow3"></i>
+  </div>
+  <div class="card-body collapse" id="s3">
+    <div class="step">
+      <b>Bước 1:</b> Đăng nhập cPanel: <a href="https://103.124.95.161:2083" target="_blank">103.124.95.161:2083</a><br>
+      User: <code>nhshiw2j</code>
+    </div>
+    <div class="step">
+      <b>Bước 2:</b> Tìm <b>"Cron Jobs"</b> → Thêm cron mới:<br>
+      Setting: <code>Once Per Hour (0 * * * *)</code><br>
+      Command:
+      <div class="url-box">
+        <span id="cpanelCmd">Đang tải...</span>
+        <button class="copy-btn" onclick="copyUrl('cpanelCmd')">Copy</button>
+      </div>
+    </div>
+    <div class="step">
+      <b>Bước 3:</b> Bấm <b>"Add New Cron Job"</b> → Done! ✅
+    </div>
+  </div>
+</div>
+
+<!-- STATUS CHECK -->
+<div class="card">
+  <div class="card-head" onclick="toggle('s4')">
+    <div class="num" style="background:#00b14f">✓</div>
+    <h2>Kiểm tra trạng thái hệ thống</h2>
+    <i class="fas fa-chevron-down arrow" id="arrow4"></i>
+  </div>
+  <div class="card-body collapse open" id="s4">
+    <ul class="checklist" id="checklist">
+      <li><span class="icon">⏳</span> Đang kiểm tra...</li>
+    </ul>
+    <div style="margin-top:12px">
+      <button class="btn btn-success btn-sm" onclick="runHealthCheck()"><i class="fas fa-sync"></i> Kiểm tra lại</button>
+    </div>
+  </div>
+</div>
+
+<!-- QUEUE PREVIEW -->
+<div class="card">
+  <div class="card-head" onclick="toggle('s5')">
+    <div class="num" style="background:#ffc107">Q</div>
+    <h2>Content Queue (Hàng đợi đăng bài)</h2>
+    <i class="fas fa-chevron-down arrow" id="arrow5"></i>
+  </div>
+  <div class="card-body collapse" id="s5">
+    <button class="btn btn-outline btn-sm" onclick="loadQueue()" style="margin-bottom:12px"><i class="fas fa-list"></i> Tải queue</button>
+    <div id="queueList"></div>
+  </div>
+</div>
+
+</div>
+
+<script>
+var TOKEN = localStorage.getItem('token');
+var CRON_KEY = '';
+var BASE = '/api/';
+
+function toggle(id) {
+    var el = document.getElementById(id);
+    el.classList.toggle('open');
+    var arrow = document.getElementById('arrow' + id.replace('s',''));
+    if (arrow) arrow.classList.toggle('open');
+}
+
+function copyUrl(id) {
+    var text = document.getElementById(id).textContent;
+    navigator.clipboard.writeText(text);
+    var btn = document.getElementById(id).parentElement.querySelector('.copy-btn');
+    btn.textContent = 'Copied!';
+    setTimeout(function(){ btn.textContent = 'Copy'; }, 1500);
+}
+
+function api(url, opts) {
+    opts = opts || {};
+    opts.headers = opts.headers || {};
+    if (TOKEN) opts.headers['Authorization'] = 'Bearer ' + TOKEN;
+    return fetch(url, opts).then(function(r){ return r.json(); });
+}
+
+// Load stats + cron key on page load
+function init() {
+    api(BASE + 'marketing-engine.php?action=stats').then(function(d) {
+        if (!d.success) { alert('Cần đăng nhập admin!'); return; }
+        var s = d.data;
+        CRON_KEY = s.cron_key;
+        
+        document.getElementById('sPending').textContent = s.content_queue.pending;
+        document.getElementById('sPublished').textContent = s.content_queue.published;
+        document.getElementById('sXpUsers').textContent = s.gamification.users_with_xp;
+        
+        // Set cron URLs
+        var base = 'https://shippershop.vn/api/auto-content.php';
+        document.getElementById('cronUrl1').textContent = base + '?action=run&key=' + CRON_KEY;
+        document.getElementById('cronUrl2').textContent = base + '?action=generate_ai&key=' + CRON_KEY;
+        document.getElementById('cronUrl3').textContent = base + '?action=weekly_report&key=' + CRON_KEY;
+        document.getElementById('cpanelCmd').textContent = 'curl -s "' + base + '?action=run&key=' + CRON_KEY + '" > /dev/null 2>&1';
+        
+        runHealthCheck();
+    }).catch(function(e) {
+        alert('Lỗi kết nối. Đăng nhập admin trước.');
+    });
+}
+
+function testCron() {
+    var r = document.getElementById('cronResult');
+    r.className = 'result show'; r.textContent = '⏳ Đang chạy...';
+    fetch(BASE + 'auto-content.php?action=run&key=' + CRON_KEY).then(function(res){ return res.json(); }).then(function(d) {
+        if (d.success) {
+            r.className = 'result show ok';
+            r.innerHTML = '✅ Cron chạy thành công!<br>Time: ' + d.data.time + '<br>Generated: ' + (d.data.generated.length || 0) + ' items<br>Published: ' + (d.data.published.length || 0) + ' items';
+        } else {
+            r.className = 'result show err'; r.textContent = '❌ ' + d.message;
+        }
+    }).catch(function(e){ r.className = 'result show err'; r.textContent = '❌ Lỗi: ' + e.message; });
+}
+
+function saveFbToken() {
+    var pageId = document.getElementById('fbPageId').value.trim();
+    var token = document.getElementById('fbToken').value.trim();
+    var r = document.getElementById('fbResult');
+    if (!pageId || !token) { r.className = 'result show err'; r.textContent = '❌ Nhập Page ID và Token'; return; }
+    r.className = 'result show'; r.textContent = '⏳ Đang lưu...';
+    fetch(BASE + 'auto-publish.php?action=save_token&key=' + CRON_KEY, {
+        method: 'POST',
+        headers: {'Content-Type':'application/json'},
+        body: JSON.stringify({platform:'facebook',page_id:pageId,access_token:token,account_name:'ShipperShop'})
+    }).then(function(res){ return res.json(); }).then(function(d) {
+        if (d.success) {
+            r.className = 'result show ok'; r.textContent = '✅ ' + d.message;
+            document.getElementById('badge2').className = 'status-badge status-done';
+            document.getElementById('badge2').textContent = 'Đã setup';
+        } else {
+            r.className = 'result show err'; r.textContent = '❌ ' + d.message;
+        }
+    });
+}
+
+function testFbPost() {
+    var r = document.getElementById('fbTestResult');
+    r.className = 'result show'; r.textContent = '⏳ Đang gửi bài test...';
+    fetch(BASE + 'auto-publish.php?action=test_post&key=' + CRON_KEY).then(function(res){ return res.json(); }).then(function(d) {
+        if (d.success) {
+            r.className = 'result show ok'; r.textContent = '✅ Đã đăng thành công lên Fanpage!';
+        } else {
+            r.className = 'result show err'; r.textContent = '❌ ' + (d.data ? d.data.error || d.message : d.message);
+        }
+    });
+}
+
+function runHealthCheck() {
+    var cl = document.getElementById('checklist');
+    cl.innerHTML = '<li><span class="icon">⏳</span> Đang kiểm tra...</li>';
+    
+    var checks = [];
+    
+    // 1. Auto-cron pixel
+    fetch('/api/auto-cron.php',{method:'HEAD'}).then(function(r){
+        checks.push({name:'Auto-Cron Pixel (tự chạy mỗi giờ)',ok:r.status===200});
+    }).catch(function(){checks.push({name:'Auto-Cron Pixel',ok:false});});
+    
+    // 2. Marketing engine
+    api(BASE+'marketing-engine.php?action=stats').then(function(d){
+        checks.push({name:'Marketing Engine API',ok:d.success});
+    }).catch(function(){checks.push({name:'Marketing Engine API',ok:false});});
+    
+    // 3. Content queue
+    fetch(BASE+'auto-content.php?action=queue_status&key='+CRON_KEY).then(function(r){return r.json();}).then(function(d){
+        var c=d.data?d.data.counts:null;
+        checks.push({name:'Content Queue ('+((c?c.pending:0)||0)+' pending)',ok:d.success});
+    }).catch(function(){checks.push({name:'Content Queue',ok:false});});
+    
+    // 4. Facebook
+    fetch(BASE+'auto-publish.php?action=setup_facebook').then(function(r){return r.json();}).then(function(d){
+        checks.push({name:'Auto-Publish API',ok:d.success});
+    }).catch(function(){checks.push({name:'Auto-Publish API',ok:false});});
+    
+    // 5. Referral
+    api(BASE+'referral.php?action=my_code').then(function(d){
+        checks.push({name:'Referral System (code: '+(d.data?d.data.code:'?')+')',ok:d.success});
+    }).catch(function(){checks.push({name:'Referral System',ok:false});});
+    
+    // 6. Gamification
+    api(BASE+'gamification.php?action=profile').then(function(d){
+        checks.push({name:'Gamification (XP: '+(d.data?d.data.total_xp:'?')+')',ok:d.success});
+    }).catch(function(){checks.push({name:'Gamification',ok:false});});
+    
+    setTimeout(function(){
+        var html='';
+        checks.forEach(function(c){
+            html+='<li><span class="icon">'+(c.ok?'✅':'❌')+'</span>'+c.name+'</li>';
+        });
+        cl.innerHTML=html;
+    },3000);
+}
+
+function loadQueue() {
+    var el = document.getElementById('queueList');
+    el.innerHTML = '<div style="text-align:center;color:#888;padding:20px"><i class="fas fa-spinner fa-spin"></i></div>';
+    fetch(BASE+'auto-content.php?action=queue_status&key='+CRON_KEY).then(function(r){return r.json();}).then(function(d){
+        if (!d.success){el.innerHTML='❌ Error';return;}
+        var items=d.data.items||[];
+        var html='<div style="font-size:13px">';
+        items.forEach(function(i){
+            var color=i.status==='published'?'#00b14f':i.status==='failed'?'#EE4D2D':'#ffc107';
+            var icon=i.type==='facebook'?'fab fa-facebook':i.type==='tiktok'?'fab fa-tiktok':i.type==='blog'?'fas fa-blog':'fas fa-bell';
+            html+='<div style="display:flex;gap:8px;padding:8px;border-bottom:1px solid #2a2a4a;align-items:center">';
+            html+='<i class="'+icon+'" style="color:'+color+';width:20px;text-align:center"></i>';
+            html+='<div style="flex:1;min-width:0"><div style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+(i.title||'Untitled')+'</div>';
+            html+='<div style="font-size:11px;color:#888">'+i.scheduled_at+'</div></div>';
+            html+='<span style="font-size:11px;color:'+color+';font-weight:600">'+i.status+'</span>';
+            html+='</div>';
+        });
+        html+='</div>';
+        el.innerHTML=html;
+    });
+}
+
+init();
+</script>
+</body>
+</html>
