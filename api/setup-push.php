@@ -41,3 +41,4 @@ if(!file_exists($vapidFile)){
     echo "VAPID PUBLIC: ".VAPID_PUBLIC_KEY."\n";
 }
 echo "DONE\n";
+// 1773889295
