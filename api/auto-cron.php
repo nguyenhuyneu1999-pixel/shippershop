@@ -1,39 +1,36 @@
 <?php
 /**
- * SELF-TRIGGERING CRON
- * Được gọi bởi mỗi page load qua <img> tag ẩn
- * Kiểm tra nếu đã >1 giờ từ lần chạy cuối → trigger marketing engine
- * Không block page load (async)
+ * AUTO-CRON PIXEL + SELF-CRON KICKSTARTER
+ * 1x1 gif pixel trên mọi trang → trigger marketing engine mỗi giờ
+ * Cũng kick-start self-cron nếu nó chưa chạy
  */
+ignore_user_abort(true);
 require_once __DIR__ . '/../includes/config.php';
-require_once __DIR__ . '/../includes/db.php';
 
-// Return 1x1 transparent pixel immediately
+// Return pixel ngay lập tức (không block page load)
 header('Content-Type: image/gif');
+header('Cache-Control: no-store, no-cache');
 echo base64_decode('R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7');
+if (ob_get_level()) ob_end_flush();
+flush();
 
-// Check if should run (max 1x per hour)
-$lockFile = sys_get_temp_dir() . '/ss_cron_lock';
-$lastRun = file_exists($lockFile) ? (int)file_get_contents($lockFile) : 0;
-$now = time();
+// Lock: max 1x/55 phút  
+$lock = sys_get_temp_dir() . '/ss_autocron';
+$last = file_exists($lock) ? (int)file_get_contents($lock) : 0;
+if (time() - $last < 3300) exit;
+file_put_contents($lock, time());
 
-if ($now - $lastRun < 3600) exit; // Already ran this hour
-
-// Update lock
-file_put_contents($lockFile, $now);
-
-// Run in background (non-blocking)
+// Fire marketing engine (non-blocking)
 $cronKey = 'ss_mkt_' . substr(md5(JWT_SECRET . 'marketing'), 0, 16);
-$url = 'https://shippershop.vn/api/auto-content.php?action=run&key=' . $cronKey;
+$urls = [
+    "/api/auto-content.php?action=run&key=$cronKey",
+    "/api/auto-publish.php?action=run&key=$cronKey",
+];
 
-// Use fsockopen for non-blocking request
-$parts = parse_url($url);
-$fp = @fsockopen('ssl://' . $parts['host'], 443, $errno, $errstr, 5);
-if ($fp) {
-    $path = $parts['path'] . '?' . $parts['query'];
-    $out = "GET {$path} HTTP/1.1\r\n";
-    $out .= "Host: {$parts['host']}\r\n";
-    $out .= "Connection: Close\r\n\r\n";
-    fwrite($fp, $out);
-    fclose($fp); // Don't wait for response
+foreach ($urls as $path) {
+    $fp = @fsockopen('ssl://shippershop.vn', 443, $e1, $e2, 3);
+    if ($fp) {
+        fwrite($fp, "GET $path HTTP/1.1\r\nHost: shippershop.vn\r\nConnection: Close\r\n\r\n");
+        fclose($fp);
+    }
 }
