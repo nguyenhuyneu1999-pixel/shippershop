@@ -172,7 +172,11 @@ document.getElementById('registerForm').addEventListener('submit',async function
   try{
     var r=await fetch('/api/auth.php?action=register',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({fullname:fn,username:un,password:pw,shipping_company:sc})});
     var d=await r.json();
-    if(d.success){localStorage.setItem('user',JSON.stringify(d.data.user));localStorage.setItem('token',d.data.token);alert('✅ Đăng ký thành công!');window.location.href='index.html';}
+    if(d.success){localStorage.setItem('user',JSON.stringify(d.data.user));localStorage.setItem('token',d.data.token);
+      // Track referral if ref code exists
+      var refCode=new URLSearchParams(location.search).get('ref');
+      if(refCode&&d.data.user&&d.data.user.id){try{fetch('/api/referral.php?action=record',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({ref_code:refCode,invitee_id:d.data.user.id})}).catch(function(){});}catch(x){}}
+      alert('✅ Đăng ký thành công!');window.location.href='index.html';}
     else{document.getElementById('formError').textContent=d.message||'Đăng ký thất bại';}
   }catch(e){document.getElementById('formError').textContent='Lỗi kết nối';}
   finally{btn.classList.remove('loading');btn.disabled=false;}
@@ -180,5 +184,5 @@ document.getElementById('registerForm').addEventListener('submit',async function
 </script>
 <script src="js/mobile.js"></script>
 <nav id="mobileBottomNav" role="navigation"><a href="index.html" class="mnav-item" data-page="index.html"><i class="fas fa-home"></i><span>Trang chủ</span></a><a href="marketplace.html" class="mnav-item" data-page="marketplace.html"><i class="fas fa-store"></i><span class="mnav-badge" id="navCartBadge" style="display:none">0</span><span>Mua sắm</span></a><button class="mnav-item mnav-fab-wrap" onclick="handleFab()"><div class="mnav-fab"><i class="fas fa-search" id="fabIcon"></i></div></button><a href="map.html" class="mnav-item" data-page="map.html"><i class="fas fa-map-marked-alt"></i><span>Bản đồ</span></a><a href="profile.html" class="mnav-item" data-page="profile.html" id="navProfileItem"><i class="fas fa-user" id="navProfileIcon"></i><span id="navProfileName">Tài khoản</span></a></nav>
-<script>if("serviceWorker" in navigator)navigator.serviceWorker.register("/sw.js");</script></body>
+<script>if("serviceWorker" in navigator)navigator.serviceWorker.register("/sw.js");</script><script src="/js/analytics.js"></script></body>
 </html>

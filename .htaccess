@@ -21,6 +21,9 @@ RewriteRule ^\.env - [F,L]
 # Sitemap.xml → dynamic PHP
 RewriteRule ^sitemap\.xml$ /sitemap.php [L]
 
+# Landing page SEO URL
+RewriteRule ^gioi-thieu/?$ /gioi-thieu.html [L]
+
 # Allow direct access to files/folders
 RewriteCond %{REQUEST_FILENAME} -f [OR]
 RewriteCond %{REQUEST_FILENAME} -d

@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>ShipperShop - Cộng đồng Shipper Việt Nam #1 | Tham gia miễn phí</title>
+<meta name="description" content="Tham gia ShipperShop miễn phí. Cộng đồng 700+ shipper Việt Nam. Chia sẻ kinh nghiệm giao hàng, mẹo tiết kiệm xăng, cảnh báo giao thông real-time, chợ mua bán đồ ship.">
+<meta property="og:title" content="ShipperShop - Cộng đồng Shipper Việt Nam #1">
+<meta property="og:description" content="Tham gia cộng đồng 700+ shipper. Chia sẻ kinh nghiệm, mẹo xăng, cảnh báo giao thông, chợ đồ ship.">
+<meta property="og:image" content="https://shippershop.vn/icons/og-image.png">
+<meta property="og:url" content="https://shippershop.vn/gioi-thieu">
+<meta property="og:type" content="website">
+<meta property="og:locale" content="vi_VN">
+<link rel="canonical" href="https://shippershop.vn/gioi-thieu">
+<link rel="icon" href="/icons/icon-72.png">
+<link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{--p:#7C3AED;--pd:#5B21B6;--pl:#A78BFA;--bg:#0F0B1A;--card:#1A1425;--text:#F8F6FF;--muted:#9CA3AF}
+body{font-family:'Be Vietnam Pro',sans-serif;color:var(--text);background:var(--bg);overflow-x:hidden}
+a{color:var(--pl);text-decoration:none}
+
+/* HERO */
+.hero{min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:80px 20px 40px;position:relative;overflow:hidden}
+.hero::before{content:'';position:absolute;top:-50%;left:-50%;width:200%;height:200%;background:radial-gradient(circle at 30% 40%,rgba(124,58,237,.15) 0%,transparent 50%),radial-gradient(circle at 70% 60%,rgba(167,139,250,.1) 0%,transparent 40%);animation:glow 8s ease-in-out infinite alternate}
+@keyframes glow{0%{transform:translate(0,0)}100%{transform:translate(-2%,2%)}}
+.hero-badge{display:inline-flex;align-items:center;gap:6px;background:rgba(124,58,237,.2);border:1px solid rgba(124,58,237,.3);border-radius:20px;padding:6px 16px;font-size:13px;color:var(--pl);margin-bottom:24px;backdrop-filter:blur(10px);animation:fadeUp .6s ease-out}
+.hero h1{font-size:clamp(32px,7vw,56px);font-weight:900;line-height:1.15;margin-bottom:16px;animation:fadeUp .6s ease-out .1s both}
+.hero h1 span{background:linear-gradient(135deg,var(--pl),#E879F9,var(--pl));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.hero-sub{font-size:clamp(16px,3vw,20px);color:var(--muted);max-width:600px;margin:0 auto 32px;line-height:1.6;animation:fadeUp .6s ease-out .2s both}
+.hero-cta{display:flex;gap:12px;flex-wrap:wrap;justify-content:center;animation:fadeUp .6s ease-out .3s both}
+.btn{display:inline-flex;align-items:center;gap:8px;padding:14px 28px;border-radius:12px;font-size:16px;font-weight:700;cursor:pointer;border:none;transition:all .2s}
+.btn-primary{background:var(--p);color:#fff;box-shadow:0 4px 20px rgba(124,58,237,.4)}
+.btn-primary:hover{background:var(--pd);transform:translateY(-2px);box-shadow:0 8px 30px rgba(124,58,237,.5)}
+.btn-outline{background:transparent;color:var(--pl);border:2px solid rgba(124,58,237,.4)}
+.btn-outline:hover{background:rgba(124,58,237,.1);border-color:var(--pl)}
+@keyframes fadeUp{from{opacity:0;transform:translateY(30px)}to{opacity:1;transform:none}}
+
+/* STATS BAR */
+.stats{display:flex;justify-content:center;gap:40px;padding:40px 20px;flex-wrap:wrap;animation:fadeUp .6s ease-out .4s both}
+.stat{text-align:center}
+.stat-num{font-size:clamp(28px,5vw,40px);font-weight:900;color:var(--pl)}
+.stat-label{font-size:13px;color:var(--muted);margin-top:4px}
+
+/* COMPANIES */
+.companies{padding:30px 20px;text-align:center}
+.companies p{font-size:13px;color:var(--muted);margin-bottom:16px;text-transform:uppercase;letter-spacing:2px}
+.company-logos{display:flex;justify-content:center;gap:20px;flex-wrap:wrap;align-items:center;opacity:.6}
+.company-logos span{font-size:14px;font-weight:700;padding:6px 14px;border-radius:8px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08)}
+
+/* FEATURES */
+.features{padding:80px 20px;max-width:1000px;margin:0 auto}
+.section-title{text-align:center;margin-bottom:48px}
+.section-title h2{font-size:clamp(24px,5vw,36px);font-weight:800;margin-bottom:12px}
+.section-title h2 span{color:var(--pl)}
+.section-title p{color:var(--muted);font-size:16px;max-width:500px;margin:0 auto}
+.feature-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:20px}
+.feature-card{background:var(--card);border:1px solid rgba(124,58,237,.1);border-radius:16px;padding:28px;transition:all .3s}
+.feature-card:hover{border-color:rgba(124,58,237,.3);transform:translateY(-4px);box-shadow:0 8px 30px rgba(124,58,237,.1)}
+.feature-icon{width:48px;height:48px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:22px;margin-bottom:16px}
+.feature-card h3{font-size:18px;font-weight:700;margin-bottom:8px}
+.feature-card p{font-size:14px;color:var(--muted);line-height:1.6}
+
+/* TESTIMONIALS */
+.testimonials{padding:60px 20px;max-width:800px;margin:0 auto}
+.testi-grid{display:flex;flex-direction:column;gap:16px}
+.testi-card{background:var(--card);border:1px solid rgba(255,255,255,.06);border-radius:16px;padding:24px;display:flex;gap:14px}
+.testi-av{width:44px;height:44px;border-radius:50%;background:var(--p);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:16px;flex-shrink:0}
+.testi-name{font-weight:700;font-size:14px}
+.testi-role{font-size:12px;color:var(--muted)}
+.testi-text{font-size:14px;color:var(--muted);margin-top:6px;line-height:1.5;font-style:italic}
+.testi-stars{color:#FBBF24;font-size:12px;margin-top:6px}
+
+/* CTA */
+.cta-section{padding:80px 20px;text-align:center;position:relative}
+.cta-section::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse at center,rgba(124,58,237,.15),transparent 70%)}
+.cta-section h2{font-size:clamp(24px,5vw,36px);font-weight:800;margin-bottom:12px;position:relative}
+.cta-section p{color:var(--muted);margin-bottom:28px;font-size:16px;position:relative}
+.cta-section .btn{position:relative;font-size:18px;padding:16px 40px}
+
+/* FAQ */
+.faq{padding:60px 20px;max-width:700px;margin:0 auto}
+.faq-item{border-bottom:1px solid rgba(255,255,255,.08);padding:16px 0}
+.faq-q{font-weight:700;font-size:15px;cursor:pointer;display:flex;justify-content:space-between;align-items:center}
+.faq-q i{transition:transform .3s;color:var(--pl)}
+.faq-a{max-height:0;overflow:hidden;transition:max-height .3s;color:var(--muted);font-size:14px;line-height:1.6}
+.faq-item.open .faq-a{max-height:200px;padding-top:10px}
+.faq-item.open .faq-q i{transform:rotate(180deg)}
+
+/* FOOTER */
+.footer{padding:40px 20px;text-align:center;border-top:1px solid rgba(255,255,255,.06)}
+.footer-links{display:flex;justify-content:center;gap:20px;flex-wrap:wrap;margin-bottom:16px}
+.footer-links a{font-size:14px;color:var(--muted)}
+.footer-copy{font-size:12px;color:rgba(255,255,255,.3)}
+
+/* FLOATING CTA */
+.float-cta{position:fixed;bottom:0;left:0;right:0;background:rgba(15,11,26,.95);backdrop-filter:blur(10px);padding:12px 20px;display:flex;align-items:center;gap:12px;z-index:100;border-top:1px solid rgba(124,58,237,.2);transform:translateY(100%);transition:transform .3s}
+.float-cta.show{transform:none}
+.float-cta-text{flex:1;font-size:13px;font-weight:600}
+.float-cta .btn{padding:10px 20px;font-size:14px;white-space:nowrap}
+
+/* NAV */
+.nav{position:fixed;top:0;left:0;right:0;z-index:100;padding:12px 20px;display:flex;align-items:center;justify-content:space-between;transition:background .3s}
+.nav.scrolled{background:rgba(15,11,26,.95);backdrop-filter:blur(10px);border-bottom:1px solid rgba(124,58,237,.15)}
+.nav-logo{font-size:20px;font-weight:900;color:var(--text)}
+.nav-logo span{color:var(--pl)}
+.nav .btn{padding:8px 20px;font-size:14px}
+
+@media(max-width:600px){
+  .stats{gap:24px}
+  .hero{padding:100px 20px 40px}
+  .feature-grid{grid-template-columns:1fr}
+}
+</style>
+</head>
+<body>
+
+<nav class="nav" id="nav">
+  <div class="nav-logo">Shipper<span>Shop</span></div>
+  <a href="/register.html" class="btn btn-primary" style="font-size:13px;padding:8px 16px">Tham gia miễn phí</a>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-badge"><i class="fas fa-fire"></i> 700+ shipper đã tham gia</div>
+  <h1>Cộng đồng <span>Shipper</span><br>lớn nhất Việt Nam</h1>
+  <p class="hero-sub">Chia sẻ kinh nghiệm, mẹo tiết kiệm xăng, cảnh báo giao thông real-time, chợ mua bán đồ ship. Hoàn toàn miễn phí.</p>
+  <div class="hero-cta">
+    <a href="/register.html" class="btn btn-primary"><i class="fas fa-rocket"></i> Tham gia ngay</a>
+    <a href="/" class="btn btn-outline"><i class="fas fa-eye"></i> Xem bài viết</a>
+  </div>
+  
+  <div class="stats">
+    <div class="stat"><div class="stat-num" id="sPost">700+</div><div class="stat-label">Bài viết</div></div>
+    <div class="stat"><div class="stat-num">12</div><div class="stat-label">Cộng đồng</div></div>
+    <div class="stat"><div class="stat-num">700+</div><div class="stat-label">Shipper</div></div>
+    <div class="stat"><div class="stat-num">24/7</div><div class="stat-label">Cảnh báo GT</div></div>
+  </div>
+</section>
+
+<!-- COMPANIES -->
+<section class="companies">
+  <p>Dành cho shipper mọi hãng</p>
+  <div class="company-logos">
+    <span style="color:#00b14f">GHTK</span>
+    <span style="color:#ff6600">GHN</span>
+    <span style="color:#00b14f">Grab</span>
+    <span style="color:#5bc500">Be</span>
+    <span style="color:#EE4D2D">SPX</span>
+    <span style="color:#d32f2f">J&T</span>
+    <span style="color:#e21a1a">Viettel Post</span>
+    <span style="color:#c41230">Ninja Van</span>
+  </div>
+</section>
+
+<!-- FEATURES -->
+<section class="features">
+  <div class="section-title">
+    <h2>Tại sao <span>700+ shipper</span> chọn ShipperShop?</h2>
+    <p>Tất cả những gì bạn cần trong 1 app duy nhất</p>
+  </div>
+  <div class="feature-grid">
+    <div class="feature-card">
+      <div class="feature-icon" style="background:rgba(124,58,237,.15);color:var(--pl)"><i class="fas fa-users"></i></div>
+      <h3>Cộng đồng sôi động</h3>
+      <p>12 nhóm chuyên đề: Confession, Mẹo xăng, Review đồ ship, Hỏi đáp... Chia sẻ 24/7 với anh em cùng nghề.</p>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon" style="background:rgba(239,68,68,.15);color:#EF4444"><i class="fas fa-triangle-exclamation"></i></div>
+      <h3>Cảnh báo giao thông</h3>
+      <p>Real-time từ cộng đồng shipper. Kẹt xe, ngập nước, tai nạn — biết trước tránh được, tiết kiệm giờ ship.</p>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon" style="background:rgba(34,197,94,.15);color:#22C55E"><i class="fas fa-store"></i></div>
+      <h3>Chợ mua bán đồ ship</h3>
+      <p>Mua bán thùng ship, áo khoác UV, sạc dự phòng, xe máy. Giá tốt từ shipper cho shipper.</p>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon" style="background:rgba(251,191,36,.15);color:#FBBF24"><i class="fas fa-lightbulb"></i></div>
+      <h3>Mẹo tiết kiệm xăng</h3>
+      <p>15+ mẹo đã verified, tiết kiệm 500-600k xăng/tháng. Review xe, dầu nhớt, phụ tùng cho shipper.</p>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon" style="background:rgba(59,130,246,.15);color:#3B82F6"><i class="fas fa-map-location-dot"></i></div>
+      <h3>Bản đồ shipper</h3>
+      <p>Hỏi địa chỉ, đánh giá điểm giao hàng, chia sẻ tuyến đường. Shipper giúp shipper tìm đường.</p>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon" style="background:rgba(236,72,153,.15);color:#EC4899"><i class="fas fa-bell"></i></div>
+      <h3>Thông báo real-time</h3>
+      <p>Push notification đến điện thoại. Tin nhắn, bình luận, like — không bỏ lỡ bất kỳ tương tác nào.</p>
+    </div>
+  </div>
+</section>
+
+<!-- TESTIMONIALS -->
+<section class="testimonials">
+  <div class="section-title">
+    <h2>Shipper nói gì về <span>ShipperShop</span>?</h2>
+  </div>
+  <div class="testi-grid">
+    <div class="testi-card">
+      <div class="testi-av">H</div>
+      <div>
+        <div class="testi-name">Nguyễn Văn Huy</div>
+        <div class="testi-role">Shipper GHTK · 3 năm kinh nghiệm</div>
+        <div class="testi-text">"Từ khi vào ShipperShop, mình tiết kiệm được 500k xăng/tháng nhờ mẹo của anh em. Cảnh báo giao thông cũng cứu mình nhiều lần rồi!"</div>
+        <div class="testi-stars"><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i></div>
+      </div>
+    </div>
+    <div class="testi-card">
+      <div class="testi-av">T</div>
+      <div>
+        <div class="testi-name">Trần Minh Đức</div>
+        <div class="testi-role">Shipper Grab · 2 năm</div>
+        <div class="testi-text">"Chợ đồ ship trên này rẻ hơn ngoài nhiều. Mình mua được túi giữ nhiệt 120k, bên ngoài 200k. Cộng đồng nhiệt tình lắm!"</div>
+        <div class="testi-stars"><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i></div>
+      </div>
+    </div>
+    <div class="testi-card">
+      <div class="testi-av">L</div>
+      <div>
+        <div class="testi-name">Lê Thị Hương</div>
+        <div class="testi-role">Shipper GHN · 1 năm</div>
+        <div class="testi-text">"Là shipper nữ, mình hay lo về an toàn. ShipperShop có cảnh báo đường nguy hiểm và nhóm hỗ trợ. Yên tâm hơn nhiều!"</div>
+        <div class="testi-stars"><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="far fa-star"></i></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CTA -->
+<section class="cta-section">
+  <h2>Sẵn sàng tham gia?</h2>
+  <p>Miễn phí 100%. Đăng ký chỉ mất 30 giây.</p>
+  <a href="/register.html" class="btn btn-primary"><i class="fas fa-rocket"></i> Tạo tài khoản miễn phí</a>
+</section>
+
+<!-- FAQ -->
+<section class="faq">
+  <div class="section-title">
+    <h2>Câu hỏi thường gặp</h2>
+  </div>
+  <div class="faq-item open">
+    <div class="faq-q" onclick="this.parentElement.classList.toggle('open')">ShipperShop có miễn phí không? <i class="fas fa-chevron-down"></i></div>
+    <div class="faq-a">Hoàn toàn miễn phí! Đăng bài, tham gia cộng đồng, xem cảnh báo giao thông, mua bán đồ ship — tất cả đều free. Có gói Pro/VIP tùy chọn nếu muốn thêm tính năng.</div>
+  </div>
+  <div class="faq-item">
+    <div class="faq-q" onclick="this.parentElement.classList.toggle('open')">Shipper hãng nào cũng tham gia được? <i class="fas fa-chevron-down"></i></div>
+    <div class="faq-a">Tất cả! GHTK, GHN, Grab, Be, Gojek, SPX, J&T, Viettel Post, Ninja Van, Lalamove, Ahamove... Thậm chí chạy freelance cũng OK.</div>
+  </div>
+  <div class="faq-item">
+    <div class="faq-q" onclick="this.parentElement.classList.toggle('open')">Có cần tải app không? <i class="fas fa-chevron-down"></i></div>
+    <div class="faq-a">Không cần! ShipperShop là web app, mở trên trình duyệt điện thoại là dùng được ngay. Thêm vào màn hình chính để trải nghiệm như app thật.</div>
+  </div>
+  <div class="faq-item">
+    <div class="faq-q" onclick="this.parentElement.classList.toggle('open')">Mình mới đi ship, có phù hợp không? <i class="fas fa-chevron-down"></i></div>
+    <div class="faq-a">Rất phù hợp! Nhóm "Hỏi Đáp Shipper" có hàng trăm bài từ ae senior. Mẹo cho người mới, review xe, cách nhận nhiều đơn — tất cả đều có.</div>
+  </div>
+  <div class="faq-item">
+    <div class="faq-q" onclick="this.parentElement.classList.toggle('open')">Thông tin cá nhân có an toàn không? <i class="fas fa-chevron-down"></i></div>
+    <div class="faq-a">Hoàn toàn bảo mật. Mã hóa mật khẩu bcrypt, JWT token, CSRF protection. Không chia sẻ thông tin cho bên thứ 3.</div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer class="footer">
+  <div class="footer-links">
+    <a href="/">Trang chủ</a>
+    <a href="/groups.html">Cộng đồng</a>
+    <a href="/marketplace.html">Chợ mua bán</a>
+    <a href="/traffic.html">Giao thông</a>
+    <a href="/login.html">Đăng nhập</a>
+  </div>
+  <div class="footer-copy">© 2026 ShipperShop. Cộng đồng shipper Việt Nam.</div>
+</footer>
+
+<!-- FLOATING CTA -->
+<div class="float-cta" id="floatCta">
+  <div class="float-cta-text">Tham gia 700+ shipper ngay!</div>
+  <a href="/register.html" class="btn btn-primary">Đăng ký</a>
+</div>
+
+<script>
+// Nav scroll effect
+var nav=document.getElementById('nav');
+var fc=document.getElementById('floatCta');
+window.addEventListener('scroll',function(){
+  nav.classList.toggle('scrolled',window.scrollY>50);
+  fc.classList.toggle('show',window.scrollY>600);
+});
+
+// Animate stats on scroll
+var observed=false;
+var observer=new IntersectionObserver(function(entries){
+  if(entries[0].isIntersecting&&!observed){
+    observed=true;
+    animateNum('sPost',0,718,1500);
+  }
+});
+observer.observe(document.querySelector('.stats'));
+
+function animateNum(id,from,to,dur){
+  var el=document.getElementById(id);
+  var start=performance.now();
+  function step(now){
+    var p=Math.min((now-start)/dur,1);
+    var ease=1-Math.pow(1-p,3);
+    el.textContent=Math.floor(from+ease*(to-from))+'+';
+    if(p<1)requestAnimationFrame(step);
+  }
+  requestAnimationFrame(step);
+}
+
+// Track ref parameter for referral
+var ref=new URLSearchParams(location.search).get('ref');
+if(ref){
+  document.querySelectorAll('a[href*="register"]').forEach(function(a){
+    a.href=a.href+(a.href.indexOf('?')>-1?'&':'?')+'ref='+ref;
+  });
+}
+</script>
+<script src="/js/analytics.js"></script></body>
+</html>

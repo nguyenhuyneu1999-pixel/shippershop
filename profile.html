@@ -378,6 +378,27 @@
                         <h3 style="margin-bottom: 10px;">Chào mừng trở lại!</h3>
                         <p style="color: var(--gray);">Xin chào <strong id="welcomeName"></strong>, cảm ơn bạn đã tin tưởng ShipperShop!</p>
                     </div>
+
+                    <!-- Referral Invite Section -->
+                    <div id="refSection" style="margin-top:16px;background:linear-gradient(135deg,#7C3AED,#5B21B6);padding:20px;border-radius:12px;color:#fff;display:none">
+                        <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px">
+                            <div style="width:44px;height:44px;border-radius:50%;background:rgba(255,255,255,.2);display:flex;align-items:center;justify-content:center;font-size:20px">🎁</div>
+                            <div>
+                                <div style="font-weight:700;font-size:16px">Mời bạn bè tham gia!</div>
+                                <div style="font-size:13px;opacity:.8">Chia sẻ ShipperShop với anh em shipper</div>
+                            </div>
+                        </div>
+                        <div style="display:flex;gap:8px;margin-bottom:12px">
+                            <input id="refLink" readonly style="flex:1;padding:10px 12px;border-radius:8px;border:none;background:rgba(255,255,255,.15);color:#fff;font-size:13px" value="Đang tải...">
+                            <button onclick="copyRef()" style="padding:10px 16px;border-radius:8px;border:none;background:#fff;color:#7C3AED;font-weight:700;font-size:13px;cursor:pointer;white-space:nowrap"><i class="fas fa-copy"></i> Copy</button>
+                        </div>
+                        <div style="display:flex;gap:8px">
+                            <button onclick="shareRef('zalo')" style="flex:1;padding:10px;border-radius:8px;border:none;background:rgba(255,255,255,.15);color:#fff;font-weight:600;font-size:13px;cursor:pointer"><i class="fas fa-comment-dots"></i> Zalo</button>
+                            <button onclick="shareRef('fb')" style="flex:1;padding:10px;border-radius:8px;border:none;background:rgba(255,255,255,.15);color:#fff;font-weight:600;font-size:13px;cursor:pointer"><i class="fab fa-facebook"></i> Facebook</button>
+                            <button onclick="shareRef('native')" style="flex:1;padding:10px;border-radius:8px;border:none;background:rgba(255,255,255,.15);color:#fff;font-weight:600;font-size:13px;cursor:pointer"><i class="fas fa-share-alt"></i> Khác</button>
+                        </div>
+                        <div style="margin-top:10px;font-size:12px;opacity:.7;text-align:center">Đã mời: <span id="refCount">0</span> bạn bè</div>
+                    </div>
                 </div>
 
                 <!-- PROFILE TAB -->
@@ -877,7 +898,23 @@ document.addEventListener('DOMContentLoaded',function(){
     }).catch(function(){});
 });
 </script>
-<script>if("serviceWorker" in navigator)navigator.serviceWorker.register("/sw.js");</script><script src="js/post-modal.js"></script><script>
+<script>if("serviceWorker" in navigator)navigator.serviceWorker.register("/sw.js");</script>
+<script>
+// Referral System
+(function(){
+var tk=localStorage.getItem("token");if(!tk)return;
+document.getElementById("refSection").style.display="block";
+fetch("/api/referral.php?action=info",{headers:{"Authorization":"Bearer "+tk}}).then(function(r){return r.json();}).then(function(d){
+  if(d.success){
+    document.getElementById("refLink").value=d.data.share_url;
+    document.getElementById("refCount").textContent=d.data.total_invited;
+  }
+}).catch(function(){});
+})();
+function copyRef(){var i=document.getElementById("refLink");i.select();document.execCommand("copy");if(typeof toast==="function")toast("Đã copy link mời!","success");else alert("Đã copy!");}
+function shareRef(type){var url=document.getElementById("refLink").value;var text="Tham gia ShipperShop - Cộng đồng Shipper #1 Việt Nam! "+url;if(type==="zalo"){window.open("https://zalo.me/share?url="+encodeURIComponent(url)+"&title="+encodeURIComponent("Tham gia ShipperShop"));}else if(type==="fb"){window.open("https://www.facebook.com/sharer/sharer.php?u="+encodeURIComponent(url));}else{if(navigator.share)navigator.share({title:"ShipperShop",text:"Tham gia cộng đồng shipper #1 VN",url:url});else{copyRef();}}}
+</script>
+<script src="js/post-modal.js"></script><script>
 (function(){
 var VP="BK3cBLMYiJYXNIyw4zXLosWVJuhZwoaMjF7DX0JBYpJRQFHiaSClhO5Qfahv1yAH9Y7AuNVRaLb1syrF7HwC_88";
 var U=JSON.parse(localStorage.getItem("user")||"null");
@@ -887,5 +924,5 @@ navigator.serviceWorker.ready.then(function(reg){reg.pushManager.getSubscription
 function sb(r){r.pushManager.subscribe({userVisibleOnly:true,applicationServerKey:u2a(VP)}).then(function(s){ss(s);}).catch(function(){});}
 function ss(s){var k=s.getKey("p256dh"),a=s.getKey("auth");var d={endpoint:s.endpoint,keys:{p256dh:btoa(String.fromCharCode.apply(null,new Uint8Array(k))).replace(/\+/g,"-").replace(/\//g,"_").replace(/=+$/,""),auth:btoa(String.fromCharCode.apply(null,new Uint8Array(a))).replace(/\+/g,"-").replace(/\//g,"_").replace(/=+$/,"")}};var t=localStorage.getItem("token"),h={"Content-Type":"application/json"};if(t)h["Authorization"]="Bearer "+t;fetch("/api/push.php?action=subscribe",{method:"POST",headers:h,credentials:"include",body:JSON.stringify(d)}).catch(function(){});}
 })();
-</script></body>
+</script><script src="/js/analytics.js"></script></body>
 </html>
