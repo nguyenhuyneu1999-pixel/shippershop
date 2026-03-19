@@ -207,6 +207,20 @@ if ($method === 'POST') {
             $d->query("UPDATE group_posts SET likes_count = likes_count + 1 WHERE id = ?", [$pid]);
         }
         $cnt = $d->fetchOne("SELECT likes_count FROM group_posts WHERE id = ?", [$pid]);
+        // Push: notify group post author on like (only on like, not unlike)
+        if (!$ex) {
+            try{
+                require_once __DIR__.'/../includes/push-helper.php';
+                $gpost=$d->fetchOne("SELECT user_id,group_id FROM group_posts WHERE id=?",[$pid]);
+                if($gpost&&intval($gpost['user_id'])!==$uid){
+                    $me=$d->fetchOne("SELECT fullname FROM users WHERE id=?",[$uid]);
+                    $grp=$d->fetchOne("SELECT name FROM `groups` WHERE id=?",[$gpost['group_id']]);
+                    $mName=$me?$me['fullname']:'Ai đó';
+                    $gName=$grp?$grp['name']:'Cộng đồng';
+                    notifyUser(intval($gpost['user_id']),$gName.': '.$mName.' đã thành công','Bài viết được thành công','group','/group.html?id='.$gpost['group_id']);
+                }
+            }catch(Throwable $e){}
+        }
         gOk('OK', ['liked' => !$ex, 'count' => intval($cnt['likes_count'] ?? 0)]);
     }
 
