@@ -26,7 +26,7 @@ function ytEmbed(u){if(u.indexOf("youtube.com/watch")!==-1)return"https://www.yo
    mkPost - Reddit-style post card
    ============================================ */
 function mkPost(p){
-  var likes=parseInt(p.likes_count||p.score||p.upvotes||0);
+  var likes=parseInt(p.likes_count||0);
   var isLiked=p.user_liked||p.user_vote==='up';
   var anon=parseInt(p.is_anonymous)===1;
   var uName=anon?'Ẩn danh':(p.user_name||'Người dùng');
