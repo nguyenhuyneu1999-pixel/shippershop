@@ -20,6 +20,7 @@ define('APP_ACCESS', true);
 require_once __DIR__ . '/../includes/config.php';
 require_once __DIR__ . '/../includes/db.php';
 require_once __DIR__ . '/../includes/functions.php';
+require_once __DIR__ . '/auth-check.php';
 
 // Set CORS headers
 setCorsHeaders();
@@ -30,9 +31,14 @@ $db = db();
 // Get action
 $action = $_GET['action'] ?? '';
 
-// Require admin authentication for ALL actions
-requireAuth();
-requireAdmin();
+// Require admin authentication for ALL actions (JWT + session)
+$adminUid = getAuthUserId(); // supports JWT Bearer + session
+$adminUser = $db->fetchOne("SELECT role FROM users WHERE id = ?", [$adminUid]);
+if (!$adminUser || $adminUser['role'] !== 'admin') {
+    http_response_code(403);
+    echo json_encode(['success' => false, 'message' => 'Không có quyền admin']);
+    exit;
+}
 
 // ============================================
 // DASHBOARD STATS
@@ -64,7 +70,7 @@ if ($action === 'dashboard_stats') {
     $todayPosts = $db->fetchOne("SELECT COUNT(*) as c FROM posts WHERE $pf AND DATE(created_at) = CURDATE()")['c'];
     
     // Comments & Likes
-    $cmtFilter = ($filter === 'real') ? "AND c.user_id IN (SELECT id FROM users WHERE $realUserWhere)" : "";
+    $cmtFilter = ($filter === 'real') ? "AND c.user_id IN (SELECT id FROM users WHERE $userReal)" : "";
     $totalCmts = $db->fetchOne("SELECT COUNT(*) as c FROM comments c WHERE 1=1 $cmtFilter")['c'];
     $todayCmts = $db->fetchOne("SELECT COUNT(*) as c FROM comments c WHERE DATE(c.created_at) = CURDATE() $cmtFilter")['c'];
     $totalLikes = $db->fetchOne("SELECT COUNT(*) as c FROM likes")['c'];
@@ -103,7 +109,7 @@ if ($action === 'dashboard_stats') {
     $postsByDay = $db->fetchAll("SELECT DATE(created_at) as day, COUNT(*) as cnt FROM posts WHERE $pf AND created_at >= DATE_SUB(CURDATE(), INTERVAL 7 DAY) GROUP BY DATE(created_at) ORDER BY day");
     
     // Top posters
-    $topPosters = $db->fetchAll("SELECT u.id, u.fullname, u.avatar, COUNT(p.id) as post_count FROM users u JOIN posts p ON u.id = p.user_id WHERE p.`status`='active' AND u.id > 1 " . ($filter === 'real' ? "AND $realUserWhere" : "") . " GROUP BY u.id ORDER BY post_count DESC LIMIT 5");
+    $topPosters = $db->fetchAll("SELECT u.id, u.fullname, u.avatar, COUNT(p.id) as post_count FROM users u JOIN posts p ON u.id = p.user_id WHERE p.`status`='active' AND u.id > 1 " . ($filter === 'real' ? "AND (u.id = 2 OR u.id > $seedMax)" : "") . " GROUP BY u.id ORDER BY post_count DESC LIMIT 5");
     
     success('Success', [
         'filter' => $filter,
@@ -598,7 +604,7 @@ if ($action === 'update_user_status') {
     }
     
     // Cannot change own status
-    if ($userId === getCurrentUserId()) {
+    if ($userId === getAuthUserId()) {
         error('Không thể thay đổi trạng thái của chính mình', 403);
     }
     
