@@ -211,12 +211,13 @@
             <textarea id="cDesc" placeholder="Mô tả chi tiết sản phẩm, lý do bán..." rows="4"></textarea>
         </div>
         <div class="mk-field">
-            <label>Ảnh mô tả chi tiết (hiện bên dưới mô tả, giống Amazon)</label>
-            <div class="mk-images" id="descImgPreviews">
-                <label class="mk-img-add" id="descImgAddBtn">
-                    <i class="fas fa-images"></i>
+            <label><i class="fas fa-images" style="color:var(--primary);margin-right:4px"></i> Ảnh chi tiết sản phẩm (giống Amazon)</label>
+            <p style="font-size:12px;color:#65676B;margin:0 0 8px">Ảnh hiện full màn hình khi cuộn trang. Upload banner, ảnh tính năng, so sánh...</p>
+            <div class="mk-images" id="showcaseImgPreviews">
+                <label class="mk-img-add" id="showcaseImgAddBtn">
+                    <i class="fas fa-plus-circle" style="font-size:24px;color:var(--primary)"></i>
                     <span>Thêm ảnh</span>
-                    <input type="file" accept="image/*" multiple style="display:none" onchange="handleDescImgUpload(this)">
+                    <input type="file" accept="image/*" multiple style="display:none" onchange="handleShowcaseImgUpload(this)">
                 </label>
             </div>
         </div>
@@ -389,9 +390,9 @@ function removeVideo() {
     document.getElementById('videoLabel').textContent = 'Chọn video (MP4, tối đa 50MB)';
 }
 
-// Description images
-var uploadedDescImgUrls = [];
-async function handleDescImgUpload(input) {
+// Showcase images (Amazon A+ Content style)
+var uploadedShowcaseUrls = [];
+async function handleShowcaseImgUpload(input) {
     if (!input.files || input.files.length === 0) return;
     var fd = new FormData();
     for (var i = 0; i < Math.min(input.files.length, 10); i++) { fd.append('images[]', input.files[i]); }
@@ -403,20 +404,20 @@ async function handleDescImgUpload(input) {
         });
         var d = await r.json();
         if (d.success && d.data.urls) {
-            uploadedDescImgUrls = uploadedDescImgUrls.concat(d.data.urls);
-            renderDescImgPreviews();
+            uploadedShowcaseUrls = uploadedShowcaseUrls.concat(d.data.urls);
+            renderShowcasePreviews();
         }
     } catch(e) {}
 }
-function renderDescImgPreviews() {
-    var c = document.getElementById('descImgPreviews');
-    var html = uploadedDescImgUrls.map(function(url, i) {
-        return '<div class="mk-img-preview"><img src="' + url + '"><button class="mk-img-del" onclick="removeDescImg(' + i + ')"><i class="fas fa-times"></i></button></div>';
+function renderShowcasePreviews() {
+    var c = document.getElementById('showcaseImgPreviews');
+    var html = uploadedShowcaseUrls.map(function(url, i) {
+        return '<div class="mk-img-preview"><img src="' + url + '"><button class="mk-img-del" onclick="removeShowcaseImg(' + i + ')"><i class="fas fa-times"></i></button></div>';
     }).join('');
-    html += '<label class="mk-img-add" id="descImgAddBtn"><i class="fas fa-images"></i><span>Thêm</span><input type="file" accept="image/*" multiple style="display:none" onchange="handleDescImgUpload(this)"></label>';
+    html += '<label class="mk-img-add" id="showcaseImgAddBtn"><i class="fas fa-plus-circle" style="font-size:24px;color:var(--primary)"></i><span>Thêm</span><input type="file" accept="image/*" multiple style="display:none" onchange="handleShowcaseImgUpload(this)"></label>';
     c.innerHTML = html;
 }
-function removeDescImg(i) { uploadedDescImgUrls.splice(i, 1); renderDescImgPreviews(); }
+function removeShowcaseImg(i) { uploadedShowcaseUrls.splice(i, 1); renderShowcasePreviews(); }
 
 async function submitListing() {
     var title = document.getElementById('cTitle').value.trim();
@@ -434,7 +435,8 @@ async function submitListing() {
                 category: document.getElementById('cCategory').value,
                 condition_type: document.getElementById('cCondition').value,
                 description: document.getElementById('cDesc').value,
-                description_images: JSON.stringify(uploadedDescImgUrls),
+                description_images: JSON.stringify(uploadedShowcaseUrls),
+                showcase_images: JSON.stringify(uploadedShowcaseUrls),
                 location: document.getElementById('cLocation').value,
                 phone: document.getElementById('cPhone').value,
                 images: uploadedImgUrls,
@@ -444,7 +446,7 @@ async function submitListing() {
         var d = await r.json();
         if (d.success) {
             alert('✅ Đăng tin thành công!');
-            closeCreate(); uploadedImgUrls = []; uploadedVideoUrl = null; uploadedDescImgUrls = [];
+            closeCreate(); uploadedImgUrls = []; uploadedVideoUrl = null; uploadedShowcaseUrls = [];
             document.getElementById('cTitle').value = '';
             document.getElementById('cPrice').value = '';
             document.getElementById('cDesc').value = '';

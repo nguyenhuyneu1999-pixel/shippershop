@@ -237,12 +237,25 @@ function renderItem(){
   h+='</div><button class="seller-btn" onclick="location.href=\'user.html?id='+p.user_id+'\'">Xem shop</button></div>';
 
   // === DESCRIPTION (Collapsible) ===
+  // === SHOWCASE IMAGES (Amazon A+ Content) ===
+  // Full-width images - user just scrolls to see all product details
+  var showImgs=[];try{showImgs=JSON.parse(p.showcase_images||"[]");}catch(e){}
+  var descImgs=[];try{descImgs=JSON.parse(p.description_images||"[]");}catch(e){}
+  var allShowcase=[].concat(showImgs,descImgs);
+  if(allShowcase.length>0){
+    h+='<div style="background:#fff;margin-top:8px">';
+    h+='<div style="padding:14px 16px 8px;font-size:15px;font-weight:700"><i class="fas fa-images" style="color:var(--primary);margin-right:6px"></i>Chi tiết sản phẩm</div>';
+    allShowcase.forEach(function(si){
+      h+='<img src="'+si+'" style="width:100%;display:block;cursor:pointer" onclick="openLB(this.src)" loading="lazy">';
+    });
+    h+='</div>';
+  }
+
+  // === DESCRIPTION TEXT ===
   if(p.description){
     h+='<div class="section"><div class="section-header open" onclick="toggleSection(this)"><h3><i class="fas fa-file-text" style="color:var(--primary);margin-right:8px"></i>Mô tả sản phẩm</h3><i class="fas fa-chevron-down"></i></div>';
     h+='<div class="section-body open" style="font-size:14px;line-height:1.8">';
     h+='<div style="white-space:pre-wrap;word-break:break-word">'+esc(p.description).replace(/\n/g,"<br>")+'</div>';
-    var descImgs=[];try{descImgs=JSON.parse(p.description_images||"[]");}catch(e){}
-    if(descImgs&&descImgs.length>0){h+='<div style="margin-top:16px">';descImgs.forEach(function(di){h+='<img src="'+di+'" style="width:100%;border-radius:8px;margin-bottom:12px;cursor:pointer" onclick="openLB(this.src)" loading="lazy">';});h+='</div>';}
     h+='</div></div>';
   }
 
