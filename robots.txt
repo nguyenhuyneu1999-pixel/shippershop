@@ -1,10 +1,11 @@
 User-agent: *
 Allow: /
 Disallow: /api/
-Disallow: /includes/
 Disallow: /admin.html
-Disallow: /admin-orders.html
+Disallow: /admin-v2.html
 Disallow: /admin-wallet.html
-Disallow: /uploads/messages/
+Disallow: /auto-post.html
+Disallow: /marketing-setup.html
+Disallow: /cron-setup.html
 
-Sitemap: https://shippershop.vn/sitemap.xml
+Sitemap: https://shippershop.vn/api/sitemap.php

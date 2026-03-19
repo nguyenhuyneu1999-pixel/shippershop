@@ -211,6 +211,7 @@ video{width:100%;max-height:600px;display:block;background:#000;}
 .loc-filter select:focus{border-color:#1976d2;}
 .loc-filter .loc-icon{color:#1976d2;font-size:14px;flex-shrink:0;}
 .loc-filter .loc-clear{background:none;border:1px solid #ddd;border-radius:20px;padding:4px 10px;font-size:11px;cursor:pointer;color:#999;flex-shrink:0;}
+@keyframes xpIn{from{transform:translateX(100px);opacity:0}to{transform:translateX(0);opacity:1}}
 </style>
 
 <style id="fabFix">
@@ -288,6 +289,7 @@ video{width:100%;max-height:600px;display:block;background:#000;}
 .loc-filter select:focus{border-color:#1976d2;}
 .loc-filter .loc-icon{color:#1976d2;font-size:14px;flex-shrink:0;}
 .loc-filter .loc-clear{background:none;border:1px solid #ddd;border-radius:20px;padding:4px 10px;font-size:11px;cursor:pointer;color:#999;flex-shrink:0;}
+@keyframes xpIn{from{transform:translateX(100px);opacity:0}to{transform:translateX(0);opacity:1}}
 </style>
 
 <link rel="manifest" href="/manifest.json">
@@ -1071,6 +1073,7 @@ video{width:100%;max-height:600px;display:block;background:#000;}
 .loc-filter select:focus{border-color:#1976d2;}
 .loc-filter .loc-icon{color:#1976d2;font-size:14px;flex-shrink:0;}
 .loc-filter .loc-clear{background:none;border:1px solid #ddd;border-radius:20px;padding:4px 10px;font-size:11px;cursor:pointer;color:#999;flex-shrink:0;}
+@keyframes xpIn{from{transform:translateX(100px);opacity:0}to{transform:translateX(0);opacity:1}}
 </style>
 <script>
 var deferredPrompt=null;
@@ -1179,5 +1182,39 @@ function sendSubToServer(sub){
   fetch("/api/push.php?action=subscribe",{method:"POST",headers:hdrs,credentials:"include",body:JSON.stringify(data)}).catch(function(){});
 }
 })();
-</script><script src="/js/analytics.js"></script><script src="/js/image-viewer.js"></script><img src="/api/auto-cron.php" style="display:none" width="1" height="1" alt="">
+</script><script src="/js/analytics.js"></script><script src="/js/image-viewer.js"></script>
+<!-- Daily Check-in Banner -->
+<div id="checkinBanner" style="display:none;position:fixed;bottom:70px;left:50%;transform:translateX(-50%);z-index:999;background:linear-gradient(135deg,#7C3AED,#5B21B6);color:#fff;padding:10px 20px;border-radius:12px;box-shadow:0 4px 20px rgba(124,58,237,.4);font-size:13px;display:flex;align-items:center;gap:10px;max-width:360px;width:90%;cursor:pointer" onclick="doFeedCheckin()">
+  <span style="font-size:22px">🔥</span>
+  <div style="flex:1"><b>Check-in hôm nay!</b><br><span style="font-size:11px;opacity:.8">+5 XP · Giữ streak liên tục</span></div>
+  <span style="font-size:18px">→</span>
+</div>
+
+<img src="/api/auto-cron.php" style="display:none" width="1" height="1" alt="">
+<script>
+// Daily check-in banner
+(function(){
+  if(!CU)return;
+  var today=new Date().toISOString().split("T")[0];
+  if(localStorage.getItem("ss_checkin")===today)return;
+  setTimeout(function(){document.getElementById("checkinBanner").style.display="flex";},3000);
+})();
+function doFeedCheckin(){
+  var tk=localStorage.getItem("token");if(!tk)return;
+  var b=document.getElementById("checkinBanner");
+  b.innerHTML="<span style='font-size:22px'>⏳</span><div>Đang check-in...</div>";
+  fetch("/api/gamification.php?action=checkin",{method:"POST",headers:{"Authorization":"Bearer "+tk}}).then(function(r){return r.json();}).then(function(d){
+    if(d.success){
+      b.innerHTML="<span style='font-size:22px'>✅</span><div><b>"+d.data.message+"</b></div>";
+      b.style.background="linear-gradient(135deg,#00b14f,#009a43)";
+      localStorage.setItem("ss_checkin",new Date().toISOString().split("T")[0]);
+      setTimeout(function(){b.style.display="none";},3000);
+    }else{
+      b.innerHTML="<span style='font-size:22px'>⚠️</span><div>"+d.message+"</div>";
+      localStorage.setItem("ss_checkin",new Date().toISOString().split("T")[0]);
+      setTimeout(function(){b.style.display="none";},2000);
+    }
+  }).catch(function(){b.style.display="none";});
+}
+</script>
 </body>

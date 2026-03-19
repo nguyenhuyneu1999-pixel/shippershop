@@ -1,3 +1,11 @@
+
+function xpToast(msg){
+  var t=document.createElement("div");
+  t.textContent=msg;
+  t.style.cssText="position:fixed;top:80px;right:16px;background:#7C3AED;color:#fff;padding:8px 16px;border-radius:8px;font-size:13px;font-weight:600;z-index:9999;animation:xpIn .3s;box-shadow:0 4px 12px rgba(124,58,237,.4)";
+  document.body.appendChild(t);
+  setTimeout(function(){t.style.opacity="0";t.style.transition="opacity .3s";setTimeout(function(){t.remove();},300);},2000);
+}
 function ytEmbed(u){if(u.indexOf("youtube.com/watch")!==-1)return"https://www.youtube.com/embed/"+u.split("v=")[1].split("&")[0];if(u.indexOf("youtu.be/")!==-1)return"https://www.youtube.com/embed/"+u.split("youtu.be/")[1].split("?")[0];return u;}
 /* ============================================
    FETCH INTERCEPTOR - Auto-add Bearer token to all /api/ calls
@@ -401,7 +409,7 @@ function sendGC(){
   if(_gcReply){b.parent_id=_gcReply;_gcReply=null;document.getElementById("gcRpl").className="gc-rpl";}
   fetch("/api/posts.php?action=comment",{method:"POST",headers:{"Content-Type":"application/json"},credentials:"include",body:JSON.stringify(b)}).then(function(r){return r.json();}).then(function(d){
     if(d.success){
-      _gcLoadCmts(_gcPid);
+      _gcLoadCmts(_gcPid);try{xpToast("+5 XP Ghi chú");}catch(e){}
       // Update feed counter
       var card=document.getElementById("P"+_gcPid);
       if(card){var nc=card.querySelector("#nc"+_gcPid);if(nc){/* keep text */}var fs=card.querySelectorAll(".pa3-stats span");if(fs[1]){var cur=parseInt(fs[1].textContent)||0;fs[1].textContent=(cur+1)+" ghi chú";}}

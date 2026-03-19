@@ -399,6 +399,43 @@
                         </div>
                         <div style="margin-top:10px;font-size:12px;opacity:.7;text-align:center">Đã mời: <span id="refCount">0</span> bạn bè</div>
                     </div>
+                    <div id="xpSection" style="margin-top:12px;background:#1a1a2e;border-radius:12px;padding:16px;display:none">
+                        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
+                            <div style="display:flex;align-items:center;gap:8px">
+                                <span id="xpBadge" style="font-size:24px">🟢</span>
+                                <div>
+                                    <div style="font-weight:700;font-size:15px;color:#fff" id="xpLevelName">Tân binh</div>
+                                    <div style="font-size:12px;color:#888">Level <span id="xpLevel">1</span></div>
+                                </div>
+                            </div>
+                            <div style="text-align:right">
+                                <div style="font-size:20px;font-weight:700;color:#7C3AED" id="xpTotal">0</div>
+                                <div style="font-size:11px;color:#888">XP</div>
+                            </div>
+                        </div>
+                        <div style="background:#2a2a4a;border-radius:6px;height:8px;overflow:hidden;margin-bottom:8px">
+                            <div id="xpBar" style="height:100%;background:linear-gradient(90deg,#7C3AED,#a78bfa);border-radius:6px;width:0%;transition:width .5s"></div>
+                        </div>
+                        <div style="display:flex;justify-content:space-between;font-size:11px;color:#888;margin-bottom:12px">
+                            <span id="xpNextInfo">0 / 500 XP đến level tiếp</span>
+                            <span id="xpProgress">0%</span>
+                        </div>
+                        <div style="display:flex;gap:8px;margin-bottom:8px">
+                            <div style="flex:1;background:#16213e;border-radius:8px;padding:10px;text-align:center">
+                                <div style="font-size:18px;font-weight:700;color:#ff9800" id="xpStreak">0</div>
+                                <div style="font-size:10px;color:#888">🔥 Streak</div>
+                            </div>
+                            <div style="flex:1;background:#16213e;border-radius:8px;padding:10px;text-align:center">
+                                <div style="font-size:18px;font-weight:700;color:#00b14f" id="xpPosts">0</div>
+                                <div style="font-size:10px;color:#888">📝 Hôm nay</div>
+                            </div>
+                            <div style="flex:1;background:#16213e;border-radius:8px;padding:10px;text-align:center">
+                                <div style="font-size:18px;font-weight:700;color:#2196F3" id="xpRefs">0</div>
+                                <div style="font-size:10px;color:#888">👥 Referral</div>
+                            </div>
+                        </div>
+                        <button onclick="doCheckin()" id="checkinBtn" style="width:100%;padding:10px;border-radius:8px;border:none;background:#7C3AED;color:#fff;font-weight:600;font-size:14px;cursor:pointer">✅ Check-in hôm nay (+5 XP)</button>
+                    </div>
                 </div>
 
                 <!-- PROFILE TAB -->
@@ -904,14 +941,51 @@ document.addEventListener('DOMContentLoaded',function(){
 (function(){
 var tk=localStorage.getItem("token");if(!tk)return;
 document.getElementById("refSection").style.display="block";
-fetch("/api/referral.php?action=info",{headers:{"Authorization":"Bearer "+tk}}).then(function(r){return r.json();}).then(function(d){
+fetch("/api/referral.php?action=my_code",{headers:{"Authorization":"Bearer "+tk}}).then(function(r){return r.json();}).then(function(d){
   if(d.success){
-    document.getElementById("refLink").value=d.data.share_url;
-    document.getElementById("refCount").textContent=d.data.total_invited;
+    document.getElementById("refLink").value=d.data.link;
+    document.getElementById("refCount").textContent=d.data.uses_count;
   }
 }).catch(function(){});
 })();
 function copyRef(){var i=document.getElementById("refLink");i.select();document.execCommand("copy");if(typeof toast==="function")toast("Đã copy link mời!","success");else alert("Đã copy!");}
+
+// XP & Gamification
+(function(){
+var tk=localStorage.getItem("token");if(!tk)return;
+document.getElementById("xpSection").style.display="block";
+fetch("/api/gamification.php?action=profile",{headers:{"Authorization":"Bearer "+tk}}).then(function(r){return r.json();}).then(function(d){
+  if(d.success){
+    var p=d.data;
+    document.getElementById("xpTotal").textContent=p.total_xp;
+    document.getElementById("xpLevel").textContent=p.level;
+    document.getElementById("xpLevelName").textContent=p.level_info.name;
+    document.getElementById("xpBadge").textContent=p.level_info.badge;
+    document.getElementById("xpBar").style.width=p.progress+"%";
+    document.getElementById("xpProgress").textContent=p.progress+"%";
+    document.getElementById("xpStreak").textContent=p.streak.current;
+    document.getElementById("xpPosts").textContent=p.today.posts+p.today.comments;
+    if(p.next_level)document.getElementById("xpNextInfo").textContent=p.total_xp+" / "+p.next_level.xp+" XP đến "+p.next_level.name;
+    else document.getElementById("xpNextInfo").textContent="MAX LEVEL!";
+  }
+}).catch(function(){});
+// Load referral count for XP section
+fetch("/api/referral.php?action=stats",{headers:{"Authorization":"Bearer "+tk}}).then(function(r){return r.json();}).then(function(d){
+  if(d.success)document.getElementById("xpRefs").textContent=d.data.total_referrals;
+}).catch(function(){});
+})();
+function doCheckin(){
+var tk=localStorage.getItem("token");if(!tk)return;
+var btn=document.getElementById("checkinBtn");
+btn.disabled=true;btn.textContent="⏳ Đang check-in...";
+fetch("/api/gamification.php?action=checkin",{method:"POST",headers:{"Authorization":"Bearer "+tk}}).then(function(r){return r.json();}).then(function(d){
+  if(d.success){btn.textContent="✅ "+d.data.message;btn.style.background="#00b14f";
+    var xpEl=document.getElementById("xpTotal");xpEl.textContent=parseInt(xpEl.textContent)+5;
+    document.getElementById("xpStreak").textContent=d.data.streak;
+  }else{btn.textContent="⚠️ "+d.message;btn.style.background="#ff9800";}
+}).catch(function(){btn.textContent="❌ Lỗi kết nối";});
+}
+
 function shareRef(type){var url=document.getElementById("refLink").value;var text="Tham gia ShipperShop - Cộng đồng Shipper #1 Việt Nam! "+url;if(type==="zalo"){window.open("https://zalo.me/share?url="+encodeURIComponent(url)+"&title="+encodeURIComponent("Tham gia ShipperShop"));}else if(type==="fb"){window.open("https://www.facebook.com/sharer/sharer.php?u="+encodeURIComponent(url));}else{if(navigator.share)navigator.share({title:"ShipperShop",text:"Tham gia cộng đồng shipper #1 VN",url:url});else{copyRef();}}}
 </script>
 <script src="js/post-modal.js"></script><script>
