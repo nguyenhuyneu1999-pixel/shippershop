@@ -273,24 +273,34 @@ function loadPosts(){
   html+="<div class='sort-btn"+(curSort==="top"?" active":"")+"' onclick='changeSort(\"top\",this)'>⬆ Nhiều thích</div>";
   html+="</div>";
   html+="<div id='postsContainer'><div class='empty-msg'><i class='fas fa-spinner fa-spin'></i></div></div>";
+  html+="<button id='grpLoadMore' onclick='grpPage++;fetchPosts(true)' style='display:none;width:100%;padding:12px;background:#e4e6eb;border:none;font-size:14px;font-weight:700;cursor:pointer;margin-top:4px'>Tải thêm bài viết</button>";
   document.getElementById("tabPosts").innerHTML=html;
 
   fetchPosts();
 }
 
 function changeSort(s,el){
-  curSort=s;
+  curSort=s;grpPage=1;
   document.querySelectorAll(".sort-btn").forEach(function(b){b.classList.remove("active");});
   el.classList.add("active");
   fetchPosts();
 }
 
-function fetchPosts(){
-  apiFetch("/api/groups.php?action=posts&group_id="+GROUP.id+"&sort="+curSort).then(function(d){
-    if(!d.success||!d.data.posts.length){
-      document.getElementById("postsContainer").innerHTML="<p class='empty-msg'>Chưa có bài viết nào. Hãy là người đầu tiên!</p>";return;
+var grpPage=1,grpTotalPg=1;
+
+function fetchPosts(append){
+  if(!append)grpPage=1;
+  apiFetch("/api/groups.php?action=posts&group_id="+GROUP.id+"&sort="+curSort+"&page="+grpPage).then(function(d){
+    if(!d.success||!d.data.posts||!d.data.posts.length){
+      if(!append)document.getElementById("postsContainer").innerHTML="<p class='empty-msg'>Chưa có bài viết nào. Hãy là người đầu tiên!</p>";
+      return;
     }
-    document.getElementById("postsContainer").innerHTML=d.data.posts.map(function(p){return mkPost(p);}).join("");
+    grpTotalPg=d.data.total_pages||1;
+    var html=d.data.posts.map(function(p){return mkPost(p);}).join("");
+    if(append){document.getElementById("postsContainer").insertAdjacentHTML("beforeend",html);}
+    else{document.getElementById("postsContainer").innerHTML=html;}
+    var lmBtn=document.getElementById("grpLoadMore");
+    if(lmBtn)lmBtn.style.display=grpPage<grpTotalPg?"block":"none";
   });
 }
 

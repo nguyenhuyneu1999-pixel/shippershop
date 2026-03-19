@@ -94,7 +94,7 @@ if ($method === 'GET') {
     if ($action === 'posts') {
         $gid = intval($_GET['group_id'] ?? 0);
         $page = max(1, intval($_GET['page'] ?? 1));
-        $limit = 15; $offset = ($page - 1) * $limit;
+        $limit = 20; $offset = ($page - 1) * $limit;
         $sort = $_GET['sort'] ?? 'new';
         $orderBy = 'gp.created_at DESC';
         if ($sort === 'hot') $orderBy = '(gp.likes_count * 2 + gp.comments_count * 3) DESC, gp.created_at DESC';
@@ -109,7 +109,9 @@ if ($method === 'GET') {
             $likedSet = array_flip(array_column($liked, 'post_id'));
             foreach ($posts as &$p) { $p['user_liked'] = isset($likedSet[$p['id']]); }
         } else { foreach ($posts as &$p) { $p['user_liked'] = false; } }
-        gOk('OK', ['posts' => $posts, 'total' => intval($total['c'] ?? 0), 'page' => $page]);
+        $totalCount = intval($total['c'] ?? 0);
+        $totalPages = max(1, ceil($totalCount / $limit));
+        gOk('OK', ['posts' => $posts, 'total' => $totalCount, 'total_pages' => $totalPages, 'page' => $page]);
     }
 
     if ($action === 'members') {
