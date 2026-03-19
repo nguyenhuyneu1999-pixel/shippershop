@@ -82,6 +82,16 @@ if ($method === 'POST') {
     }
     
     $id = $db->insert('map_pins', $data);
+    // Push: notify followers about new map pin
+    try {
+        require_once __DIR__.'/../includes/push-helper.php';
+        $me = $db->fetchOne("SELECT fullname FROM users WHERE id = ?", [$uid]);
+        $mName = $me ? $me['fullname'] : 'Ai đó';
+        $followers = $db->fetchAll("SELECT follower_id FROM follows WHERE following_id = ? LIMIT 50", [$uid]);
+        foreach ($followers as $f) {
+            notifyUser(intval($f['follower_id']), 'Bản đồ: ' . $mName, $title, 'map', '/map.html');
+        }
+    } catch (Throwable $e) {}
     ok('Đã thêm ghim!', ['id'=>$id]);
 }
 

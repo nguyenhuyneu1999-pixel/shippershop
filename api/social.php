@@ -257,6 +257,14 @@ if ($action === 'follow') {
             'following_id' => $followUserId
         ]);
         
+        // Push: notify user they got a new follower
+        try {
+            require_once __DIR__.'/../includes/push-helper.php';
+            $me = $db->fetchOne("SELECT fullname FROM users WHERE id = ?", [$userId]);
+            $mName = $me ? $me['fullname'] : 'Ai đó';
+            notifyUser($followUserId, $mName . ' đã theo dõi bạn', 'Bạn có người theo dõi mới', 'social', '/user.html?id=' . $userId);
+        } catch (Throwable $e) {}
+        
         success('Đã theo dõi', [
             'is_following' => true,
             'user_id' => $followUserId

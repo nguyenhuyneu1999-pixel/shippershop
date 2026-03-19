@@ -120,6 +120,20 @@ if ($method === 'POST' && empty($action)) {
     // Increase trust score
     try { $db->query("UPDATE users SET trust_score = trust_score + 1 WHERE id = ?", [$uid]); } catch (Throwable $e) {}
 
+    // Push: notify followers about new traffic alert
+    try {
+        require_once __DIR__.'/../includes/push-helper.php';
+        $me = $db->fetchOne("SELECT fullname FROM users WHERE id = ?", [$uid]);
+        $mName = $me ? $me['fullname'] : 'Ai đó';
+        $catNames = ['traffic'=>'Ùn tắc','weather'=>'Thời tiết','terrain'=>'Địa hình','warning'=>'Nguy hiểm','other'=>'Cảnh báo'];
+        $catLabel = $catNames[$cat] ?? 'Giao thông';
+        $preview = mb_substr($content, 0, 60);
+        $followers = $db->fetchAll("SELECT follower_id FROM follows WHERE following_id = ? LIMIT 50", [$uid]);
+        foreach ($followers as $f) {
+            notifyUser(intval($f['follower_id']), 'Giao thông: ' . $catLabel, $mName . ': ' . $preview, 'traffic', '/traffic.html');
+        }
+    } catch (Throwable $e) {}
+
     tSuccess('Đã báo cáo!', ['id' => $alertId, 'expires_at' => $expiresAt]);
 }
 
