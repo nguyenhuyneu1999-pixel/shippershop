@@ -219,7 +219,7 @@ function renderHeader(){
   document.title=g.name+" - ShipperShop";
   document.getElementById("ghName").textContent=g.name;
   var jb=document.getElementById("ghJoin");
-  if(g.is_member){jb.className="gh-join joined";jb.textContent="Tham gia r\u1ed3i";}
+  if(g.is_member){jb.className="gh-join joined";jb.textContent="\u0110\u00e3 tham gia";}
   else{jb.className="gh-join join";jb.textContent="Tham gia";}
 
   var icon=g.icon_image?"<img src='"+esc(g.icon_image)+"' style='width:100%;height:100%;object-fit:cover;border-radius:16px'>":"<span>"+esc(g.name[0])+"</span>";
@@ -236,10 +236,10 @@ function renderHeader(){
     iconEdit="<label style='position:absolute;bottom:-2px;right:-2px;width:20px;height:20px;border-radius:50%;background:var(--primary);display:flex;align-items:center;justify-content:center;cursor:pointer;border:2px solid #fff'><i class='fas fa-camera' style='color:#fff;font-size:8px'></i><input type='file' accept='image/*' style='display:none' onchange='uploadGroupImg(\"icon\",this)'></label>";
   }
   document.getElementById("gBanner").innerHTML=
-    "<div style='"+bannerBg+";height:120px;position:relative'>"+editBtns+"</div>"+
-    "<div class='g-banner-info'>"+
-      "<div class='g-banner-icon' style='background:"+(g.banner_color||"var(--primary)")+";position:relative'>"+icon+iconEdit+"</div>"+
-      "<div class='g-banner-text'><h1>"+esc(g.name)+"</h1><div class='gm'>"+fN(g.member_count)+" th\u00e0nh vi\u00ean \u00b7 "+fN(g.post_count||0)+" b\u00e0i vi\u1ebft"+(g.cat_name?" \u00b7 "+esc(g.cat_name):"")+"</div>"+(g.privacy==="private"?"<div class='gm' style='color:var(--primary)'><i class='fas fa-lock' style='margin-right:4px'></i>Ri\u00eang t\u01b0</div>":"")+"</div>"+
+    "<div style='"+bannerBg+";height:140px;position:relative'>"+editBtns+"</div>"+
+    "<div class='g-banner-info' style='margin-top:-32px;padding:0 16px 16px;align-items:flex-end'>"+
+      "<div class='g-banner-icon' style='background:"+(g.banner_color||"var(--primary)")+";position:relative;border:3px solid #fff;border-radius:16px;box-shadow:0 2px 8px rgba(0,0,0,.15)'>"+icon+iconEdit+"</div>"+
+      "<div class='g-banner-text' style='padding-bottom:4px'><h1>"+esc(g.name)+"</h1><div class='gm'>"+fN(g.member_count)+" th\u00e0nh vi\u00ean \u00b7 "+fN(g.post_count||0)+" b\u00e0i vi\u1ebft"+(g.cat_name?" \u00b7 "+esc(g.cat_name):"")+"</div>"+(g.privacy==="private"?"<div class='gm' style='color:var(--primary)'><i class='fas fa-lock' style='margin-right:4px'></i>Ri\u00eang t\u01b0</div>":"")+"</div>"+
     "</div>";
 }
 
@@ -250,8 +250,8 @@ function toggleJoin(){
   .then(function(d){
     if(d.success){
       GROUP.is_member=d.data.joined;
-      if(d.data.joined){GROUP.member_count++;toast("Đã tham gia!");}
-      else{GROUP.member_count--;toast("Đã rời nhóm");}
+      if(d.data.joined){GROUP.member_count++;toast("\u0110\u00e3 tham gia nh\u00f3m!");}
+      else{GROUP.member_count--;toast("\u0110\u00e3 r\u1eddi nh\u00f3m");}
       renderHeader();
     }else{toast(d.message);}
   });
@@ -528,8 +528,8 @@ function sendGroupComment(pid){
   var inp=document.getElementById("gcInput2");var ct=inp.value.trim();if(!ct)return;
   inp.value="";
   apiFetch("/api/groups.php?action=comment",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({post_id:pid,content:ct})}).then(function(d){
-    if(d.success){openComment(pid);fetchPosts();}
-    else toast(d.message||"Lỗi");
+    if(d.success){openComment(pid);var card=document.getElementById("gp"+pid);if(card){var s=card.querySelectorAll(".pa3-stats span");if(s.length>=2){var cur=parseInt(s[1].textContent)||0;s[1].textContent=(cur+1)+" ghi ch\u00fa";}}}
+    else toast(d.message||"L\u1ed7i");
   });
 }
 
