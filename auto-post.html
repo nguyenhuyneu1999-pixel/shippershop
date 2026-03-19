@@ -173,7 +173,7 @@ function publishOne(queueId) {
         return fetch('https://graph.facebook.com/v19.0/' + FB_PAGE_ID + '/feed', {
             method: 'POST',
             headers: {'Content-Type': 'application/x-www-form-urlencoded'},
-            body: 'message=' + encodeURIComponent(item.title || 'ShipperShop') + '&access_token=' + encodeURIComponent(FB_TOKEN)
+            body: 'message=' + encodeURIComponent(item.content || item.title || 'ShipperShop') + '&access_token=' + encodeURIComponent(FB_TOKEN)
         });
     }).then(function(r){return r.json()}).then(function(fbResp) {
         if (fbResp && fbResp.id) {
@@ -215,7 +215,7 @@ function publishSequential(index) {
     fetch('https://graph.facebook.com/v19.0/' + FB_PAGE_ID + '/feed', {
         method: 'POST',
         headers: {'Content-Type': 'application/x-www-form-urlencoded'},
-        body: 'message=' + encodeURIComponent(item.title || 'ShipperShop') + '&access_token=' + encodeURIComponent(FB_TOKEN)
+        body: 'message=' + encodeURIComponent(item.content || item.title || 'ShipperShop') + '&access_token=' + encodeURIComponent(FB_TOKEN)
     }).then(function(r){return r.json()}).then(function(fb) {
         if (fb && fb.id) {
             log('  ✅ OK: ' + fb.id);

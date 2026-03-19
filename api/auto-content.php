@@ -164,7 +164,7 @@ if ($action === 'weekly_report') {
 // ACTION: QUEUE STATUS
 // ========================================
 if ($action === 'queue_status') {
-    $items = $d->fetchAll("SELECT id, type, title, `status`, scheduled_at, published_at, error_log 
+    $items = $d->fetchAll("SELECT id, type, title, content, `status`, scheduled_at, published_at, error_log 
         FROM content_queue ORDER BY scheduled_at DESC LIMIT 50");
     $counts = $d->fetchOne("SELECT 
         SUM(CASE WHEN `status`='pending' THEN 1 ELSE 0 END) as pending,
