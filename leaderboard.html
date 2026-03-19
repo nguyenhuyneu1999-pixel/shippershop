@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="vi"><head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Bảng xếp hạng - ShipperShop</title>
+<meta name="description" content="Bảng xếp hạng shipper tích cực nhất trên ShipperShop - Cộng đồng Shipper Việt Nam">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="stylesheet" href="css/style-v2.css">
+<link rel="stylesheet" href="mobile.css">
+<style>
+body{background:#f0f2f5;padding-top:56px;padding-bottom:70px}
+.lb-wrap{max-width:500px;margin:0 auto;padding:12px}
+.lb-head{background:linear-gradient(135deg,#7C3AED,#5B21B6);border-radius:16px;padding:20px;color:#fff;text-align:center;margin-bottom:16px}
+.lb-head h1{font-size:20px;margin-bottom:4px}
+.lb-head p{font-size:12px;opacity:.8}
+.lb-tabs{display:flex;gap:6px;margin-bottom:12px;overflow-x:auto;padding:2px 0}
+.lb-tab{padding:8px 16px;border-radius:20px;background:#fff;font-size:13px;font-weight:600;color:#65676B;cursor:pointer;white-space:nowrap;border:none}
+.lb-tab.active{background:#7C3AED;color:#fff}
+.lb-card{background:#fff;border-radius:12px;margin-bottom:8px;overflow:hidden}
+.lb-me{border:2px solid #7C3AED}
+.lb-row{display:flex;align-items:center;gap:10px;padding:12px 14px}
+.lb-rank{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:13px;flex-shrink:0;color:#fff}
+.r1{background:linear-gradient(135deg,#FFD700,#FFA500)}.r2{background:linear-gradient(135deg,#C0C0C0,#A0A0A0)}.r3{background:linear-gradient(135deg,#CD7F32,#A0522D)}
+.r-n{background:#e4e6eb;color:#333}
+.lb-av{width:40px;height:40px;border-radius:50%;object-fit:cover;flex-shrink:0}
+.lb-av-ph{width:40px;height:40px;border-radius:50%;background:#e4e6eb;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:14px;flex-shrink:0}
+.lb-info{flex:1;min-width:0}
+.lb-name{font-weight:700;font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.lb-sub{font-size:11px;color:#65676B;display:flex;align-items:center;gap:6px}
+.lb-xp{text-align:right}
+.lb-xp .val{font-size:16px;font-weight:700;color:#7C3AED}
+.lb-xp .unit{font-size:10px;color:#888}
+.lb-badge{font-size:16px}
+.lb-streak{font-size:11px;color:#ff9800}
+.lb-empty{text-align:center;color:#999;padding:40px 20px;font-size:14px}
+.lb-my{background:#f8f6ff;border-radius:12px;padding:14px;margin-bottom:12px;display:none}
+.lb-my-head{font-size:12px;color:#7C3AED;font-weight:600;margin-bottom:8px}
+.lb-my-stats{display:flex;gap:8px}
+.lb-my-stat{flex:1;text-align:center;background:#fff;border-radius:8px;padding:8px}
+.lb-my-stat .v{font-size:18px;font-weight:700;color:#7C3AED}
+.lb-my-stat .l{font-size:10px;color:#888}
+.share-btn{display:inline-flex;align-items:center;gap:6px;padding:8px 16px;border-radius:8px;background:#7C3AED;color:#fff;border:none;font-size:13px;font-weight:600;cursor:pointer;margin-top:8px}
+</style>
+</head><body>
+<nav class="top-nav">
+  <div class="nav-left"><a href="index.html" style="text-decoration:none;color:inherit"><i class="fas fa-arrow-left"></i></a></div>
+  <div class="nav-title">🏆 Bảng xếp hạng</div>
+  <div class="nav-right"></div>
+</nav>
+
+<div class="lb-wrap">
+  <div class="lb-head">
+    <h1>🏆 Bảng xếp hạng Shipper</h1>
+    <p>Ae shipper tích cực nhất cộng đồng</p>
+  </div>
+
+  <div id="mySection" class="lb-my">
+    <div class="lb-my-head">📊 Thứ hạng của bạn</div>
+    <div class="lb-my-stats">
+      <div class="lb-my-stat"><div class="v" id="myRank">-</div><div class="l">Hạng</div></div>
+      <div class="lb-my-stat"><div class="v" id="myXP">0</div><div class="l">XP</div></div>
+      <div class="lb-my-stat"><div class="v" id="myLevel">1</div><div class="l">Level</div></div>
+      <div class="lb-my-stat"><div class="v" id="myStreak">0</div><div class="l">🔥</div></div>
+    </div>
+    <button class="share-btn" onclick="shareRank()"><i class="fas fa-share"></i> Chia sẻ thứ hạng</button>
+  </div>
+
+  <div class="lb-tabs">
+    <button class="lb-tab active" onclick="loadLB('all',this)">Tất cả</button>
+    <button class="lb-tab" onclick="loadLB('month',this)">Tháng này</button>
+    <button class="lb-tab" onclick="loadLB('week',this)">Tuần này</button>
+    <button class="lb-tab" onclick="loadLB('referral',this)">Referral</button>
+  </div>
+
+  <div id="lbList"><div class="lb-empty"><i class="fas fa-spinner fa-spin"></i></div></div>
+</div>
+
+<script>
+var CU=JSON.parse(localStorage.getItem("user")||"null");
+var TK=localStorage.getItem("token");
+var BADGES={"1":"🟢","2":"🟡","3":"🟠","4":"🔴","5":"🟣"};
+var LEVELS={"1":"Tân binh","2":"Shipper","3":"Pro Shipper","4":"Master","5":"Legend"};
+
+function loadLB(period,btn){
+  document.querySelectorAll(".lb-tab").forEach(function(b){b.classList.remove("active");});
+  if(btn)btn.classList.add("active");
+  var el=document.getElementById("lbList");
+  el.innerHTML='<div class="lb-empty"><i class="fas fa-spinner fa-spin"></i></div>';
+
+  var url=period==="referral"?"/api/referral.php?action=leaderboard&period=all":"/api/gamification.php?action=leaders&period="+period;
+  var hdrs={};if(TK)hdrs["Authorization"]="Bearer "+TK;
+  
+  fetch(url,{headers:hdrs}).then(function(r){return r.json();}).then(function(d){
+    if(!d.success||!d.data||!d.data.length){el.innerHTML='<div class="lb-empty">Chưa có dữ liệu. Hãy là người đầu tiên!</div>';return;}
+    var html="";
+    d.data.forEach(function(u,i){
+      var rank=i+1;
+      var rClass=rank===1?"r1":rank===2?"r2":rank===3?"r3":"r-n";
+      var medal=rank===1?"🥇":rank===2?"🥈":rank===3?"🥉":rank;
+      var av=u.avatar?"<img src='"+u.avatar+"' class='lb-av' onerror=\"this.outerHTML='<div class=lb-av-ph>'+(this.alt||'?')[0]+'</div>'\">":"<div class='lb-av-ph'>"+(u.fullname||"?")[0]+"</div>";
+      var xpVal=period==="referral"?(u.referral_count||0):(u.total_xp||0);
+      var xpUnit=period==="referral"?"refs":"XP";
+      var isMe=CU&&u.id==CU.id;
+      var badge=BADGES[u.level||1]||"🟢";
+      var streak=u.streak>0?"🔥"+u.streak:"";
+      var company=u.shipping_company?"<span style='color:"+({"GHTK":"#00b14f","GHN":"#ff6600","J&T":"#d32f2f","SPX":"#EE4D2D","Grab":"#00b14f"}[u.shipping_company]||"#999")+"'>"+u.shipping_company+"</span>":"";
+      
+      html+="<div class='lb-card"+(isMe?" lb-me":"")+"'><div class='lb-row'>";
+      html+="<div class='lb-rank "+rClass+"'>"+medal+"</div>";
+      html+=av;
+      html+="<div class='lb-info'><div class='lb-name'>"+badge+" "+(u.fullname||"Shipper")+"</div>";
+      html+="<div class='lb-sub'>"+company+(streak?" <span class='lb-streak'>"+streak+"</span>":"")+" <span>Lv"+(u.level||1)+"</span></div></div>";
+      html+="<div class='lb-xp'><div class='val'>"+xpVal.toLocaleString()+"</div><div class='unit'>"+xpUnit+"</div></div>";
+      html+="</div></div>";
+
+      if(isMe){
+        document.getElementById("myRank").textContent="#"+rank;
+        document.getElementById("myXP").textContent=u.total_xp||0;
+        document.getElementById("myLevel").textContent=u.level||1;
+        document.getElementById("myStreak").textContent=u.streak||0;
+      }
+    });
+    el.innerHTML=html;
+  }).catch(function(e){el.innerHTML='<div class="lb-empty">Lỗi tải dữ liệu</div>';});
+}
+
+// Load my stats
+if(CU&&TK){
+  document.getElementById("mySection").style.display="block";
+  fetch("/api/gamification.php?action=profile",{headers:{"Authorization":"Bearer "+TK}}).then(function(r){return r.json();}).then(function(d){
+    if(d.success){
+      document.getElementById("myXP").textContent=d.data.total_xp;
+      document.getElementById("myLevel").textContent=d.data.level;
+      document.getElementById("myStreak").textContent=d.data.streak.current;
+    }
+  }).catch(function(){});
+}
+
+function shareRank(){
+  var text="🏆 Tôi đang hạng "+document.getElementById("myRank").textContent+" trên ShipperShop với "+document.getElementById("myXP").textContent+" XP!\n\n📱 Tham gia cộng đồng shipper: shippershop.vn";
+  if(navigator.share)navigator.share({title:"ShipperShop Ranking",text:text,url:"https://shippershop.vn/leaderboard.html"});
+  else{navigator.clipboard.writeText(text);alert("Đã copy!");}
+}
+
+loadLB("all");
+</script>
+<script src="js/mobile.js"></script>
+<img src="/api/auto-cron.php" style="display:none" width="1" height="1" alt="">
+</body></html>

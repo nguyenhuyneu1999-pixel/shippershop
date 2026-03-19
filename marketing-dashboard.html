@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="vi"><head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Marketing Dashboard - ShipperShop</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,system-ui,sans-serif;background:#0f0f23;color:#e0e0e0;min-height:100vh}
+.top{background:linear-gradient(135deg,#7C3AED,#5B21B6);padding:20px 16px;text-align:center;color:#fff}
+.top h1{font-size:20px}.top p{font-size:12px;opacity:.8}
+.wrap{max-width:800px;margin:0 auto;padding:16px}
+.grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:16px}
+.metric{background:#1a1a2e;border-radius:10px;padding:12px;text-align:center}
+.metric .v{font-size:22px;font-weight:700;color:#7C3AED}
+.metric .l{font-size:10px;color:#888;margin-top:2px}
+.section{background:#1a1a2e;border-radius:12px;padding:16px;margin-bottom:12px;border:1px solid #2a2a4a}
+.section h2{font-size:15px;color:#7C3AED;margin-bottom:10px;display:flex;align-items:center;gap:8px}
+.actions{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-bottom:16px}
+.action-btn{background:#16213e;border-radius:10px;padding:14px;text-align:center;cursor:pointer;border:1px solid #2a2a4a;text-decoration:none;color:#e0e0e0;transition:all .2s}
+.action-btn:hover{border-color:#7C3AED;background:#1a1a3e}
+.action-btn .icon{font-size:24px;margin-bottom:4px}
+.action-btn .name{font-size:13px;font-weight:600}
+.action-btn .desc{font-size:10px;color:#888;margin-top:2px}
+.log-item{padding:8px 0;border-bottom:1px solid #2a2a4a;font-size:12px;display:flex;justify-content:space-between}
+.log-item:last-child{border:none}
+.badge{font-size:10px;padding:2px 6px;border-radius:4px;font-weight:600}
+.b-ok{background:#00b14f20;color:#00b14f}
+.b-err{background:#EE4D2D20;color:#EE4D2D}
+.b-wait{background:#ffc10720;color:#ffc107}
+</style>
+</head><body>
+<div class="top">
+  <h1>📊 Marketing Dashboard</h1>
+  <p>Tổng quan hệ thống marketing tự động</p>
+</div>
+<div class="wrap">
+
+<div class="grid" id="metrics">
+  <div class="metric"><div class="v" id="mUsers">-</div><div class="l">Users</div></div>
+  <div class="metric"><div class="v" id="mPosts">-</div><div class="l">Posts</div></div>
+  <div class="metric"><div class="v" id="mQueue">-</div><div class="l">Queue</div></div>
+  <div class="metric"><div class="v" id="mXP">-</div><div class="l">XP Users</div></div>
+</div>
+
+<div class="actions">
+  <a href="auto-post.html" class="action-btn">
+    <div class="icon">📘</div>
+    <div class="name">Facebook Publisher</div>
+    <div class="desc">Đăng bài lên Fanpage</div>
+  </a>
+  <a href="tiktok-scripts.html" class="action-btn">
+    <div class="icon">🎵</div>
+    <div class="name">TikTok Scripts</div>
+    <div class="desc">Copy caption TikTok</div>
+  </a>
+  <a href="leaderboard.html" class="action-btn">
+    <div class="icon">🏆</div>
+    <div class="name">Leaderboard</div>
+    <div class="desc">Bảng xếp hạng</div>
+  </a>
+  <a href="marketing-setup.html" class="action-btn">
+    <div class="icon">⚙️</div>
+    <div class="name">Setup</div>
+    <div class="desc">Cấu hình hệ thống</div>
+  </a>
+  <a href="fb-groups.html" class="action-btn">
+    <div class="icon">👥</div>
+    <div class="name">FB Group Seeding</div>
+    <div class="desc">Bài viết cho FB groups</div>
+  </a>
+  <a href="admin-v2.html" class="action-btn">
+    <div class="icon">🔧</div>
+    <div class="name">Admin Panel</div>
+    <div class="desc">Quản trị hệ thống</div>
+  </a>
+</div>
+
+<div class="section">
+  <h2><i class="fas fa-chart-line"></i> Weekly Report</h2>
+  <div id="weeklyReport"><div style="text-align:center;color:#888;padding:20px"><i class="fas fa-spinner fa-spin"></i></div></div>
+</div>
+
+<div class="section">
+  <h2><i class="fas fa-clock"></i> Content Queue (gần nhất)</h2>
+  <div id="recentQueue"></div>
+</div>
+
+<div class="section">
+  <h2><i class="fas fa-users"></i> Top Shipper tuần này</h2>
+  <div id="topShippers"></div>
+</div>
+
+</div>
+
+<script>
+var TK=localStorage.getItem("token");
+var KEY="";
+
+function api(url,opts){opts=opts||{};opts.headers=opts.headers||{};if(TK)opts.headers["Authorization"]="Bearer "+TK;return fetch(url,opts).then(function(r){return r.json();});}
+
+api("/api/marketing-engine.php?action=stats").then(function(d){
+  if(!d.success)return;
+  var s=d.data;
+  KEY=s.cron_key;
+  document.getElementById("mQueue").textContent=s.content_queue.pending;
+  document.getElementById("mXP").textContent=s.gamification.users_with_xp;
+  
+  // Load weekly report
+  fetch("/api/auto-content.php?action=weekly_report&key="+KEY).then(function(r){return r.json();}).then(function(d){
+    if(!d.success)return;
+    var s=d.data;
+    document.getElementById("mUsers").textContent=s.new_users;
+    document.getElementById("mPosts").textContent=s.new_posts;
+    var el=document.getElementById("weeklyReport");
+    el.innerHTML='<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:6px;font-size:12px">'+
+      '<div style="background:#16213e;padding:8px;border-radius:6px;text-align:center"><div style="font-size:16px;font-weight:700;color:#00b14f">'+s.new_users+'</div>Users mới</div>'+
+      '<div style="background:#16213e;padding:8px;border-radius:6px;text-align:center"><div style="font-size:16px;font-weight:700;color:#2196F3">'+s.new_posts+'</div>Bài viết</div>'+
+      '<div style="background:#16213e;padding:8px;border-radius:6px;text-align:center"><div style="font-size:16px;font-weight:700;color:#ff9800">'+s.new_comments+'</div>Comments</div>'+
+      '<div style="background:#16213e;padding:8px;border-radius:6px;text-align:center"><div style="font-size:16px;font-weight:700;color:#E91E63">'+s.total_likes+'</div>Likes</div>'+
+      '<div style="background:#16213e;padding:8px;border-radius:6px;text-align:center"><div style="font-size:16px;font-weight:700;color:#7C3AED">'+s.referrals+'</div>Referrals</div>'+
+      '<div style="background:#16213e;padding:8px;border-radius:6px;text-align:center"><div style="font-size:16px;font-weight:700;color:#4CAF50">'+s.xp_awarded+'</div>XP</div>'+
+    '</div>';
+  });
+  
+  // Load queue
+  fetch("/api/auto-content.php?action=queue_status&key="+KEY).then(function(r){return r.json();}).then(function(d){
+    if(!d.success)return;
+    var items=(d.data.items||[]).slice(0,8);
+    var el=document.getElementById("recentQueue");
+    var html="";
+    items.forEach(function(i){
+      var icon=i.type==="facebook"?"📘":i.type==="tiktok"?"🎵":i.type==="blog"?"📝":"🔔";
+      var badge=i.status==="published"?"b-ok":i.status==="failed"?"b-err":"b-wait";
+      html+='<div class="log-item"><span>'+icon+' '+(i.title||"").substring(0,40)+'</span><span class="badge '+badge+'">'+i.status+'</span></div>';
+    });
+    el.innerHTML=html||'<div style="color:#666;font-size:12px">Trống</div>';
+  });
+  
+  // Load top shippers
+  fetch("/api/gamification.php?action=leaders&period=week",{headers:{"Authorization":"Bearer "+TK}}).then(function(r){return r.json();}).then(function(d){
+    if(!d.success)return;
+    var el=document.getElementById("topShippers");
+    var html="";
+    (d.data||[]).slice(0,5).forEach(function(u,i){
+      var medal=i===0?"🥇":i===1?"🥈":i===2?"🥉":"#"+(i+1);
+      html+='<div class="log-item"><span>'+medal+' '+(u.fullname||"Shipper")+'</span><span style="color:#7C3AED;font-weight:700">'+(u.total_xp||0)+' XP</span></div>';
+    });
+    el.innerHTML=html||'<div style="color:#666;font-size:12px">Chưa có dữ liệu tuần này</div>';
+  });
+});
+</script>
+</body></html>

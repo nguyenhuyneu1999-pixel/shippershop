@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="vi"><head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>TikTok Scripts - ShipperShop</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,system-ui,sans-serif;background:#0f0f23;color:#e0e0e0;min-height:100vh;padding:16px}
+.wrap{max-width:600px;margin:0 auto}
+h1{color:#ff0044;font-size:20px;margin-bottom:4px}
+.sub{color:#888;font-size:13px;margin-bottom:16px}
+.stats{display:flex;gap:8px;margin-bottom:16px}
+.stat{background:#1a1a2e;border-radius:10px;padding:10px;flex:1;text-align:center}
+.stat .v{font-size:20px;font-weight:700;color:#ff0044}
+.stat .l{font-size:10px;color:#888}
+.card{background:#1a1a2e;border-radius:12px;margin-bottom:10px;overflow:hidden;border:1px solid #2a2a4a}
+.card-head{display:flex;justify-content:space-between;align-items:center;padding:10px 14px;border-bottom:1px solid #2a2a4a}
+.card-head .type{font-size:11px;padding:2px 8px;border-radius:6px;background:#ff004420;color:#ff0044;font-weight:600}
+.card-head .time{font-size:11px;color:#888}
+.card-body{padding:14px;font-size:13px;line-height:1.8;white-space:pre-wrap;color:#ccc;max-height:250px;overflow-y:auto}
+.card-foot{display:flex;gap:8px;padding:10px 14px;border-top:1px solid #2a2a4a}
+.btn{padding:8px 16px;border-radius:8px;border:none;font-size:12px;font-weight:600;cursor:pointer;display:inline-flex;align-items:center;gap:4px}
+.btn-copy{background:#ff0044;color:#fff}
+.btn-copy:hover{background:#cc0036}
+.btn-sm{background:#333;color:#ccc}
+.btn-sm:hover{background:#444}
+.tip{background:#16213e;border-radius:10px;padding:14px;margin-bottom:16px;font-size:13px;line-height:1.7}
+.tip b{color:#ff0044}
+.empty{text-align:center;color:#666;padding:40px}
+</style>
+</head><body>
+<div class="wrap">
+<h1><i class="fab fa-tiktok"></i> TikTok Content Scripts</h1>
+<p class="sub">Nội dung sẵn sàng copy → đăng TikTok</p>
+
+<div class="tip">
+  <b>Cách dùng:</b> Copy caption bên dưới → Mở TikTok → Quay video ngắn → Dán caption → Đăng!<br>
+  <b>Tips:</b> Video tốt nhất 15-30 giây, nói/đọc nội dung, thêm text overlay, nhạc trending.
+</div>
+
+<div class="stats">
+  <div class="stat"><div class="v" id="sPending">-</div><div class="l">Scripts sẵn sàng</div></div>
+  <div class="stat"><div class="v" id="sUsed">-</div><div class="l">Đã dùng</div></div>
+</div>
+
+<button class="btn btn-copy" onclick="generateMore()" style="margin-bottom:16px;width:100%;justify-content:center;padding:12px">
+  <i class="fas fa-magic"></i> Tạo thêm scripts mới
+</button>
+
+<div id="list"><div class="empty"><i class="fas fa-spinner fa-spin"></i></div></div>
+</div>
+
+<script>
+var TK=localStorage.getItem("token");
+var CRON_KEY="";
+
+function api(url,opts){opts=opts||{};opts.headers=opts.headers||{};if(TK)opts.headers["Authorization"]="Bearer "+TK;return fetch(url,opts).then(function(r){return r.json();});}
+
+function init(){
+  api("/api/marketing-engine.php?action=stats").then(function(d){
+    if(!d.success){document.getElementById("list").innerHTML='<div class="empty">Đăng nhập admin!</div>';return;}
+    CRON_KEY=d.data.cron_key;
+    loadScripts();
+  });
+}
+
+function loadScripts(){
+  fetch("/api/auto-content.php?action=queue_status&key="+CRON_KEY).then(function(r){return r.json();}).then(function(d){
+    if(!d.success)return;
+    var items=(d.data.items||[]);
+    var tk=items.filter(function(i){return i.type==="tiktok";});
+    var pending=tk.filter(function(i){return i.status==="pending";});
+    var used=tk.filter(function(i){return i.status!=="pending";});
+    
+    document.getElementById("sPending").textContent=pending.length;
+    document.getElementById("sUsed").textContent=used.length;
+    
+    if(!pending.length){document.getElementById("list").innerHTML='<div class="empty">Chưa có scripts. Bấm "Tạo thêm" ở trên!</div>';return;}
+    
+    var html="";
+    pending.forEach(function(item){
+      var content=item.content||item.title||"";
+      html+='<div class="card" id="tk'+item.id+'">';
+      html+='<div class="card-head"><span class="type"><i class="fab fa-tiktok"></i> TikTok</span><span class="time">'+item.scheduled_at+'</span></div>';
+      html+='<div class="card-body" id="content'+item.id+'">'+escH(content)+'</div>';
+      html+='<div class="card-foot">';
+      html+='<button class="btn btn-copy" onclick="copyScript('+item.id+')"><i class="fas fa-copy"></i> Copy</button>';
+      html+='<button class="btn btn-sm" onclick="markDone('+item.id+')"><i class="fas fa-check"></i> Đã dùng</button>';
+      html+='</div></div>';
+    });
+    document.getElementById("list").innerHTML=html;
+  });
+}
+
+function copyScript(id){
+  var el=document.getElementById("content"+id);
+  var text=el.textContent||el.innerText;
+  navigator.clipboard.writeText(text).then(function(){
+    var btn=document.querySelector("#tk"+id+" .btn-copy");
+    btn.innerHTML='<i class="fas fa-check"></i> Copied!';
+    btn.style.background="#00b14f";
+    setTimeout(function(){btn.innerHTML='<i class="fas fa-copy"></i> Copy';btn.style.background="#ff0044";},2000);
+  });
+}
+
+function markDone(id){
+  fetch("/api/auto-content.php?action=mark_published&key="+CRON_KEY+"&id="+id).then(function(){
+    var card=document.getElementById("tk"+id);
+    card.style.opacity="0.5";
+    card.querySelector(".card-foot").innerHTML='<span style="color:#00b14f;font-size:12px">✅ Đã đánh dấu sử dụng</span>';
+  });
+}
+
+function generateMore(){
+  fetch("/api/auto-content.php?action=generate_ai&key="+CRON_KEY).then(function(r){return r.json();}).then(function(d){
+    if(d.success){alert("Đã tạo "+d.data.length+" scripts mới!");loadScripts();}
+    else alert("Lỗi: "+d.message);
+  });
+}
+
+function escH(s){return s.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");}
+
+init();
+</script>
+</body></html>

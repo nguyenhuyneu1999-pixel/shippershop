@@ -398,6 +398,10 @@
                             <button onclick="shareRef('native')" style="flex:1;padding:10px;border-radius:8px;border:none;background:rgba(255,255,255,.15);color:#fff;font-weight:600;font-size:13px;cursor:pointer"><i class="fas fa-share-alt"></i> Khác</button>
                         </div>
                         <div style="margin-top:10px;font-size:12px;opacity:.7;text-align:center">Đã mời: <span id="refCount">0</span> bạn bè</div>
+                        <div style="margin-top:10px;text-align:center">
+                            <img id="refCard" src="" style="width:100%;border-radius:8px;display:none;margin-bottom:8px">
+                            <button onclick="showRefCard()" style="background:rgba(255,255,255,.2);color:#fff;border:none;padding:6px 14px;border-radius:8px;font-size:12px;cursor:pointer"><i class="fas fa-image"></i> Tạo ảnh chia sẻ</button>
+                        </div>
                     </div>
                     <div id="xpSection" style="margin-top:12px;background:#1a1a2e;border-radius:12px;padding:16px;display:none">
                         <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
@@ -948,6 +952,7 @@ fetch("/api/referral.php?action=my_code",{headers:{"Authorization":"Bearer "+tk}
   }
 }).catch(function(){});
 })();
+function showRefCard(){var code=document.getElementById("refLink").value.split("/r/")[1];if(!code)return;var img=document.getElementById("refCard");img.src="/api/share-card.php?action=referral&code="+code;img.style.display="block";}
 function copyRef(){var i=document.getElementById("refLink");i.select();document.execCommand("copy");if(typeof toast==="function")toast("Đã copy link mời!","success");else alert("Đã copy!");}
 
 // XP & Gamification

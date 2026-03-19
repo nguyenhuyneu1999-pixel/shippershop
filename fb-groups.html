@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="vi"><head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>FB Group Seeding - ShipperShop</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,system-ui,sans-serif;background:#0f0f23;color:#e0e0e0;min-height:100vh;padding:16px}
+.wrap{max-width:600px;margin:0 auto}
+h1{color:#1877f2;font-size:20px;margin-bottom:4px}
+.sub{color:#888;font-size:13px;margin-bottom:16px}
+.tip{background:#1877f220;border-radius:10px;padding:12px;margin-bottom:16px;font-size:12px;line-height:1.7;color:#8bb8f2}
+.card{background:#1a1a2e;border-radius:12px;margin-bottom:10px;overflow:hidden;border:1px solid #2a2a4a}
+.card-tag{display:inline-block;font-size:10px;padding:2px 8px;border-radius:4px;font-weight:600;margin:10px 14px 0}
+.tag-hot{background:#EE4D2D20;color:#EE4D2D}
+.tag-tips{background:#00b14f20;color:#00b14f}
+.tag-ask{background:#2196F320;color:#2196F3}
+.tag-fun{background:#ff980020;color:#ff9800}
+.card-body{padding:10px 14px;font-size:13px;line-height:1.8;white-space:pre-wrap;color:#ccc}
+.card-foot{display:flex;gap:8px;padding:10px 14px;border-top:1px solid #2a2a4a}
+.btn{padding:7px 14px;border-radius:8px;border:none;font-size:12px;font-weight:600;cursor:pointer;display:inline-flex;align-items:center;gap:4px}
+.btn-blue{background:#1877f2;color:#fff}
+.btn-sm{background:#333;color:#ccc}
+.groups-list{margin-bottom:16px}
+.groups-list h3{font-size:14px;color:#1877f2;margin-bottom:8px}
+.group-item{display:flex;align-items:center;gap:8px;padding:6px 0;font-size:13px}
+.group-item a{color:#60a5fa;text-decoration:none}
+.counter{font-size:12px;color:#888;margin-bottom:16px}
+</style>
+</head><body>
+<div class="wrap">
+<h1><i class="fab fa-facebook"></i> FB Group Seeding</h1>
+<p class="sub">Bài viết sẵn sàng đăng vào các group shipper Facebook</p>
+
+<div class="tip">
+  <b>Cách dùng:</b> Copy bài → Mở group Facebook → Paste → Đăng<br>
+  <b>Tips:</b> Đăng 2-3 group/ngày, cách nhau vài giờ. Tránh spam. Nội dung giá trị → không bị xóa.
+</div>
+
+<div class="groups-list">
+  <h3>📋 Top Groups Shipper (đăng vào đây):</h3>
+  <div class="group-item">🏍️ <a href="https://www.facebook.com/groups/shipperghtk" target="_blank">Shipper GHTK</a> <span style="color:#888">(100k+ members)</span></div>
+  <div class="group-item">🏍️ <a href="https://www.facebook.com/groups/shipperghn" target="_blank">Shipper GHN</a></div>
+  <div class="group-item">🏍️ <a href="https://www.facebook.com/groups/shipperj&t" target="_blank">Shipper J&T Express</a></div>
+  <div class="group-item">🏍️ <a href="https://www.facebook.com/groups/grabdriver" target="_blank">Tài xế Grab</a></div>
+  <div class="group-item">🏍️ <a href="https://www.facebook.com/groups/shippersaigon" target="_blank">Shipper Sài Gòn</a></div>
+  <div class="group-item">🏍️ <a href="https://www.facebook.com/groups/shipperhanoi" target="_blank">Shipper Hà Nội</a></div>
+</div>
+
+<p class="counter">📝 <span id="count">0</span> bài viết sẵn sàng</p>
+
+<div id="posts"></div>
+</div>
+
+<script>
+var posts = [
+  {tag:"tips",tagName:"Tips",content:"Ae shipper ơi, chia sẻ mẹo tiết kiệm xăng mà mình áp dụng được:\n\n1️⃣ Giữ tốc độ 40-50km/h ổn định\n2️⃣ Tắt máy khi chờ >30 giây\n3️⃣ Kiểm tra lốp mỗi sáng (lốp non hao xăng 15%)\n4️⃣ Đổ xăng sáng sớm (trạm vắng + xăng lạnh = nhiều hơn)\n\nTiết kiệm ~50-80k/ngày!\n\nAe có mẹo gì hay chia sẻ thêm nhé 👇\n\n📱 Thêm tips tại: shippershop.vn"},
+  {tag:"ask",tagName:"Hỏi đáp",content:"Hỏi ae: GHTK hay GHN trả phí ship cho shipper tốt hơn?\n\nMình đang chạy GHTK nhưng nghe nhiều ae khen GHN. Ai chạy cả 2 cho ý kiến với!\n\n📱 Thảo luận thêm tại cộng đồng shipper: shippershop.vn"},
+  {tag:"hot",tagName:"Hot",content:"🔥 Ae shipper có biết app cộng đồng shipper mới không?\n\n📱 ShipperShop - Cộng đồng Shipper Việt Nam\n\n✅ Chia sẻ kinh nghiệm giao hàng\n✅ Cảnh báo giao thông real-time\n✅ Tips tuyến đường, khu vực\n✅ Chợ mua bán đồ nghề shipper\n✅ Nhóm theo hãng: GHTK, GHN, J&T, Grab...\n\nFree 100%! Vào thử: shippershop.vn\n\n#shipper #giaohang #congdongshipper"},
+  {tag:"fun",tagName:"Vui",content:"Ai ship đêm có bao giờ gặp chuyện hài hước gì chưa? 😂\n\nMình hôm qua giao đồ ăn 11h đêm, khách ra nhận mà mặc đồ ngủ siêu hài, còn tip thêm 10k 😂\n\nAe chia sẻ chuyện vui khi đi ship đi! 👇\n\n📱 Thêm chuyện vui tại: shippershop.vn"},
+  {tag:"tips",tagName:"Tips",content:"📦 Checklist shipper mới cần biết:\n\n✅ Sạc dự phòng 10000mAh+\n✅ Bình nước 1L\n✅ Áo mưa loại tốt (1 lần ướt hàng = đền 500k)\n✅ Túi giữ nhiệt đồ ăn\n✅ Dây thun/buộc hàng\n✅ Thuốc đau đầu + dầu gió\n✅ Găng tay chống nắng\n✅ App ShipperShop (cảnh báo GT)\n\nAe bổ sung thêm gì? 👇\n\n📱 shippershop.vn"},
+  {tag:"ask",tagName:"Hỏi đáp",content:"Ae ơi, giao khu nào ở Sài Gòn mà nhiều đơn nhất?\n\nMình mới chạy, đang tìm khu đông đơn. Có ae kinh nghiệm chỉ giúp với!\n\nMà có app ShipperShop (shippershop.vn) ae cảnh báo giao thông cho nhau, khá hay. Ae thử xem.\n\n#shipper #saigon"},
+  {tag:"hot",tagName:"Hot",content:"🏍️ Shipper 2026: Thu nhập thật sự bao nhiêu?\n\nMình chạy GHTK được 3 tháng:\n- Trung bình: 300-400k/ngày\n- Ngày đông: 500-600k\n- Trừ xăng: ~100k\n- Ròng: ~200-500k/ngày\n\nAe chạy hãng khác thu nhập sao? Comment chia sẻ!\n\nTham gia cộng đồng shipper để update tips mới: shippershop.vn"},
+  {tag:"tips",tagName:"Tips",content:"🌧️ Mùa mưa shipper cần lưu ý:\n\n1. Bọc hàng 2 lớp nilon (1 lớp = vẫn ướt)\n2. Áo mưa bộ, không dùng áo mưa cánh dơi\n3. Giảm tốc qua vũng nước (ổ gà ẩn bên dưới)\n4. Không giao khi mưa to + sấm sét\n5. Check cảnh báo ngập trên ShipperShop\n\nAn toàn là trên hết ae!\n\n📱 shippershop.vn - Cảnh báo GT real-time"},
+  {tag:"fun",tagName:"Vui",content:"Tag 1 ae shipper bạn quen! 🏍️\n\nĐời shipper là:\n😅 Nắng cũng đi, mưa cũng đi\n😅 Khách cancel lúc tới nơi\n😅 GPS chỉ vào ngõ cụt\n😅 'Anh ơi em ở tầng 20 ko có thang máy'\n😅 Tip 2k rồi rate 5 sao\n\nNhưng mà vẫn yêu nghề! 💪\n\n📱 Chia sẻ thêm tại: shippershop.vn"},
+  {tag:"ask",tagName:"Hỏi đáp",content:"Ae ship J&T cho hỏi: phí COD mới thay đổi thế nào?\n\nNghe nói J&T đổi cách tính phí, ai rõ update giúp với!\n\nMình hay update tin tức shipper trên ShipperShop (shippershop.vn), ae vào xem thử nhé 👍"},
+];
+
+document.getElementById("count").textContent = posts.length;
+
+var tagColors = {hot:"tag-hot",tips:"tag-tips",ask:"tag-ask",fun:"tag-fun"};
+var html = "";
+posts.forEach(function(p, i) {
+    html += '<div class="card">';
+    html += '<span class="card-tag '+tagColors[p.tag]+'">'+p.tagName+'</span>';
+    html += '<div class="card-body" id="p'+i+'">'+escH(p.content)+'</div>';
+    html += '<div class="card-foot">';
+    html += '<button class="btn btn-blue" onclick="copyP('+i+')"><i class="fas fa-copy"></i> Copy bài</button>';
+    html += '<button class="btn btn-sm" onclick="shareP('+i+')"><i class="fab fa-facebook"></i> Mở FB</button>';
+    html += '</div></div>';
+});
+document.getElementById("posts").innerHTML = html;
+
+function copyP(i) {
+    var text = document.getElementById("p"+i).textContent;
+    navigator.clipboard.writeText(text).then(function(){
+        var btns = document.querySelectorAll(".card")[i].querySelectorAll(".btn-blue");
+        btns[0].innerHTML = '<i class="fas fa-check"></i> Copied!';
+        btns[0].style.background = "#00b14f";
+        setTimeout(function(){ btns[0].innerHTML = '<i class="fas fa-copy"></i> Copy bài'; btns[0].style.background = "#1877f2"; }, 2000);
+    });
+}
+
+function shareP(i) {
+    window.open("https://www.facebook.com/", "_blank");
+}
+
+function escH(s) { return s.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;"); }
+</script>
+</body></html>

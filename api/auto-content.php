@@ -238,6 +238,21 @@ function getDailyTip() {
         "💡 Đeo khẩu trang + kính khi ship. Bụi + nắng lâu ngày ảnh hưởng sức khỏe nhiều",
         "💡 Kiểm tra phanh xe mỗi tuần. An toàn hơn tiết kiệm vài phút",
         "💡 Giao tiếp lịch sự với khách: 'Dạ em giao hàng cho anh/chị'. Tip rate tăng 30%!",
+        "🏍️ Mang theo dây thun/dây buộc dự phòng. Hàng cồng kềnh cần cố định chắc",
+        "📱 Bật GPS trước khi nhận đơn. Tắt GPS giữa đường = mất tracking = giảm thưởng",
+        "💰 Ghi chép thu chi mỗi ngày. Cuối tháng mới biết lãi/lỗ thật sự bao nhiêu",
+        "🌧️ Mùa mưa: mang theo áo mưa loại tốt. Áo mưa rẻ rách nhanh, ướt hàng = đền tiền",
+        "⚡ Sạc điện thoại đầy 100% trước khi bắt đầu ca. Pin dưới 20% GPS sai nhiều",
+        "🗺️ Học thuộc các con hẻm khu vực mình giao thường. Nhanh hơn GPS 5-10 phút/đơn",
+        "💊 Luôn có thuốc đau đầu + dầu gió trong cốp. Đau giữa đường không có chỗ mua",
+        "📦 Kiểm tra hàng dễ vỡ ngay khi nhận. Phát hiện sớm = không phải chịu trách nhiệm",
+        "🔧 Học sửa xe cơ bản: vá lốp, thay bugi. Giữa đường hỏng xe = mất cả buổi đơn",
+        "👥 Tham gia nhóm shipper khu vực để chia sẻ thông tin kẹt xe, đường cấm",
+        "🏪 Nắm vị trí các cửa hàng tiện lợi trên tuyến. Chỗ nghỉ + toilet + mua đồ ăn nhanh",
+        "📞 Gọi khách trước 5 phút khi đến. Khách chuẩn bị sẵn = giao nhanh hơn 3 phút",
+        "💪 Tập thể dục nhẹ 15 phút mỗi sáng. Ngồi xe lâu đau lưng, cần giãn cơ",
+        "🧊 Mang theo túi giữ nhiệt nếu giao đồ ăn. Đồ nóng giữ nóng, đồ lạnh giữ lạnh",
+        "📊 Check bảng xếp hạng ShipperShop mỗi tuần để xem mình đứng thứ mấy! shippershop.vn/leaderboard.html",
     ];
     
     // Use day of year to rotate tips (different tip each day)
