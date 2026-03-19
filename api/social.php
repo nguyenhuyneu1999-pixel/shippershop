@@ -23,6 +23,7 @@ define('APP_ACCESS', true);
 require_once __DIR__ . '/../includes/config.php';
 require_once __DIR__ . '/../includes/db.php';
 require_once __DIR__ . '/../includes/functions.php';
+require_once __DIR__ . '/auth-check.php';
 
 // Set CORS headers
 setCorsHeaders();
@@ -42,10 +43,8 @@ if ($action === 'like') {
         error('Method not allowed', 405);
     }
     
-    requireAuth();
-    
     $input = getJsonInput();
-    $userId = getCurrentUserId();
+    $userId = getAuthUserId();
     $postId = intval($input['post_id'] ?? 0);
     
     if ($postId <= 0) {
@@ -96,10 +95,8 @@ if ($action === 'comment') {
         error('Method not allowed', 405);
     }
     
-    requireAuth();
-    
     $input = getJsonInput();
-    $userId = getCurrentUserId();
+    $userId = getAuthUserId();
     $postId = intval($input['post_id'] ?? 0);
     $content = sanitize($input['content'] ?? '');
     
@@ -176,10 +173,8 @@ if ($action === 'delete_comment') {
         error('Method not allowed', 405);
     }
     
-    requireAuth();
-    
     $commentId = intval($_GET['comment_id'] ?? 0);
-    $userId = getCurrentUserId();
+    $userId = getAuthUserId();
     
     if ($commentId <= 0) {
         error('Comment ID không hợp lệ');
@@ -215,10 +210,8 @@ if ($action === 'follow') {
         error('Method not allowed', 405);
     }
     
-    requireAuth();
-    
     $input = getJsonInput();
-    $userId = getCurrentUserId();
+    $userId = getAuthUserId();
     $followUserId = intval($input['user_id'] ?? 0);
     
     if ($followUserId <= 0) {
@@ -374,10 +367,7 @@ if ($action === 'feed') {
     if (getRequestMethod() !== 'GET') {
         error('Method not allowed', 405);
     }
-    
-    requireAuth();
-    
-    $userId = getCurrentUserId();
+    $userId = getAuthUserId();
     $page = isset($_GET['page']) ? max(1, intval($_GET['page'])) : 1;
     $limit = isset($_GET['limit']) ? min(intval($_GET['limit']), 50) : 20;
     
@@ -413,10 +403,8 @@ if ($action === 'save') {
         error('Method not allowed', 405);
     }
     
-    requireAuth();
-    
     $input = getJsonInput();
-    $userId = getCurrentUserId();
+    $userId = getAuthUserId();
     $postId = intval($input['post_id'] ?? 0);
     
     if ($postId <= 0) {
@@ -466,10 +454,7 @@ if ($action === 'saved_posts') {
     if (getRequestMethod() !== 'GET') {
         error('Method not allowed', 405);
     }
-    
-    requireAuth();
-    
-    $userId = getCurrentUserId();
+    $userId = getAuthUserId();
     $page = isset($_GET['page']) ? max(1, intval($_GET['page'])) : 1;
     $limit = isset($_GET['limit']) ? min(intval($_GET['limit']), 50) : 20;
     
@@ -501,7 +486,7 @@ error('Invalid action', 400);
 
 // LIKE COMMENT
 if ($action === 'like_comment') {
-    $uid = getCurrentUserId();
+    $uid = getAuthUserId();
     if (!$uid) { echo json_encode(['success'=>false,'message'=>'Login required']); exit; }
     $input = json_decode(file_get_contents('php://input'), true);
     $cid = intval($input['comment_id'] ?? 0);
