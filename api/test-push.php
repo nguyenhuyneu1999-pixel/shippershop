@@ -3,100 +3,84 @@ error_reporting(E_ALL);
 ini_set('display_errors','1');
 header('Content-Type: text/plain; charset=utf-8');
 require_once __DIR__.'/../includes/db.php';
-require_once __DIR__.'/../includes/push-helper.php';
+require_once __DIR__.'/../includes/vapid_keys.php';
 
-echo "======================================\n";
-echo " PUSH NOTIFICATION - FULL TEST\n";
-echo "======================================\n\n";
-$errors=[];
+echo "=== ECDH Deep Debug ===\n\n";
 
-// 1. VAPID
-echo "1. VAPID Keys: ";
-$pubDec=base64url_decode(VAPID_PUBLIC_KEY);
-echo (strlen($pubDec)===65&&ord($pubDec[0])===4)?'OK':'FAIL';
-echo " (".strlen(VAPID_PUBLIC_KEY)." chars)\n";
-if(strlen($pubDec)!==65) $errors[]="VAPID pub != 65 bytes";
+// Clear openssl errors
+while(openssl_error_string()){}
 
-// 2. Private Key
-echo "2. Private Key: ";
-$pk=openssl_pkey_get_private(VAPID_PRIVATE_PEM);
-echo $pk?'OK':'FAIL'; echo "\n";
-if(!$pk) $errors[]="Private key invalid";
+// Create keys exactly like encryptPayload does
+$localKey = openssl_pkey_new(['curve_name'=>'prime256v1','private_key_type'=>OPENSSL_KEYTYPE_EC]);
+$localDet = openssl_pkey_get_details($localKey);
+$localPub = chr(4).$localDet['ec']['x'].$localDet['ec']['y'];
+echo "localKey OK, localPub: ".strlen($localPub)." bytes\n";
 
-// 3. JWT Signing
-echo "3. JWT Sign: ";
-$h=base64url_encode('{"typ":"JWT","alg":"ES256"}');
-$c=base64url_encode('{"aud":"https://fcm.googleapis.com","exp":'.(time()+3600).'}');
-$ok=openssl_sign($h.'.'.$c,$sig,$pk,OPENSSL_ALGO_SHA256);
-echo $ok?'OK':'FAIL'; echo " (raw sig ".strlen(derToRaw($sig))." bytes)\n";
-if(!$ok) $errors[]="JWT signing failed";
+// Create client key (simulates browser)
+$clientKey = openssl_pkey_new(['curve_name'=>'prime256v1','private_key_type'=>OPENSSL_KEYTYPE_EC]);
+$cDet = openssl_pkey_get_details($clientKey);
+$clientPubRaw = chr(4).$cDet['ec']['x'].$cDet['ec']['y'];
+echo "clientPubRaw: ".strlen($clientPubRaw)." bytes\n";
 
-// 4. EC Key Gen
-echo "4. EC Key Gen: ";
-$testKey=openssl_pkey_new(['curve_name'=>'prime256v1','private_key_type'=>OPENSSL_KEYTYPE_EC]);
-echo $testKey?'OK':'FAIL'; echo "\n";
+// Simulate what encryptPayload does: base64url encode then decode
+function b64ue($d){return rtrim(strtr(base64_encode($d),'+/','-_'),'=');}
+function b64ud($d){return base64_decode(strtr($d,'-_','+/').str_repeat('=',(4-strlen($d)%4)%4));}
 
-// 5. ECDH
-echo "5. ECDH: ";
-$clientKey=openssl_pkey_new(['curve_name'=>'prime256v1','private_key_type'=>OPENSSL_KEYTYPE_EC]);
-$cDet=openssl_pkey_get_details($clientKey);
-$clientPub=chr(4).$cDet['ec']['x'].$cDet['ec']['y'];
-$shared=computeECDH($testKey,$clientPub);
-echo $shared?'OK ('.strlen($shared).' bytes)':'FAIL'; echo "\n";
-if(!$shared){
-    $errors[]="ECDH failed";
-    while($e=openssl_error_string()) echo "   openssl: $e\n";
+$clientPubB64 = b64ue($clientPubRaw);
+echo "clientPubB64: ".strlen($clientPubB64)." chars\n";
+
+$userPub = b64ud($clientPubB64);
+echo "userPub (decoded): ".strlen($userPub)." bytes\n";
+echo "First byte: 0x".bin2hex($userPub[0])." (should be 0x04)\n";
+echo "Match raw: ".($userPub===$clientPubRaw?'YES':'NO')."\n";
+
+// Now trace computeECDH exactly
+echo "\n--- Inside computeECDH ---\n";
+$remotePubKeyBin = $userPub;
+echo "remotePubKeyBin: ".strlen($remotePubKeyBin)." bytes\n";
+
+// Check lengths of x,y
+$x = substr($remotePubKeyBin, 1, 32);
+$y = substr($remotePubKeyBin, 33, 32);
+echo "x: ".strlen($x)." bytes, y: ".strlen($y)." bytes\n";
+
+// Build DER
+$der = "\x30\x59\x30\x13\x06\x07\x2a\x86\x48\xce\x3d\x02\x01\x06\x08\x2a\x86\x48\xce\x3d\x03\x01\x07\x03\x42\x00" . $remotePubKeyBin;
+echo "DER: ".strlen($der)." bytes (should be 91)\n";
+echo "DER hex start: ".bin2hex(substr($der,0,10))."\n";
+
+// Build PEM
+$b64 = base64_encode($der);
+echo "Base64: ".strlen($b64)." chars\n";
+$pem = "-----BEGIN PUBLIC KEY-----\n" . chunk_split($b64, 64, "\n") . "-----END PUBLIC KEY-----\n";
+echo "PEM:\n$pem\n";
+
+// Clear errors before parse
+while(openssl_error_string()){}
+
+$remotePubKey = openssl_pkey_get_public($pem);
+echo "remotePubKey: ".($remotePubKey?'VALID':'INVALID')."\n";
+if(!$remotePubKey){
+    while($e=openssl_error_string()) echo "  err: $e\n";
 }
 
-// 6. AES-128-GCM
-echo "6. AES-GCM: ";
-$tag='';$ct=openssl_encrypt("test",'aes-128-gcm',random_bytes(16),OPENSSL_RAW_DATA,random_bytes(12),$tag,'',16);
-echo ($ct!==false)?'OK':'FAIL'; echo "\n";
-
-// 7. Full Encryption
-echo "7. Full Encrypt: ";
-$clientPubB64=base64url_encode($clientPub);
-$clientAuth=base64url_encode(random_bytes(16));
-$enc=encryptPayload('{"title":"Test","body":"Hello World"}', $clientPubB64, $clientAuth);
-echo $enc?'OK ('.strlen($enc['ciphertext']).' bytes)':'FAIL'; echo "\n";
-if(!$enc) $errors[]="Encryption pipeline failed";
-
-// 8. HTTP Send
-echo "8. HTTP Send (httpbin): ";
-if($enc){
-    $fakeSub=['endpoint'=>'https://httpbin.org/post','p256dh'=>$clientPubB64,'auth'=>$clientAuth];
-    $res=sendPushNotification($fakeSub, '{"title":"Test","body":"Hello"}');
-    echo "status=".$res['status']." ".($res['success']?'OK':'FAIL'); echo "\n";
-}else echo "SKIP (encrypt failed)\n";
-
-// 9. DB
-echo "9. Database: ";
-$d=db();
-$cnt=$d->fetchOne("SELECT COUNT(*) as c FROM push_subscriptions");
-echo "OK (".$cnt['c']." subscriptions)\n";
-
-// 10. API
-echo "10. API vapid_key: ";
-$resp=@file_get_contents('https://shippershop.vn/api/push.php?action=vapid_key',false,stream_context_create(['ssl'=>['verify_peer'=>false]]));
-$data=json_decode($resp,true);
-echo ($data&&$data['success'])?'OK':'FAIL'; echo "\n";
-
-// 11. Key match
-echo "11. Client-Server match: ";
-$apiKey=$data['data']['publicKey']??'';
-echo (VAPID_PUBLIC_KEY===$apiKey)?'OK':'MISMATCH'; echo "\n";
-if(VAPID_PUBLIC_KEY!==$apiKey) $errors[]="Key mismatch";
-
-// 12. notifyUser (user 2)
-echo "12. notifyUser(2): ";
-$sent=notifyUser(2,'Test','Test body','general','/');
-echo "sent to $sent devices\n";
-
-echo "\n======================================\n";
-if(empty($errors)){
-    echo " ALL 12 TESTS PASSED\n";
-}else{
-    echo " ".count($errors)." ERRORS:\n";
-    foreach($errors as $e) echo "   - $e\n";
+// Try derive
+if($remotePubKey){
+    while(openssl_error_string()){}
+    $shared = openssl_pkey_derive($remotePubKey, $localKey, 32);
+    echo "Shared secret: ".($shared?strlen($shared)." bytes":'FAIL')."\n";
+    if(!$shared){while($e=openssl_error_string()) echo "  err: $e\n";}
 }
-echo "======================================\n";
+
+// Also try the PHP 8.2+ approach: export pub PEM from key details
+echo "\n--- Alternative: use key details PEM ---\n";
+$clientPubPem = $cDet['key']; // OpenSSL's own PEM public key
+echo "Client PEM from details:\n$clientPubPem\n";
+$pubKey2 = openssl_pkey_get_public($clientPubPem);
+echo "pubKey2: ".($pubKey2?'VALID':'INVALID')."\n";
+if($pubKey2){
+    $shared2 = openssl_pkey_derive($pubKey2, $localKey, 32);
+    echo "Shared2: ".($shared2?strlen($shared2)." bytes":'FAIL')."\n";
+}
+
+echo "\nDONE\n";
