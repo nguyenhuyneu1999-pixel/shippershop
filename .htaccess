@@ -7,6 +7,9 @@ RewriteEngine On
 RewriteCond %{HTTP:Authorization} ^(.*)
 RewriteRule .* - [e=HTTP_AUTHORIZATION:%1]
 
+# Referral deep link: /r/CODE → register with ref code
+RewriteRule ^r/([A-Za-z0-9_-]+)$ /register.html?ref=$1 [R=302,L]
+
 # DirectoryIndex
 DirectoryIndex index.html index.php
 

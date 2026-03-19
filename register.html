@@ -170,12 +170,12 @@ document.getElementById('registerForm').addEventListener('submit',async function
   if(err)return;
   var btn=document.getElementById('submitBtn');btn.classList.add('loading');btn.disabled=true;
   try{
-    var r=await fetch('/api/auth.php?action=register',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({fullname:fn,username:un,password:pw,shipping_company:sc})});
+    var r=await fetch('/api/auth.php?action=register',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({fullname:fn,username:un,password:pw,shipping_company:sc,ref_code:new URLSearchParams(location.search).get('ref')||''})});
     var d=await r.json();
     if(d.success){localStorage.setItem('user',JSON.stringify(d.data.user));localStorage.setItem('token',d.data.token);
       // Track referral if ref code exists
       var refCode=new URLSearchParams(location.search).get('ref');
-      if(refCode&&d.data.user&&d.data.user.id){try{fetch('/api/referral.php?action=record',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({ref_code:refCode,invitee_id:d.data.user.id})}).catch(function(){});}catch(x){}}
+      if(refCode&&d.data.user&&d.data.user.id){try{fetch('/api/referral.php?action=apply',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({code:refCode,user_id:d.data.user.id})}).catch(function(){});}catch(x){}}
       alert('✅ Đăng ký thành công!');window.location.href='index.html';}
     else{document.getElementById('formError').textContent=d.message||'Đăng ký thất bại';}
   }catch(e){document.getElementById('formError').textContent='Lỗi kết nối';}

@@ -19,6 +19,7 @@ require_once __DIR__ . '/../includes/config.php';
 require_once __DIR__ . '/../includes/db.php';
 require_once __DIR__ . '/../includes/functions.php';
 require_once __DIR__ . '/auth-check.php';
+require_once __DIR__ . '/../includes/xp-helper.php';
 
 // Set CORS headers
 setCorsHeaders();
@@ -233,7 +234,7 @@ if ($method === 'POST') {
             if ($uv) { try { require_once __DIR__.'/../includes/push-helper.php'; $post=$db->fetchOne("SELECT user_id FROM posts WHERE id=?",[$postId]); if($post&&intval($post['user_id'])!==$userId){ $me=$db->fetchOne("SELECT fullname FROM users WHERE id=?",[$userId]); notifyUser(intval($post['user_id']),($me?$me['fullname']:'Ai đó').' đã thành công bài viết','Bài viết của bạn được thành công','post','/post-detail.html?id='.$postId); } } catch(Throwable $e){} }
             success("OK", ["score" => intval($score), "user_vote" => $uv ? "up" : null]);
         }
-        if ($action === "comment") { $pid = intval($input["post_id"] ?? 0); $ct = sanitize($input["content"] ?? ""); $par = $input["parent_id"] ?? null; if (empty($ct)) error("Nội dung trống"); $db->insert("comments", ["post_id" => $pid, "user_id" => $userId, "parent_id" => $par, "content" => $ct]); $db->query("UPDATE posts SET comments_count = comments_count + 1 WHERE id = ?", [$pid]); try{require_once __DIR__.'/../includes/push-helper.php';$post=$db->fetchOne("SELECT user_id,content FROM posts WHERE id=?",[$pid]);if($post&&intval($post['user_id'])!==$userId){$me=$db->fetchOne("SELECT fullname FROM users WHERE id=?",[$userId]);$mName=$me?$me['fullname']:'Ai đó';$preview=mb_substr($ct,0,50);notifyUser(intval($post['user_id']),'Bài viết: '.$mName.' đã ghi chú',$preview,'post','/post-detail.html?id='.$pid);}}catch(Throwable $e){} success("Đã bình luận!"); }
+        if ($action === "comment") { $pid = intval($input["post_id"] ?? 0); $ct = sanitize($input["content"] ?? ""); $par = $input["parent_id"] ?? null; if (empty($ct)) error("Nội dung trống"); $db->insert("comments", ["post_id" => $pid, "user_id" => $userId, "parent_id" => $par, "content" => $ct]); $db->query("UPDATE posts SET comments_count = comments_count + 1 WHERE id = ?", [$pid]); try{require_once __DIR__.'/../includes/push-helper.php';$post=$db->fetchOne("SELECT user_id,content FROM posts WHERE id=?",[$pid]);if($post&&intval($post['user_id'])!==$userId){$me=$db->fetchOne("SELECT fullname FROM users WHERE id=?",[$userId]);$mName=$me?$me['fullname']:'Ai đó';$preview=mb_substr($ct,0,50);notifyUser(intval($post['user_id']),'Bài viết: '.$mName.' đã ghi chú',$preview,'post','/post-detail.html?id='.$pid);}}catch(Throwable $e){} try{awardXP($userId,"comment",5,"Ghi chú bài #".$pid);}catch(Throwable$e){} success("Đã bình luận!"); }
         if ($action === "save") { $pid = intval($input["post_id"] ?? 0); $ex = $db->fetchOne("SELECT id FROM saved_posts WHERE post_id = ? AND user_id = ?", [$pid, $userId]); if ($ex) { $db->hardDelete("saved_posts", "post_id = ? AND user_id = ?", [$pid, $userId]); success("OK", ["saved" => false]); } else { $db->insert("saved_posts", ["post_id" => $pid, "user_id" => $userId]); success("OK", ["saved" => true]); } }
         if ($action === "share") { $pid = intval($input["post_id"] ?? 0); if ($pid) { $db->query("UPDATE posts SET shares_count = shares_count + 1 WHERE id = ?", [$pid]); $cnt = $db->fetchOne("SELECT shares_count FROM posts WHERE id = ?", [$pid]); try{require_once __DIR__.'/../includes/push-helper.php';$post=$db->fetchOne("SELECT user_id FROM posts WHERE id=?",[$pid]);if($post&&intval($post['user_id'])!==$userId){$me=$db->fetchOne("SELECT fullname FROM users WHERE id=?",[$userId]);notifyUser(intval($post['user_id']),($me?$me['fullname']:'Ai đó').' đã chuyển tiếp bài viết','Bài viết của bạn được chia sẻ','post','/post-detail.html?id='.$pid);}}catch(Throwable $e){} success("OK", ["shares_count" => intval($cnt['shares_count'] ?? 0)]); } else { success("OK"); } }
         if ($action === "delete") { $pid = intval($input["post_id"] ?? 0); $po = $db->fetchOne("SELECT user_id FROM posts WHERE id = ?", [$pid]); if (!$po || intval($po["user_id"]) !== $userId) error("Không có quyền"); $db->update("posts", ["status" => "deleted"], "id = ?", [$pid]); success("Đã xóa"); }
@@ -367,7 +368,7 @@ if ($method === 'POST') {
             }
         } catch (Exception $he) { error_log('Hashtag save error: ' . $he->getMessage()); }
         
-        success('Đăng bài thành công!', [
+        try{awardXP(\$userId,'post',10,'Đăng bài mới');}catch(Throwable\$e){} success('Đăng bài thành công!', [
             'post_id' => $postId,
             'images' => $imagesJson,
             'type' => $type
