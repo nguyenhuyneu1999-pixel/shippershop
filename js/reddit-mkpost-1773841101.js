@@ -52,7 +52,7 @@ function mkPost(p){
   var contentH='<div class="post-content'+(long?'':' full')+'" id="pc-'+p.id+'">'+body+'</div>'+(long?'<span class="show-more" onclick="xpnd(\''+p.id+'\')">Xem thêm ▼</span>':'');
   var imgH='';
   var imgs2=p.images_arr||(p.images?tryParse(p.images):null)||(p.thumbnail?[p.thumbnail]:[]);
-  if(imgs2&&imgs2.length){var cl=imgs2.length>1?' multi':'';imgH='<div class="post-images'+(imgs2.length>1?' multi-img':'')+'">'+imgs2.slice(0,4).map(function(i){return'<img class="post-img'+cl+'" src="'+i+'" loading="lazy" onclick="openLb(\''+i+'\')" onerror="this.style.display=\'none\'">';}).join('')+'</div>';}
+  if(imgs2&&imgs2.length){var cl=imgs2.length>1?' multi':'';window._ssPI=window._ssPI||{};window._ssPI[p.id]=imgs2;imgH='<div class="post-images'+(imgs2.length>1?' multi-img':'')+'">'+imgs2.slice(0,4).map(function(i){return'<img class="post-img'+cl+'" src="'+i+'" loading="lazy" onclick="openLb(\''+i+'\','+p.id+',window._ssPI['+p.id+'])" onerror="this.style.display=\'none\'">';}).join('')+'</div>';}
   var vidH='';
   if(p.video_url){
     if(p.video_url.indexOf('/uploads/')!==-1){

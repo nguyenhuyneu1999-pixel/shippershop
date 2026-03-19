@@ -797,8 +797,8 @@ async function submitPost(){
 }
 
 // Lightbox
-function openLb(src){document.getElementById('lbImg').src=src;document.getElementById('lb').classList.add('open');}
-function closeLb(){document.getElementById('lb').classList.remove('open');}
+// openLb/closeLb provided by image-viewer.js
+
 
 // Helpers
 function xpnd(id){const e=document.getElementById('pc-'+id);e.classList.add('full');e.nextElementSibling&&e.nextElementSibling.classList.contains('show-more')&&e.nextElementSibling.remove();}
@@ -1244,4 +1244,4 @@ function sendSubToServer(sub){
   fetch("/api/push.php?action=subscribe",{method:"POST",headers:hdrs,credentials:"include",body:JSON.stringify(data)}).catch(function(){});
 }
 })();
-</script></body>
+</script><script src="/js/image-viewer.js"></script></body>

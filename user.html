@@ -121,7 +121,7 @@ function loadCmts(){}
 function togMenu(pid){var m=document.getElementById("pm"+pid);if(!m)return;m.style.display=m.style.display==="none"?"block":"none";}
 function delP(pid){if(confirm("Xóa bài này?")){fetch("/api/posts.php?action=delete",{method:"POST",headers:{"Content-Type":"application/json"},credentials:"include",body:JSON.stringify({post_id:pid})}).then(function(r){return r.json();}).then(function(d){if(d.success){document.getElementById("P"+pid).remove();}});}}
 function reportP(pid){togMenu(pid);}
-function openLb(src){window.open(src,"_blank");}
+// openLb provided by image-viewer.js
 function xpnd(pid){var el=document.getElementById("pc-"+pid);if(el)el.classList.add("full");var btn=el.nextElementSibling;if(btn)btn.remove();}
 </script>
 <script src="js/mobile.js"></script>
@@ -177,4 +177,4 @@ async function lkSC(cid,btn){if(!CU){toast("Dang nhap!","warning");return;}try{v
 function shrSheet(){var u=location.origin+"/post-detail.html?id="+sheetPostId;if(navigator.share)navigator.share({url:u});else{navigator.clipboard.writeText(u);toast("Da copy link!","success");}}
 </script>
 <script src="js/post-modal.js"></script>
-</body></html>
+<script src="/js/image-viewer.js"></script></body></html>
