@@ -127,7 +127,7 @@ async function savePost(pid,btn){
 
 /* Share - uses native share (shows Zalo, FB etc) or copy link */
 function sharePost(pid){
-  var url=location.origin+'/post-detail.html?id='+pid;
+  var url=location.origin+'/share.php?type=post&id='+pid;
   if(navigator.share){
     navigator.share({title:'ShipperShop',text:'Xem bài viết trên ShipperShop',url:url}).catch(function(){});
   }else{

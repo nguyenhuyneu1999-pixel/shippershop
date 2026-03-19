@@ -1,0 +1,10 @@
+User-agent: *
+Allow: /
+Disallow: /api/
+Disallow: /includes/
+Disallow: /admin.html
+Disallow: /admin-orders.html
+Disallow: /admin-wallet.html
+Disallow: /uploads/messages/
+
+Sitemap: https://shippershop.vn/sitemap.xml

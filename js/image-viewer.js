@@ -182,7 +182,7 @@ window.ssIvComment=function(pid){
   else if(typeof openPdCmtModal==="function")openPdCmtModal();
 };
 window.ssIvShare=function(pid){
-  var u=location.origin+"/post-detail.html?id="+pid;
+  var u=location.origin+"/share.php?type=post&id="+pid;
   if(navigator.share)navigator.share({url:u,title:"ShipperShop"});
   else{navigator.clipboard.writeText(u);if(typeof toast==="function")toast("Đã copy link!");}
 };
