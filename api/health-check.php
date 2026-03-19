@@ -3,31 +3,25 @@ require_once __DIR__.'/../includes/db.php';
 header('Content-Type: text/plain');
 $d=db();
 
-echo "=== FIX DOUBLE-PATH IMAGES ===\n";
-$bad=$d->fetchAll("SELECT id,images FROM posts WHERE images LIKE '%/uploads%/uploads%'");
-echo "Found: ".count($bad)." posts\n";
+echo "=== ACTUAL double-path check ===\n";
+// The LIKE '%/uploads%/uploads%' matches posts with 2+ images (each has /uploads path)
+// Real double-path is: /uploads/posts//uploads/posts/
+$real=$d->fetchAll("SELECT id,images FROM posts WHERE images LIKE '%uploads/posts/%uploads/posts/%' OR images LIKE '%uploads/posts//uploads%'");
+echo "Real double-path: ".count($real)."\n";
+foreach($real as $r){
+    echo "  id=".$r['id'].": ".substr($r['images'],0,100)."\n";
+}
 
-$fixed=0;
-foreach($bad as $p){
-    $imgs=$p['images'];
-    // Fix patterns like /uploads/posts//uploads/posts/seed_img_1.jpg
-    $newImgs=str_replace('/uploads/posts//uploads/posts/','/uploads/posts/',$imgs);
-    $newImgs=str_replace('/uploads/posts/uploads/posts/','/uploads/posts/',$newImgs);
-    // Generic double /uploads
-    $newImgs=preg_replace('#(/uploads/[^/]+/)(/uploads/[^/]+/)#','$2',$newImgs);
-    if($newImgs!==$imgs){
-        $d->query("UPDATE posts SET images=? WHERE id=?",[  $newImgs,$p['id']]);
-        $fixed++;
+echo "\n=== Verify all images are accessible ===\n";
+// Sample 5 random posts with images
+$samples=$d->fetchAll("SELECT id,images FROM posts WHERE images IS NOT NULL AND images != '' AND images != '[]' ORDER BY RAND() LIMIT 5");
+foreach($samples as $s){
+    $imgs=json_decode($s['images'],true);
+    if(!$imgs)continue;
+    foreach($imgs as $img){
+        $path='/home/nhshiw2j/public_html'.$img;
+        $exists=file_exists($path)?'✅':'❌';
+        echo "  post=".$s['id']." $exists $img\n";
     }
 }
-echo "Fixed: $fixed posts\n";
-
-// Verify
-$still=$d->fetchOne("SELECT COUNT(*) as c FROM posts WHERE images LIKE '%/uploads%/uploads%'");
-echo "Remaining: ".$still['c']."\n";
-
-if($still['c']>0){
-    $samples=$d->fetchAll("SELECT id,LEFT(images,120) as img FROM posts WHERE images LIKE '%/uploads%/uploads%' LIMIT 3");
-    foreach($samples as $s) echo "  id=".$s['id'].": ".$s['img']."\n";
-}
-echo "DONE\n";
+echo "\nDONE\n";
