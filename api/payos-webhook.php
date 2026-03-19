@@ -1,131 +1,61 @@
 <?php
-// payOS Webhook - receives payment confirmation
-// URL: https://shippershop.vn/api/payos-webhook.php
-// Register this URL at: https://my.payos.vn > Kênh thanh toán > Webhook
-
+// payOS Webhook - receives payment confirmations
 define('APP_ACCESS', true);
-require_once __DIR__ . '/../includes/config.php';
 require_once __DIR__ . '/../includes/db.php';
 require_once __DIR__ . '/../includes/payos.php';
-
 header('Content-Type: application/json');
 
-// payOS sends POST with JSON body
+if ($_SERVER['REQUEST_METHOD'] !== 'POST') { http_response_code(405); echo '{"success":false}'; exit; }
+
 $raw = file_get_contents('php://input');
-$data = json_decode($raw, true);
+$body = json_decode($raw, true);
+if (!$body) { echo '{"success":true}'; exit; }
 
-// Log for debugging
-$logFile = __DIR__ . '/../uploads/payos_webhook.log';
-file_put_contents($logFile, date('Y-m-d H:i:s') . " | " . $raw . "\n", FILE_APPEND);
-
-if (!$data || !isset($data['data'])) {
-    http_response_code(200); // Always return 200 to payOS
-    echo json_encode(['success' => true]); // payOS expects success response
-    exit;
-}
+$d = db();
+$logData = json_encode($body, JSON_UNESCAPED_UNICODE);
 
 // Verify signature
-if (!payosVerifyWebhook($data)) {
-    file_put_contents($logFile, date('Y-m-d H:i:s') . " | INVALID SIGNATURE\n", FILE_APPEND);
-    echo json_encode(['success' => true]);
-    exit;
+if (!payosVerifyWebhook($body)) {
+    try { $d->query("INSERT INTO audit_log (user_id,action,details,ip,created_at) VALUES (0,'payos_invalid',?,?,NOW())", [mb_substr($logData,0,500), $_SERVER['REMOTE_ADDR']??'']); } catch(Throwable $e) {}
+    echo '{"success":true}'; exit;
 }
 
-$paymentData = $data['data'];
-$orderCode = intval($paymentData['orderCode'] ?? 0);
-$amount = intval($paymentData['amount'] ?? 0);
-$status = $paymentData['code'] ?? '';  // 00 = success
-$desc = $paymentData['desc'] ?? '';
+$data = $body['data'] ?? [];
+$orderCode = intval($data['orderCode'] ?? 0);
+$code = $data['code'] ?? '';
+$amount = intval($data['amount'] ?? 0);
+if (!$orderCode) { echo '{"success":true}'; exit; }
 
-file_put_contents($logFile, date('Y-m-d H:i:s') . " | orderCode=$orderCode amount=$amount status=$status\n", FILE_APPEND);
-
-// Only process successful payments
-if ($status !== '00' || $orderCode <= 0) {
-    echo json_encode(['success' => true]);
-    exit;
-}
-
-$db = db();
-
-// Find pending payment record
-$payment = $db->fetchOne(
-    "SELECT * FROM payos_payments WHERE order_code = ? AND `status` = 'pending'",
-    [$orderCode]
-);
-
-if (!$payment) {
-    file_put_contents($logFile, date('Y-m-d H:i:s') . " | Payment not found for orderCode=$orderCode\n", FILE_APPEND);
-    echo json_encode(['success' => true]);
-    exit;
-}
-
-// Verify amount matches
-if (intval($payment['amount']) !== $amount) {
-    file_put_contents($logFile, date('Y-m-d H:i:s') . " | Amount mismatch: expected={$payment['amount']} got=$amount\n", FILE_APPEND);
-    echo json_encode(['success' => true]);
-    exit;
-}
+// Find pending payment
+$payment = $d->fetchOne("SELECT * FROM payos_payments WHERE order_code=? AND `status`='pending'", [$orderCode]);
+if (!$payment) { echo '{"success":true}'; exit; }
 
 $userId = intval($payment['user_id']);
 $planId = intval($payment['plan_id']);
-$type = $payment['type']; // 'subscription' or 'deposit'
 
-try {
-    $db->beginTransaction();
-
-    // Mark payment as completed
-    $db->query("UPDATE payos_payments SET `status` = 'completed', paid_at = NOW(), raw_webhook = ? WHERE id = ?",
-        [$raw, $payment['id']]);
-
-    if ($type === 'subscription') {
-        // Get plan details
-        $plan = $db->fetchOne("SELECT * FROM subscription_plans WHERE id = ?", [$planId]);
-        if ($plan) {
-            // Deactivate old subscriptions
-            $db->query("UPDATE user_subscriptions SET `status` = 'expired' WHERE user_id = ? AND `status` = 'active'", [$userId]);
-
-            // Create new subscription
-            $db->query("INSERT INTO user_subscriptions (user_id, plan_id, `status`, started_at, expires_at, created_at) VALUES (?, ?, 'active', NOW(), DATE_ADD(NOW(), INTERVAL ? DAY), NOW())",
-                [$userId, $planId, intval($plan['duration_days'])]);
-
-            // Log transaction
-            $db->query("INSERT INTO wallet_transactions (user_id, type, amount, `status`, description, created_at) VALUES (?, 'subscription', ?, 'completed', ?, NOW())",
-                [$userId, $amount, 'Đăng ký ' . $plan['name'] . ' via payOS']);
-
-            file_put_contents($logFile, date('Y-m-d H:i:s') . " | Subscription activated: user=$userId plan={$plan['name']}\n", FILE_APPEND);
-        }
-    } elseif ($type === 'deposit') {
-        // Add to wallet balance
-        $wallet = $db->fetchOne("SELECT * FROM wallets WHERE user_id = ?", [$userId]);
-        if ($wallet) {
-            $db->query("UPDATE wallets SET balance = balance + ? WHERE user_id = ?", [$amount, $userId]);
-        } else {
-            $db->query("INSERT INTO wallets (user_id, balance, created_at) VALUES (?, ?, NOW())", [$userId, $amount]);
-        }
-
-        // Log transaction
-        $db->query("INSERT INTO wallet_transactions (user_id, type, amount, `status`, description, created_at) VALUES (?, 'deposit', ?, 'completed', ?, NOW())",
-            [$userId, $amount, 'Nạp tiền via payOS']);
-
-        file_put_contents($logFile, date('Y-m-d H:i:s') . " | Deposit completed: user=$userId amount=$amount\n", FILE_APPEND);
-    }
-
-    $db->commit();
-
-    // Send push notification
+if ($code === '00' && $amount >= intval($payment['amount'])) {
+    // SUCCESS
     try {
-        require_once __DIR__ . '/../includes/push-helper.php';
-        if ($type === 'subscription') {
-            notifyUser($userId, 'Đăng ký thành công!', 'Gói ' . ($plan['name'] ?? '') . ' đã được kích hoạt', 'wallet', '/wallet.html');
-        } else {
-            notifyUser($userId, 'Nạp tiền thành công!', number_format($amount) . 'đ đã được cộng vào ví', 'wallet', '/wallet.html');
+        $pdo = db()->getConnection();
+        $pdo->beginTransaction();
+        $pdo->prepare("UPDATE payos_payments SET `status`='completed',paid_at=NOW(),payos_data=? WHERE id=?")->execute([$logData,$payment['id']]);
+        $planStmt = $pdo->prepare("SELECT * FROM subscription_plans WHERE id=?");
+        $planStmt->execute([$planId]);
+        $plan = $planStmt->fetch(\PDO::FETCH_ASSOC);
+        if ($plan) {
+            $pdo->prepare("UPDATE user_subscriptions SET `status`='cancelled' WHERE user_id=? AND `status`='active'")->execute([$userId]);
+            $pdo->prepare("INSERT INTO user_subscriptions (user_id,plan_id,`status`,started_at,expires_at,auto_renew) VALUES (?,?,'active',NOW(),DATE_ADD(NOW(),INTERVAL ? DAY),0)")->execute([$userId,$planId,intval($plan['duration_days'])]);
+            $ref = 'PAYOS_' . $orderCode;
+            $pdo->prepare("INSERT INTO wallet_transactions (user_id,type,amount,balance_before,balance_after,description,reference_id,`status`,created_at) VALUES (?,'payment',?,0,0,?,?,'completed',NOW())")->execute([$userId,intval($payment['amount']),'Thanh toán gói '.$plan['name'].' (QR)',$ref]);
         }
-    } catch (Throwable $e) {}
-
-} catch (Throwable $e) {
-    $db->rollback();
-    file_put_contents($logFile, date('Y-m-d H:i:s') . " | ERROR: " . $e->getMessage() . "\n", FILE_APPEND);
+        $pdo->commit();
+        try { $d->query("INSERT INTO audit_log (user_id,action,details,ip,created_at) VALUES (?,'payos_ok',?,?,NOW())", [$userId,'plan='.($plan['name']??$planId).' amt='.$amount,$_SERVER['REMOTE_ADDR']??'']); } catch(Throwable $e) {}
+        try { require_once __DIR__.'/../includes/push-helper.php'; notifyUser($userId,'Thanh toán thành công!','Gói '.($plan['name']??'Premium').' đã kích hoạt','wallet','/wallet.html'); } catch(Throwable $e) {}
+    } catch (Throwable $e) {
+        if (isset($pdo) && $pdo->inTransaction()) $pdo->rollBack();
+    }
+} else {
+    $d->query("UPDATE payos_payments SET `status`='failed',payos_data=? WHERE id=?", [$logData,$payment['id']]);
 }
 
-// Always return 200 to payOS
-echo json_encode(['success' => true]);
+echo '{"success":true}';

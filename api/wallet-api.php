@@ -267,6 +267,95 @@ if ($method === 'POST') {
     }
 
     // SUBSCRIBE (requires CSRF + PIN for paid)
+    // PAY VIA PAYOS (QR code)
+    if ($action === 'pay_subscribe') {
+        rateLimit('pay_subscribe', 10, 300);
+        $planId = intval($input['plan_id'] ?? 0);
+        if (!$planId) wErr('Chọn gói');
+        
+        $plan = $db->fetchOne("SELECT * FROM subscription_plans WHERE id=? AND is_active=1", [$planId]);
+        if (!$plan) wErr('Gói không tồn tại');
+        $price = intval($plan['price']);
+        
+        if ($price <= 0) {
+            // Free plan - activate directly
+            $db->query("UPDATE user_subscriptions SET `status`='cancelled' WHERE user_id=? AND `status`='active'", [$uid]);
+            $db->query("INSERT INTO user_subscriptions (user_id,plan_id,`status`,started_at,expires_at,auto_renew) VALUES (?,?,'active',NOW(),DATE_ADD(NOW(), INTERVAL ? DAY),0)", [$uid, $planId, intval($plan['duration_days'])]);
+            wOk('Đã kích hoạt gói ' . $plan['name']);
+        }
+        
+        // Create payOS payment
+        require_once __DIR__ . '/../includes/payos.php';
+        $orderCode = payosOrderCode($uid, $planId);
+        
+        // Check if already have pending payment for same plan
+        $existing = $db->fetchOne("SELECT * FROM payos_payments WHERE user_id=? AND plan_id=? AND `status`='pending' AND created_at > DATE_SUB(NOW(), INTERVAL 30 MINUTE)", [$uid, $planId]);
+        if ($existing) {
+            // Return existing payment link
+            wOk('Đang chờ thanh toán', [
+                'order_code' => intval($existing['order_code']),
+                'checkout_url' => $existing['checkout_url'],
+                'qr_code' => $existing['qr_code'],
+                'amount' => intval($existing['amount']),
+                'plan_name' => $plan['name']
+            ]);
+        }
+        
+        $desc = 'SS ' . $plan['name'];
+        $items = [['name' => $plan['name'], 'quantity' => 1, 'price' => $price]];
+        
+        $result = payosCreateLink($orderCode, $price, $desc, $items);
+        
+        if (isset($result['error'])) {
+            wErr($result['error']);
+        }
+        
+        // Save pending payment
+        $db->query("INSERT INTO payos_payments (user_id,plan_id,order_code,amount,checkout_url,qr_code,`status`,created_at) VALUES (?,?,?,?,?,?,'pending',NOW())",
+            [$uid, $planId, $orderCode, $price, $result['checkoutUrl'] ?? '', $result['qrCode'] ?? '']);
+        
+        auditLog($uid, 'payos_create', "plan={$plan['name']} amount=$price orderCode=$orderCode");
+        
+        wOk('Tạo thanh toán thành công', [
+            'order_code' => $orderCode,
+            'checkout_url' => $result['checkoutUrl'] ?? '',
+            'qr_code' => $result['qrCode'] ?? '',
+            'amount' => $price,
+            'plan_name' => $plan['name']
+        ]);
+    }
+    
+    // CHECK PAYMENT STATUS
+    if ($action === 'check_payment') {
+        $orderCode = intval($input['order_code'] ?? ($_GET['order_code'] ?? 0));
+        if (!$orderCode) wErr('Missing order_code');
+        
+        $payment = $db->fetchOne("SELECT * FROM payos_payments WHERE order_code=? AND user_id=?", [$orderCode, $uid]);
+        if (!$payment) wErr('Không tìm thấy giao dịch');
+        
+        // If still pending, check with payOS API
+        if ($payment['status'] === 'pending') {
+            require_once __DIR__ . '/../includes/payos.php';
+            $payosData = payosGetPayment($orderCode);
+            if ($payosData && ($payosData['status'] === 'PAID' || $payosData['status'] === 'COMPLETED')) {
+                // Payment confirmed by payOS but webhook hasn't fired yet
+                // Activate subscription directly
+                $plan = $db->fetchOne("SELECT * FROM subscription_plans WHERE id=?", [$payment['plan_id']]);
+                if ($plan) {
+                    $db->query("UPDATE payos_payments SET `status`='completed',paid_at=NOW() WHERE id=?", [$payment['id']]);
+                    $db->query("UPDATE user_subscriptions SET `status`='cancelled' WHERE user_id=? AND `status`='active'", [$uid]);
+                    $db->query("INSERT INTO user_subscriptions (user_id,plan_id,`status`,started_at,expires_at,auto_renew) VALUES (?,?,'active',NOW(),DATE_ADD(NOW(), INTERVAL ? DAY),0)", [$uid, $payment['plan_id'], intval($plan['duration_days'])]);
+                    $ref = 'PAYOS_' . $orderCode;
+                    $db->query("INSERT INTO wallet_transactions (user_id,type,amount,balance_before,balance_after,description,reference_id,`status`,created_at) VALUES (?,'payment',?,0,0,?,?,'completed',NOW())", [$uid, $payment['amount'], 'Thanh toán gói '.$plan['name'].' (QR)', $ref]);
+                    auditLog($uid, 'payos_confirmed_poll', "plan={$plan['name']} orderCode=$orderCode");
+                }
+                wOk('Thanh toán thành công!', ['status' => 'completed', 'plan_name' => $plan['name'] ?? '']);
+            }
+        }
+        
+        wOk('OK', ['status' => $payment['status']]);
+    }
+
     if ($action === 'subscribe') {
         rateLimit('subscribe', 10, 300);
         $planId = intval($input['plan_id'] ?? 0);
