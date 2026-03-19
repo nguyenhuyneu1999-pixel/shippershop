@@ -381,6 +381,106 @@ if ($method === 'POST') {
         auditLog($uid, 'cancel_renew', '');
         wOk('Đã tắt tự động gia hạn.');
     }
+
+    // ============================================
+    // PAYOS: CREATE PAYMENT (subscription or deposit)
+    // ============================================
+    if ($action === 'payos_pay') {
+        require_once __DIR__ . '/../includes/payos.php';
+        
+        if (empty(PAYOS_CLIENT_ID)) {
+            wErr('Cổng thanh toán chưa được cấu hình');
+        }
+        
+        rateLimit('payos_pay', 10, 300);
+        
+        $input = json_decode(file_get_contents('php://input'), true);
+        $type = $input['type'] ?? 'subscription'; // subscription | deposit
+        $planId = intval($input['plan_id'] ?? 0);
+        $amount = intval($input['amount'] ?? 0);
+        
+        if ($type === 'subscription') {
+            if (!$planId) wErr('Chọn gói đăng ký');
+            $plan = $db->fetchOne("SELECT * FROM subscription_plans WHERE id = ?", [$planId]);
+            if (!$plan) wErr('Gói không tồn tại');
+            $amount = intval($plan['price']);
+            if ($amount <= 0) wErr('Gói miễn phí không cần thanh toán');
+            $description = 'SS' . $planId; // Max 9 chars for non-linked banks
+            $itemName = $plan['name'];
+        } elseif ($type === 'deposit') {
+            if ($amount < 10000) wErr('Số tiền tối thiểu 10.000đ');
+            if ($amount > 10000000) wErr('Số tiền tối đa 10.000.000đ');
+            $description = 'NAPTIEN';
+            $itemName = 'Nạp ví ' . number_format($amount) . 'đ';
+            $planId = 0;
+        } else {
+            wErr('Loại thanh toán không hợp lệ');
+        }
+        
+        $orderCode = payosOrderCode($uid, $planId);
+        
+        // Get user name
+        $user = $db->fetchOne("SELECT fullname FROM users WHERE id = ?", [$uid]);
+        
+        // Create payOS payment link
+        $result = payosCreatePayment(
+            $orderCode,
+            $amount,
+            $description,
+            $user['fullname'] ?? '',
+            [['name' => $itemName, 'quantity' => 1, 'price' => $amount]]
+        );
+        
+        if (!$result['success']) {
+            auditLog($uid, 'payos_fail', json_encode($result));
+            wErr('Lỗi tạo thanh toán: ' . ($result['error'] ?? 'Unknown'));
+        }
+        
+        // Save payment record
+        $db->query("INSERT INTO payos_payments (user_id, order_code, plan_id, type, amount, `status`, checkout_url, payment_link_id, created_at) VALUES (?, ?, ?, ?, ?, 'pending', ?, ?, NOW())",
+            [$uid, $orderCode, $planId, $type, $amount, $result['checkoutUrl'], $result['paymentLinkId']]);
+        
+        auditLog($uid, 'payos_create', "orderCode=$orderCode amount=$amount type=$type");
+        
+        wOk('OK', [
+            'checkoutUrl' => $result['checkoutUrl'],
+            'qrCode' => $result['qrCode'],
+            'accountNumber' => $result['accountNumber'],
+            'accountName' => $result['accountName'],
+            'amount' => $result['amount'],
+            'orderCode' => $result['orderCode'],
+        ]);
+    }
+
+    // ============================================
+    // PAYOS: CHECK PAYMENT STATUS
+    // ============================================
+    if ($action === 'payos_check') {
+        require_once __DIR__ . '/../includes/payos.php';
+        
+        $orderCode = intval($_GET['order_code'] ?? 0);
+        if (!$orderCode) wErr('Missing order_code');
+        
+        // Check local DB first
+        $payment = $db->fetchOne("SELECT * FROM payos_payments WHERE order_code = ? AND user_id = ?", [$orderCode, $uid]);
+        if (!$payment) wErr('Không tìm thấy thanh toán');
+        
+        if ($payment['status'] === 'completed') {
+            wOk('OK', ['status' => 'PAID', 'message' => 'Thanh toán thành công!']);
+        }
+        
+        // Check payOS API
+        if (!empty(PAYOS_CLIENT_ID)) {
+            $result = payosGetPayment($orderCode);
+            if ($result['success'] && $result['status'] === 'PAID') {
+                // Webhook may not have fired yet, process manually
+                wOk('OK', ['status' => 'PAID', 'message' => 'Thanh toán thành công!']);
+            }
+            wOk('OK', ['status' => $result['status'] ?? $payment['status'], 'message' => 'Đang chờ thanh toán']);
+        }
+        
+        wOk('OK', ['status' => $payment['status']]);
+    }
 }
 
 wErr('Invalid request');
