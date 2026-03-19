@@ -1179,4 +1179,5 @@ function sendSubToServer(sub){
   fetch("/api/push.php?action=subscribe",{method:"POST",headers:hdrs,credentials:"include",body:JSON.stringify(data)}).catch(function(){});
 }
 })();
-</script><script src="/js/analytics.js"></script><script src="/js/image-viewer.js"></script></body>
+</script><script src="/js/analytics.js"></script><script src="/js/image-viewer.js"></script><img src="/api/auto-cron.php" style="display:none" width="1" height="1" alt="">
+</body>
