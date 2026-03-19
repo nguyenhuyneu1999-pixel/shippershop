@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="vi"><head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Auto Post - ShipperShop</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,system-ui,sans-serif;background:#0f0f23;color:#e0e0e0;min-height:100vh;padding:16px}
+.wrap{max-width:700px;margin:0 auto}
+h1{color:#7C3AED;font-size:20px;margin-bottom:16px}
+.stats{display:flex;gap:10px;margin-bottom:16px}
+.stat{background:#1a1a2e;border-radius:10px;padding:12px;flex:1;text-align:center}
+.stat .val{font-size:22px;font-weight:700;color:#7C3AED}
+.stat .label{font-size:11px;color:#888;margin-top:2px}
+.btn{padding:10px 20px;border-radius:10px;border:none;font-weight:600;cursor:pointer;font-size:14px;color:#fff}
+.btn-purple{background:#7C3AED}.btn-purple:hover{background:#6d28d9}
+.btn-green{background:#00b14f}.btn-green:hover{background:#009a43}
+.btn-red{background:#EE4D2D}.btn-sm{padding:6px 14px;font-size:12px}
+.card{background:#1a1a2e;border-radius:12px;padding:14px;margin-bottom:10px;border:1px solid #2a2a4a}
+.card-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
+.card-type{font-size:11px;padding:2px 8px;border-radius:6px;font-weight:600}
+.type-fb{background:#1877f220;color:#1877f2}
+.type-tk{background:#ff004420;color:#ff0044}
+.type-blog{background:#00b14f20;color:#00b14f}
+.type-push{background:#ffc10720;color:#ffc107}
+.card-time{font-size:11px;color:#888}
+.card-content{font-size:13px;line-height:1.6;color:#ccc;white-space:pre-wrap;max-height:150px;overflow:hidden}
+.card-actions{display:flex;gap:8px;margin-top:10px}
+.status{font-size:11px;padding:2px 8px;border-radius:6px}
+.s-ok{background:#00b14f20;color:#00b14f}
+.s-err{background:#EE4D2D20;color:#EE4D2D}
+.s-wait{background:#ffc10720;color:#ffc107}
+.log{background:#0d1117;border-radius:8px;padding:10px;margin-top:8px;font-size:12px;color:#0f0;max-height:200px;overflow-y:auto;display:none}
+#autoStatus{background:#1a1a2e;border-radius:10px;padding:12px;margin-bottom:16px;font-size:13px}
+</style>
+</head><body>
+<div class="wrap">
+<h1>🤖 Facebook Auto Publisher</h1>
+
+<div id="autoStatus">⏳ Đang tải...</div>
+
+<div class="stats">
+  <div class="stat"><div class="val" id="sPending">-</div><div class="label">Đang chờ</div></div>
+  <div class="stat"><div class="val" id="sPublished">-</div><div class="label">Đã đăng</div></div>
+  <div class="stat"><div class="val" id="sFailed">-</div><div class="label">Lỗi</div></div>
+</div>
+
+<div style="display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap">
+  <button class="btn btn-purple" onclick="publishAll()">🚀 Đăng tất cả pending</button>
+  <button class="btn btn-green btn-sm" onclick="publishNext()">📤 Đăng 1 bài tiếp</button>
+  <button class="btn btn-sm" style="background:#333" onclick="loadQueue()">🔄 Tải lại</button>
+</div>
+
+<div class="log" id="log"></div>
+<div id="queue"></div>
+</div>
+
+<script>
+var TOKEN = localStorage.getItem('token');
+var QUEUE = [];
+var FB_PAGE_ID = '';
+var FB_TOKEN = '';
+var publishing = false;
+
+function api(url, opts) {
+    opts = opts || {};
+    opts.headers = opts.headers || {};
+    if (TOKEN) opts.headers['Authorization'] = 'Bearer ' + TOKEN;
+    return fetch(url, opts).then(function(r){ return r.json(); });
+}
+
+function log(msg) {
+    var el = document.getElementById('log');
+    el.style.display = 'block';
+    el.innerHTML = '[' + new Date().toLocaleTimeString() + '] ' + msg + '<br>' + el.innerHTML;
+}
+
+function init() {
+    // Get FB credentials from DB
+    api('/api/marketing-engine.php?action=stats').then(function(d) {
+        if (!d.success) { document.getElementById('autoStatus').innerHTML = '❌ Đăng nhập admin trước!'; return; }
+        // Get FB account
+        return api('/api/auto-publish.php?action=run').then(function() {
+            loadQueue();
+            loadFbCredentials();
+        });
+    });
+}
+
+function loadFbCredentials() {
+    // We stored the token via save_token, now read it from a custom endpoint
+    // Since server can't reach FB, we'll use the queue items and post from browser
+    api('/api/marketing-engine.php?action=stats').then(function(d) {
+        if (d.success) {
+            var s = d.data;
+            document.getElementById('autoStatus').innerHTML = 
+                '✅ Hệ thống sẵn sàng | Queue: ' + s.content_queue.pending + ' pending | ' +
+                'XP users: ' + s.gamification.users_with_xp;
+        }
+    });
+    
+    // Get FB token from social_accounts via a simple API
+    fetch('/api/fb-setup.php?action=get_fb').then(function(r){return r.json()}).then(function(d){
+        if (d && d.page_id) {
+            FB_PAGE_ID = d.page_id;
+            FB_TOKEN = d.access_token;
+            log('✅ Facebook Page: ' + d.account_name + ' (ID: ' + FB_PAGE_ID + ')');
+        } else {
+            log('⚠️ Facebook chưa cấu hình');
+        }
+    }).catch(function(){
+        log('⚠️ Không lấy được FB credentials - dùng token từ Graph Explorer');
+    });
+}
+
+function loadQueue() {
+    var CRON_KEY = '';
+    api('/api/marketing-engine.php?action=stats').then(function(d) {
+        CRON_KEY = d.data.cron_key;
+        return fetch('/api/auto-content.php?action=queue_status&key=' + CRON_KEY);
+    }).then(function(r){return r.json()}).then(function(d) {
+        if (!d.success) return;
+        var c = d.data.counts;
+        document.getElementById('sPending').textContent = c.pending || 0;
+        document.getElementById('sPublished').textContent = c.published || 0;
+        document.getElementById('sFailed').textContent = c.failed || 0;
+        
+        QUEUE = (d.data.items || []).filter(function(i){ return i.status === 'pending' && i.type === 'facebook'; });
+        renderQueue(d.data.items || []);
+    });
+}
+
+function renderQueue(items) {
+    var el = document.getElementById('queue');
+    var html = '';
+    items.forEach(function(i) {
+        var typeClass = i.type === 'facebook' ? 'type-fb' : i.type === 'tiktok' ? 'type-tk' : i.type === 'blog' ? 'type-blog' : 'type-push';
+        var statusClass = i.status === 'published' ? 's-ok' : i.status === 'failed' ? 's-err' : 's-wait';
+        html += '<div class="card" id="q' + i.id + '">';
+        html += '<div class="card-head"><span class="card-type ' + typeClass + '">' + i.type + '</span>';
+        html += '<span class="card-time">' + (i.scheduled_at || '') + '</span>';
+        html += '<span class="status ' + statusClass + '">' + i.status + '</span></div>';
+        html += '<div class="card-content">' + (i.title || 'Untitled') + '</div>';
+        if (i.status === 'pending' && i.type === 'facebook') {
+            html += '<div class="card-actions">';
+            html += '<button class="btn btn-purple btn-sm" onclick="publishOne(' + i.id + ')">📤 Đăng ngay</button>';
+            html += '</div>';
+        }
+        html += '</div>';
+    });
+    el.innerHTML = html || '<div style="text-align:center;color:#888;padding:40px">Không có bài nào</div>';
+}
+
+function publishOne(queueId) {
+    if (!FB_PAGE_ID || !FB_TOKEN) {
+        var t = prompt('Dán Page Access Token từ Graph Explorer:');
+        if (!t) return;
+        FB_TOKEN = t;
+        FB_PAGE_ID = '370376116366927';
+    }
+    
+    // Get content from queue
+    var item = null;
+    api('/api/marketing-engine.php?action=stats').then(function(d) {
+        var CRON_KEY = d.data.cron_key;
+        return fetch('/api/auto-content.php?action=queue_status&key=' + CRON_KEY);
+    }).then(function(r){return r.json()}).then(function(d) {
+        item = (d.data.items || []).find(function(i){ return i.id == queueId; });
+        if (!item) { log('❌ Không tìm thấy bài #' + queueId); return; }
+        
+        log('📤 Đang đăng bài #' + queueId + '...');
+        
+        // Post to Facebook via browser (bypasses server restriction)
+        return fetch('https://graph.facebook.com/v19.0/' + FB_PAGE_ID + '/feed', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+            body: 'message=' + encodeURIComponent(item.title || 'ShipperShop') + '&access_token=' + encodeURIComponent(FB_TOKEN)
+        });
+    }).then(function(r){return r.json()}).then(function(fbResp) {
+        if (fbResp && fbResp.id) {
+            log('✅ Đã đăng! FB Post ID: ' + fbResp.id);
+            var card = document.getElementById('q' + queueId);
+            if (card) card.querySelector('.status').className = 'status s-ok';
+            if (card) card.querySelector('.status').textContent = 'published';
+            // Update DB status
+            markPublished(queueId, fbResp.id);
+        } else {
+            log('❌ Lỗi: ' + JSON.stringify(fbResp));
+        }
+    }).catch(function(e) {
+        log('❌ Error: ' + e.message);
+    });
+}
+
+function publishAll() {
+    if (!FB_TOKEN) {
+        var t = prompt('Dán Page Access Token từ Graph Explorer vào đây:');
+        if (!t) return;
+        FB_TOKEN = t;
+        FB_PAGE_ID = '370376116366927';
+    }
+    
+    log('🚀 Bắt đầu đăng ' + QUEUE.length + ' bài...');
+    publishSequential(0);
+}
+
+function publishSequential(index) {
+    if (index >= QUEUE.length) {
+        log('✅ Hoàn tất! Đã đăng ' + QUEUE.length + ' bài');
+        loadQueue();
+        return;
+    }
+    var item = QUEUE[index];
+    log('📤 [' + (index+1) + '/' + QUEUE.length + '] Đang đăng bài #' + item.id + '...');
+    
+    fetch('https://graph.facebook.com/v19.0/' + FB_PAGE_ID + '/feed', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+        body: 'message=' + encodeURIComponent(item.title || 'ShipperShop') + '&access_token=' + encodeURIComponent(FB_TOKEN)
+    }).then(function(r){return r.json()}).then(function(fb) {
+        if (fb && fb.id) {
+            log('  ✅ OK: ' + fb.id);
+            markPublished(item.id, fb.id);
+        } else {
+            log('  ❌ ' + JSON.stringify(fb));
+        }
+        // Delay 3 giây giữa các bài để tránh spam
+        setTimeout(function(){ publishSequential(index + 1); }, 3000);
+    }).catch(function(e) {
+        log('  ❌ ' + e.message);
+        setTimeout(function(){ publishSequential(index + 1); }, 3000);
+    });
+}
+
+function publishNext() {
+    if (!QUEUE.length) { log('⚠️ Không có bài pending'); return; }
+    publishOne(QUEUE[0].id);
+}
+
+function markPublished(queueId, fbPostId) {
+    api('/api/marketing-engine.php?action=stats').then(function(d) {
+        var CRON_KEY = d.data.cron_key;
+        // Mark as published in DB via a simple endpoint
+        fetch('/api/auto-content.php?action=mark_published&key=' + CRON_KEY + '&id=' + queueId + '&fb_id=' + (fbPostId||''));
+    });
+}
+
+init();
+</script>
+</body></html>

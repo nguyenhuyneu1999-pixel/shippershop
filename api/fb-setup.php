@@ -22,6 +22,15 @@ if ($action === 'store') {
 $token = file_exists($tokenFile) ? trim(file_get_contents($tokenFile)) : '';
 if (empty($token)) { echo json_encode(['error' => 'No token stored. POST token to ?action=store first']); exit; }
 
+if ($action === 'get_fb') {
+    require_once __DIR__ . '/../includes/config.php';
+    require_once __DIR__ . '/../includes/db.php';
+    $d = db();
+    $fb = $d->fetchOne("SELECT page_id, access_token, account_name FROM social_accounts WHERE platform = 'facebook' AND is_active = 1");
+    echo json_encode($fb ?: ['error' => 'not configured']);
+    exit;
+}
+
 if ($action === 'detect') {
     // Auto-detect page info from token
     $meResp = doGet("https://graph.facebook.com/v19.0/me?fields=id,name&access_token=" . urlencode($token));
