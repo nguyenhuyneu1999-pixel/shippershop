@@ -196,14 +196,24 @@ function renderItem(){
 
   var h="";
 
-  // === IMAGE CAROUSEL ===
-  if(imgs.length>0){
+  // === IMAGE + VIDEO CAROUSEL ===
+  if(imgs.length>0 || p.video_url){
     h+='<div class="carousel"><div class="carousel-track" id="carouselTrack" onscroll="onCarouselScroll()">';
     imgs.forEach(function(img){h+='<div class="carousel-slide"><img src="'+img+'" onclick="openLB(this.src)"></div>';});
+    if(p.video_url){
+      h+='<div class="carousel-slide" style="display:flex;align-items:center;justify-content:center;background:#000">';
+      if(p.video_url.indexOf('/uploads/')!==-1){
+        h+='<video controls playsinline preload="metadata" style="width:100%;max-height:400px;object-fit:contain" poster="'+(imgs[0]||'')+'"><source src="'+p.video_url+'" type="video/mp4">Video</video>';
+      }else{
+        h+='<iframe src="'+p.video_url+'" style="width:100%;height:100%;min-height:300px;border:0" allowfullscreen></iframe>';
+      }
+      h+='</div>';
+    }
+    var totalSlides=imgs.length+(p.video_url?1:0);
     h+='</div>';
-    h+='<div class="carousel-counter" id="imgCounter">1/'+imgs.length+'</div>';
+    h+='<div class="carousel-counter" id="imgCounter">1/'+totalSlides+'</div>';
     h+='<div class="carousel-dots" id="carouselDots">';
-    imgs.forEach(function(_,i){h+='<span'+(i===0?' class="active"':'')+'></span>';});
+    for(var di=0;di<totalSlides;di++){h+='<span'+(di===0?' class="active"':'')+'>'+(di>=imgs.length?'▶':'')+'</span>';}
     h+='</div>';
     h+='<div class="carousel-actions"><button onclick="toggleWish()"><i class="far fa-heart" id="wishIcon"></i></button><button onclick="shareListing()"><i class="fas fa-share-alt"></i></button></div>';
     h+='</div>';
@@ -229,7 +239,11 @@ function renderItem(){
   // === DESCRIPTION (Collapsible) ===
   if(p.description){
     h+='<div class="section"><div class="section-header open" onclick="toggleSection(this)"><h3><i class="fas fa-file-text" style="color:var(--primary);margin-right:8px"></i>Mô tả sản phẩm</h3><i class="fas fa-chevron-down"></i></div>';
-    h+='<div class="section-body open"><p>'+esc(p.description).replace(/\n/g,"<br>")+'</p></div></div>';
+    h+='<div class="section-body open" style="font-size:14px;line-height:1.8">';
+    h+='<div style="white-space:pre-wrap;word-break:break-word">'+esc(p.description).replace(/\n/g,"<br>")+'</div>';
+    var descImgs=[];try{descImgs=JSON.parse(p.description_images||"[]");}catch(e){}
+    if(descImgs&&descImgs.length>0){h+='<div style="margin-top:16px">';descImgs.forEach(function(di){h+='<img src="'+di+'" style="width:100%;border-radius:8px;margin-bottom:12px;cursor:pointer" onclick="openLB(this.src)" loading="lazy">';});h+='</div>';}
+    h+='</div></div>';
   }
 
   // === PRODUCT DETAILS (Collapsible) ===

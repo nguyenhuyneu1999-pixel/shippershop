@@ -160,6 +160,20 @@
             </div>
         </div>
         <div class="mk-field">
+            <label>Video sản phẩm (tùy chọn)</label>
+            <div style="display:flex;gap:8px;align-items:center">
+                <label style="flex:1;padding:12px;border:2px dashed #ccc;border-radius:10px;text-align:center;cursor:pointer;color:var(--text2);font-size:13px" id="videoAddBtn">
+                    <i class="fas fa-video" style="font-size:20px;display:block;margin-bottom:4px"></i>
+                    <span id="videoLabel">Chọn video (MP4, tối đa 50MB)</span>
+                    <input type="file" accept="video/mp4,video/mov,video/webm" style="display:none" onchange="handleVideoSelect(this)">
+                </label>
+            </div>
+            <div id="videoPreview" style="display:none;margin-top:8px;position:relative">
+                <video id="videoPreviewPlayer" style="width:100%;max-height:200px;border-radius:8px" controls></video>
+                <button onclick="removeVideo()" style="position:absolute;top:4px;right:4px;width:24px;height:24px;border-radius:50%;background:#333;color:#fff;border:none;font-size:12px;cursor:pointer"><i class="fas fa-times"></i></button>
+            </div>
+        </div>
+        <div class="mk-field">
             <label>Tiêu đề *</label>
             <input type="text" id="cTitle" placeholder="VD: iPhone 14 Pro Max 256GB" maxlength="200">
         </div>
@@ -195,6 +209,16 @@
         <div class="mk-field">
             <label>Mô tả</label>
             <textarea id="cDesc" placeholder="Mô tả chi tiết sản phẩm, lý do bán..." rows="4"></textarea>
+        </div>
+        <div class="mk-field">
+            <label>Ảnh mô tả chi tiết (hiện bên dưới mô tả, giống Amazon)</label>
+            <div class="mk-images" id="descImgPreviews">
+                <label class="mk-img-add" id="descImgAddBtn">
+                    <i class="fas fa-images"></i>
+                    <span>Thêm ảnh</span>
+                    <input type="file" accept="image/*" multiple style="display:none" onchange="handleDescImgUpload(this)">
+                </label>
+            </div>
         </div>
         <div class="mk-field">
             <label>Địa điểm</label>
@@ -334,6 +358,66 @@ function renderImgPreviews() {
 
 function removeImg(i) { uploadedImgUrls.splice(i, 1); renderImgPreviews(); }
 
+// Video upload
+var uploadedVideoUrl = null;
+function handleVideoSelect(input) {
+    if (!input.files || !input.files[0]) return;
+    var file = input.files[0];
+    if (file.size > 50 * 1024 * 1024) { alert('Video tối đa 50MB'); return; }
+    var label = document.getElementById('videoLabel');
+    label.textContent = 'Đang tải lên...';
+    var fd = new FormData();
+    fd.append('video', file);
+    fetch('/api/marketplace.php?action=upload', {
+        method: 'POST',
+        headers: { 'Authorization': 'Bearer ' + localStorage.getItem('token') },
+        credentials: 'include',
+        body: fd
+    }).then(function(r) { return r.json(); }).then(function(d) {
+        if (d.success && d.data.video_url) {
+            uploadedVideoUrl = d.data.video_url;
+            document.getElementById('videoPreview').style.display = 'block';
+            document.getElementById('videoPreviewPlayer').src = uploadedVideoUrl;
+            label.textContent = 'Video đã tải ✓';
+        } else { label.textContent = 'Lỗi: ' + (d.message || 'Thử lại'); }
+    }).catch(function() { label.textContent = 'Lỗi kết nối'; });
+}
+function removeVideo() {
+    uploadedVideoUrl = null;
+    document.getElementById('videoPreview').style.display = 'none';
+    document.getElementById('videoPreviewPlayer').src = '';
+    document.getElementById('videoLabel').textContent = 'Chọn video (MP4, tối đa 50MB)';
+}
+
+// Description images
+var uploadedDescImgUrls = [];
+async function handleDescImgUpload(input) {
+    if (!input.files || input.files.length === 0) return;
+    var fd = new FormData();
+    for (var i = 0; i < Math.min(input.files.length, 10); i++) { fd.append('images[]', input.files[i]); }
+    try {
+        var r = await fetch('/api/marketplace.php?action=upload', {
+            method: 'POST', credentials: 'include',
+            headers: { 'Authorization': 'Bearer ' + localStorage.getItem('token') },
+            body: fd
+        });
+        var d = await r.json();
+        if (d.success && d.data.urls) {
+            uploadedDescImgUrls = uploadedDescImgUrls.concat(d.data.urls);
+            renderDescImgPreviews();
+        }
+    } catch(e) {}
+}
+function renderDescImgPreviews() {
+    var c = document.getElementById('descImgPreviews');
+    var html = uploadedDescImgUrls.map(function(url, i) {
+        return '<div class="mk-img-preview"><img src="' + url + '"><button class="mk-img-del" onclick="removeDescImg(' + i + ')"><i class="fas fa-times"></i></button></div>';
+    }).join('');
+    html += '<label class="mk-img-add" id="descImgAddBtn"><i class="fas fa-images"></i><span>Thêm</span><input type="file" accept="image/*" multiple style="display:none" onchange="handleDescImgUpload(this)"></label>';
+    c.innerHTML = html;
+}
+function removeDescImg(i) { uploadedDescImgUrls.splice(i, 1); renderDescImgPreviews(); }
+
 async function submitListing() {
     var title = document.getElementById('cTitle').value.trim();
     var price = parseInt(document.getElementById('cPrice').value) || 0;
@@ -350,15 +434,17 @@ async function submitListing() {
                 category: document.getElementById('cCategory').value,
                 condition_type: document.getElementById('cCondition').value,
                 description: document.getElementById('cDesc').value,
+                description_images: JSON.stringify(uploadedDescImgUrls),
                 location: document.getElementById('cLocation').value,
                 phone: document.getElementById('cPhone').value,
-                images: uploadedImgUrls
+                images: uploadedImgUrls,
+                video_url: uploadedVideoUrl
             })
         });
         var d = await r.json();
         if (d.success) {
             alert('✅ Đăng tin thành công!');
-            closeCreate(); uploadedImgUrls = [];
+            closeCreate(); uploadedImgUrls = []; uploadedVideoUrl = null; uploadedDescImgUrls = [];
             document.getElementById('cTitle').value = '';
             document.getElementById('cPrice').value = '';
             document.getElementById('cDesc').value = '';

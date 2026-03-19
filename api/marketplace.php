@@ -85,26 +85,47 @@ if ($method === 'POST') {
 
     // Upload images
     if ($action === 'upload') {
-        if (empty($_FILES['images'])) mError('Chọn ít nhất 1 ảnh');
         $uploadDir = __DIR__ . '/../uploads/marketplace/';
         if (!is_dir($uploadDir)) mkdir($uploadDir, 0755, true);
         $urls = [];
-        $files = $_FILES['images'];
-        $count = is_array($files['name']) ? count($files['name']) : 1;
-        for ($i = 0; $i < min($count, 10); $i++) {
-            $tmpName = is_array($files['tmp_name']) ? $files['tmp_name'][$i] : $files['tmp_name'];
-            $origName = is_array($files['name']) ? $files['name'][$i] : $files['name'];
-            $err = is_array($files['error']) ? $files['error'][$i] : $files['error'];
-            if ($err !== UPLOAD_ERR_OK) continue;
-            $ext = strtolower(pathinfo($origName, PATHINFO_EXTENSION));
-            if (!in_array($ext, ['jpg','jpeg','png','gif','webp'])) continue;
-            $fname = 'mk_' . $uid . '_' . time() . '_' . $i . '.' . $ext;
-            if (move_uploaded_file($tmpName, $uploadDir . $fname)) {
-                $urls[] = '/uploads/marketplace/' . $fname;
+        $videoUrl = null;
+        
+        // Handle image uploads
+        if (!empty($_FILES['images'])) {
+            $files = $_FILES['images'];
+            $count = is_array($files['name']) ? count($files['name']) : 1;
+            for ($i = 0; $i < min($count, 10); $i++) {
+                $tmpName = is_array($files['tmp_name']) ? $files['tmp_name'][$i] : $files['tmp_name'];
+                $origName = is_array($files['name']) ? $files['name'][$i] : $files['name'];
+                $err = is_array($files['error']) ? $files['error'][$i] : $files['error'];
+                if ($err !== UPLOAD_ERR_OK) continue;
+                $ext = strtolower(pathinfo($origName, PATHINFO_EXTENSION));
+                if (!in_array($ext, ['jpg','jpeg','png','gif','webp'])) continue;
+                $size = is_array($files['size']) ? $files['size'][$i] : $files['size'];
+                if ($size > 10 * 1024 * 1024) continue; // 10MB max
+                $fname = 'mk_' . $uid . '_' . time() . '_' . $i . '.' . $ext;
+                if (move_uploaded_file($tmpName, $uploadDir . $fname)) {
+                    $urls[] = '/uploads/marketplace/' . $fname;
+                }
             }
         }
-        if (empty($urls)) mError('Không upload được ảnh nào');
-        mSuccess('OK', ['urls' => $urls]);
+        
+        // Handle video upload
+        if (!empty($_FILES['video'])) {
+            $vid = $_FILES['video'];
+            if ($vid['error'] === UPLOAD_ERR_OK) {
+                $ext = strtolower(pathinfo($vid['name'], PATHINFO_EXTENSION));
+                if (in_array($ext, ['mp4','mov','webm','avi']) && $vid['size'] <= 50 * 1024 * 1024) {
+                    $vname = 'mkv_' . $uid . '_' . time() . '.' . $ext;
+                    if (move_uploaded_file($vid['tmp_name'], $uploadDir . $vname)) {
+                        $videoUrl = '/uploads/marketplace/' . $vname;
+                    }
+                }
+            }
+        }
+        
+        if (empty($urls) && !$videoUrl) mError('Không upload được file nào');
+        mSuccess('OK', ['urls' => $urls, 'video_url' => $videoUrl]);
     }
 
     // Create listing
@@ -122,8 +143,8 @@ if ($method === 'POST') {
     if ($price < 0) mError('Giá không hợp lệ');
     if (is_array($images)) $images = json_encode($images);
 
-    $db->query("INSERT INTO marketplace_listings (user_id,title,description,price,category,condition_type,images,location,`status`,created_at) VALUES (?,?,?,?,?,?,?,?,?,NOW())",
-        [$uid, $title, $desc, $price, $cat, $cond, $images, $location, 'active']);
+    $db->query("INSERT INTO marketplace_listings (user_id,title,description,description_images,price,category,condition_type,images,video_url,location,phone,`status`,created_at) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,NOW())",
+        [$uid, $title, $desc, $input['description_images'] ?? null, $price, $cat, $cond, $images, $input['video_url'] ?? null, $location, $phone, 'active']);
     $listingId = $db->getLastInsertId();
     mSuccess('Đăng tin thành công!', ['id' => $listingId]);
 }
