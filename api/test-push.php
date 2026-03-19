@@ -2,64 +2,101 @@
 error_reporting(E_ALL);
 ini_set('display_errors','1');
 header('Content-Type: text/plain; charset=utf-8');
+require_once __DIR__.'/../includes/db.php';
+require_once __DIR__.'/../includes/push-helper.php';
 
-echo "=== ECDH Debug ===\n\n";
+echo "======================================\n";
+echo " PUSH NOTIFICATION - FULL TEST\n";
+echo "======================================\n\n";
+$errors=[];
 
-// Create two EC key pairs
-$keyA=openssl_pkey_new(['curve_name'=>'prime256v1','private_key_type'=>OPENSSL_KEYTYPE_EC]);
-$keyB=openssl_pkey_new(['curve_name'=>'prime256v1','private_key_type'=>OPENSSL_KEYTYPE_EC]);
-$detA=openssl_pkey_get_details($keyA);
-$detB=openssl_pkey_get_details($keyB);
+// 1. VAPID
+echo "1. VAPID Keys: ";
+$pubDec=base64url_decode(VAPID_PUBLIC_KEY);
+echo (strlen($pubDec)===65&&ord($pubDec[0])===4)?'OK':'FAIL';
+echo " (".strlen(VAPID_PUBLIC_KEY)." chars)\n";
+if(strlen($pubDec)!==65) $errors[]="VAPID pub != 65 bytes";
 
-echo "1. Keys generated: YES\n";
+// 2. Private Key
+echo "2. Private Key: ";
+$pk=openssl_pkey_get_private(VAPID_PRIVATE_PEM);
+echo $pk?'OK':'FAIL'; echo "\n";
+if(!$pk) $errors[]="Private key invalid";
 
-// Method 1: Direct openssl_pkey_derive with key objects
-echo "\n2. Direct derive (key objects):\n";
-$shared1=openssl_pkey_derive($keyA, $keyB, 32);
-echo "   A→B: ".($shared1?strlen($shared1)." bytes":'FAIL')."\n";
-if(!$shared1){while($e=openssl_error_string())echo "   err: $e\n";}
+// 3. JWT Signing
+echo "3. JWT Sign: ";
+$h=base64url_encode('{"typ":"JWT","alg":"ES256"}');
+$c=base64url_encode('{"aud":"https://fcm.googleapis.com","exp":'.(time()+3600).'}');
+$ok=openssl_sign($h.'.'.$c,$sig,$pk,OPENSSL_ALGO_SHA256);
+echo $ok?'OK':'FAIL'; echo " (raw sig ".strlen(derToRaw($sig))." bytes)\n";
+if(!$ok) $errors[]="JWT signing failed";
 
-$shared2=openssl_pkey_derive($keyB, $keyA, 32);
-echo "   B→A: ".($shared2?strlen($shared2)." bytes":'FAIL')."\n";
-if(!$shared2){while($e=openssl_error_string())echo "   err: $e\n";}
+// 4. EC Key Gen
+echo "4. EC Key Gen: ";
+$testKey=openssl_pkey_new(['curve_name'=>'prime256v1','private_key_type'=>OPENSSL_KEYTYPE_EC]);
+echo $testKey?'OK':'FAIL'; echo "\n";
 
-// Method 2: Using PEM export/import for public key
-echo "\n3. PEM-based derive:\n";
-openssl_pkey_export($keyA,$pemA);
-$detB_pub=$detB['key']; // This is the PEM public key
-$pubKeyB=openssl_pkey_get_public($detB_pub);
-echo "   B pub PEM valid: ".($pubKeyB?'YES':'NO')."\n";
-if($pubKeyB){
-    $shared3=openssl_pkey_derive($pubKeyB, $keyA, 32);
-    echo "   PEM derive: ".($shared3?strlen($shared3)." bytes":'FAIL')."\n";
-    if(!$shared3){while($e=openssl_error_string())echo "   err: $e\n";}
+// 5. ECDH
+echo "5. ECDH: ";
+$clientKey=openssl_pkey_new(['curve_name'=>'prime256v1','private_key_type'=>OPENSSL_KEYTYPE_EC]);
+$cDet=openssl_pkey_get_details($clientKey);
+$clientPub=chr(4).$cDet['ec']['x'].$cDet['ec']['y'];
+$shared=computeECDH($testKey,$clientPub);
+echo $shared?'OK ('.strlen($shared).' bytes)':'FAIL'; echo "\n";
+if(!$shared){
+    $errors[]="ECDH failed";
+    while($e=openssl_error_string()) echo "   openssl: $e\n";
 }
 
-// Method 3: Raw binary → DER → PEM (what we do in computeECDH)
-echo "\n4. Binary→DER→PEM derive:\n";
-$rawPubB=chr(4).$detB['ec']['x'].$detB['ec']['y'];
-echo "   Raw pub B: ".strlen($rawPubB)." bytes\n";
-$derB="\x30\x59\x30\x13\x06\x07\x2a\x86\x48\xce\x3d\x02\x01\x06\x08\x2a\x86\x48\xce\x3d\x03\x01\x07\x03\x42\x00".$rawPubB;
-$pemB="-----BEGIN PUBLIC KEY-----\n".chunk_split(base64_encode($derB),64,"\n")."-----END PUBLIC KEY-----\n";
-echo "   DER length: ".strlen($derB)."\n";
-$pubFromDer=openssl_pkey_get_public($pemB);
-echo "   PEM from DER valid: ".($pubFromDer?'YES':'NO')."\n";
-if(!$pubFromDer){while($e=openssl_error_string())echo "   err: $e\n";}
+// 6. AES-128-GCM
+echo "6. AES-GCM: ";
+$tag='';$ct=openssl_encrypt("test",'aes-128-gcm',random_bytes(16),OPENSSL_RAW_DATA,random_bytes(12),$tag,'',16);
+echo ($ct!==false)?'OK':'FAIL'; echo "\n";
 
-if($pubFromDer){
-    // Try both parameter orders
-    echo "\n5. Derive with DER-built PEM:\n";
-    $s4=openssl_pkey_derive($pubFromDer, $keyA, 32);
-    echo "   derive(pub,priv,32): ".($s4?strlen($s4)." bytes":'FAIL')."\n";
-    if(!$s4){while($e=openssl_error_string())echo "   err: $e\n";}
-    
-    $s5=openssl_pkey_derive($pubFromDer, $keyA, 0);
-    echo "   derive(pub,priv,0): ".($s5?strlen($s5)." bytes":'FAIL')."\n";
-    if(!$s5){while($e=openssl_error_string())echo "   err: $e\n";}
-    
-    $s6=openssl_pkey_derive($pubFromDer, $keyA);
-    echo "   derive(pub,priv): ".($s6?strlen($s6)." bytes":'FAIL')."\n";
-    if(!$s6){while($e=openssl_error_string())echo "   err: $e\n";}
+// 7. Full Encryption
+echo "7. Full Encrypt: ";
+$clientPubB64=base64url_encode($clientPub);
+$clientAuth=base64url_encode(random_bytes(16));
+$enc=encryptPayload('{"title":"Test","body":"Hello World"}', $clientPubB64, $clientAuth);
+echo $enc?'OK ('.strlen($enc['ciphertext']).' bytes)':'FAIL'; echo "\n";
+if(!$enc) $errors[]="Encryption pipeline failed";
+
+// 8. HTTP Send
+echo "8. HTTP Send (httpbin): ";
+if($enc){
+    $fakeSub=['endpoint'=>'https://httpbin.org/post','p256dh'=>$clientPubB64,'auth'=>$clientAuth];
+    $res=sendPushNotification($fakeSub, '{"title":"Test","body":"Hello"}');
+    echo "status=".$res['status']." ".($res['success']?'OK':'FAIL'); echo "\n";
+}else echo "SKIP (encrypt failed)\n";
+
+// 9. DB
+echo "9. Database: ";
+$d=db();
+$cnt=$d->fetchOne("SELECT COUNT(*) as c FROM push_subscriptions");
+echo "OK (".$cnt['c']." subscriptions)\n";
+
+// 10. API
+echo "10. API vapid_key: ";
+$resp=@file_get_contents('https://shippershop.vn/api/push.php?action=vapid_key',false,stream_context_create(['ssl'=>['verify_peer'=>false]]));
+$data=json_decode($resp,true);
+echo ($data&&$data['success'])?'OK':'FAIL'; echo "\n";
+
+// 11. Key match
+echo "11. Client-Server match: ";
+$apiKey=$data['data']['publicKey']??'';
+echo (VAPID_PUBLIC_KEY===$apiKey)?'OK':'MISMATCH'; echo "\n";
+if(VAPID_PUBLIC_KEY!==$apiKey) $errors[]="Key mismatch";
+
+// 12. notifyUser (user 2)
+echo "12. notifyUser(2): ";
+$sent=notifyUser(2,'Test','Test body','general','/');
+echo "sent to $sent devices\n";
+
+echo "\n======================================\n";
+if(empty($errors)){
+    echo " ALL 12 TESTS PASSED\n";
+}else{
+    echo " ".count($errors)." ERRORS:\n";
+    foreach($errors as $e) echo "   - $e\n";
 }
-
-echo "\nDONE\n";
+echo "======================================\n";
