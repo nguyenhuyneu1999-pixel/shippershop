@@ -34,13 +34,13 @@ if (!$user) { echo json_encode(['success' => false, 'message' => 'User not found
 
 // Stats
 $user['stats'] = [
-    'posts' => intval($db->fetchColumn("SELECT COUNT(*) FROM posts WHERE user_id = ? AND status = 'active'", [$userId])),
-    'likes' => intval($db->fetchColumn("SELECT COUNT(*) FROM likes WHERE user_id = ?", [$userId])),
-    'comments' => intval($db->fetchColumn("SELECT COUNT(*) FROM comments WHERE user_id = ? AND status = 'active'", [$userId])),
+    'posts' => intval($db->fetchOne("SELECT COUNT(*) as c FROM posts WHERE user_id = ? AND status = 'active'", [$userId])['c']),
+    'likes' => intval($db->fetchOne("SELECT COUNT(*) as c FROM likes WHERE user_id = ?", [$userId])['c']),
+    'comments' => intval($db->fetchOne("SELECT COUNT(*) as c FROM comments WHERE user_id = ? AND status = 'active'", [$userId])['c']),
 ];
 try {
-    $user['stats']['followers'] = intval($db->fetchColumn("SELECT COUNT(*) FROM follows WHERE following_id = ?", [$userId]));
-    $user['stats']['following'] = intval($db->fetchColumn("SELECT COUNT(*) FROM follows WHERE follower_id = ?", [$userId]));
+    $user['stats']['followers'] = intval($db->fetchOne("SELECT COUNT(*) as c FROM follows WHERE following_id = ?", [$userId])['c']);
+    $user['stats']['following'] = intval($db->fetchOne("SELECT COUNT(*) as c FROM follows WHERE follower_id = ?", [$userId])['c']);
 } catch (Exception $e) { $user['stats']['followers'] = 0; $user['stats']['following'] = 0; }
 
 // Check if viewing user follows this user

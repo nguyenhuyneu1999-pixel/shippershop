@@ -55,26 +55,13 @@ if ($action === 'balance') {
     // Get stats
     $stats = [
         'balance' => $wallet['balance'],
-        'total_deposit' => $db->fetchColumn(
-            "SELECT COALESCE(SUM(amount), 0) FROM transaction_history 
-             WHERE user_id = ? AND type = 'deposit' AND status = 'completed'",
-            [$userId]
-        ),
-        'total_withdraw' => $db->fetchColumn(
-            "SELECT COALESCE(SUM(amount), 0) FROM transaction_history 
-             WHERE user_id = ? AND type = 'withdraw' AND status = 'completed'",
-            [$userId]
-        ),
-        'total_spent' => $db->fetchColumn(
-            "SELECT COALESCE(SUM(amount), 0) FROM transaction_history 
-             WHERE user_id = ? AND type = 'purchase' AND status = 'completed'",
-            [$userId]
-        ),
-        'pending_count' => $db->count(
-            'transaction_history',
-            'user_id = ? AND status = ?',
-            [$userId, 'pending']
-        )
+        'total_deposit' => $db->fetchOne("SELECT COALESCE(SUM(amount), 0) as c FROM wallet_transactions 
+             WHERE user_id = ? AND type = 'deposit' AND status = 'completed'", [$userId])['c'],
+        'total_withdraw' => $db->fetchOne("SELECT COALESCE(SUM(amount), 0) as c FROM wallet_transactions 
+             WHERE user_id = ? AND type = 'withdraw' AND status = 'completed'", [$userId])['c'],
+        'total_spent' => $db->fetchOne("SELECT COALESCE(SUM(amount), 0) as c FROM wallet_transactions 
+             WHERE user_id = ? AND type = 'purchase' AND status = 'completed'", [$userId])['c'],
+        'pending_count' => $db->fetchOne("SELECT COUNT(*) as c FROM wallet_transactions WHERE user_id = ? AND `status` = ?", [$userId, 'pending'])['c']
     ];
     
     success('Success', $stats);
@@ -135,7 +122,7 @@ if ($action === 'deposit') {
         }
         
         // Create transaction record
-        $transactionId = $db->insert('transaction_history', [
+        $transactionId = $db->insert('wallet_transactions', [
             'user_id' => $userId,
             'type' => 'deposit',
             'amount' => $amount,
@@ -213,7 +200,7 @@ if ($action === 'withdraw') {
         );
         
         // Create transaction record
-        $transactionId = $db->insert('transaction_history', [
+        $transactionId = $db->insert('wallet_transactions', [
             'user_id' => $userId,
             'type' => 'withdraw',
             'amount' => $amount,
@@ -270,7 +257,7 @@ if ($action === 'approve_deposit') {
         
         // Get transaction
         $transaction = $db->fetchOne(
-            "SELECT * FROM transaction_history WHERE id = ? AND type = 'deposit' AND status = 'pending'",
+            "SELECT * FROM wallet_transactions WHERE id = ? AND type = 'deposit' AND status = 'pending'",
             [$transactionId]
         );
         
@@ -291,7 +278,7 @@ if ($action === 'approve_deposit') {
         );
         
         // Update transaction
-        $db->update('transaction_history',
+        $db->update('wallet_transactions',
             [
                 'status' => 'completed',
                 'balance_after' => $newBalance,
@@ -337,7 +324,7 @@ if ($action === 'reject_deposit') {
     
     // Get transaction
     $transaction = $db->fetchOne(
-        "SELECT * FROM transaction_history WHERE id = ? AND type = 'deposit' AND status = 'pending'",
+        "SELECT * FROM wallet_transactions WHERE id = ? AND type = 'deposit' AND status = 'pending'",
         [$transactionId]
     );
     
@@ -346,7 +333,7 @@ if ($action === 'reject_deposit') {
     }
     
     // Update transaction
-    $db->update('transaction_history',
+    $db->update('wallet_transactions',
         [
             'status' => 'rejected',
             'completed_at' => date('Y-m-d H:i:s'),
@@ -380,7 +367,7 @@ if ($action === 'approve_withdraw') {
     
     // Get transaction
     $transaction = $db->fetchOne(
-        "SELECT * FROM transaction_history WHERE id = ? AND type = 'withdraw' AND status = 'pending'",
+        "SELECT * FROM wallet_transactions WHERE id = ? AND type = 'withdraw' AND status = 'pending'",
         [$transactionId]
     );
     
@@ -389,7 +376,7 @@ if ($action === 'approve_withdraw') {
     }
     
     // Update transaction
-    $db->update('transaction_history',
+    $db->update('wallet_transactions',
         [
             'status' => 'completed',
             'completed_at' => date('Y-m-d H:i:s'),
@@ -432,7 +419,7 @@ if ($action === 'reject_withdraw') {
         
         // Get transaction
         $transaction = $db->fetchOne(
-            "SELECT * FROM transaction_history WHERE id = ? AND type = 'withdraw' AND status = 'pending'",
+            "SELECT * FROM wallet_transactions WHERE id = ? AND type = 'withdraw' AND status = 'pending'",
             [$transactionId]
         );
         
@@ -451,7 +438,7 @@ if ($action === 'reject_withdraw') {
         );
         
         // Update transaction
-        $db->update('transaction_history',
+        $db->update('wallet_transactions',
             [
                 'status' => 'rejected',
                 'completed_at' => date('Y-m-d H:i:s'),

@@ -165,7 +165,7 @@ $countSql = "SELECT COUNT(*)
              LEFT JOIN categories c ON p.category_id = c.id 
              WHERE $whereClause";
 
-$totalProducts = $db->fetchColumn($countSql, $params);
+$totalProducts = $db->fetchOne(str_replace('SELECT COUNT(*)', 'SELECT COUNT(*) as c', $countSql), $params)['c'];
 
 // Pagination
 $page = isset($_GET['page']) ? max(1, intval($_GET['page'])) : 1;

@@ -355,15 +355,12 @@ if ($action === 'stats') {
     
     // Get stats
     $stats = [
-        'followers_count' => $db->count('follows', 'following_id = ?', [$userId]),
-        'following_count' => $db->count('follows', 'follower_id = ?', [$userId]),
-        'posts_count' => $db->count('posts', 'user_id = ? AND status = ?', [$userId, 'active']),
-        'total_likes' => $db->fetchColumn(
-            "SELECT COUNT(*) FROM post_likes pl 
+        'followers_count' => $db->fetchOne("SELECT COUNT(*) as c FROM follows WHERE following_id = ?", [$userId])['c'],
+        'following_count' => $db->fetchOne("SELECT COUNT(*) as c FROM follows WHERE follower_id = ?", [$userId])['c'],
+        'posts_count' => $db->fetchOne("SELECT COUNT(*) as c FROM posts WHERE user_id = ? AND status = ?", [$userId, 'active'])['c'],
+        'total_likes' => $db->fetchOne("SELECT COUNT(*) as c FROM post_likes pl 
              JOIN posts p ON pl.post_id = p.id 
-             WHERE p.user_id = ?",
-            [$userId]
-        ) ?? 0
+             WHERE p.user_id = ?", [$userId])['c'] ?? 0
     ];
     
     success('Success', $stats);

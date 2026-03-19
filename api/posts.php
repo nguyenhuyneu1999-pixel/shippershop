@@ -160,10 +160,7 @@ if ($method === 'GET') {
     $whereClause = implode(' AND ', $where);
     
     // Count total
-    $total = $db->fetchColumn(
-        "SELECT COUNT(*) FROM posts p WHERE $whereClause",
-        $params
-    );
+    $total = $db->fetchOne("SELECT COUNT(*) as c FROM posts p WHERE $whereClause", $params)['c'];
     
     $pagination = paginate($total, $page, $limit);
     
@@ -229,7 +226,7 @@ if ($method === 'POST') {
             $voteType = $input["vote_type"] ?? "";
             if ($voteType === "remove") { $db->hardDelete("likes", "post_id = ? AND user_id = ?", [$postId, $userId]); }
             else { $ex = $db->fetchOne("SELECT id FROM likes WHERE post_id = ? AND user_id = ?", [$postId, $userId]); if ($ex) { $db->hardDelete("likes", "post_id = ? AND user_id = ?", [$postId, $userId]); } else { $db->insert("likes", ["post_id" => $postId, "user_id" => $userId]); } }
-            $score = $db->fetchColumn("SELECT COUNT(*) FROM likes WHERE post_id = ?", [$postId]);
+            $score = $db->fetchOne("SELECT COUNT(*) as c FROM likes WHERE post_id = ?", [$postId])['c'];
             $db->query("UPDATE posts SET likes_count = ? WHERE id = ?", [intval($score), $postId]);
             $uv = $db->fetchOne("SELECT id FROM likes WHERE post_id = ? AND user_id = ?", [$postId, $userId]);
             // Push: notify post owner on like (not unlike)

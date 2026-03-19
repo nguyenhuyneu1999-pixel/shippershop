@@ -212,9 +212,9 @@ if ($action === 'me') {
     $wallet = $db->fetchOne("SELECT balance FROM wallets WHERE user_id = ?", [$userId]);
     $user['wallet_balance'] = $wallet['balance'] ?? 0;
     $user['stats'] = [
-        'total_orders' => $db->count('orders', 'user_id = ?', [$userId]),
-        'cart_items'   => $db->count('cart',   'user_id = ?', [$userId]),
-        'total_posts'  => $db->count('posts',  "user_id = ? AND status = 'active'", [$userId]),
+        'total_orders' => $db->fetchOne("SELECT COUNT(*) as c FROM orders WHERE user_id = ?", [$userId])['c'],
+        'cart_items'   => $db->fetchOne("SELECT COUNT(*) as c FROM cart WHERE user_id = ?", [$userId])['c'],
+        'total_posts'  => $db->fetchOne("SELECT COUNT(*) as c FROM posts WHERE user_id = ? AND status = 'active'", [$userId])['c'],
     ];
     apiSuccess('OK', $user);
 }

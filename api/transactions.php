@@ -41,7 +41,7 @@ $userId = getCurrentUserId();
 if (isset($_GET['id'])) {
     $transactionId = intval($_GET['id']);
     
-    $sql = "SELECT * FROM transaction_history 
+    $sql = "SELECT * FROM wallet_transactions 
             WHERE id = ? AND user_id = ?";
     
     $transaction = $db->fetchOne($sql, [$transactionId, $userId]);
@@ -103,15 +103,12 @@ $page = isset($_GET['page']) ? max(1, intval($_GET['page'])) : 1;
 $limit = isset($_GET['limit']) ? min(intval($_GET['limit']), 100) : 20;
 
 // Count total
-$total = $db->fetchColumn(
-    "SELECT COUNT(*) FROM transaction_history WHERE $whereClause",
-    $params
-);
+$total = $db->fetchOne("SELECT COUNT(*) as c FROM wallet_transactions WHERE $whereClause", $params)['c'];
 
 $pagination = paginate($total, $page, $limit);
 
 // Get transactions
-$sql = "SELECT * FROM transaction_history 
+$sql = "SELECT * FROM wallet_transactions 
         WHERE $whereClause
         ORDER BY created_at DESC
         LIMIT {$pagination['per_page']} OFFSET {$pagination['offset']}";

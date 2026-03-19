@@ -59,7 +59,7 @@ if ($method === 'GET') {
     $limit = isset($_GET['limit']) ? min(intval($_GET['limit']), 50) : 10;
     
     // Count total
-    $total = $db->count('orders', 'user_id = ?', [$userId]);
+    $total = $db->fetchOne("SELECT COUNT(*) as c FROM orders WHERE user_id = ?", [$userId])['c'];
     $pagination = paginate($total, $page, $limit);
     
     // Get orders
