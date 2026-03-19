@@ -27,7 +27,7 @@ file_put_contents(__DIR__ . "/deploy.log", $log, FILE_APPEND);
 
 // Pull latest code
 chdir("/home/nhshiw2j/public_html");
-$output = shell_exec("GIT_SSH_COMMAND='ssh -i /home/nhshiw2j/.ssh/github_key -o StrictHostKeyChecking=no' git pull origin $branch 2>&1");
+$output = shell_exec("GIT_SSH_COMMAND='ssh -i /home/nhshiw2j/.ssh/github_key -o StrictHostKeyChecking=no' git fetch origin $branch 2>&1 && git reset --hard origin/$branch 2>&1");
 
 $log2 = date("Y-m-d H:i:s") . " - Result: $output\n";
 file_put_contents(__DIR__ . "/deploy.log", $log2, FILE_APPEND);
