@@ -13,10 +13,13 @@
 :root{--primary:#7C3AED;--bg:#f0f2f5;--card:#fff;--border:#e4e6eb;--text:#1C1C1C;--muted:#65676B;}
 *{margin:0;padding:0;box-sizing:border-box;}
 body{background:var(--bg);font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;color:var(--text);padding-bottom:80px;}
-.back-nav{position:fixed;top:0;left:0;right:0;z-index:100;background:rgba(255,255,255,.95);backdrop-filter:blur(10px);padding:10px 16px;display:flex;align-items:center;gap:12px;border-bottom:1px solid #f0f0f0;}
-.back-btn{background:none;border:none;font-size:20px;cursor:pointer;padding:4px;color:#333;}
-.back-nav-title{font-size:17px;font-weight:700;flex:1;}
-.cover{height:140px;background:linear-gradient(135deg,#1a1a2e,#16213e,#0f3460);margin-top:48px;}
+.back-nav{position:fixed;top:0;left:0;right:0;z-index:100;background:transparent;padding:10px 16px;display:flex;align-items:center;gap:12px;transition:background .2s;}
+.back-nav.scrolled{background:rgba(255,255,255,.95);backdrop-filter:blur(10px);border-bottom:1px solid #f0f0f0;}
+.back-nav.scrolled .back-btn{background:none;color:#333;}
+.back-btn{background:rgba(0,0,0,.3);border:none;font-size:18px;cursor:pointer;padding:6px;color:#fff;width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;}
+.back-nav-title{font-size:17px;font-weight:700;flex:1;color:#fff;opacity:0;transition:opacity .2s;}
+.back-nav.scrolled .back-nav-title{color:#333;opacity:1;}
+.cover{height:200px;background:linear-gradient(135deg,#1a1a2e,#16213e,#0f3460);background-size:cover;background-position:center;}
 .profile-section{background:#fff;padding:0 16px 16px;border-bottom:1px solid var(--border);}
 .avatar-wrap{position:relative;width:96px;height:96px;margin-top:-48px;margin-bottom:8px;}
 .profile-av{width:96px;height:96px;border-radius:50%;border:4px solid #fff;object-fit:cover;background:var(--primary);color:#fff;display:flex;align-items:center;justify-content:center;font-size:36px;font-weight:800;}
@@ -94,7 +97,7 @@ body{background:var(--bg);font-family:-apple-system,BlinkMacSystemFont,'Segoe UI
 </style>
 <link rel="manifest" href="/manifest.json"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="default"><meta name="apple-mobile-web-app-title" content="ShipperShop"><link rel="apple-touch-icon" href="/icons/icon-192.png"></head>
 <body>
-<div class="back-nav"><button class="back-btn" onclick="history.back()"><i class="fas fa-arrow-left"></i></button><span class="back-nav-title" id="navTitle">Trang cá nhân</span></div>
+<div class="back-nav" id="backNav"><button class="back-btn" onclick="history.back()"><i class="fas fa-arrow-left"></i></button><span class="back-nav-title" id="navTitle"></span></div>
 <div class="cover" id="cover"></div>
 <div class="profile-section">
 <div class="avatar-wrap"><div class="profile-av" id="avatar">?</div></div>
@@ -148,6 +151,7 @@ function fN(n){n=parseInt(n)||0;if(n>=1000)return(n/1000).toFixed(1)+'K';return 
 function ago(dt){if(!dt)return'';var s=Math.floor((new Date()-new Date(dt.replace(' ','T')))/1000);if(s<60)return s+'s';if(s<3600)return Math.floor(s/60)+'m';if(s<86400)return Math.floor(s/3600)+'h';if(s<604800)return Math.floor(s/86400)+'d';return new Date(dt).toLocaleDateString('vi-VN');}
 function toast(msg){var t=document.getElementById('toast');t.textContent=msg;t.className='toast show';setTimeout(function(){t.classList.remove('show');},2500);}
 loadProfile();
+window.addEventListener('scroll',function(){var nav=document.getElementById('backNav');if(window.scrollY>160)nav.classList.add('scrolled');else nav.classList.remove('scrolled');});
 </script>
 <nav id="mobileBottomNav" role="navigation"><a href="index.html" class="mnav-item"><i class="fas fa-home"></i><span>Trang chủ</span></a><a href="marketplace.html" class="mnav-item"><i class="fas fa-store"></i><span>Mua sắm</span></a><button class="mnav-item mnav-fab-wrap" onclick="handleFab()"><div class="mnav-fab"><i class="fas fa-camera"></i></div></button><a href="map.html" class="mnav-item"><i class="fas fa-map-marked-alt"></i><span>Bản đồ</span></a><a href="profile.html" class="mnav-item"><i class="fas fa-user"></i><span>Tài khoản</span></a></nav>
 <script>if("serviceWorker" in navigator)navigator.serviceWorker.register("/sw.js");</script>
