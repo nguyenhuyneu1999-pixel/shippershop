@@ -1,11 +1,9 @@
 <?php
-require_once '/home/nhshiw2j/public_html/includes/db.php';
+require_once __DIR__.'/../includes/db.php';
 echo "openssl: ".(extension_loaded('openssl')?'YES':'NO')."\n";
 echo "gmp: ".(extension_loaded('gmp')?'YES':'NO')."\n";
-echo "mbstring: ".(extension_loaded('mbstring')?'YES':'NO')."\n";
 echo "curl: ".(extension_loaded('curl')?'YES':'NO')."\n";
 echo "PHP: ".phpversion()."\n";
-// Create push_subscriptions table
 $d=db();
 try{
 $d->query("CREATE TABLE IF NOT EXISTS push_subscriptions (
@@ -13,29 +11,24 @@ $d->query("CREATE TABLE IF NOT EXISTS push_subscriptions (
     user_id INT NOT NULL,
     endpoint TEXT NOT NULL,
     p256dh VARCHAR(500) NOT NULL,
-    auth VARCHAR(500) NOT NULL,
+    auth VARCHAR(200) NOT NULL,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     INDEX(user_id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4");
-echo "push_subscriptions table: OK\n";
-}catch(Exception $e){echo "table: ".$e->getMessage()."\n";}
-
-// Generate VAPID keys if not exist
-$vapidFile='/home/nhshiw2j/public_html/includes/vapid_keys.php';
+echo "Table: OK\n";
+}catch(Exception $e){echo "Table: ".$e->getMessage()."\n";}
+$vapidFile=__DIR__.'/../includes/vapid_keys.php';
 if(!file_exists($vapidFile)){
     $key=openssl_pkey_new(['curve_name'=>'prime256v1','private_key_type'=>OPENSSL_KEYTYPE_EC]);
-    if(!$key){echo "VAPID key gen FAILED\n";exit;}
+    if(!$key){echo "VAPID gen FAILED: ".openssl_error_string()."\n";exit;}
     openssl_pkey_export($key,$privPem);
-    $details=openssl_pkey_get_details($key);
-    $pubX=$details['ec']['x'];
-    $pubY=$details['ec']['y'];
-    $pubKey=chr(4).$pubX.$pubY;
+    $det=openssl_pkey_get_details($key);
+    $pubKey=chr(4).$det['ec']['x'].$det['ec']['y'];
     $pubB64=rtrim(strtr(base64_encode($pubKey),'+/','-_'),'=');
-    $privD=$details['ec']['d'];
-    $privB64=rtrim(strtr(base64_encode($privD),'+/','-_'),'=');
-    file_put_contents($vapidFile,"<?php\ndefine('VAPID_PUBLIC','$pubB64');\ndefine('VAPID_PRIVATE','$privB64');\ndefine('VAPID_SUBJECT','mailto:admin@shippershop.vn');\n");
-    echo "VAPID keys generated: $pubB64\n";
+    $privB64=rtrim(strtr(base64_encode($det['ec']['d']),'+/','-_'),'=');
+    file_put_contents($vapidFile,"<?php\ndefine('VAPID_PUBLIC_KEY','$pubB64');\ndefine('VAPID_PRIVATE_KEY','$privB64');\ndefine('VAPID_SUBJECT','mailto:admin@shippershop.vn');\n");
+    echo "VAPID generated: $pubB64\n";
 }else{
-    include $vapidFile;
-    echo "VAPID public key: ".VAPID_PUBLIC."\n";
+    require $vapidFile;
+    echo "VAPID exists: ".VAPID_PUBLIC_KEY."\n";
 }
