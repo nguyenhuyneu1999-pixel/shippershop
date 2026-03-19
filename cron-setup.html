@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="vi"><head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Setup Cron 24/7 - ShipperShop</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,system-ui,sans-serif;background:#f5f5f5;color:#333}
+.top{background:linear-gradient(135deg,#7C3AED,#5b21b6);color:#fff;padding:24px 16px;text-align:center}
+.top h1{font-size:20px;margin-bottom:4px}
+.top p{font-size:13px;opacity:.8}
+.wrap{max-width:640px;margin:0 auto;padding:16px}
+.info{background:#e8f5e9;border-radius:12px;padding:14px;margin-bottom:16px;font-size:13px;line-height:1.7;color:#2e7d32}
+.info b{display:block;font-size:14px;margin-bottom:4px}
+.step-card{background:#fff;border-radius:14px;margin-bottom:12px;overflow:hidden;box-shadow:0 1px 3px rgba(0,0,0,.08)}
+.step-head{display:flex;align-items:center;gap:10px;padding:14px 16px;cursor:pointer}
+.step-num{width:32px;height:32px;border-radius:50%;background:#7C3AED;color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:14px;flex-shrink:0}
+.step-head h3{font-size:15px;flex:1}
+.step-time{font-size:11px;color:#999;background:#f5f5f5;padding:2px 8px;border-radius:8px}
+.step-body{padding:0 16px 16px;display:none}
+.step-body.open{display:block}
+.action{background:#f8f9fa;border-radius:10px;padding:12px;margin:8px 0;font-size:13px;line-height:1.8}
+.action a{color:#7C3AED;font-weight:600;text-decoration:none}
+.action a:hover{text-decoration:underline}
+.url-box{background:#1a1a2e;color:#0f0;padding:10px;border-radius:8px;font-size:11px;word-break:break-all;margin:6px 0;position:relative;font-family:monospace}
+.url-box .cb{position:absolute;top:6px;right:6px;background:#7C3AED;color:#fff;border:none;border-radius:6px;padding:4px 12px;font-size:11px;cursor:pointer}
+.url-box .cb:active{background:#5b21b6}
+.field{display:flex;flex-direction:column;gap:4px;margin:8px 0}
+.field label{font-size:12px;color:#666;font-weight:600}
+.field select,.field input{padding:8px 10px;border:1px solid #ddd;border-radius:8px;font-size:13px}
+.img-guide{background:#f0f0f0;border-radius:10px;padding:20px;margin:8px 0;text-align:center;font-size:32px}
+.btn{display:inline-flex;align-items:center;gap:6px;padding:10px 20px;border-radius:10px;border:none;font-weight:600;font-size:14px;cursor:pointer;color:#fff;background:#7C3AED;margin:8px 0}
+.btn:active{background:#5b21b6}
+.btn-green{background:#00b14f}
+.result{background:#f8f9fa;border-radius:10px;padding:12px;margin:8px 0;font-size:13px;display:none}
+.done-banner{background:#e8f5e9;border-radius:12px;padding:16px;text-align:center;margin:16px 0;display:none}
+.done-banner h2{color:#2e7d32;font-size:18px}
+.done-banner p{color:#666;font-size:13px;margin-top:4px}
+.note{font-size:11px;color:#999;margin-top:4px}
+</style>
+</head><body>
+<div class="top">
+  <h1>⚡ Setup Cron 24/7</h1>
+  <p>3 bước, 2 phút, chạy tự động mãi mãi</p>
+</div>
+<div class="wrap">
+
+<div class="info">
+  <b>ℹ️ Hiện tại hệ thống ĐÃ tự chạy khi có người vào web.</b>
+  Setup cron-job.org để đảm bảo chạy 24/7 kể cả khi <b>không ai online</b> (ban đêm, ngày lễ...).
+</div>
+
+<!-- BƯỚC 1 -->
+<div class="step-card">
+  <div class="step-head" onclick="tog(1)">
+    <div class="step-num">1</div>
+    <h3>Đăng ký cron-job.org</h3>
+    <span class="step-time">30 giây</span>
+  </div>
+  <div class="step-body open" id="b1">
+    <div class="action">
+      👉 Bấm vào link này: <a href="https://cron-job.org/en/signup/" target="_blank"><b>cron-job.org/signup</b></a><br><br>
+      Điền 3 ô:<br>
+      • <b>Email:</b> email của bạn<br>
+      • <b>Password:</b> mật khẩu bất kỳ<br>
+      • Tick ☑️ đồng ý → Bấm <b>"Create Account"</b><br><br>
+      📧 Vào email → bấm link xác nhận → <b>Xong bước 1!</b>
+    </div>
+    <div class="img-guide">📧 → ✅</div>
+  </div>
+</div>
+
+<!-- BƯỚC 2 -->
+<div class="step-card">
+  <div class="step-head" onclick="tog(2)">
+    <div class="step-num">2</div>
+    <h3>Tạo 3 Cron Jobs</h3>
+    <span class="step-time">1 phút</span>
+  </div>
+  <div class="step-body" id="b2">
+    <div class="action">
+      Sau khi đăng nhập → Bấm nút <b>"Create cronjob"</b> (góc phải)<br><br>
+      Tạo lần lượt <b>3 jobs</b> bên dưới. Mỗi job chỉ cần điền 3 ô:
+    </div>
+
+    <div class="action" style="border-left:3px solid #7C3AED;margin-left:0">
+      <b>🕐 Job 1: Marketing Engine (mỗi giờ)</b><br><br>
+      <div class="field"><label>Title:</label><input value="ShipperShop Hourly" readonly onclick="this.select()"></div>
+      <div class="field"><label>URL: (bấm Copy)</label></div>
+      <div class="url-box"><span id="u1">loading...</span><button class="cb" onclick="cp('u1')">📋 Copy</button></div>
+      <div class="field"><label>Execution schedule:</label><input value="Every 1 hour" readonly></div>
+      <p class="note">→ Chọn "Every" → "1 hour" → Bấm <b>"Create"</b></p>
+    </div>
+
+    <div class="action" style="border-left:3px solid #1877f2;margin-left:0">
+      <b>📝 Job 2: Tạo nội dung (3 lần/ngày)</b><br><br>
+      <div class="field"><label>Title:</label><input value="ShipperShop Content" readonly onclick="this.select()"></div>
+      <div class="field"><label>URL: (bấm Copy)</label></div>
+      <div class="url-box"><span id="u2">loading...</span><button class="cb" onclick="cp('u2')">📋 Copy</button></div>
+      <div class="field"><label>Execution schedule:</label><input value="Custom: 0 6,12,18 * * *" readonly></div>
+      <p class="note">→ Chọn tab "Custom" → Minutes: <b>0</b> → Hours: <b>6, 12, 18</b> (tick 3 ô) → Bấm <b>"Create"</b></p>
+    </div>
+
+    <div class="action" style="border-left:3px solid #00b14f;margin-left:0">
+      <b>📊 Job 3: Báo cáo tuần (Thứ 2)</b><br><br>
+      <div class="field"><label>Title:</label><input value="ShipperShop Weekly" readonly onclick="this.select()"></div>
+      <div class="field"><label>URL: (bấm Copy)</label></div>
+      <div class="url-box"><span id="u3">loading...</span><button class="cb" onclick="cp('u3')">📋 Copy</button></div>
+      <div class="field"><label>Execution schedule:</label><input value="Custom: 0 9 * * 1" readonly></div>
+      <p class="note">→ Chọn tab "Custom" → Minutes: <b>0</b> → Hours: <b>9</b> → Days of week: <b>Monday</b> → Bấm <b>"Create"</b></p>
+    </div>
+  </div>
+</div>
+
+<!-- BƯỚC 3 -->
+<div class="step-card">
+  <div class="step-head" onclick="tog(3)">
+    <div class="step-num">3</div>
+    <h3>Kiểm tra hoạt động</h3>
+    <span class="step-time">10 giây</span>
+  </div>
+  <div class="step-body" id="b3">
+    <div class="action">
+      Bấm nút bên dưới để test ngay:<br><br>
+      <button class="btn" onclick="testAll()">🚀 Test toàn bộ hệ thống</button>
+      <div class="result" id="testR"></div>
+    </div>
+  </div>
+</div>
+
+<div class="done-banner" id="doneBanner">
+  <h2>🎉 Hoàn tất!</h2>
+  <p>Hệ thống marketing tự động đang chạy 24/7.<br>Content sẽ được tạo mỗi 6h, publish tự động, báo cáo hàng tuần.</p>
+</div>
+
+</div>
+
+<script>
+var KEY='ss_mkt_2d47732bbd94e008';
+var B='https://shippershop.vn/api/auto-content.php';
+document.getElementById('u1').textContent=B+'?action=run&key='+KEY;
+document.getElementById('u2').textContent=B+'?action=generate_ai&key='+KEY;
+document.getElementById('u3').textContent=B+'?action=weekly_report&key='+KEY;
+
+function tog(n){var e=document.getElementById('b'+n);e.classList.toggle('open');}
+function cp(id){var t=document.getElementById(id).textContent;navigator.clipboard.writeText(t);var b=document.getElementById(id).parentElement.querySelector('.cb');b.textContent='✅ Copied!';setTimeout(function(){b.textContent='📋 Copy';},1500);}
+
+function testAll(){
+  var r=document.getElementById('testR');
+  r.style.display='block';r.innerHTML='⏳ Đang test...';
+  
+  fetch(B+'?action=run&key='+KEY).then(function(res){return res.json();}).then(function(d){
+    if(d.success){
+      var data=d.data;
+      r.innerHTML='✅ <b>Hệ thống hoạt động!</b><br>'+
+        '⏰ Thời gian: '+data.time+'<br>'+
+        '📝 Content tạo: '+(data.generated?data.generated.length:0)+'<br>'+
+        '📤 Đã publish: '+(data.published?data.published.length:0)+'<br><br>'+
+        '<span style="color:#00b14f;font-weight:700">✅ Cron setup thành công! Hệ thống sẽ tự chạy 24/7.</span>';
+      r.style.borderLeft='3px solid #00b14f';
+      document.getElementById('doneBanner').style.display='block';
+    }else{
+      r.innerHTML='❌ Lỗi: '+d.message;
+      r.style.borderLeft='3px solid red';
+    }
+  }).catch(function(e){
+    r.innerHTML='❌ Lỗi kết nối: '+e.message;
+    r.style.borderLeft='3px solid red';
+  });
+}
+</script>
+</body></html>
