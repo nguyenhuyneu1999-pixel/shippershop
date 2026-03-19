@@ -68,7 +68,7 @@ if ($action === 'generate_ai') {
     $topPosts = $d->fetchAll("SELECT p.*, u.fullname as user_name, u.shipping_company,
         (p.likes_count * 2 + p.comments_count * 3 + p.shares_count) as score
         FROM posts p JOIN users u ON p.user_id = u.id
-        WHERE p.`status` = 'active' AND p.created_at >= DATE_SUB(NOW(), INTERVAL 48 HOUR)
+        WHERE p.`status` = 'active' AND p.created_at >= DATE_SUB(NOW(), INTERVAL 7 DAY)
         AND LENGTH(p.content) >= 30
         ORDER BY score DESC LIMIT 5");
     
