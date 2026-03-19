@@ -184,6 +184,7 @@ if ($method === 'GET') {
         foreach ($plans as &$p) {
             $p['features'] = json_decode($p['features'] ?: '[]', true);
             $p['price'] = floatval($p['price']);
+            $p['yearly_price'] = floatval($p['yearly_price'] ?? 0);
         }
         wOk('OK', $plans);
     }
