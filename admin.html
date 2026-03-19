@@ -595,10 +595,11 @@
         async function loadDashboardStats() {
             try {
                 var r = await fetch('/api/admin.php?action=dashboard_stats&filter=' + currentFilter, {
-                    headers: { 'Authorization': 'Bearer ' + localStorage.getItem('token') }
+                    headers: { 'Authorization': 'Bearer ' + localStorage.getItem('token') },
+                    credentials: 'include'
                 });
                 var d = await r.json();
-                if (!d.success) return;
+                if (!d.success) { console.error('Dashboard load failed:', d.message); return; }
                 var s = d.data;
 
                 // Main stat cards
@@ -668,7 +669,7 @@
             var search = document.getElementById('userSearch').value.trim();
             var url = '/api/admin.php?action=users&filter=' + userFilter + '&page=' + userPage + (search ? '&search=' + encodeURIComponent(search) : '');
             try {
-                var r = await fetch(url, { headers: { 'Authorization': 'Bearer ' + localStorage.getItem('token') } });
+                var r = await fetch(url, { headers: { 'Authorization': 'Bearer ' + localStorage.getItem('token') }, credentials: 'include' });
                 var d = await r.json();
                 if (!d.success) { document.getElementById('userList').innerHTML = '<div style="text-align:center;padding:20px;color:#c00">' + (d.message || 'Lỗi') + '</div>'; return; }
                 
@@ -702,7 +703,7 @@
             var search = document.getElementById('postSearch').value.trim();
             var url = '/api/admin.php?action=posts&filter=' + postFilter + '&page=' + postPage + (search ? '&search=' + encodeURIComponent(search) : '');
             try {
-                var r = await fetch(url, { headers: { 'Authorization': 'Bearer ' + localStorage.getItem('token') } });
+                var r = await fetch(url, { headers: { 'Authorization': 'Bearer ' + localStorage.getItem('token') }, credentials: 'include' });
                 var d = await r.json();
                 if (!d.success) { document.getElementById('postList').innerHTML = '<div style="text-align:center;padding:20px;color:#c00">' + (d.message || 'Lỗi') + '</div>'; return; }
                 

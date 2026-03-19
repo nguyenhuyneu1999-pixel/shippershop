@@ -373,13 +373,31 @@ var API='/api/admin-v2.php';
 var TK=localStorage.getItem('token')||'';
 var CU=JSON.parse(localStorage.getItem('user')||'null');
 if(!CU||CU.id!==2){alert('Chỉ Admin mới truy cập được!');location.href='login.html';}
+// Try refreshing token from auth API
+if(TK){
+  fetch('/api/auth.php?action=me',{headers:{'Authorization':'Bearer '+TK},credentials:'include'})
+  .then(function(r){return r.json();})
+  .then(function(d){if(!d.success){toast('Token hết hạn, đăng nhập lại','error');setTimeout(function(){location.href='login.html';},1500);}})
+  .catch(function(){});
+}
 
 function api(action,opts){
   var url=API+'?action='+action;
   if(opts&&opts.params)Object.keys(opts.params).forEach(function(k){url+='&'+k+'='+encodeURIComponent(opts.params[k]);});
   var o={headers:{'Authorization':'Bearer '+TK},credentials:'include'};
   if(opts&&opts.body){o.method='POST';o.headers['Content-Type']='application/json';o.body=JSON.stringify(opts.body);}
-  return fetch(url,o).then(function(r){return r.json();});
+  return fetch(url,o).then(function(r){
+    if(!r.ok&&(r.status===401||r.status===403)){
+      toast('Phiên đã hết hạn. Đăng nhập lại!','error');
+      setTimeout(function(){location.href='login.html';},1500);
+      return {success:false,message:'Unauthorized'};
+    }
+    return r.json();
+  }).catch(function(e){
+    console.error('API error:',action,e);
+    toast('Lỗi kết nối API','error');
+    return {success:false,message:'Network error'};
+  });
 }
 function esc(s){if(!s)return'';return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
 function fmtN(n){n=parseInt(n)||0;if(n>=1000000)return(n/1000000).toFixed(1)+'M';if(n>=1000)return(n/1000).toFixed(1)+'K';return n;}
