@@ -277,11 +277,13 @@ function showCategory(slug){
 
     if(subs.length){
       html+="<div class='sub-chips'>";
-      subs.forEach(function(s){html+="<div class='sub-chip'>"+esc(s.name)+"</div>";});
+      html+="<div class='sub-chip active' onclick='filterByAll(this)'>Tất cả</div>";
+      subs.forEach(function(s){html+="<div class='sub-chip' onclick='filterBySub(\""+esc(s.slug)+"\",this,"+cat.id+")'>"+esc(s.name)+"</div>";});
       html+="</div>";
     }
 
     // Group by subcategory name
+    _catGroups=groups;
     if(groups.length){
       html+="<div class='section'><div class='g-list'>"+groups.map(function(g){return mkGroupCard(g);}).join("")+"</div></div>";
     }else{
@@ -289,6 +291,45 @@ function showCategory(slug){
     }
 
     document.getElementById("catPage").innerHTML=html;
+  });
+}
+
+var _catGroups=[];
+function filterByAll(chip){
+  var chips=chip.parentNode.querySelectorAll(".sub-chip");
+  chips.forEach(function(c){c.classList.remove("active");});
+  chip.classList.add("active");
+  var listEl=document.querySelector("#catPage .g-list");
+  if(listEl)listEl.innerHTML=_catGroups.map(function(g){return mkGroupCard(g);}).join("");
+}
+function filterBySub(subSlug,chip,parentCatId){
+  // Toggle active
+  var chips=chip.parentNode.querySelectorAll(".sub-chip");
+  var wasActive=chip.classList.contains("active");
+  chips.forEach(function(c){c.classList.remove("active");});
+  if(!wasActive)chip.classList.add("active");
+  
+  // Filter groups
+  var listEl=document.querySelector("#catPage .g-list");
+  if(!listEl)return;
+  
+  if(wasActive){
+    // Deselect = show all
+    listEl.innerHTML=_catGroups.map(function(g){return mkGroupCard(g);}).join("");
+    return;
+  }
+  
+  // Find subcategory id
+  var subCat=null;
+  for(var i=0;i<categories.length;i++){
+    if(categories[i].slug===subSlug){subCat=categories[i];break;}
+  }
+  
+  // Fetch sub category to get its id, then filter
+  fetch("/api/groups.php?action=category&slug="+encodeURIComponent(subSlug)).then(function(r){return r.json();}).then(function(d){
+    if(d.success&&d.data.groups){
+      listEl.innerHTML=d.data.groups.length?d.data.groups.map(function(g){return mkGroupCard(g);}).join(""):"<p style='padding:30px;text-align:center;color:var(--muted)'>Không có nhóm nào</p>";
+    }
   });
 }
 

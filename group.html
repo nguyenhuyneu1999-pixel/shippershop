@@ -534,9 +534,24 @@ function sendGroupComment(pid){
   var inp=document.getElementById("gcInput2");var ct=inp.value.trim();if(!ct)return;
   inp.value="";
   apiFetch("/api/groups.php?action=comment",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({post_id:pid,content:ct})}).then(function(d){
-    if(d.success){openComment(pid);var card=document.getElementById("gp"+pid);if(card){var s=card.querySelectorAll(".pa3-stats span");if(s.length>=2){var cur=parseInt(s[1].textContent)||0;s[1].textContent=(cur+1)+" ghi ch\u00fa";}}}
+    if(d.success){
+      toast("Đã bình luận!");
+      // Reload comments with cache-bust
+      var wrap=document.getElementById("gcCmts2");
+      if(wrap)wrap.innerHTML="<div style='text-align:center;padding:20px;color:#999'><i class='fas fa-spinner fa-spin'></i></div>";
+      apiFetch("/api/groups.php?action=comments&post_id="+pid+"&_t="+Date.now()).then(function(d2){
+        if(!d2.success||!d2.data||!d2.data.length){if(wrap)wrap.innerHTML="<div style='text-align:center;padding:20px;color:#999'>Chưa có bình luận</div>";return;}
+        var h="";d2.data.forEach(function(c){
+          var av=c.user_avatar?"<img src='"+esc(c.user_avatar)+"' style='width:28px;height:28px;border-radius:50%;object-fit:cover'>":"<div style='width:28px;height:28px;border-radius:50%;background:#e4e6eb;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700'>"+esc((c.user_name||"U")[0])+"</div>";
+          h+="<div style='display:flex;gap:8px;padding:6px 8px'>"+av+"<div><div style='background:#f0f2f5;border-radius:18px;padding:6px 12px;display:inline-block'><div style='font-weight:700;font-size:13px'>"+esc(c.user_name)+"</div><div style='font-size:14px'>"+esc(c.content)+"</div></div><div style='font-size:11px;color:#65676B;padding:2px 12px'>"+ago(c.created_at)+"</div></div></div>";
+        });
+        if(wrap)wrap.innerHTML=h;
+        wrap.scrollTop=wrap.scrollHeight;
+      });
+      var card=document.getElementById("gp"+pid);if(card){var s=card.querySelectorAll(".pa3-stats span");if(s.length>=2){var cur=parseInt(s[1].textContent)||0;s[1].textContent=(cur+1)+" ghi ch\u00fa";}}
+    }
     else toast(d.message||"L\u1ed7i");
-  });
+  }).catch(function(){toast("L\u1ed7i k\u1ebft n\u1ed1i");});
 }
 
 function sharePost(pid){
