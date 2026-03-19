@@ -44,10 +44,16 @@ h1{color:#7C3AED;font-size:20px;margin-bottom:16px}
   <div class="stat"><div class="val" id="sFailed">-</div><div class="label">Lỗi</div></div>
 </div>
 
-<div style="display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap">
-  <button class="btn btn-purple" onclick="publishAll()">🚀 Đăng tất cả pending</button>
+<div style="display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap">
+  <button class="btn btn-purple" onclick="publishAll()">🚀 Đăng tất cả FB pending</button>
   <button class="btn btn-green btn-sm" onclick="publishNext()">📤 Đăng 1 bài tiếp</button>
   <button class="btn btn-sm" style="background:#333" onclick="loadQueue()">🔄 Tải lại</button>
+</div>
+<div style="display:flex;gap:6px;margin-bottom:16px;flex-wrap:wrap">
+  <button class="btn btn-sm" style="background:#1877f2" onclick="filterQ('facebook')">📘 Facebook</button>
+  <button class="btn btn-sm" style="background:#ff0044" onclick="filterQ('tiktok')">🎵 TikTok</button>
+  <button class="btn btn-sm" style="background:#00b14f" onclick="filterQ('blog')">📝 Blog</button>
+  <button class="btn btn-sm" style="background:#555" onclick="filterQ('all')">Tất cả</button>
 </div>
 
 <div class="log" id="log"></div>
@@ -241,6 +247,23 @@ function markPublished(queueId, fbPostId) {
         var CRON_KEY = d.data.cron_key;
         // Mark as published in DB via a simple endpoint
         fetch('/api/auto-content.php?action=mark_published&key=' + CRON_KEY + '&id=' + queueId + '&fb_id=' + (fbPostId||''));
+    });
+}
+
+
+var currentFilter = 'all';
+function filterQ(type) {
+    currentFilter = type;
+    var cards = document.querySelectorAll('.card');
+    cards.forEach(function(card) {
+        var typeEl = card.querySelector('.card-type');
+        if (!typeEl) return;
+        var cardType = typeEl.textContent.trim();
+        if (type === 'all' || cardType === type) {
+            card.style.display = 'block';
+        } else {
+            card.style.display = 'none';
+        }
     });
 }
 
