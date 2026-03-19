@@ -64,7 +64,7 @@ if ($action === 'dashboard_stats') {
     $todayPosts = $db->fetchOne("SELECT COUNT(*) as c FROM posts WHERE $pf AND DATE(created_at) = CURDATE()")['c'];
     
     // Comments & Likes
-    $cmtFilter = ($filter === 'real') ? "AND (c.user_id = 2 OR c.user_id > $seedMax)" : "";
+    $cmtFilter = ($filter === 'real') ? "AND c.user_id IN (SELECT id FROM users WHERE $realUserWhere)" : "";
     $totalCmts = $db->fetchOne("SELECT COUNT(*) as c FROM comments c WHERE 1=1 $cmtFilter")['c'];
     $todayCmts = $db->fetchOne("SELECT COUNT(*) as c FROM comments c WHERE DATE(c.created_at) = CURDATE() $cmtFilter")['c'];
     $totalLikes = $db->fetchOne("SELECT COUNT(*) as c FROM likes")['c'];
@@ -96,11 +96,14 @@ if ($action === 'dashboard_stats') {
     $weekPosts = $db->fetchOne("SELECT COUNT(*) as c FROM posts WHERE $pf AND created_at >= DATE_SUB(CURDATE(), INTERVAL 7 DAY)")['c'];
     $weekUsers = $db->fetchOne("SELECT COUNT(*) as c FROM users WHERE $uf AND created_at >= DATE_SUB(CURDATE(), INTERVAL 7 DAY)")['c'];
     
+    // Pending deposits
+    $pendingDeposits = $db->fetchOne("SELECT COUNT(*) as c FROM wallet_transactions WHERE `status`='pending'")['c'];
+    
     // Posts by day (last 7 days)
     $postsByDay = $db->fetchAll("SELECT DATE(created_at) as day, COUNT(*) as cnt FROM posts WHERE $pf AND created_at >= DATE_SUB(CURDATE(), INTERVAL 7 DAY) GROUP BY DATE(created_at) ORDER BY day");
     
     // Top posters
-    $topPosters = $db->fetchAll("SELECT u.id, u.fullname, u.avatar, COUNT(p.id) as post_count FROM users u JOIN posts p ON u.id = p.user_id WHERE p.`status`='active' AND u.id > 1 " . ($filter === 'real' ? "AND (u.id = 2 OR u.id > $seedMax)" : "") . " GROUP BY u.id ORDER BY post_count DESC LIMIT 5");
+    $topPosters = $db->fetchAll("SELECT u.id, u.fullname, u.avatar, COUNT(p.id) as post_count FROM users u JOIN posts p ON u.id = p.user_id WHERE p.`status`='active' AND u.id > 1 " . ($filter === 'real' ? "AND $realUserWhere" : "") . " GROUP BY u.id ORDER BY post_count DESC LIMIT 5");
     
     success('Success', [
         'filter' => $filter,
@@ -161,11 +164,12 @@ if ($action === 'users') {
     
     // Mark seed users
     foreach ($users as &$u) {
-        $u['is_seed'] = ($u['id'] >= $seedMin && $u['id'] <= $seedMax) ? 1 : 0;
+        $isReal = (stripos($u['email']??'', '@shippershop.local') !== false || $u['email'] === 'nguyenhuyneu1999@gmail.com' || $u['email'] === 'nguyenvanhuy12123@gmail.com');
+        $u['is_seed'] = $isReal ? 0 : 1;
     }
     
-    $realCount = $db->fetchOne("SELECT COUNT(*) as c FROM users WHERE (id = 2 OR id > $seedMax)")['c'];
-    $seedCount = $db->fetchOne("SELECT COUNT(*) as c FROM users WHERE id >= $seedMin AND id <= $seedMax")['c'];
+    $realCount = $db->fetchOne("SELECT COUNT(*) as c FROM users WHERE id > 1 AND $realWhere")['c'];
+    $seedCount = $db->fetchOne("SELECT COUNT(*) as c FROM users WHERE id > 1 AND NOT $realWhere")['c'];
     
     success('Success', [
         'users' => $users,
@@ -186,15 +190,15 @@ if ($action === 'posts') {
     $limit = 20;
     $offset = ($page - 1) * $limit;
     $search = trim($_GET['search'] ?? '');
-    $seedMin = 3; $seedMax = 102;
+    $realUWhere = "(email LIKE '%@shippershop.local' OR email = 'nguyenhuyneu1999@gmail.com' OR email = 'nguyenvanhuy12123@gmail.com')";
     
     $where = ["`status` = 'active'"];
     $params = [];
     
     if ($filter === 'real') {
-        $where[] = "(user_id = 2 OR user_id > $seedMax)";
+        $where[] = "user_id IN (SELECT id FROM users WHERE $realUWhere)";
     } elseif ($filter === 'seed') {
-        $where[] = "user_id >= $seedMin AND user_id <= $seedMax";
+        $where[] = "user_id NOT IN (SELECT id FROM users WHERE $realUWhere)";
     }
     
     if ($search) {
@@ -209,14 +213,14 @@ if ($action === 'posts') {
     $posts = $db->fetchAll(
         "SELECT p.id, p.content, p.images, p.likes_count, p.comments_count, p.shares_count, p.type, p.province, p.district, p.created_at,
                 u.id as user_id, u.fullname as user_name, u.avatar as user_avatar, u.shipping_company,
-                CASE WHEN u.id >= $seedMin AND u.id <= $seedMax THEN 1 ELSE 0 END as is_seed
+                CASE WHEN (u.email LIKE '%@shippershop.local' OR u.email = 'nguyenhuyneu1999@gmail.com' OR u.email = 'nguyenvanhuy12123@gmail.com') THEN 0 ELSE 1 END as is_seed
          FROM posts p JOIN users u ON p.user_id = u.id
          WHERE p.`status` = 'active'" . ($filter === 'real' ? " AND (p.user_id = 2 OR p.user_id > $seedMax)" : ($filter === 'seed' ? " AND p.user_id >= $seedMin AND p.user_id <= $seedMax" : "")) . ($search ? " AND p.content LIKE ?" : "") . "
          ORDER BY p.created_at DESC LIMIT $limit OFFSET $offset", $params
     );
     
-    $realCount = $db->fetchOne("SELECT COUNT(*) as c FROM posts WHERE `status`='active' AND (user_id = 2 OR user_id > $seedMax)")['c'];
-    $seedCount = $db->fetchOne("SELECT COUNT(*) as c FROM posts WHERE `status`='active' AND user_id >= $seedMin AND user_id <= $seedMax")['c'];
+    $realCount = $db->fetchOne("SELECT COUNT(*) as c FROM posts WHERE `status`='active' AND user_id IN (SELECT id FROM users WHERE $realUWhere)")['c'];
+    $seedCount = $db->fetchOne("SELECT COUNT(*) as c FROM posts WHERE `status`='active' AND user_id NOT IN (SELECT id FROM users WHERE $realUWhere)")['c'];
     
     success('Success', [
         'posts' => $posts,
