@@ -335,15 +335,15 @@ function _gcLoadCmts(pid){
   }).catch(function(){wrap.innerHTML="";});
 }
 
-function _gcCmt(c,dp){
-  var sz=dp>0?24:28;
+function _gcCmt(c,dp,rplTo){
+  var sz=dp>0?22:28;
   var av=c.user_avatar?"<img class='gc-cmt-av' src='"+esc(c.user_avatar)+"' style='width:"+sz+"px;height:"+sz+"px'>":"<div class='gc-cmt-av-ph' style='width:"+sz+"px;height:"+sz+"px'>"+esc((c.user_name||"U")[0])+"</div>";
   var lk=c.user_vote==="up"||c.user_liked;
   var n=c.likes_count||0;
-  var reps="";
-  if(c.replies&&c.replies.length){reps="<div class='gc-replies'>";for(var i=0;i<c.replies.length;i++){reps+=_gcCmt(c.replies[i],dp+1);}reps+="</div>";}
   var sn=esc(c.user_name||"");
-  return "<div class='gc-cmt'>"+av+"<div style='flex:1;min-width:0'><div class='gc-bubble'><div class='gc-cmt-name'>"+sn+"</div><div class='gc-cmt-text'>"+esc(c.content)+"</div></div><div class='gc-cmt-meta'><span>"+ago(c.created_at)+"</span><a class='"+(lk?"liked":"")+"' onclick='_gcLkCmt("+c.id+",this)'>Thành công"+(n>0?" · "+n:"")+"</a><a onclick='_gcSetRpl("+c.id+",\""+sn.replace(/"/g,"&quot;")+"\")'>Ghi chú</a></div>"+reps+"</div></div>";
+  var rplTag=rplTo?"<span style='color:#7C3AED;font-size:11px'>\u21a9 "+esc(rplTo)+"</span> ":"";
+  var indent=dp>0?"padding-left:20px;margin-left:14px;border-left:2px solid #e4e6eb":"";
+  return "<div class='gc-cmt' style='"+indent+"'>"+av+"<div style='flex:1;min-width:0'><div class='gc-bubble'><div class='gc-cmt-name'>"+sn+"</div><div class='gc-cmt-text'>"+rplTag+esc(c.content)+"</div></div><div class='gc-cmt-meta'><span>"+ago(c.created_at)+"</span><a class='"+(lk?"liked":"")+"' onclick='_gcLkCmt("+c.id+",this)'>Th\u00e0nh c\u00f4ng"+(n>0?" \u00b7 "+n:"")+"</a><a onclick='_gcSetRpl("+c.id+",\""+sn.replace(/"/g,"&quot;")+"\")'>Ghi ch\u00fa</a></div></div></div>";
 }
 
 function _gcLike(){
