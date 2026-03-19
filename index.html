@@ -727,10 +727,7 @@ async function sendCmt(pid){
   const ta=document.getElementById('ct'+pid); const ct=ta.value.trim(); if(!ct){toast('Nhập nội dung!','warning');return;}
   try{const r=await fetch('/api/posts.php?action=comment',{method:'POST',headers:{'Content-Type':'application/json'},credentials:'include',body:JSON.stringify({post_id:pid,content:ct})});const d=await r.json();if(d.success){ta.value='';const nc=document.getElementById('nc'+pid);if(nc)nc.textContent=parseInt(nc.textContent)+1;loadCmts(pid);}else toast(d.message,'error');}catch{toast('Lỗi kết nối','error');}
 }
-async function delP(pid){
-  if(!confirm('Xóa bài viết này?')) return;
-  try{const r=await fetch('/api/posts.php?action=delete',{method:'POST',headers:{'Content-Type':'application/json'},credentials:'include',body:JSON.stringify({post_id:pid})});const d=await r.json();if(d.success){document.getElementById('P'+pid).remove();toast('Đã xóa','success');}else toast(d.message,'error');}catch{toast('Lỗi','error');}
-}
+// delP → moved to reddit-mkpost JS
 
 async function loadTrend(){
   try{const r=await fetch('/api/posts.php?sort=top&limit=5');const d=await r.json();if(d.success&&d.data.posts.length){document.getElementById('trendBox').innerHTML='<div class="sidebar-title" style="padding:10px 12px">🔥 Đang thịnh hành</div>'+d.data.posts.map(p=>`<div class="trend-item" onclick="scrollTo2(${p.id})"><div class="trend-title">${esc((p.title||p.content).substring(0,80))}${(p.title||p.content).length>80?'...':''}</div><div class="trend-meta">▲${fN(p.score||0)} · ${fN(p.comments_count||0)} bình luận</div></div>`).join('');}}catch{}
@@ -849,7 +846,7 @@ function handleFab(){if(!CU){toast('Đăng nhập để đăng bài!','warning')
     <span>Kéo xuống để làm mới</span>
   </div>
 
-<script src="js/reddit-mkpost-1773841101.js">
+<script src="js/reddit-mkpost-1773915587.js">
     function renderComments(comments, postId) {
         if (!comments || comments.length === 0) return '<p style="text-align:center;color:#999;padding:20px;font-size:13px">Chưa có bình luận</p>';
         // Group: top-level and replies
@@ -924,9 +921,7 @@ function handleFab(){if(!CU){toast('Đăng nhập để đăng bài!','warning')
     }
 </script>
 <script>
-function togMenu(pid){var m=document.getElementById('pm'+pid);if(!m)return;m.style.display=m.style.display==='none'?'block':'none';}
-function reportP(pid){toast('Đã gửi báo cáo!','success');togMenu(pid);}
-document.addEventListener('click',function(e){if(!e.target.closest('.post-dots')&&!e.target.closest('.post-menu')){document.querySelectorAll('.post-menu').forEach(function(m){m.style.display='none';});}});
+// togMenu, reportP, delP → moved to reddit-mkpost JS
 </script>
 <script>
 function openSearch(){

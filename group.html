@@ -130,6 +130,10 @@ body{background:var(--bg);font-family:-apple-system,BlinkMacSystemFont,'Segoe UI
 .toast{position:fixed;bottom:90px;left:50%;transform:translateX(-50%);background:#333;color:#fff;padding:10px 20px;border-radius:20px;font-size:13px;opacity:0;transition:opacity .3s;z-index:999;pointer-events:none}
 .toast.show{opacity:1}
 .empty-msg{text-align:center;padding:40px 20px;color:var(--muted);font-size:14px}
+.post-dots{background:none;border:none;font-size:18px;color:#65676B;cursor:pointer;padding:4px 8px;border-radius:50%;}.post-dots:hover{background:#f0f2f5;}
+.post-menu{position:absolute;right:8px;top:36px;background:#fff;border-radius:8px;box-shadow:0 2px 12px rgba(0,0,0,.15);z-index:50;min-width:160px;padding:4px 0;}
+.post-menu div{padding:10px 14px;font-size:13px;cursor:pointer;display:flex;align-items:center;gap:8px;}.post-menu div:hover{background:#f5f5f5;}
+.post-meta{position:relative;}
 </style>
 </head>
 <body>
@@ -340,10 +344,12 @@ function mkPost(p){
   if(p.images){try{var a=JSON.parse(p.images);if(a&&a.length){var cl=a.length>1?" multi":"";window._ssPI=window._ssPI||{};window._ssPI["g"+p.id]=a;window._ssIvGroup=true;window._ssIvGroupId=GROUP?GROUP.id:0;imgH="<div class='post-images"+cl+"'>";for(var i=0;i<Math.min(a.length,4);i++){imgH+="<img src='"+a[i]+"' loading='lazy' onclick='openLb(\""+a[i]+"\","+p.id+",window._ssPI[\"g"+p.id+"\"])' onerror='this.style.display=\"none\"'>";}imgH+="</div>";}}catch(x){}}
   var vidH="";
   if(p.video_url){if(p.video_url.indexOf("/uploads/")!==-1){vidH="<video controls playsinline preload='metadata' style='width:100%;max-height:500px'><source src='"+p.video_url+"' type='video/mp4'></video>";}else{vidH="<div style='position:relative;padding-bottom:56%;height:0;overflow:hidden'><iframe src='"+p.video_url+"' style='position:absolute;inset:0;width:100%;height:100%;border:0' allowfullscreen></iframe></div>";}}
+  var canDel=CU&&parseInt(p.user_id)===parseInt(CU.id);
   return "<div class='post-card' id='gp"+p.id+"'>"
     +"<div class='post-meta'><div class='post-av'>"+av+"</div>"
-    +"<div style='flex:1;min-width:0'><div class='post-author'><a href='user.html?id="+p.user_id+"'>"+esc(p.user_name)+"</a></div>"
+    +"<div style='flex:1;min-width:0'><div style='display:flex;align-items:center;justify-content:space-between'><div class='post-author'><a href='user.html?id="+p.user_id+"'>"+esc(p.user_name)+"</a></div><button class='post-dots' onclick='event.stopPropagation();togMenu("+p.id+")'><i class='fas fa-ellipsis'></i></button></div>"
     +"<div style='font-size:12px;color:#65676B;display:flex;align-items:center;gap:4px'>"+shipBadge+"<span>"+ago(p.created_at)+"</span>"+badge+"</div></div></div>"
+    +"<div class='post-menu' id='pm"+p.id+"' style='display:none'><div id='sv"+p.id+"' onclick='togSave("+p.id+")'><i class='"+(p.user_saved?"fas":"far")+" fa-bookmark' style='color:"+(p.user_saved?"#7C3AED":"inherit")+"'></i> "+(p.user_saved?"Bỏ lưu":"Lưu bài viết")+"</div>"+(canDel?"<div onclick='delP("+p.id+")'><i class='far fa-trash-can'></i> Xóa bài</div>":"")+"<div onclick='reportP("+p.id+")'><i class='fas fa-flag'></i> Báo cáo</div><div onclick='togMenu("+p.id+")'><i class='fas fa-times'></i> Đóng</div></div>"
     +title+contentH+imgH+vidH
     +"<div class='pa3-stats'><span>"+(likes>0?fN(likes)+" \u0111\u01a1n giao th\u00e0nh c\u00f4ng":"")+"</span><span>"+(cmts>0?fN(cmts)+" ghi ch\u00fa":"")+"</span><span>"+(shares>0?fN(shares)+" chuy\u1ec3n ti\u1ebfp":"")+"</span></div>"
     +"<div class='post-actions-3'>"
@@ -540,5 +546,12 @@ function sharePost(pid){
 }
 </script>
 <script src="js/mobile.js"></script>
+<script>
+function togMenu(pid){var m=document.getElementById("pm"+pid);if(!m)return;var show=m.style.display==="none"||!m.style.display;document.querySelectorAll(".post-menu").forEach(function(el){el.style.display="none";});if(show)m.style.display="block";}
+function reportP(pid){togMenu(pid);if(typeof toast==="function")toast("Đã gửi báo cáo!");}
+function delP(pid){if(!confirm("Xóa bài viết này?"))return;togMenu(pid);apiFetch("/api/groups.php?action=delete_post",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({post_id:pid})}).then(function(d){if(d.success){var el=document.getElementById("gp"+pid);if(el)el.style.display="none";}});}
+async function togSave(pid){if(!CU){location.href="login.html";return;}togMenu(pid);try{var tk=localStorage.getItem("token");var r=await fetch("/api/posts.php?action=save",{method:"POST",headers:{"Content-Type":"application/json","Authorization":"Bearer "+tk},credentials:"include",body:JSON.stringify({post_id:pid})});var d=await r.json();if(d.success){var saved=d.data&&d.data.saved;var el=document.getElementById("sv"+pid);if(el){el.innerHTML="<i class='"+(saved?"fas":"far")+" fa-bookmark' style='color:"+(saved?"#7C3AED":"inherit")+"'></i> "+(saved?"Bỏ lưu":"Lưu bài viết");}}}catch(e){}}
+document.addEventListener("click",function(e){if(!e.target.closest(".post-dots")&&!e.target.closest(".post-menu")){document.querySelectorAll(".post-menu").forEach(function(m){m.style.display="none";});}});
+</script>
 <script src="/js/image-viewer.js"></script><script src="/js/analytics.js"></script></body>
 </html>

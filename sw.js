@@ -13,7 +13,7 @@ const STATIC_ASSETS = [
   '/register.html',
   '/css/style.css',
   '/mobile.css',
-  '/js/reddit-mkpost-1773841101.js',
+  '/js/reddit-mkpost-1773915587.js',
   '/js/mobile.js',
   'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css',
 ];
