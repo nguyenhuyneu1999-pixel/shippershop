@@ -191,6 +191,29 @@
         .bar-row{display:flex;align-items:center;gap:8px;margin-bottom:6px;}
         .bar-row .day{width:36px;font-size:11px;color:#65676B;text-align:right;}
         .bar-row .bar{height:22px;border-radius:4px;background:linear-gradient(90deg,#7C3AED,#A78BFA);min-width:2px;display:flex;align-items:center;justify-content:flex-end;padding-right:6px;color:#fff;font-size:10px;font-weight:700;}
+        .u-item{display:flex;align-items:center;gap:12px;padding:10px 12px;border-bottom:1px solid #f0f2f5;transition:.15s;}
+        .u-item:hover{background:#f8f7ff;}
+        .u-item:last-child{border:none;}
+        .u-item img,.u-item .u-av{width:40px;height:40px;border-radius:50%;object-fit:cover;flex-shrink:0;}
+        .u-item .u-av{background:#7C3AED;color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:14px;}
+        .u-info{flex:1;min-width:0;}
+        .u-name{font-weight:700;font-size:14px;display:flex;align-items:center;gap:6px;}
+        .u-name .badge-seed{font-size:10px;padding:1px 6px;border-radius:10px;background:#FFF3E0;color:#FF9800;font-weight:600;}
+        .u-name .badge-real{font-size:10px;padding:1px 6px;border-radius:10px;background:#E8F5E9;color:#4CAF50;font-weight:600;}
+        .u-name .badge-admin{font-size:10px;padding:1px 6px;border-radius:10px;background:#EDE9FE;color:#7C3AED;font-weight:600;}
+        .u-meta{font-size:12px;color:#65676B;margin-top:2px;}
+        .u-stats{display:flex;gap:12px;font-size:12px;color:#65676B;white-space:nowrap;}
+        .u-stats span{display:flex;align-items:center;gap:3px;}
+        .p-item{padding:12px;border-bottom:1px solid #f0f2f5;}
+        .p-item:last-child{border:none;}
+        .p-head{display:flex;align-items:center;gap:10px;margin-bottom:6px;}
+        .p-head img,.p-head .p-av{width:32px;height:32px;border-radius:50%;object-fit:cover;flex-shrink:0;}
+        .p-head .p-av{background:#7C3AED;color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:12px;}
+        .p-content{font-size:13px;line-height:1.5;color:#333;margin-bottom:6px;max-height:60px;overflow:hidden;}
+        .p-stats{display:flex;gap:12px;font-size:12px;color:#65676B;}
+        .paging-btn{padding:4px 12px;border:1px solid #ddd;border-radius:6px;background:#fff;cursor:pointer;font-size:13px;}
+        .paging-btn.active{background:#7C3AED;color:#fff;border-color:#7C3AED;}
+        .paging-btn:hover{border-color:#7C3AED;}
 
         .stat-value {
             font-size: 32px;
@@ -494,6 +517,36 @@
                 </div>
             </div>
 
+            <!-- USERS MANAGEMENT -->
+            <div class="admin-section" style="margin-bottom:24px">
+                <div class="section-header" style="flex-wrap:wrap;gap:8px">
+                    <h2 class="section-title"><i class="fas fa-users" style="color:#7C3AED;margin-right:6px"></i>Người dùng</h2>
+                    <div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center">
+                        <button class="btn-filter uf-btn active" data-uf="all" onclick="setUF('all')">Tất cả <span id="ufAll">-</span></button>
+                        <button class="btn-filter uf-btn" data-uf="real" onclick="setUF('real')">Thật <span id="ufReal">-</span></button>
+                        <button class="btn-filter uf-btn" data-uf="seed" onclick="setUF('seed')">Ảo <span id="ufSeed">-</span></button>
+                        <input type="text" id="userSearch" placeholder="Tìm người dùng..." style="padding:6px 12px;border:1px solid #ddd;border-radius:20px;font-size:13px;width:160px" oninput="debounceUserSearch()">
+                    </div>
+                </div>
+                <div id="userList" style="margin-top:12px"><div style="text-align:center;padding:30px;color:#999"><i class="fas fa-spinner fa-spin"></i> Đang tải...</div></div>
+                <div id="userPaging" style="display:flex;justify-content:center;gap:8px;margin-top:12px"></div>
+            </div>
+
+            <!-- POSTS MANAGEMENT -->
+            <div class="admin-section" style="margin-bottom:24px">
+                <div class="section-header" style="flex-wrap:wrap;gap:8px">
+                    <h2 class="section-title"><i class="fas fa-newspaper" style="color:#2196F3;margin-right:6px"></i>Bài đăng</h2>
+                    <div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center">
+                        <button class="btn-filter pf-btn active" data-pf="all" onclick="setPF('all')">Tất cả <span id="pfAll">-</span></button>
+                        <button class="btn-filter pf-btn" data-pf="real" onclick="setPF('real')">Thật <span id="pfReal">-</span></button>
+                        <button class="btn-filter pf-btn" data-pf="seed" onclick="setPF('seed')">Ảo <span id="pfSeed">-</span></button>
+                        <input type="text" id="postSearch" placeholder="Tìm bài đăng..." style="padding:6px 12px;border:1px solid #ddd;border-radius:20px;font-size:13px;width:160px" oninput="debouncePostSearch()">
+                    </div>
+                </div>
+                <div id="postList" style="margin-top:12px"><div style="text-align:center;padding:30px;color:#999"><i class="fas fa-spinner fa-spin"></i> Đang tải...</div></div>
+                <div id="postPaging" style="display:flex;justify-content:center;gap:8px;margin-top:12px"></div>
+            </div>
+
             <!-- QUICK ACTIONS -->
             <div class="quick-actions">
                 <div class="quick-action-card" onclick="window.location.href='admin-orders.html'">
@@ -528,6 +581,8 @@
         document.addEventListener('DOMContentLoaded', function() {
             checkAdminAuth();
             loadDashboardStats();
+            loadUsers();
+            loadPosts();
         });
 
         function setFilter(f) {
@@ -603,6 +658,97 @@
 
         function fmtN(n) { if (n >= 1000000) return (n / 1000000).toFixed(1) + 'M'; if (n >= 1000) return (n / 1000).toFixed(1) + 'K'; return n; }
         function esc(s) { if (!s) return ''; var d = document.createElement('div'); d.textContent = s; return d.innerHTML; }
+
+        // ============ USERS ============
+        var userFilter = 'all', userPage = 1, userSearchTimer = null;
+        function setUF(f) { userFilter = f; userPage = 1; document.querySelectorAll('.uf-btn').forEach(function(b){b.classList.toggle('active',b.dataset.uf===f);}); loadUsers(); }
+        function debounceUserSearch() { clearTimeout(userSearchTimer); userSearchTimer = setTimeout(function(){ userPage = 1; loadUsers(); }, 400); }
+        
+        async function loadUsers() {
+            var search = document.getElementById('userSearch').value.trim();
+            var url = '/api/admin.php?action=users&filter=' + userFilter + '&page=' + userPage + (search ? '&search=' + encodeURIComponent(search) : '');
+            try {
+                var r = await fetch(url, { headers: { 'Authorization': 'Bearer ' + localStorage.getItem('token') } });
+                var d = await r.json();
+                if (!d.success) { document.getElementById('userList').innerHTML = '<div style="text-align:center;padding:20px;color:#c00">' + (d.message || 'Lỗi') + '</div>'; return; }
+                
+                // Update filter counts
+                document.getElementById('ufAll').textContent = d.data.counts.all;
+                document.getElementById('ufReal').textContent = d.data.counts.real;
+                document.getElementById('ufSeed').textContent = d.data.counts.seed;
+                
+                var users = d.data.users;
+                if (!users.length) { document.getElementById('userList').innerHTML = '<div style="text-align:center;padding:20px;color:#999">Không tìm thấy người dùng</div>'; document.getElementById('userPaging').innerHTML = ''; return; }
+                
+                var h = users.map(function(u) {
+                    var av = u.avatar ? '<img src="' + u.avatar + '" onerror="this.outerHTML=\'<div class=u-av>' + esc((u.fullname||'U')[0]) + '</div>\'">' : '<div class="u-av">' + esc((u.fullname||'U')[0]) + '</div>';
+                    var badge = u.role === 'admin' ? '<span class="badge-admin">ADMIN</span>' : (u.is_seed ? '<span class="badge-seed">ẢO</span>' : '<span class="badge-real">THẬT</span>');
+                    var ship = u.shipping_company ? '<span style="color:' + ({'GHTK':'#00b14f','GHN':'#ff6600','SPX':'#7C3AED','Grab':'#00b14f','Be':'#5bc500'}[u.shipping_company] || '#999') + ';font-weight:600">' + esc(u.shipping_company) + '</span>' : '';
+                    return '<div class="u-item" onclick="window.open(\'user.html?id=' + u.id + '\',\'_blank\')">' + av + '<div class="u-info"><div class="u-name">' + esc(u.fullname) + ' ' + badge + '</div><div class="u-meta">@' + esc(u.username || '') + (ship ? ' · ' + ship : '') + ' · ' + ago(u.created_at) + '</div></div><div class="u-stats"><span><i class="fas fa-pen"></i> ' + (u.post_count||0) + '</span><span><i class="fas fa-comment"></i> ' + (u.comment_count||0) + '</span><span><i class="fas fa-heart"></i> ' + (u.like_count||0) + '</span></div></div>';
+                }).join('');
+                document.getElementById('userList').innerHTML = h;
+                
+                // Paging
+                renderPaging('userPaging', d.data.page, d.data.pages, function(p){ userPage = p; loadUsers(); });
+            } catch (e) { document.getElementById('userList').innerHTML = '<div style="text-align:center;padding:20px;color:#c00">Lỗi kết nối</div>'; }
+        }
+
+        // ============ POSTS ============
+        var postFilter = 'all', postPage = 1, postSearchTimer = null;
+        function setPF(f) { postFilter = f; postPage = 1; document.querySelectorAll('.pf-btn').forEach(function(b){b.classList.toggle('active',b.dataset.pf===f);}); loadPosts(); }
+        function debouncePostSearch() { clearTimeout(postSearchTimer); postSearchTimer = setTimeout(function(){ postPage = 1; loadPosts(); }, 400); }
+        
+        async function loadPosts() {
+            var search = document.getElementById('postSearch').value.trim();
+            var url = '/api/admin.php?action=posts&filter=' + postFilter + '&page=' + postPage + (search ? '&search=' + encodeURIComponent(search) : '');
+            try {
+                var r = await fetch(url, { headers: { 'Authorization': 'Bearer ' + localStorage.getItem('token') } });
+                var d = await r.json();
+                if (!d.success) { document.getElementById('postList').innerHTML = '<div style="text-align:center;padding:20px;color:#c00">' + (d.message || 'Lỗi') + '</div>'; return; }
+                
+                document.getElementById('pfAll').textContent = d.data.counts.all;
+                document.getElementById('pfReal').textContent = d.data.counts.real;
+                document.getElementById('pfSeed').textContent = d.data.counts.seed;
+                
+                var posts = d.data.posts;
+                if (!posts.length) { document.getElementById('postList').innerHTML = '<div style="text-align:center;padding:20px;color:#999">Không tìm thấy bài đăng</div>'; document.getElementById('postPaging').innerHTML = ''; return; }
+                
+                var h = posts.map(function(p) {
+                    var av = p.user_avatar ? '<img src="' + p.user_avatar + '">' : '<div class="p-av">' + esc((p.user_name||'U')[0]) + '</div>';
+                    var badge = p.is_seed ? '<span class="badge-seed" style="font-size:10px;padding:1px 6px;border-radius:10px;background:#FFF3E0;color:#FF9800">ẢO</span>' : '<span class="badge-real" style="font-size:10px;padding:1px 6px;border-radius:10px;background:#E8F5E9;color:#4CAF50">THẬT</span>';
+                    var content = esc((p.content || '').substring(0, 120));
+                    if ((p.content||'').length > 120) content += '...';
+                    var imgs = 0; try { imgs = JSON.parse(p.images || '[]').length; } catch(e) {}
+                    return '<div class="p-item" onclick="window.open(\'post-detail.html?id=' + p.id + '\',\'_blank\')" style="cursor:pointer"><div class="p-head">' + av + '<div style="flex:1;min-width:0"><div style="font-weight:600;font-size:13px;display:flex;align-items:center;gap:6px">' + esc(p.user_name) + ' ' + badge + '</div><div style="font-size:11px;color:#65676B">' + ago(p.created_at) + (p.district ? ' · ' + esc(p.district) : '') + '</div></div><div style="font-size:11px;color:#999">#' + p.id + '</div></div><div class="p-content">' + content + '</div><div class="p-stats"><span><i class="fas fa-heart" style="color:#E91E63"></i> ' + (p.likes_count||0) + '</span><span><i class="fas fa-comment" style="color:#2196F3"></i> ' + (p.comments_count||0) + '</span><span><i class="fas fa-share" style="color:#4CAF50"></i> ' + (p.shares_count||0) + '</span>' + (imgs ? '<span><i class="fas fa-image" style="color:#FF9800"></i> ' + imgs + '</span>' : '') + '</div></div>';
+                }).join('');
+                document.getElementById('postList').innerHTML = h;
+                renderPaging('postPaging', d.data.page, d.data.pages, function(p){ postPage = p; loadPosts(); });
+            } catch (e) { document.getElementById('postList').innerHTML = '<div style="text-align:center;padding:20px;color:#c00">Lỗi kết nối</div>'; }
+        }
+
+        // ============ PAGING HELPER ============
+        function renderPaging(elId, cur, total, cb) {
+            if (total <= 1) { document.getElementById(elId).innerHTML = ''; return; }
+            var h = '';
+            if (cur > 1) h += '<button class="paging-btn" onclick="event.stopPropagation()">← Trước</button>';
+            var start = Math.max(1, cur - 2), end = Math.min(total, cur + 2);
+            for (var i = start; i <= end; i++) {
+                h += '<button class="paging-btn' + (i === cur ? ' active' : '') + '">' + i + '</button>';
+            }
+            if (cur < total) h += '<button class="paging-btn">Sau →</button>';
+            var el = document.getElementById(elId);
+            el.innerHTML = h;
+            el.querySelectorAll('.paging-btn').forEach(function(btn) {
+                btn.onclick = function() {
+                    var txt = btn.textContent.trim();
+                    if (txt === '← Trước') cb(cur - 1);
+                    else if (txt === 'Sau →') cb(cur + 1);
+                    else cb(parseInt(txt));
+                };
+            });
+        }
+
+        function ago(dt) { if (!dt) return ''; var s = Math.floor((new Date() - new Date(dt.replace(' ', 'T'))) / 1000); if (s < 60) return s + 'g'; if (s < 3600) return Math.floor(s/60) + ' phút'; if (s < 86400) return Math.floor(s/3600) + ' giờ'; if (s < 604800) return Math.floor(s/86400) + ' ngày'; return new Date(dt).toLocaleDateString('vi-VN'); }
 
         // Check admin authentication
         function checkAdminAuth() {

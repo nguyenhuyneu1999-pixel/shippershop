@@ -121,6 +121,113 @@ if ($action === 'dashboard_stats') {
 }
 
 // ============================================
+// USERS LIST (with filter: all / real / seed)
+// ============================================
+
+if ($action === 'users') {
+    $filter = $_GET['filter'] ?? 'all'; // all | real | seed
+    $page = max(1, intval($_GET['page'] ?? 1));
+    $limit = 20;
+    $offset = ($page - 1) * $limit;
+    $search = trim($_GET['search'] ?? '');
+    $seedMin = 3; $seedMax = 102;
+    
+    $where = ["id > 1"];
+    $params = [];
+    
+    if ($filter === 'real') {
+        $where[] = "(id = 2 OR id > $seedMax)";
+    } elseif ($filter === 'seed') {
+        $where[] = "id >= $seedMin AND id <= $seedMax";
+    }
+    
+    if ($search) {
+        $where[] = "(fullname LIKE ? OR username LIKE ? OR email LIKE ?)";
+        $params[] = "%$search%"; $params[] = "%$search%"; $params[] = "%$search%";
+    }
+    
+    $whereStr = implode(' AND ', $where);
+    
+    $total = $db->fetchOne("SELECT COUNT(*) as c FROM users WHERE $whereStr", $params)['c'];
+    
+    $users = $db->fetchAll(
+        "SELECT u.id, u.username, u.fullname, u.email, u.avatar, u.role, u.shipping_company, u.created_at,
+                (SELECT COUNT(*) FROM posts WHERE user_id = u.id AND `status` = 'active') as post_count,
+                (SELECT COUNT(*) FROM comments WHERE user_id = u.id) as comment_count,
+                (SELECT COUNT(*) FROM likes WHERE user_id = u.id) as like_count
+         FROM users u WHERE $whereStr
+         ORDER BY u.created_at DESC LIMIT $limit OFFSET $offset", $params
+    );
+    
+    // Mark seed users
+    foreach ($users as &$u) {
+        $u['is_seed'] = ($u['id'] >= $seedMin && $u['id'] <= $seedMax) ? 1 : 0;
+    }
+    
+    $realCount = $db->fetchOne("SELECT COUNT(*) as c FROM users WHERE (id = 2 OR id > $seedMax)")['c'];
+    $seedCount = $db->fetchOne("SELECT COUNT(*) as c FROM users WHERE id >= $seedMin AND id <= $seedMax")['c'];
+    
+    success('Success', [
+        'users' => $users,
+        'total' => (int)$total,
+        'page' => $page,
+        'pages' => ceil($total / $limit),
+        'counts' => ['all' => (int)$realCount + (int)$seedCount, 'real' => (int)$realCount, 'seed' => (int)$seedCount]
+    ]);
+}
+
+// ============================================
+// POSTS LIST (with filter: all / real / seed)
+// ============================================
+
+if ($action === 'posts') {
+    $filter = $_GET['filter'] ?? 'all';
+    $page = max(1, intval($_GET['page'] ?? 1));
+    $limit = 20;
+    $offset = ($page - 1) * $limit;
+    $search = trim($_GET['search'] ?? '');
+    $seedMin = 3; $seedMax = 102;
+    
+    $where = ["`status` = 'active'"];
+    $params = [];
+    
+    if ($filter === 'real') {
+        $where[] = "(user_id = 2 OR user_id > $seedMax)";
+    } elseif ($filter === 'seed') {
+        $where[] = "user_id >= $seedMin AND user_id <= $seedMax";
+    }
+    
+    if ($search) {
+        $where[] = "content LIKE ?";
+        $params[] = "%$search%";
+    }
+    
+    $whereStr = implode(' AND ', $where);
+    
+    $total = $db->fetchOne("SELECT COUNT(*) as c FROM posts WHERE $whereStr", $params)['c'];
+    
+    $posts = $db->fetchAll(
+        "SELECT p.id, p.content, p.images, p.likes_count, p.comments_count, p.shares_count, p.type, p.province, p.district, p.created_at,
+                u.id as user_id, u.fullname as user_name, u.avatar as user_avatar, u.shipping_company,
+                CASE WHEN u.id >= $seedMin AND u.id <= $seedMax THEN 1 ELSE 0 END as is_seed
+         FROM posts p JOIN users u ON p.user_id = u.id
+         WHERE p.`status` = 'active'" . ($filter === 'real' ? " AND (p.user_id = 2 OR p.user_id > $seedMax)" : ($filter === 'seed' ? " AND p.user_id >= $seedMin AND p.user_id <= $seedMax" : "")) . ($search ? " AND p.content LIKE ?" : "") . "
+         ORDER BY p.created_at DESC LIMIT $limit OFFSET $offset", $params
+    );
+    
+    $realCount = $db->fetchOne("SELECT COUNT(*) as c FROM posts WHERE `status`='active' AND (user_id = 2 OR user_id > $seedMax)")['c'];
+    $seedCount = $db->fetchOne("SELECT COUNT(*) as c FROM posts WHERE `status`='active' AND user_id >= $seedMin AND user_id <= $seedMax")['c'];
+    
+    success('Success', [
+        'posts' => $posts,
+        'total' => (int)$total,
+        'page' => $page,
+        'pages' => ceil($total / $limit),
+        'counts' => ['all' => (int)$realCount + (int)$seedCount, 'real' => (int)$realCount, 'seed' => (int)$seedCount]
+    ]);
+}
+
+// ============================================
 // ORDERS STATS
 // ============================================
 
