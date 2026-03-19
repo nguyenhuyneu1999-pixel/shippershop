@@ -1,16 +1,23 @@
-/* ShipperShop Analytics Tracker - lightweight, privacy-friendly */
+// ShipperShop Simple Analytics
 (function(){
-var sid=localStorage.getItem("ss_sid");
-if(!sid){sid="s"+Math.random().toString(36).substr(2,12)+Date.now().toString(36);localStorage.setItem("ss_sid",sid);}
-var u=JSON.parse(localStorage.getItem("user")||"null");
-var uid=u?u.id:0;
-var data={page:location.pathname+location.search,referrer:document.referrer,sid:sid,uid:uid};
-setTimeout(function(){
-  try{
-    var x=new XMLHttpRequest();
-    x.open("POST","/api/analytics.php?action=view",true);
-    x.setRequestHeader("Content-Type","application/json");
-    x.send(JSON.stringify(data));
-  }catch(e){}
-},1000);
+  try {
+    var page = location.pathname.replace(/\//g,'').replace('.html','') || 'home';
+    var ref = document.referrer || 'direct';
+    var src = new URLSearchParams(location.search).get('utm_source') || '';
+    var data = {page: page, ref: ref, src: src, t: Date.now()};
+    
+    // Send to our analytics endpoint (non-blocking)
+    var img = new Image();
+    img.src = '/api/track.php?p=' + encodeURIComponent(page) + 
+              '&r=' + encodeURIComponent(ref.substring(0, 100)) + 
+              '&s=' + encodeURIComponent(src) +
+              '&_=' + Date.now();
+    
+    // Track time on page
+    var startTime = Date.now();
+    window.addEventListener('beforeunload', function() {
+      var duration = Math.round((Date.now() - startTime) / 1000);
+      navigator.sendBeacon('/api/track.php?p=' + page + '&d=' + duration + '&action=leave');
+    });
+  } catch(e) {}
 })();
