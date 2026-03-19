@@ -1,44 +1,34 @@
 <?php
 require_once '/home/nhshiw2j/public_html/includes/db.php';
 $d=db();
-$imgDir='/home/nhshiw2j/public_html/uploads/posts/';
-
-// Count actual files
-$files=glob($imgDir.'seed_*.jpg');
-echo "Seed image files: ".count($files)."\n";
-
-// Check posts with missing images
-$posts=$d->fetchAll("SELECT id,images FROM posts WHERE images IS NOT NULL AND images != 'null' AND images != ''");
-$missing=0;$ok=0;$badPosts=[];
+// Fix double path in posts.images
+$posts=$d->fetchAll("SELECT id,images FROM posts WHERE images LIKE '%/uploads/posts//uploads/%'");
+echo "Posts with double path: ".count($posts)."\n";
 foreach($posts as $p){
-    $imgs=json_decode($p['images'],true);
-    if(!$imgs)continue;
-    foreach($imgs as $img){
-        $path='/home/nhshiw2j/public_html'.$img;
-        if(!file_exists($path)){$missing++;$badPosts[]=$p['id'];}
-        else $ok++;
-    }
-}
-echo "Images OK: $ok, Missing: $missing\n";
-if($missing>0){
-    echo "Posts with missing images (first 10): ".implode(',',array_unique(array_slice($badPosts,0,10)))."\n";
-    // Show sample missing paths
-    foreach(array_slice(array_unique($badPosts),0,3) as $pid){
-        $p=$d->fetchOne("SELECT images FROM posts WHERE id=?",[$pid]);
-        echo "  Post $pid: ".$p['images']."\n";
-    }
+    $fixed=str_replace('/uploads/posts//uploads/posts/','/uploads/posts/',$p['images']);
+    $d->query("UPDATE posts SET images=? WHERE id=?",[$fixed,$p['id']]);
+    echo "  Fixed post ".$p['id'].": ".$fixed."\n";
 }
 
-// Same for group_posts
-$gposts=$d->fetchAll("SELECT id,images FROM group_posts WHERE images IS NOT NULL AND images != 'null' AND images != ''");
-$gmissing=0;$gok=0;
-foreach($gposts as $p){
+// Check for any other bad paths
+$bad=$d->fetchAll("SELECT id,images FROM posts WHERE images IS NOT NULL AND images NOT LIKE '%null%' AND images != ''");
+$still=0;
+foreach($bad as $p){
     $imgs=json_decode($p['images'],true);
     if(!$imgs)continue;
     foreach($imgs as $img){
-        $path='/home/nhshiw2j/public_html'.$img;
-        if(!file_exists($path))$gmissing++;
-        else $gok++;
+        if(!file_exists('/home/nhshiw2j/public_html'.$img)){
+            // Try to find the file
+            $base=basename($img);
+            if(file_exists('/home/nhshiw2j/public_html/uploads/posts/'.$base)){
+                $newImgs=['/uploads/posts/'.$base];
+                $d->query("UPDATE posts SET images=? WHERE id=?", [json_encode($newImgs),$p['id']]);
+                echo "  Remapped post ".$p['id'].": ".$base."\n";
+            }else{
+                $still++;
+            }
+        }
     }
 }
-echo "Group images OK: $gok, Missing: $gmissing\n";
+echo "\nStill missing after fix: $still\n";
+echo "Done!\n";
