@@ -176,6 +176,21 @@
             background: rgba(255, 185, 0, 0.1);
             color: var(--warning);
         }
+        .detail-stat{background:#fff;border-radius:12px;padding:16px;display:flex;flex-direction:column;align-items:center;gap:6px;box-shadow:0 1px 4px rgba(0,0,0,.06);}
+        .detail-stat i{font-size:22px;}
+        .detail-stat span{font-size:22px;font-weight:800;color:#1C1C1C;}
+        .detail-stat small{font-size:12px;color:#65676B;}
+        .btn-filter{padding:6px 16px;border-radius:20px;border:1px solid #ddd;background:#fff;cursor:pointer;font-size:13px;font-weight:600;color:#555;transition:.2s;}
+        .btn-filter.active{background:var(--primary);color:#fff;border-color:var(--primary);}
+        .btn-filter:hover{border-color:var(--primary);}
+        .top-poster{display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid #f0f2f5;}
+        .top-poster:last-child{border:none;}
+        .top-poster img,.top-poster .av-ph{width:32px;height:32px;border-radius:50%;object-fit:cover;flex-shrink:0;}
+        .top-poster .av-ph{background:#7C3AED;color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:12px;}
+        .top-poster .rank{width:20px;font-weight:800;color:#7C3AED;font-size:14px;}
+        .bar-row{display:flex;align-items:center;gap:8px;margin-bottom:6px;}
+        .bar-row .day{width:36px;font-size:11px;color:#65676B;text-align:right;}
+        .bar-row .bar{height:22px;border-radius:4px;background:linear-gradient(90deg,#7C3AED,#A78BFA);min-width:2px;display:flex;align-items:center;justify-content:flex-end;padding-right:6px;color:#fff;font-size:10px;font-weight:700;}
 
         .stat-value {
             font-size: 32px;
@@ -416,126 +431,67 @@
                 </div>
             </div>
 
+            <!-- FILTER -->
+            <div style="display:flex;align-items:center;gap:12px;margin-bottom:20px;flex-wrap:wrap">
+                <span style="font-weight:600;color:#555">Bộ lọc dữ liệu:</span>
+                <button class="btn-filter active" id="filterAll" onclick="setFilter('all')">Tất cả (thật + ảo)</button>
+                <button class="btn-filter" id="filterReal" onclick="setFilter('real')">Chỉ người thật</button>
+            </div>
+
             <!-- STATS -->
-            <div class="stats-grid">
+            <div class="stats-grid" id="statsGrid">
                 <div class="stat-card revenue">
-                    <div class="stat-header">
-                        <div>
-                            <div class="stat-label">Doanh thu hôm nay</div>
-                            <div class="stat-value" id="todayRevenue">0₫</div>
-                            <div class="stat-change">
-                                <i class="fas fa-arrow-up"></i> +12% so với hôm qua
-                            </div>
-                        </div>
-                        <div class="stat-icon">
-                            <i class="fas fa-dollar-sign"></i>
-                        </div>
-                    </div>
+                    <div class="stat-header"><div>
+                        <div class="stat-label">Người dùng</div>
+                        <div class="stat-value" id="sUsers">-</div>
+                        <div class="stat-change" id="sUsersDetail">Đang tải...</div>
+                    </div><div class="stat-icon"><i class="fas fa-users"></i></div></div>
                 </div>
-
                 <div class="stat-card orders">
-                    <div class="stat-header">
-                        <div>
-                            <div class="stat-label">Đơn hàng mới</div>
-                            <div class="stat-value" id="newOrders">0</div>
-                            <div class="stat-change">
-                                <i class="fas fa-arrow-up"></i> +8% so với hôm qua
-                            </div>
-                        </div>
-                        <div class="stat-icon">
-                            <i class="fas fa-shopping-cart"></i>
-                        </div>
-                    </div>
+                    <div class="stat-header"><div>
+                        <div class="stat-label">Bài đăng</div>
+                        <div class="stat-value" id="sPosts">-</div>
+                        <div class="stat-change" id="sPostsDetail">Đang tải...</div>
+                    </div><div class="stat-icon"><i class="fas fa-newspaper"></i></div></div>
                 </div>
-
                 <div class="stat-card users">
-                    <div class="stat-header">
-                        <div>
-                            <div class="stat-label">Người dùng mới</div>
-                            <div class="stat-value" id="newUsers">0</div>
-                            <div class="stat-change">
-                                <i class="fas fa-arrow-up"></i> +5% so với hôm qua
-                            </div>
-                        </div>
-                        <div class="stat-icon">
-                            <i class="fas fa-users"></i>
-                        </div>
-                    </div>
+                    <div class="stat-header"><div>
+                        <div class="stat-label">Bình luận</div>
+                        <div class="stat-value" id="sCmts">-</div>
+                        <div class="stat-change" id="sCmtsDetail">Đang tải...</div>
+                    </div><div class="stat-icon"><i class="fas fa-comments"></i></div></div>
                 </div>
-
                 <div class="stat-card products">
-                    <div class="stat-header">
-                        <div>
-                            <div class="stat-label">Chờ duyệt</div>
-                            <div class="stat-value" id="pendingItems">0</div>
-                            <div class="stat-change negative">
-                                <i class="fas fa-clock"></i> Cần xử lý
-                            </div>
-                        </div>
-                        <div class="stat-icon">
-                            <i class="fas fa-exclamation-circle"></i>
-                        </div>
-                    </div>
+                    <div class="stat-header"><div>
+                        <div class="stat-label">Lượt thích</div>
+                        <div class="stat-value" id="sLikes">-</div>
+                        <div class="stat-change" id="sLikesDetail">&nbsp;</div>
+                    </div><div class="stat-icon"><i class="fas fa-heart"></i></div></div>
                 </div>
             </div>
 
-            <!-- RECENT ORDERS -->
-            <div class="admin-section">
-                <div class="section-header">
-                    <h2 class="section-title">Đơn hàng gần đây</h2>
-                    <button class="btn-primary" onclick="window.location.href='admin-orders.html'">
-                        Xem tất cả
-                    </button>
-                </div>
-
-                <table class="admin-table" id="recentOrdersTable">
-                    <thead>
-                        <tr>
-                            <th>Mã đơn</th>
-                            <th>Khách hàng</th>
-                            <th>Sản phẩm</th>
-                            <th>Tổng tiền</th>
-                            <th>Trạng thái</th>
-                            <th>Thao tác</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr>
-                            <td colspan="6" style="text-align: center; padding: 40px; color: var(--gray);">
-                                Đang tải...
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
+            <!-- DETAILED STATS -->
+            <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:16px;margin-bottom:24px" id="detailGrid">
+                <div class="detail-stat"><i class="fas fa-users-cog" style="color:#7C3AED"></i><span id="dGroups">-</span><small>Hội nhóm</small></div>
+                <div class="detail-stat"><i class="fas fa-clipboard-list" style="color:#2196F3"></i><span id="dGP">-</span><small>Bài nhóm</small></div>
+                <div class="detail-stat"><i class="fas fa-store" style="color:#FF9800"></i><span id="dMk">-</span><small>Chợ mua bán</small></div>
+                <div class="detail-stat"><i class="fas fa-road" style="color:#F44336"></i><span id="dTraffic">-</span><small>Cảnh báo GT</small></div>
+                <div class="detail-stat"><i class="fas fa-envelope" style="color:#00BCD4"></i><span id="dMsg">-</span><small>Tin nhắn</small></div>
+                <div class="detail-stat"><i class="fas fa-wallet" style="color:#4CAF50"></i><span id="dWallet">-</span><small>Ví tiền</small></div>
+                <div class="detail-stat"><i class="fas fa-bell" style="color:#E91E63"></i><span id="dPush">-</span><small>Push subs</small></div>
+                <div class="detail-stat"><i class="fas fa-crown" style="color:#FFC107"></i><span id="dSubs">-</span><small>Gói Premium</small></div>
             </div>
 
-            <!-- PENDING WALLET REQUESTS -->
-            <div class="admin-section">
-                <div class="section-header">
-                    <h2 class="section-title">Yêu cầu nạp/rút tiền</h2>
-                    <button class="btn-primary" onclick="window.location.href='admin-wallet.html'">
-                        Xem tất cả
-                    </button>
+            <!-- TOP POSTERS + POSTS BY DAY -->
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-bottom:24px">
+                <div class="admin-section" style="margin:0">
+                    <h2 class="section-title" style="margin-bottom:12px">Top người đăng</h2>
+                    <div id="topPosters"><div style="text-align:center;padding:20px;color:#999">Đang tải...</div></div>
                 </div>
-
-                <table class="admin-table" id="pendingWalletTable">
-                    <thead>
-                        <tr>
-                            <th>Người dùng</th>
-                            <th>Loại</th>
-                            <th>Số tiền</th>
-                            <th>Thời gian</th>
-                            <th>Thao tác</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr>
-                            <td colspan="5" style="text-align: center; padding: 40px; color: var(--gray);">
-                                Đang tải...
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
+                <div class="admin-section" style="margin:0">
+                    <h2 class="section-title" style="margin-bottom:12px">Bài đăng 7 ngày gần đây</h2>
+                    <div id="chartDays"><div style="text-align:center;padding:20px;color:#999">Đang tải...</div></div>
+                </div>
             </div>
 
             <!-- QUICK ACTIONS -->
@@ -548,13 +504,13 @@
                     <div class="quick-action-icon">💰</div>
                     <div style="font-weight: 600;">Duyệt thanh toán</div>
                 </div>
-                <div class="quick-action-card" onclick="alert('Coming soon')">
-                    <div class="quick-action-icon">📝</div>
-                    <div style="font-weight: 600;">Thêm sản phẩm</div>
+                <div class="quick-action-card" onclick="window.location.href='marketplace.html'">
+                    <div class="quick-action-icon">🛒</div>
+                    <div style="font-weight: 600;">Chợ mua bán</div>
                 </div>
-                <div class="quick-action-card" onclick="alert('Coming soon')">
-                    <div class="quick-action-icon">📊</div>
-                    <div style="font-weight: 600;">Xem báo cáo</div>
+                <div class="quick-action-card" onclick="window.location.href='traffic.html'">
+                    <div class="quick-action-icon">🚦</div>
+                    <div style="font-weight: 600;">Cảnh báo GT</div>
                 </div>
             </div>
         </main>
@@ -567,14 +523,86 @@
         // ==========================================
 
         let currentAdmin = null;
+        let currentFilter = 'all';
 
-        // Initialize
         document.addEventListener('DOMContentLoaded', function() {
             checkAdminAuth();
             loadDashboardStats();
-            loadRecentOrders();
-            loadPendingWallet();
         });
+
+        function setFilter(f) {
+            currentFilter = f;
+            document.getElementById('filterAll').className = 'btn-filter' + (f === 'all' ? ' active' : '');
+            document.getElementById('filterReal').className = 'btn-filter' + (f === 'real' ? ' active' : '');
+            loadDashboardStats();
+        }
+
+        async function loadDashboardStats() {
+            try {
+                var r = await fetch('/api/admin.php?action=dashboard_stats&filter=' + currentFilter, {
+                    headers: { 'Authorization': 'Bearer ' + localStorage.getItem('token') }
+                });
+                var d = await r.json();
+                if (!d.success) return;
+                var s = d.data;
+
+                // Main stat cards
+                document.getElementById('sUsers').textContent = fmtN(s.users.total);
+                document.getElementById('sUsersDetail').innerHTML = (currentFilter === 'all')
+                    ? '<span style="color:#4CAF50">' + s.users.real + ' thật</span> · <span style="color:#999">' + s.users.seed + ' ảo</span>' + (s.users.today > 0 ? ' · <span style="color:#2196F3">+' + s.users.today + ' hôm nay</span>' : '')
+                    : s.users.total + ' người dùng thật' + (s.users.today > 0 ? ' · +' + s.users.today + ' hôm nay' : '');
+
+                document.getElementById('sPosts').textContent = fmtN(s.posts.total);
+                document.getElementById('sPostsDetail').innerHTML = (currentFilter === 'all')
+                    ? '<span style="color:#4CAF50">' + s.posts.real + ' thật</span> · <span style="color:#999">' + s.posts.seed + ' ảo</span>' + (s.posts.today > 0 ? ' · <span style="color:#2196F3">+' + s.posts.today + ' hôm nay</span>' : '')
+                    : s.posts.total + ' bài thật' + (s.posts.today > 0 ? ' · +' + s.posts.today + ' hôm nay' : '');
+
+                document.getElementById('sCmts').textContent = fmtN(s.comments.total);
+                document.getElementById('sCmtsDetail').textContent = s.comments.today > 0 ? '+' + s.comments.today + ' hôm nay' : 'Hôm nay: 0';
+
+                document.getElementById('sLikes').textContent = fmtN(s.likes);
+                document.getElementById('sLikesDetail').innerHTML = '&nbsp;';
+
+                // Detail grid
+                document.getElementById('dGroups').textContent = s.groups.total;
+                document.getElementById('dGP').textContent = fmtN(s.groups.posts);
+                document.getElementById('dMk').textContent = s.marketplace;
+                document.getElementById('dTraffic').textContent = s.traffic;
+                document.getElementById('dMsg').textContent = fmtN(s.messages.total);
+                document.getElementById('dWallet').textContent = s.wallet.total;
+                document.getElementById('dPush').textContent = s.push_subs;
+                document.getElementById('dSubs').textContent = s.wallet.active_subs;
+
+                // Top posters
+                var tp = s.top_posters || [];
+                if (tp.length) {
+                    document.getElementById('topPosters').innerHTML = tp.map(function(u, i) {
+                        var av = u.avatar ? '<img src="' + u.avatar + '">' : '<div class="av-ph">' + (u.fullname || 'U')[0] + '</div>';
+                        return '<div class="top-poster"><span class="rank">#' + (i + 1) + '</span>' + av + '<div style="flex:1;min-width:0"><div style="font-weight:600;font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">' + esc(u.fullname) + '</div><div style="font-size:11px;color:#65676B">' + u.post_count + ' bài</div></div></div>';
+                    }).join('');
+                } else {
+                    document.getElementById('topPosters').innerHTML = '<div style="text-align:center;padding:20px;color:#999">Không có dữ liệu</div>';
+                }
+
+                // Posts by day chart
+                var days = s.posts_by_day || [];
+                if (days.length) {
+                    var maxCnt = Math.max.apply(null, days.map(function(d) { return d.cnt; }));
+                    document.getElementById('chartDays').innerHTML = days.map(function(d) {
+                        var pct = maxCnt > 0 ? Math.round(d.cnt / maxCnt * 100) : 0;
+                        var dayLabel = d.day.substring(5);
+                        return '<div class="bar-row"><span class="day">' + dayLabel + '</span><div class="bar" style="width:' + Math.max(pct, 5) + '%">' + d.cnt + '</div></div>';
+                    }).join('');
+                } else {
+                    document.getElementById('chartDays').innerHTML = '<div style="text-align:center;padding:20px;color:#999">Không có dữ liệu</div>';
+                }
+            } catch (e) {
+                console.error('Load stats error:', e);
+            }
+        }
+
+        function fmtN(n) { if (n >= 1000000) return (n / 1000000).toFixed(1) + 'M'; if (n >= 1000) return (n / 1000).toFixed(1) + 'K'; return n; }
+        function esc(s) { if (!s) return ''; var d = document.createElement('div'); d.textContent = s; return d.innerHTML; }
 
         // Check admin authentication
         function checkAdminAuth() {
@@ -594,126 +622,13 @@
             document.getElementById('adminAvatar').textContent = avatar;
         }
 
-        // Load dashboard stats
-        async function loadDashboardStats() {
-            try {
-                const response = await fetch('/api/admin.php?action=dashboard_stats', {
-                    headers: {
-                        'Authorization': 'Bearer ' + localStorage.getItem('token')
-                    }
-                });
-
-                const data = await response.json();
-
-                if (data.success) {
-                    const stats = data.data;
-                    
-                    document.getElementById('todayRevenue').textContent = formatCurrency(stats.today_revenue || 0);
-                    document.getElementById('newOrders').textContent = stats.new_orders || 0;
-                    document.getElementById('newUsers').textContent = stats.new_users || 0;
-                    document.getElementById('pendingItems').textContent = stats.pending_items || 0;
-                }
-            } catch (error) {
-                console.error('Load stats error:', error);
-            }
-        }
-
-        // Load recent orders
-        async function loadRecentOrders() {
-            try {
-                const response = await fetch('/api/admin.php?action=recent_orders&limit=5', {
-                    headers: {
-                        'Authorization': 'Bearer ' + localStorage.getItem('token')
-                    }
-                });
-
-                const data = await response.json();
-
-                if (data.success && data.data.length > 0) {
-                    const tbody = document.querySelector('#recentOrdersTable tbody');
-                    tbody.innerHTML = data.data.map(order => `
-                        <tr>
-                            <td><strong>#${order.order_number}</strong></td>
-                            <td>${order.shipping_name}</td>
-                            <td>${order.items_count || 0} sản phẩm</td>
-                            <td><strong>${formatCurrency(order.total)}</strong></td>
-                            <td><span class="badge ${order.status}">${getOrderStatus(order.status)}</span></td>
-                            <td>
-                                <button class="action-btn view" onclick="viewOrder(${order.id})">
-                                    <i class="fas fa-eye"></i> Xem
-                                </button>
-                            </td>
-                        </tr>
-                    `).join('');
-                } else {
-                    document.querySelector('#recentOrdersTable tbody').innerHTML = `
-                        <tr><td colspan="6" style="text-align: center; padding: 40px;">Chưa có đơn hàng</td></tr>
-                    `;
-                }
-            } catch (error) {
-                console.error('Load orders error:', error);
-            }
-        }
-
-        // Load pending wallet requests
-        async function loadPendingWallet() {
-            try {
-                const response = await fetch('/api/admin.php?action=pending_wallet&limit=5', {
-                    headers: {
-                        'Authorization': 'Bearer ' + localStorage.getItem('token')
-                    }
-                });
-
-                const data = await response.json();
-
-                if (data.success && data.data.length > 0) {
-                    const tbody = document.querySelector('#pendingWalletTable tbody');
-                    tbody.innerHTML = data.data.map(tx => `
-                        <tr>
-                            <td>${tx.user_name || 'Unknown'}</td>
-                            <td>
-                                <span class="badge ${tx.type === 'deposit' ? 'completed' : 'pending'}">
-                                    ${tx.type === 'deposit' ? '💰 Nạp tiền' : '💸 Rút tiền'}
-                                </span>
-                            </td>
-                            <td><strong>${formatCurrency(tx.amount)}</strong></td>
-                            <td>${formatDateTime(tx.created_at)}</td>
-                            <td>
-                                <button class="action-btn view" onclick="viewWalletRequest(${tx.id})">
-                                    <i class="fas fa-eye"></i> Xem
-                                </button>
-                            </td>
-                        </tr>
-                    `).join('');
-                } else {
-                    document.querySelector('#pendingWalletTable tbody').innerHTML = `
-                        <tr><td colspan="5" style="text-align: center; padding: 40px;">Không có yêu cầu chờ xử lý</td></tr>
-                    `;
-                }
-            } catch (error) {
-                console.error('Load wallet error:', error);
-            }
-        }
-
         // Helper functions
-        function getOrderStatus(status) {
-            const statuses = {
-                'pending': 'Chờ xác nhận',
-                'confirmed': 'Đã xác nhận',
-                'processing': 'Đang xử lý',
-                'shipping': 'Đang giao',
-                'completed': 'Hoàn thành',
-                'cancelled': 'Đã hủy'
-            };
-            return statuses[status] || status;
-        }
-
         function viewOrder(orderId) {
-            window.location.href = `admin-orders.html?id=${orderId}`;
+            window.location.href = 'admin-orders.html?id=' + orderId;
         }
 
         function viewWalletRequest(txId) {
-            window.location.href = `admin-wallet.html?id=${txId}`;
+            window.location.href = 'admin-wallet.html?id=' + txId;
         }
     </script>
     <script src="js/mobile.js"></script>

@@ -39,43 +39,84 @@ requireAdmin();
 // ============================================
 
 if ($action === 'dashboard_stats') {
-    if (getRequestMethod() !== 'GET') {
-        error('Method not allowed', 405);
-    }
+    $filter = $_GET['filter'] ?? 'all'; // all | real
+    $seedMin = 3; $seedMax = 102; // seed user IDs range
     
-    // Today's revenue
-    $todayRevenue = $db->fetchColumn(
-        "SELECT COALESCE(SUM(total), 0) FROM orders 
-         WHERE DATE(created_at) = CURDATE() AND status != 'cancelled'",
-        []
-    ) ?? 0;
+    // User filter conditions
+    $userAll = "id > 1";
+    $userReal = "(id = 2 OR id > $seedMax)";
+    $postAll = "`status` = 'active'";
+    $postReal = "`status` = 'active' AND (user_id = 2 OR user_id > $seedMax)";
     
-    // New orders today
-    $newOrders = $db->count(
-        'orders',
-        "DATE(created_at) = CURDATE()",
-        []
-    );
+    $uf = ($filter === 'real') ? $userReal : $userAll;
+    $pf = ($filter === 'real') ? $postReal : $postAll;
     
-    // New users today
-    $newUsers = $db->count(
-        'users',
-        "DATE(created_at) = CURDATE() AND status = 'active'",
-        []
-    );
+    // Users
+    $totalUsers = $db->fetchOne("SELECT COUNT(*) as c FROM users WHERE $uf")['c'];
+    $realUsers = $db->fetchOne("SELECT COUNT(*) as c FROM users WHERE $userReal")['c'];
+    $seedUsers = $db->fetchOne("SELECT COUNT(*) as c FROM users WHERE id >= $seedMin AND id <= $seedMax")['c'];
+    $todayUsers = $db->fetchOne("SELECT COUNT(*) as c FROM users WHERE $uf AND DATE(created_at) = CURDATE()")['c'];
     
-    // Pending items (orders + wallet transactions)
-    $pendingOrders = $db->count('orders', 'status = ?', ['pending']);
-    $pendingWallet = $db->count('transaction_history', 'status = ?', ['pending']);
-    $pendingItems = $pendingOrders + $pendingWallet;
+    // Posts
+    $totalPosts = $db->fetchOne("SELECT COUNT(*) as c FROM posts WHERE $pf")['c'];
+    $realPosts = $db->fetchOne("SELECT COUNT(*) as c FROM posts WHERE $postReal")['c'];
+    $seedPosts = $db->fetchOne("SELECT COUNT(*) as c FROM posts WHERE `status`='active' AND user_id >= $seedMin AND user_id <= $seedMax")['c'];
+    $todayPosts = $db->fetchOne("SELECT COUNT(*) as c FROM posts WHERE $pf AND DATE(created_at) = CURDATE()")['c'];
+    
+    // Comments & Likes
+    $cmtFilter = ($filter === 'real') ? "AND (c.user_id = 2 OR c.user_id > $seedMax)" : "";
+    $totalCmts = $db->fetchOne("SELECT COUNT(*) as c FROM comments c WHERE 1=1 $cmtFilter")['c'];
+    $todayCmts = $db->fetchOne("SELECT COUNT(*) as c FROM comments c WHERE DATE(c.created_at) = CURDATE() $cmtFilter")['c'];
+    $totalLikes = $db->fetchOne("SELECT COUNT(*) as c FROM likes")['c'];
+    
+    // Groups & Group posts
+    $totalGroups = $db->fetchOne("SELECT COUNT(*) as c FROM `groups`")['c'];
+    $totalGP = $db->fetchOne("SELECT COUNT(*) as c FROM group_posts")['c'];
+    
+    // Marketplace
+    $totalMk = $db->fetchOne("SELECT COUNT(*) as c FROM marketplace_listings WHERE `status`='active'")['c'];
+    
+    // Traffic
+    $totalTraffic = $db->fetchOne("SELECT COUNT(*) as c FROM traffic_alerts")['c'];
+    
+    // Messages & Conversations
+    $totalMsg = $db->fetchOne("SELECT COUNT(*) as c FROM messages")['c'];
+    $totalConv = $db->fetchOne("SELECT COUNT(*) as c FROM conversations")['c'];
+    
+    // Wallet & Subscriptions
+    $totalWallets = $db->fetchOne("SELECT COUNT(*) as c FROM wallets")['c'];
+    $totalBalance = $db->fetchOne("SELECT COALESCE(SUM(balance),0) as s FROM wallets")['s'];
+    $activeSubs = $db->fetchOne("SELECT COUNT(*) as c FROM user_subscriptions WHERE `status`='active'")['c'];
+    $pendingDeposits = $db->fetchOne("SELECT COUNT(*) as c FROM wallet_transactions WHERE `status`='pending'")['c'];
+    
+    // Push subscriptions
+    $pushSubs = $db->fetchOne("SELECT COUNT(*) as c FROM push_subscriptions")['c'];
+    
+    // Recent activity (last 7 days)
+    $weekPosts = $db->fetchOne("SELECT COUNT(*) as c FROM posts WHERE $pf AND created_at >= DATE_SUB(CURDATE(), INTERVAL 7 DAY)")['c'];
+    $weekUsers = $db->fetchOne("SELECT COUNT(*) as c FROM users WHERE $uf AND created_at >= DATE_SUB(CURDATE(), INTERVAL 7 DAY)")['c'];
+    
+    // Posts by day (last 7 days)
+    $postsByDay = $db->fetchAll("SELECT DATE(created_at) as day, COUNT(*) as cnt FROM posts WHERE $pf AND created_at >= DATE_SUB(CURDATE(), INTERVAL 7 DAY) GROUP BY DATE(created_at) ORDER BY day");
+    
+    // Top posters
+    $topPosters = $db->fetchAll("SELECT u.id, u.fullname, u.avatar, COUNT(p.id) as post_count FROM users u JOIN posts p ON u.id = p.user_id WHERE p.`status`='active' AND u.id > 1 " . ($filter === 'real' ? "AND (u.id = 2 OR u.id > $seedMax)" : "") . " GROUP BY u.id ORDER BY post_count DESC LIMIT 5");
     
     success('Success', [
-        'today_revenue' => $todayRevenue,
-        'new_orders' => $newOrders,
-        'new_users' => $newUsers,
-        'pending_items' => $pendingItems,
-        'pending_orders' => $pendingOrders,
-        'pending_wallet' => $pendingWallet
+        'filter' => $filter,
+        'users' => ['total' => (int)$totalUsers, 'real' => (int)$realUsers, 'seed' => (int)$seedUsers, 'today' => (int)$todayUsers],
+        'posts' => ['total' => (int)$totalPosts, 'real' => (int)$realPosts, 'seed' => (int)$seedPosts, 'today' => (int)$todayPosts, 'week' => (int)$weekPosts],
+        'comments' => ['total' => (int)$totalCmts, 'today' => (int)$todayCmts],
+        'likes' => (int)$totalLikes,
+        'groups' => ['total' => (int)$totalGroups, 'posts' => (int)$totalGP],
+        'marketplace' => (int)$totalMk,
+        'traffic' => (int)$totalTraffic,
+        'messages' => ['total' => (int)$totalMsg, 'conversations' => (int)$totalConv],
+        'wallet' => ['total' => (int)$totalWallets, 'balance' => $totalBalance, 'active_subs' => (int)$activeSubs, 'pending_deposits' => (int)$pendingDeposits],
+        'push_subs' => (int)$pushSubs,
+        'week_users' => (int)$weekUsers,
+        'posts_by_day' => $postsByDay,
+        'top_posters' => $topPosters
     ]);
 }
 
