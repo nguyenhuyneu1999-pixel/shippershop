@@ -7,7 +7,7 @@ echo '<?xml version="1.0" encoding="UTF-8"?>';
 echo '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">';
 
 // Static pages
-$pages = ['','login.html','register.html','marketplace.html','traffic.html','groups.html','people.html','map.html','wallet.html'];
+$pages = ['','login.html','register.html','marketplace.html','traffic.html','groups.html','people.html','map.html','wallet.html','landing.html','leaderboard.html'];
 foreach ($pages as $p) {
     echo "<url><loc>$base/$p</loc><changefreq>daily</changefreq><priority>".($p===''?'1.0':'0.7')."</priority></url>";
 }

@@ -7,5 +7,8 @@ Disallow: /admin-wallet.html
 Disallow: /auto-post.html
 Disallow: /marketing-setup.html
 Disallow: /cron-setup.html
+Disallow: /tiktok-scripts.html
+Disallow: /fb-groups.html
+Disallow: /marketing-dashboard.html
 
 Sitemap: https://shippershop.vn/api/sitemap.php
