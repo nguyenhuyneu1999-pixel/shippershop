@@ -391,7 +391,7 @@ if ($method === 'PUT') {
     
     $input = getJsonInput();
     $postId = intval($input['post_id'] ?? 0);
-    $userId = getCurrentUserId();
+    $userId = getAuthUserId();
     
     if ($postId <= 0) {
         error('Post ID không hợp lệ');
@@ -424,7 +424,7 @@ if ($method === 'DELETE') {
     requireAuth();
     
     $postId = intval($_GET['id'] ?? 0);
-    $userId = getCurrentUserId();
+    $userId = getAuthUserId();
     
     if ($postId <= 0) {
         error('Post ID không hợp lệ');

@@ -16,6 +16,7 @@ define('APP_ACCESS', true);
 require_once __DIR__ . '/../includes/config.php';
 require_once __DIR__ . '/../includes/db.php';
 require_once __DIR__ . '/../includes/functions.php';
+require_once __DIR__ . '/auth-check.php';
 
 // Set CORS headers
 setCorsHeaders();
@@ -27,8 +28,7 @@ $db = db();
 $action = $_GET['action'] ?? '';
 
 // Require authentication for all wallet actions
-requireAuth();
-$userId = getCurrentUserId();
+$userId = getAuthUserId();
 
 // ============================================
 // GET BALANCE & STATS
@@ -283,7 +283,7 @@ if ($action === 'approve_deposit') {
                 'status' => 'completed',
                 'balance_after' => $newBalance,
                 'completed_at' => date('Y-m-d H:i:s'),
-                'approved_by' => getCurrentUserId()
+                'approved_by' => getAuthUserId()
             ],
             'id = ?',
             [$transactionId]
@@ -337,7 +337,7 @@ if ($action === 'reject_deposit') {
         [
             'status' => 'rejected',
             'completed_at' => date('Y-m-d H:i:s'),
-            'approved_by' => getCurrentUserId(),
+            'approved_by' => getAuthUserId(),
             'description' => $transaction['description'] . ($reason ? " - Lý do từ chối: $reason" : '')
         ],
         'id = ?',
@@ -380,7 +380,7 @@ if ($action === 'approve_withdraw') {
         [
             'status' => 'completed',
             'completed_at' => date('Y-m-d H:i:s'),
-            'approved_by' => getCurrentUserId()
+            'approved_by' => getAuthUserId()
         ],
         'id = ?',
         [$transactionId]
@@ -442,7 +442,7 @@ if ($action === 'reject_withdraw') {
             [
                 'status' => 'rejected',
                 'completed_at' => date('Y-m-d H:i:s'),
-                'approved_by' => getCurrentUserId(),
+                'approved_by' => getAuthUserId(),
                 'description' => $transaction['description'] . ($reason ? " - Lý do từ chối: $reason" : '') . " (Đã hoàn tiền)"
             ],
             'id = ?',
