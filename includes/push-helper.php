@@ -20,8 +20,7 @@ function sendPushNotification($subscription, $payload = null) {
     $sigInput = $header . '.' . $claims;
     
     // Sign with ES256
-    $privKeyPem = createPemFromPrivateKey(VAPID_PRIVATE_KEY);
-    $privKey = openssl_pkey_get_private($privKeyPem);
+    $privKey = openssl_pkey_get_private(VAPID_PRIVATE_PEM);
     if (!$privKey) return ['success' => false, 'error' => 'Invalid private key'];
     
     openssl_sign($sigInput, $derSig, $privKey, OPENSSL_ALGO_SHA256);
@@ -120,18 +119,17 @@ function encryptPayload($payload, $userPublicKey, $userAuth) {
 }
 
 function computeECDH($localPrivKey, $remotePubKeyBin) {
-    // Create PEM from raw public key
-    $x = substr($remotePubKeyBin, 1, 32);
-    $y = substr($remotePubKeyBin, 33, 32);
+    // Clear any stale OpenSSL errors
+    while(openssl_error_string()){}
     
-    // ASN.1 DER encoding for EC public key
+    // ASN.1 DER encoding for EC public key (P-256)
     $der = "\x30\x59\x30\x13\x06\x07\x2a\x86\x48\xce\x3d\x02\x01\x06\x08\x2a\x86\x48\xce\x3d\x03\x01\x07\x03\x42\x00" . $remotePubKeyBin;
     $pem = "-----BEGIN PUBLIC KEY-----\n" . chunk_split(base64_encode($der), 64, "\n") . "-----END PUBLIC KEY-----\n";
     
     $remotePubKey = openssl_pkey_get_public($pem);
     if (!$remotePubKey) return null;
     
-    $shared = openssl_pkey_derive($localPrivKey, $remotePubKey, 256);
+    $shared = openssl_pkey_derive($remotePubKey, $localPrivKey, 32);
     return $shared ?: null;
 }
 
