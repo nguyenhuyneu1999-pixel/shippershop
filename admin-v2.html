@@ -1,0 +1,715 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Admin · ShipperShop</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{--bg:#0f1117;--sidebar:#161822;--card:#1c1e2e;--card2:#252840;--border:#2a2d42;--text:#e4e4f0;--muted:#8888a4;--primary:#7C3AED;--primary2:#9F67FF;--green:#22c55e;--red:#ef4444;--yellow:#eab308;--blue:#3b82f6}
+body{font-family:'Be Vietnam Pro',sans-serif;background:var(--bg);color:var(--text);display:flex;min-height:100vh}
+a{color:var(--primary2);text-decoration:none}
+::-webkit-scrollbar{width:6px}
+::-webkit-scrollbar-track{background:var(--bg)}
+::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px}
+
+/* SIDEBAR */
+.sb{width:240px;background:var(--sidebar);border-right:1px solid var(--border);display:flex;flex-direction:column;position:fixed;top:0;bottom:0;z-index:50;transition:transform .2s}
+.sb-logo{padding:20px;font-size:18px;font-weight:800;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px}
+.sb-logo span{color:var(--primary2)}
+.sb-nav{flex:1;overflow-y:auto;padding:12px 0}
+.sb-item{display:flex;align-items:center;gap:12px;padding:10px 20px;color:var(--muted);font-size:13px;font-weight:500;cursor:pointer;transition:all .15s;border-left:3px solid transparent}
+.sb-item:hover{background:rgba(124,58,237,.08);color:var(--text)}
+.sb-item.active{background:rgba(124,58,237,.12);color:var(--primary2);border-left-color:var(--primary)}
+.sb-item i{width:18px;text-align:center;font-size:14px}
+.sb-item .badge{margin-left:auto;background:var(--red);color:#fff;font-size:10px;padding:2px 6px;border-radius:10px;font-weight:700}
+.sb-section{padding:8px 20px;font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:1.5px;margin-top:8px}
+.sb-bottom{padding:16px 20px;border-top:1px solid var(--border);font-size:12px;color:var(--muted)}
+
+/* MAIN */
+.main{flex:1;margin-left:240px;min-height:100vh}
+.topbar{height:56px;background:var(--sidebar);border-bottom:1px solid var(--border);display:flex;align-items:center;padding:0 24px;gap:16px;position:sticky;top:0;z-index:40}
+.topbar-toggle{display:none;background:none;border:none;color:var(--text);font-size:20px;cursor:pointer}
+.topbar-title{font-size:15px;font-weight:700;flex:1}
+.topbar-user{display:flex;align-items:center;gap:8px;font-size:13px}
+.topbar-avatar{width:32px;height:32px;border-radius:50%;background:var(--primary);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:12px;color:#fff}
+.content{padding:24px}
+
+/* CARDS */
+.stats{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:16px;margin-bottom:24px}
+.stat-card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:18px;transition:border-color .2s}
+.stat-card:hover{border-color:var(--primary)}
+.stat-label{font-size:12px;color:var(--muted);font-weight:500;margin-bottom:8px;display:flex;align-items:center;gap:6px}
+.stat-val{font-size:26px;font-weight:800;line-height:1}
+.stat-sub{font-size:11px;color:var(--muted);margin-top:6px}
+.stat-up{color:var(--green)}
+.stat-down{color:var(--red)}
+
+/* TABLE */
+.tbl-wrap{background:var(--card);border:1px solid var(--border);border-radius:12px;overflow:hidden;margin-bottom:24px}
+.tbl-head{padding:16px 20px;display:flex;align-items:center;gap:12px;border-bottom:1px solid var(--border);flex-wrap:wrap}
+.tbl-title{font-size:15px;font-weight:700;flex:1}
+.tbl-search{background:var(--card2);border:1px solid var(--border);border-radius:8px;padding:8px 12px;color:var(--text);font-size:13px;width:220px;outline:none}
+.tbl-search:focus{border-color:var(--primary)}
+.tbl-filter{background:var(--card2);border:1px solid var(--border);border-radius:8px;padding:8px 12px;color:var(--text);font-size:13px;outline:none}
+table{width:100%;border-collapse:collapse}
+th{padding:10px 16px;font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;text-align:left;background:var(--card2);border-bottom:1px solid var(--border)}
+td{padding:10px 16px;font-size:13px;border-bottom:1px solid var(--border);vertical-align:middle}
+tr:hover td{background:rgba(124,58,237,.04)}
+.tbl-pager{padding:12px 20px;display:flex;align-items:center;justify-content:space-between;font-size:12px;color:var(--muted)}
+.tbl-pager button{background:var(--card2);border:1px solid var(--border);color:var(--text);padding:6px 12px;border-radius:6px;cursor:pointer;font-size:12px}
+.tbl-pager button:disabled{opacity:.4;cursor:not-allowed}
+
+/* BADGES */
+.badge-active{background:rgba(34,197,94,.15);color:var(--green);padding:3px 10px;border-radius:20px;font-size:11px;font-weight:600}
+.badge-banned{background:rgba(239,68,68,.15);color:var(--red);padding:3px 10px;border-radius:20px;font-size:11px;font-weight:600}
+.badge-pending{background:rgba(234,179,8,.15);color:var(--yellow);padding:3px 10px;border-radius:20px;font-size:11px;font-weight:600}
+.badge-hidden{background:rgba(136,136,164,.15);color:var(--muted);padding:3px 10px;border-radius:20px;font-size:11px;font-weight:600}
+
+/* USER ROW */
+.user-row{display:flex;align-items:center;gap:10px}
+.user-av{width:32px;height:32px;border-radius:50%;object-fit:cover;flex-shrink:0}
+.user-av-ph{width:32px;height:32px;border-radius:50%;background:var(--primary);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:11px;flex-shrink:0}
+.user-info{min-width:0}
+.user-name{font-weight:600;font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.user-sub{font-size:11px;color:var(--muted)}
+
+/* BUTTONS */
+.btn{display:inline-flex;align-items:center;gap:6px;padding:6px 14px;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;border:1px solid var(--border);background:var(--card2);color:var(--text);transition:all .15s}
+.btn:hover{border-color:var(--primary);background:rgba(124,58,237,.1)}
+.btn-sm{padding:4px 10px;font-size:11px}
+.btn-danger{border-color:rgba(239,68,68,.3);color:var(--red)}
+.btn-danger:hover{background:rgba(239,68,68,.1)}
+.btn-success{border-color:rgba(34,197,94,.3);color:var(--green)}
+.btn-success:hover{background:rgba(34,197,94,.1)}
+.btn-primary{background:var(--primary);color:#fff;border-color:var(--primary)}
+.btn-primary:hover{background:var(--primary2)}
+
+/* CHART PLACEHOLDER */
+.chart-wrap{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:20px;margin-bottom:24px}
+.chart-title{font-size:14px;font-weight:700;margin-bottom:16px}
+.chart-bar{display:flex;align-items:flex-end;gap:4px;height:120px}
+.chart-col{flex:1;background:var(--primary);border-radius:3px 3px 0 0;min-width:8px;transition:height .5s ease;position:relative}
+.chart-col:hover{background:var(--primary2)}
+.chart-labels{display:flex;gap:4px;margin-top:4px}
+.chart-labels span{flex:1;text-align:center;font-size:9px;color:var(--muted)}
+
+/* SECTION PANELS */
+.panel{display:none}
+.panel.active{display:block}
+
+/* MODAL */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:100;display:none;align-items:center;justify-content:center;padding:20px}
+.modal-overlay.open{display:flex}
+.modal{background:var(--card);border:1px solid var(--border);border-radius:16px;width:100%;max-width:500px;max-height:80vh;overflow-y:auto}
+.modal-head{padding:16px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center}
+.modal-head h3{flex:1;font-size:16px}
+.modal-close{background:none;border:none;color:var(--muted);font-size:18px;cursor:pointer}
+.modal-body{padding:20px}
+.modal-body label{display:block;font-size:12px;color:var(--muted);margin-bottom:4px;margin-top:12px}
+.modal-body input,.modal-body select,.modal-body textarea{width:100%;padding:10px 12px;background:var(--card2);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:13px;outline:none}
+.modal-body input:focus,.modal-body select:focus{border-color:var(--primary)}
+.modal-foot{padding:12px 20px;border-top:1px solid var(--border);display:flex;justify-content:flex-end;gap:8px}
+
+/* TOAST */
+.toast{position:fixed;bottom:24px;right:24px;background:var(--card);border:1px solid var(--green);color:var(--green);padding:12px 20px;border-radius:10px;font-size:13px;z-index:200;transform:translateY(100px);opacity:0;transition:.3s}
+.toast.show{transform:none;opacity:1}
+.toast.error{border-color:var(--red);color:var(--red)}
+
+/* RESPONSIVE */
+@media(max-width:768px){
+  .sb{transform:translateX(-100%)}
+  .sb.open{transform:none}
+  .main{margin-left:0}
+  .topbar-toggle{display:block}
+  .stats{grid-template-columns:repeat(2,1fr)}
+  .content{padding:16px}
+  .tbl-search{width:100%}
+}
+</style>
+</head>
+<body>
+
+<!-- SIDEBAR -->
+<aside class="sb" id="sidebar">
+  <div class="sb-logo"><i class="fas fa-truck-fast" style="color:var(--primary)"></i> Shipper<span>Shop</span></div>
+  <nav class="sb-nav">
+    <div class="sb-section">Tổng quan</div>
+    <div class="sb-item active" data-panel="dashboard"><i class="fas fa-chart-pie"></i> Dashboard</div>
+    <div class="sb-item" data-panel="analytics"><i class="fas fa-chart-line"></i> Analytics</div>
+    
+    <div class="sb-section">Quản lý</div>
+    <div class="sb-item" data-panel="users"><i class="fas fa-users"></i> Người dùng</div>
+    <div class="sb-item" data-panel="posts"><i class="fas fa-pen-to-square"></i> Bài viết</div>
+    <div class="sb-item" data-panel="comments"><i class="fas fa-comments"></i> Bình luận</div>
+    <div class="sb-item" data-panel="groups"><i class="fas fa-people-group"></i> Cộng đồng</div>
+    
+    <div class="sb-section">Thương mại</div>
+    <div class="sb-item" data-panel="marketplace"><i class="fas fa-store"></i> Mua bán</div>
+    <div class="sb-item" data-panel="wallet"><i class="fas fa-wallet"></i> Ví tiền <span class="badge" id="pendingBadge" style="display:none">0</span></div>
+    
+    <div class="sb-section">Hệ thống</div>
+    <div class="sb-item" data-panel="traffic"><i class="fas fa-triangle-exclamation"></i> Giao thông</div>
+    <div class="sb-item" data-panel="referrals"><i class="fas fa-gift"></i> Referral</div>
+    <div class="sb-item" data-panel="broadcast"><i class="fas fa-bullhorn"></i> Thông báo</div>
+    <div class="sb-item" data-panel="system"><i class="fas fa-server"></i> Hệ thống</div>
+  </nav>
+  <div class="sb-bottom">
+    <div style="font-weight:600">Admin ShipperShop</div>
+    <div style="margin-top:4px"><a href="index.html">← Về trang chủ</a></div>
+  </div>
+</aside>
+
+<!-- MAIN -->
+<div class="main">
+  <header class="topbar">
+    <button class="topbar-toggle" onclick="document.getElementById('sidebar').classList.toggle('open')"><i class="fas fa-bars"></i></button>
+    <div class="topbar-title" id="pageTitle">Dashboard</div>
+    <div class="topbar-user">
+      <div class="topbar-avatar">A</div>
+      <span>Admin</span>
+    </div>
+  </header>
+
+  <div class="content">
+    <!-- ============ DASHBOARD ============ -->
+    <div class="panel active" id="p-dashboard">
+      <div class="stats" id="dashStats"></div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+        <div class="chart-wrap"><div class="chart-title">Người dùng mới (30 ngày)</div><div class="chart-bar" id="growthChart"></div><div class="chart-labels" id="growthLabels"></div></div>
+        <div class="chart-wrap"><div class="chart-title">Hoạt động gần đây</div><div id="recentActivity" style="font-size:13px;color:var(--muted)">Đang tải...</div></div>
+      </div>
+    </div>
+
+    <!-- ============ USERS ============ -->
+    <div class="panel" id="p-users">
+      <div class="tbl-wrap">
+        <div class="tbl-head">
+          <div class="tbl-title">Người dùng</div>
+          <input class="tbl-search" id="userSearch" placeholder="Tìm tên, username, ID..." oninput="debounce(loadUsers,400)">
+          <select class="tbl-filter" id="userStatus" onchange="loadUsers()">
+            <option value="">Tất cả</option><option value="active">Active</option><option value="banned">Banned</option>
+          </select>
+          <select class="tbl-filter" id="userSort" onchange="loadUsers()">
+            <option value="newest">Mới nhất</option><option value="oldest">Cũ nhất</option><option value="most_posts">Nhiều bài</option>
+          </select>
+        </div>
+        <div style="overflow-x:auto"><table>
+          <thead><tr><th>User</th><th>Hãng</th><th>Bài viết</th><th>Followers</th><th>Trạng thái</th><th>Ngày tạo</th><th></th></tr></thead>
+          <tbody id="usersTbody"></tbody>
+        </table></div>
+        <div class="tbl-pager"><span id="usersInfo"></span><div><button onclick="usersPage(-1)" id="usersPrev">← Trước</button> <button onclick="usersPage(1)" id="usersNext">Sau →</button></div></div>
+      </div>
+    </div>
+
+    <!-- ============ POSTS ============ -->
+    <div class="panel" id="p-posts">
+      <div class="tbl-wrap">
+        <div class="tbl-head">
+          <div class="tbl-title">Bài viết</div>
+          <input class="tbl-search" id="postSearch" placeholder="Tìm nội dung..." oninput="debounce(loadPosts,400)">
+          <select class="tbl-filter" id="postStatus" onchange="loadPosts()">
+            <option value="active">Active</option><option value="hidden">Hidden</option><option value="">Tất cả</option>
+          </select>
+        </div>
+        <div style="overflow-x:auto"><table>
+          <thead><tr><th>ID</th><th>Tác giả</th><th>Nội dung</th><th>Likes</th><th>CMT</th><th>Trạng thái</th><th></th></tr></thead>
+          <tbody id="postsTbody"></tbody>
+        </table></div>
+        <div class="tbl-pager"><span id="postsInfo"></span><div><button onclick="postsPage(-1)" id="postsPrev">←</button> <button onclick="postsPage(1)" id="postsNext">→</button></div></div>
+      </div>
+    </div>
+
+    <!-- ============ COMMENTS ============ -->
+    <div class="panel" id="p-comments">
+      <div class="tbl-wrap">
+        <div class="tbl-head">
+          <div class="tbl-title">Bình luận</div>
+          <input class="tbl-search" id="cmtSearch" placeholder="Tìm..." oninput="debounce(loadComments,400)">
+        </div>
+        <div style="overflow-x:auto"><table>
+          <thead><tr><th>ID</th><th>User</th><th>Nội dung</th><th>Post ID</th><th>Ngày</th><th></th></tr></thead>
+          <tbody id="cmtsTbody"></tbody>
+        </table></div>
+        <div class="tbl-pager"><span id="cmtsInfo"></span><div><button onclick="cmtsPage(-1)">←</button> <button onclick="cmtsPage(1)">→</button></div></div>
+      </div>
+    </div>
+
+    <!-- ============ GROUPS ============ -->
+    <div class="panel" id="p-groups">
+      <div class="tbl-wrap">
+        <div class="tbl-head"><div class="tbl-title">Cộng đồng</div></div>
+        <div style="overflow-x:auto"><table>
+          <thead><tr><th>ID</th><th>Tên</th><th>Thành viên</th><th>Bài viết</th><th>Trạng thái</th><th></th></tr></thead>
+          <tbody id="groupsTbody"></tbody>
+        </table></div>
+      </div>
+    </div>
+
+    <!-- ============ MARKETPLACE ============ -->
+    <div class="panel" id="p-marketplace">
+      <div class="tbl-wrap">
+        <div class="tbl-head">
+          <div class="tbl-title">Mua bán</div>
+          <select class="tbl-filter" id="listingStatus" onchange="loadListings()">
+            <option value="">Tất cả</option><option value="active">Active</option><option value="sold">Sold</option><option value="hidden">Hidden</option>
+          </select>
+        </div>
+        <div style="overflow-x:auto"><table>
+          <thead><tr><th>ID</th><th>Sản phẩm</th><th>Người bán</th><th>Giá</th><th>Lượt xem</th><th>Trạng thái</th><th></th></tr></thead>
+          <tbody id="listingsTbody"></tbody>
+        </table></div>
+        <div class="tbl-pager"><span id="listingsInfo"></span><div><button onclick="listingsPage(-1)">←</button> <button onclick="listingsPage(1)">→</button></div></div>
+      </div>
+    </div>
+
+    <!-- ============ WALLET ============ -->
+    <div class="panel" id="p-wallet">
+      <div class="stats" id="walletStats"></div>
+      <div class="tbl-wrap">
+        <div class="tbl-head"><div class="tbl-title">Yêu cầu nạp tiền chờ duyệt</div></div>
+        <div style="overflow-x:auto"><table>
+          <thead><tr><th>ID</th><th>User</th><th>Số tiền</th><th>Ngày</th><th></th></tr></thead>
+          <tbody id="pendingTbody"></tbody>
+        </table></div>
+      </div>
+      <div class="tbl-wrap">
+        <div class="tbl-head"><div class="tbl-title">Giao dịch gần đây</div></div>
+        <div style="overflow-x:auto"><table>
+          <thead><tr><th>ID</th><th>User</th><th>Loại</th><th>Số tiền</th><th>Trạng thái</th><th>Ngày</th></tr></thead>
+          <tbody id="txnsTbody"></tbody>
+        </table></div>
+      </div>
+    </div>
+
+    <!-- ============ TRAFFIC ============ -->
+    <div class="panel" id="p-traffic">
+      <div class="tbl-wrap">
+        <div class="tbl-head"><div class="tbl-title">Cảnh báo giao thông</div></div>
+        <div style="overflow-x:auto"><table>
+          <thead><tr><th>ID</th><th>Người báo</th><th>Loại</th><th>Mức độ</th><th>Xác nhận</th><th>Phủ nhận</th><th></th></tr></thead>
+          <tbody id="trafficTbody"></tbody>
+        </table></div>
+      </div>
+    </div>
+
+    <!-- ============ ANALYTICS ============ -->
+    <div class="panel" id="p-analytics">
+      <div class="stats" id="analyticsStats"></div>
+      <div style="display:flex;gap:8px;margin-bottom:16px">
+        <button class="btn btn-primary" onclick="loadAnalytics('24h')">24h</button>
+        <button class="btn" onclick="loadAnalytics('7d')">7 ngày</button>
+        <button class="btn" onclick="loadAnalytics('30d')">30 ngày</button>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+        <div class="chart-wrap"><div class="chart-title">Page Views</div><div class="chart-bar" id="viewsChart"></div><div class="chart-labels" id="viewsLabels"></div></div>
+        <div class="tbl-wrap"><div class="tbl-head"><div class="tbl-title">Top trang</div></div><table><thead><tr><th>Trang</th><th>Views</th></tr></thead><tbody id="topPagesTbody"></tbody></table></div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:16px">
+        <div class="tbl-wrap"><div class="tbl-head"><div class="tbl-title">Nguồn truy cập</div></div><table><thead><tr><th>Referrer</th><th>Views</th></tr></thead><tbody id="referersTbody"></tbody></table></div>
+        <div class="tbl-wrap"><div class="tbl-head"><div class="tbl-title">Thiết bị</div></div><table><thead><tr><th>Loại</th><th>Lượt</th></tr></thead><tbody id="devicesTbody"></tbody></table></div>
+      </div>
+    </div>
+
+    <!-- ============ REFERRALS ============ -->
+    <div class="panel" id="p-referrals">
+      <div class="stats" id="refStats"></div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+        <div class="tbl-wrap"><div class="tbl-head"><div class="tbl-title">Top người mời</div></div><table><thead><tr><th>User</th><th>Số lượng</th></tr></thead><tbody id="topInvitersTbody"></tbody></table></div>
+        <div class="tbl-wrap"><div class="tbl-head"><div class="tbl-title">Mời gần đây</div></div><table><thead><tr><th>Người mời</th><th>Người được mời</th><th>Ngày</th></tr></thead><tbody id="recentRefsTbody"></tbody></table></div>
+      </div>
+    </div>
+
+    <!-- ============ BROADCAST ============ -->
+    <div class="panel" id="p-broadcast">
+      <div class="chart-wrap">
+        <div class="chart-title">Gửi thông báo đến tất cả người dùng</div>
+        <label style="display:block;font-size:12px;color:var(--muted);margin-bottom:4px;margin-top:12px">Tiêu đề</label>
+        <input id="bcTitle" placeholder="Tiêu đề thông báo" style="width:100%;padding:10px 12px;background:var(--card2);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:14px;outline:none;margin-bottom:8px">
+        <label style="display:block;font-size:12px;color:var(--muted);margin-bottom:4px">Nội dung</label>
+        <textarea id="bcBody" placeholder="Nội dung thông báo" rows="3" style="width:100%;padding:10px 12px;background:var(--card2);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:14px;outline:none;resize:vertical;margin-bottom:8px"></textarea>
+        <label style="display:block;font-size:12px;color:var(--muted);margin-bottom:4px">URL khi click</label>
+        <input id="bcUrl" placeholder="/" value="/" style="width:100%;padding:10px 12px;background:var(--card2);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:14px;outline:none;margin-bottom:16px">
+        <button class="btn btn-primary" onclick="sendBroadcast()"><i class="fas fa-paper-plane"></i> Gửi Push Notification</button>
+        <div id="bcResult" style="margin-top:12px;font-size:13px"></div>
+      </div>
+    </div>
+
+    <!-- ============ SYSTEM ============ -->
+    <div class="panel" id="p-system">
+      <div class="stats" id="sysStats"></div>
+      <div class="tbl-wrap">
+        <div class="tbl-head"><div class="tbl-title">Database Tables</div></div>
+        <div style="overflow-x:auto"><table>
+          <thead><tr><th>Table</th><th>Rows</th><th>Size (MB)</th></tr></thead>
+          <tbody id="sysTbody"></tbody>
+        </table></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL -->
+<div class="modal-overlay" id="modal" onclick="if(event.target===this)closeModal()">
+  <div class="modal">
+    <div class="modal-head"><h3 id="modalTitle">Chi tiết</h3><button class="modal-close" onclick="closeModal()"><i class="fas fa-times"></i></button></div>
+    <div class="modal-body" id="modalBody"></div>
+    <div class="modal-foot" id="modalFoot"></div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+var API='/api/admin-v2.php';
+var TK=localStorage.getItem('token')||'';
+var CU=JSON.parse(localStorage.getItem('user')||'null');
+if(!CU||CU.id!==2){alert('Chỉ Admin mới truy cập được!');location.href='login.html';}
+
+function api(action,opts){
+  var url=API+'?action='+action;
+  if(opts&&opts.params)Object.keys(opts.params).forEach(function(k){url+='&'+k+'='+encodeURIComponent(opts.params[k]);});
+  var o={headers:{'Authorization':'Bearer '+TK},credentials:'include'};
+  if(opts&&opts.body){o.method='POST';o.headers['Content-Type']='application/json';o.body=JSON.stringify(opts.body);}
+  return fetch(url,o).then(function(r){return r.json();});
+}
+function esc(s){if(!s)return'';return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+function fmtN(n){n=parseInt(n)||0;if(n>=1000000)return(n/1000000).toFixed(1)+'M';if(n>=1000)return(n/1000).toFixed(1)+'K';return n;}
+function fmtD(d){if(!d)return'-';return d.substring(0,10);}
+function fmtMoney(n){return Number(n||0).toLocaleString('vi-VN')+'đ';}
+function toast(msg,type){var t=document.getElementById('toast');t.textContent=msg;t.className='toast'+(type==='error'?' error':'')+' show';setTimeout(function(){t.classList.remove('show');},3000);}
+var _debounce={};function debounce(fn,ms){clearTimeout(_debounce[fn.name]);_debounce[fn.name]=setTimeout(fn,ms);}
+
+// Nav
+document.querySelectorAll('.sb-item[data-panel]').forEach(function(el){
+  el.onclick=function(){
+    document.querySelectorAll('.sb-item').forEach(function(e){e.classList.remove('active');});
+    document.querySelectorAll('.panel').forEach(function(e){e.classList.remove('active');});
+    el.classList.add('active');
+    var p=document.getElementById('p-'+el.dataset.panel);
+    if(p)p.classList.add('active');
+    document.getElementById('pageTitle').textContent=el.textContent.trim();
+    document.getElementById('sidebar').classList.remove('open');
+    // Load data
+    var panel=el.dataset.panel;
+    if(panel==='users')loadUsers();
+    else if(panel==='posts')loadPosts();
+    else if(panel==='comments')loadComments();
+    else if(panel==='groups')loadGroups();
+    else if(panel==='marketplace')loadListings();
+    else if(panel==='wallet')loadWallet();
+    else if(panel==='traffic')loadTraffic();
+    else if(panel==='analytics')loadAnalytics('7d');
+    else if(panel==='referrals')loadReferrals();
+    else if(panel==='system')loadSystem();
+  };
+});
+
+// ============ DASHBOARD ============
+function loadDashboard(){
+  api('dashboard').then(function(d){
+    if(!d.success)return;
+    var s=d.data;
+    document.getElementById('dashStats').innerHTML=
+      statCard('fa-users','Người dùng',fmtN(s.users.total),'Hôm nay: +'+s.users.today)+
+      statCard('fa-user-check','Active 7 ngày',fmtN(s.users.active_7d),Math.round(s.users.active_7d/Math.max(s.users.total,1)*100)+'%')+
+      statCard('fa-pen','Bài viết',fmtN(s.content.posts),'Hôm nay: +'+s.content.posts_today)+
+      statCard('fa-comments','Bình luận',fmtN(s.content.comments),'')+
+      statCard('fa-people-group','Nhóm CĐ',s.community.groups,fmtN(s.content.group_posts)+' bài')+
+      statCard('fa-store','Mua bán',s.marketplace.listings,'')+
+      statCard('fa-eye','Views hôm nay',fmtN(s.views.today),'7 ngày: '+fmtN(s.views.week))+
+      statCard('fa-bell','Push Subs',s.push_subs,'');
+    // Growth chart
+    if(s.growth&&s.growth.length){
+      var max=Math.max.apply(null,s.growth.map(function(g){return g.count;}));
+      var bars='',labels='';
+      s.growth.forEach(function(g){
+        var h=Math.max(4,Math.round(g.count/Math.max(max,1)*100));
+        bars+='<div class="chart-col" style="height:'+h+'%" title="'+g.date+': '+g.count+'"></div>';
+        labels+='<span>'+g.date.substring(5)+'</span>';
+      });
+      document.getElementById('growthChart').innerHTML=bars;
+      document.getElementById('growthLabels').innerHTML=labels;
+    }
+  });
+}
+function statCard(icon,label,val,sub){
+  return '<div class="stat-card"><div class="stat-label"><i class="fas '+icon+'" style="color:var(--primary)"></i> '+label+'</div><div class="stat-val">'+val+'</div>'+(sub?'<div class="stat-sub">'+sub+'</div>':'')+'</div>';
+}
+
+// ============ USERS ============
+var usersP=1;
+function loadUsers(){
+  var search=document.getElementById('userSearch').value;
+  var status=document.getElementById('userStatus').value;
+  var sort=document.getElementById('userSort').value;
+  api('users',{params:{page:usersP,search:search,status:status,sort:sort,limit:20}}).then(function(d){
+    if(!d.success)return;
+    var h='';
+    d.data.users.forEach(function(u){
+      var av=u.avatar?'<img class="user-av" src="'+u.avatar+'" onerror="this.style.display=\'none\'">':'<div class="user-av-ph">'+esc((u.fullname||'?')[0])+'</div>';
+      var badge=u.status==='active'?'badge-active':u.status==='banned'?'badge-banned':'badge-hidden';
+      h+='<tr><td><div class="user-row">'+av+'<div class="user-info"><div class="user-name">'+esc(u.fullname)+'</div><div class="user-sub">@'+esc(u.username)+' · ID:'+u.id+'</div></div></div></td>';
+      h+='<td>'+esc(u.shipping_company||'-')+'</td>';
+      h+='<td>'+u.post_count+'</td>';
+      h+='<td>'+u.follower_count+'</td>';
+      h+='<td><span class="'+badge+'">'+u.status+'</span></td>';
+      h+='<td>'+fmtD(u.created_at)+'</td>';
+      h+='<td>';
+      if(u.status==='active')h+='<button class="btn btn-sm btn-danger" onclick="banUser('+u.id+')"><i class="fas fa-ban"></i></button>';
+      else if(u.status==='banned')h+='<button class="btn btn-sm btn-success" onclick="unbanUser('+u.id+')"><i class="fas fa-check"></i></button>';
+      h+=' <button class="btn btn-sm" onclick="viewUser('+u.id+')"><i class="fas fa-eye"></i></button>';
+      h+='</td></tr>';
+    });
+    document.getElementById('usersTbody').innerHTML=h||'<tr><td colspan="7" style="text-align:center;color:var(--muted);padding:30px">Không có dữ liệu</td></tr>';
+    document.getElementById('usersInfo').textContent='Trang '+d.data.page+'/'+d.data.pages+' · '+d.data.total+' users';
+    document.getElementById('usersPrev').disabled=d.data.page<=1;
+    document.getElementById('usersNext').disabled=d.data.page>=d.data.pages;
+  });
+}
+function usersPage(dir){usersP=Math.max(1,usersP+dir);loadUsers();}
+function banUser(id){if(!confirm('Ban user #'+id+'?'))return;api('user_ban',{body:{id:id}}).then(function(d){toast(d.message);loadUsers();});}
+function unbanUser(id){api('user_unban',{body:{id:id}}).then(function(d){toast(d.message);loadUsers();});}
+function viewUser(id){
+  api('user_detail',{params:{id:id}}).then(function(d){
+    if(!d.success)return;
+    var u=d.data;
+    document.getElementById('modalTitle').textContent=u.fullname;
+    document.getElementById('modalBody').innerHTML=
+      '<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;font-size:13px">'+
+      '<div><label>ID</label><div>'+u.id+'</div></div>'+
+      '<div><label>Username</label><div>@'+esc(u.username)+'</div></div>'+
+      '<div><label>Hãng</label><div>'+esc(u.shipping_company||'-')+'</div></div>'+
+      '<div><label>Status</label><div>'+u.status+'</div></div>'+
+      '<div><label>Bài viết</label><div>'+u.post_count+'</div></div>'+
+      '<div><label>Comments</label><div>'+u.comment_count+'</div></div>'+
+      '<div><label>Followers</label><div>'+u.follower_count+'</div></div>'+
+      '<div><label>Following</label><div>'+u.following_count+'</div></div>'+
+      '<div><label>Likes</label><div>'+u.like_count+'</div></div>'+
+      '<div><label>Ngày tạo</label><div>'+fmtD(u.created_at)+'</div></div>'+
+      '</div>';
+    document.getElementById('modalFoot').innerHTML='<button class="btn" onclick="closeModal()">Đóng</button>';
+    document.getElementById('modal').classList.add('open');
+  });
+}
+
+// ============ POSTS ============
+var postsP=1;
+function loadPosts(){
+  var search=document.getElementById('postSearch').value;
+  var status=document.getElementById('postStatus').value;
+  api('posts',{params:{page:postsP,search:search,status:status}}).then(function(d){
+    if(!d.success)return;
+    var h='';
+    d.data.posts.forEach(function(p){
+      var badge=p.status==='active'?'badge-active':'badge-hidden';
+      h+='<tr><td>'+p.id+'</td>';
+      h+='<td><div class="user-name">'+esc(p.user_name)+'</div></td>';
+      h+='<td style="max-width:300px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+esc(p.content)+'</td>';
+      h+='<td>'+p.likes_count+'</td><td>'+p.comments_count+'</td>';
+      h+='<td><span class="'+badge+'">'+p.status+'</span></td>';
+      h+='<td>';
+      if(p.status==='active')h+='<button class="btn btn-sm btn-danger" onclick="hidePost('+p.id+')"><i class="fas fa-eye-slash"></i></button>';
+      else h+='<button class="btn btn-sm btn-success" onclick="showPost('+p.id+')"><i class="fas fa-eye"></i></button>';
+      h+=' <button class="btn btn-sm btn-danger" onclick="delPost('+p.id+')"><i class="fas fa-trash"></i></button>';
+      h+='</td></tr>';
+    });
+    document.getElementById('postsTbody').innerHTML=h||'<tr><td colspan="7" style="text-align:center;color:var(--muted);padding:30px">Không có</td></tr>';
+    document.getElementById('postsInfo').textContent='Trang '+d.data.page+'/'+d.data.pages+' · '+d.data.total;
+    document.getElementById('postsPrev').disabled=d.data.page<=1;
+    document.getElementById('postsNext').disabled=d.data.page>=d.data.pages;
+  });
+}
+function postsPage(dir){postsP=Math.max(1,postsP+dir);loadPosts();}
+function hidePost(id){api('post_update',{body:{id:id,status:'hidden'}}).then(function(d){toast(d.message);loadPosts();});}
+function showPost(id){api('post_update',{body:{id:id,status:'active'}}).then(function(d){toast(d.message);loadPosts();});}
+function delPost(id){if(!confirm('Xóa bài #'+id+'?'))return;api('post_delete',{body:{id:id}}).then(function(d){toast(d.message);loadPosts();});}
+
+// ============ COMMENTS ============
+var cmtsP=1;
+function loadComments(){
+  var search=document.getElementById('cmtSearch').value;
+  api('comments',{params:{page:cmtsP,search:search}}).then(function(d){
+    if(!d.success)return;
+    var h='';
+    d.data.comments.forEach(function(c){
+      h+='<tr><td>'+c.id+'</td><td>'+esc(c.user_name)+'</td><td style="max-width:300px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+esc(c.content)+'</td><td>'+c.post_id+'</td><td>'+fmtD(c.created_at)+'</td>';
+      h+='<td><button class="btn btn-sm btn-danger" onclick="delComment('+c.id+')"><i class="fas fa-trash"></i></button></td></tr>';
+    });
+    document.getElementById('cmtsTbody').innerHTML=h||'<tr><td colspan="6" style="text-align:center;color:var(--muted);padding:30px">Không có</td></tr>';
+    document.getElementById('cmtsInfo').textContent='Trang '+d.data.page+'/'+d.data.pages+' · '+d.data.total;
+  });
+}
+function cmtsPage(dir){cmtsP=Math.max(1,cmtsP+dir);loadComments();}
+function delComment(id){if(!confirm('Xóa comment #'+id+'?'))return;api('comment_delete',{body:{id:id}}).then(function(d){toast(d.message);loadComments();});}
+
+// ============ GROUPS ============
+function loadGroups(){
+  api('groups_list').then(function(d){
+    if(!d.success)return;
+    var h='';
+    d.data.forEach(function(g){
+      var badge=g.status==='active'?'badge-active':'badge-hidden';
+      h+='<tr><td>'+g.id+'</td><td>'+esc(g.name)+'</td><td>'+g.member_count+'</td><td>'+g.post_count+'</td>';
+      h+='<td><span class="'+badge+'">'+g.status+'</span></td>';
+      h+='<td><button class="btn btn-sm" onclick="editGroup('+g.id+',\''+esc(g.name)+'\',\''+g.status+'\')"><i class="fas fa-edit"></i></button></td></tr>';
+    });
+    document.getElementById('groupsTbody').innerHTML=h;
+  });
+}
+function editGroup(id,name,status){
+  document.getElementById('modalTitle').textContent='Sửa nhóm #'+id;
+  document.getElementById('modalBody').innerHTML='<label>Tên</label><input id="gName" value="'+name+'"><label>Trạng thái</label><select id="gStatus"><option value="active"'+(status==='active'?' selected':'')+'>Active</option><option value="hidden"'+(status==='hidden'?' selected':'')+'>Hidden</option></select>';
+  document.getElementById('modalFoot').innerHTML='<button class="btn" onclick="closeModal()">Hủy</button><button class="btn btn-primary" onclick="saveGroup('+id+')">Lưu</button>';
+  document.getElementById('modal').classList.add('open');
+}
+function saveGroup(id){
+  api('group_update',{body:{id:id,name:document.getElementById('gName').value,status:document.getElementById('gStatus').value}}).then(function(d){toast(d.message);closeModal();loadGroups();});
+}
+
+// ============ MARKETPLACE ============
+var listingsP=1;
+function loadListings(){
+  var status=document.getElementById('listingStatus').value;
+  api('listings',{params:{page:listingsP,status:status}}).then(function(d){
+    if(!d.success)return;
+    var h='';
+    d.data.listings.forEach(function(l){
+      var badge=l.status==='active'?'badge-active':l.status==='sold'?'badge-pending':'badge-hidden';
+      h+='<tr><td>'+l.id+'</td><td>'+esc(l.title)+'</td><td>'+esc(l.seller_name)+'</td><td>'+fmtMoney(l.price)+'</td><td>'+l.views_count+'</td>';
+      h+='<td><span class="'+badge+'">'+l.status+'</span></td>';
+      h+='<td><button class="btn btn-sm btn-danger" onclick="hideListing('+l.id+')"><i class="fas fa-eye-slash"></i></button></td></tr>';
+    });
+    document.getElementById('listingsTbody').innerHTML=h||'<tr><td colspan="7" style="text-align:center;color:var(--muted);padding:30px">Không có</td></tr>';
+    document.getElementById('listingsInfo').textContent='Trang '+d.data.page+'/'+d.data.pages+' · '+d.data.total;
+  });
+}
+function listingsPage(dir){listingsP=Math.max(1,listingsP+dir);loadListings();}
+function hideListing(id){api('listing_update',{body:{id:id,status:'hidden'}}).then(function(d){toast(d.message);loadListings();});}
+
+// ============ WALLET ============
+function loadWallet(){
+  api('wallet_overview').then(function(d){
+    if(!d.success)return;
+    var s=d.data;
+    document.getElementById('walletStats').innerHTML=
+      statCard('fa-wallet','Tổng số dư',fmtMoney(s.total_balance),'')+
+      statCard('fa-clock','Chờ duyệt',s.pending_deposits.length,'')+
+      statCard('fa-users','Subscribers',s.active_subscribers.length,'');
+    // Pending
+    var h='';
+    s.pending_deposits.forEach(function(t){
+      h+='<tr><td>'+t.id+'</td><td>'+esc(t.fullname)+'</td><td style="font-weight:700;color:var(--green)">'+fmtMoney(t.amount)+'</td><td>'+fmtD(t.created_at)+'</td>';
+      h+='<td><button class="btn btn-sm btn-success" onclick="approveDeposit('+t.id+')"><i class="fas fa-check"></i> Duyệt</button> ';
+      h+='<button class="btn btn-sm btn-danger" onclick="rejectDeposit('+t.id+')"><i class="fas fa-times"></i></button></td></tr>';
+    });
+    document.getElementById('pendingTbody').innerHTML=h||'<tr><td colspan="5" style="text-align:center;color:var(--muted);padding:20px">Không có yêu cầu nào</td></tr>';
+    if(s.pending_deposits.length){document.getElementById('pendingBadge').style.display='';document.getElementById('pendingBadge').textContent=s.pending_deposits.length;}
+    // Txns
+    var h2='';
+    s.recent_transactions.forEach(function(t){
+      h2+='<tr><td>'+t.id+'</td><td>'+esc(t.fullname)+'</td><td>'+t.type+'</td><td>'+fmtMoney(t.amount)+'</td><td>'+t.status+'</td><td>'+fmtD(t.created_at)+'</td></tr>';
+    });
+    document.getElementById('txnsTbody').innerHTML=h2||'<tr><td colspan="6" style="text-align:center;color:var(--muted);padding:20px">Không có</td></tr>';
+  });
+}
+function approveDeposit(id){if(!confirm('Duyệt nạp tiền #'+id+'?'))return;api('approve_deposit',{body:{id:id}}).then(function(d){toast(d.message);loadWallet();});}
+function rejectDeposit(id){if(!confirm('Từ chối #'+id+'?'))return;api('reject_deposit',{body:{id:id}}).then(function(d){toast(d.message);loadWallet();});}
+
+// ============ TRAFFIC ============
+function loadTraffic(){
+  api('traffic_list').then(function(d){
+    if(!d.success)return;
+    var h='';
+    d.data.forEach(function(t){
+      h+='<tr><td>'+t.id+'</td><td>'+esc(t.reporter_name)+'</td><td>'+t.category+'</td><td>'+t.severity+'</td><td style="color:var(--green)">'+t.confirms+'</td><td style="color:var(--red)">'+t.denies+'</td>';
+      h+='<td><button class="btn btn-sm btn-danger" onclick="delTraffic('+t.id+')"><i class="fas fa-trash"></i></button></td></tr>';
+    });
+    document.getElementById('trafficTbody').innerHTML=h||'<tr><td colspan="7" style="text-align:center;color:var(--muted);padding:20px">Không có</td></tr>';
+  });
+}
+function delTraffic(id){if(!confirm('Xóa cảnh báo #'+id+'?'))return;api('traffic_delete',{body:{id:id}}).then(function(d){toast(d.message);loadTraffic();});}
+
+// ============ ANALYTICS ============
+function loadAnalytics(period){
+  api('analytics',{params:{period:period}}).then(function(d){
+    if(!d.success)return;
+    var s=d.data;
+    document.getElementById('analyticsStats').innerHTML=
+      statCard('fa-eye','Total Views',fmtN(s.total_views||0),'')+
+      statCard('fa-user','Unique Visitors',fmtN(s.unique_visitors||0),'');
+    // Views chart
+    if(s.page_views&&s.page_views.length){
+      var max=Math.max.apply(null,s.page_views.map(function(v){return parseInt(v.views);}));
+      var bars='',labels='';
+      s.page_views.forEach(function(v){
+        var h=Math.max(4,Math.round(parseInt(v.views)/Math.max(max,1)*100));
+        bars+='<div class="chart-col" style="height:'+h+'%" title="'+v.date+': '+v.views+'"></div>';
+        labels+='<span>'+v.date.substring(5)+'</span>';
+      });
+      document.getElementById('viewsChart').innerHTML=bars;
+      document.getElementById('viewsLabels').innerHTML=labels;
+    }
+    // Top pages
+    var h='';(s.top_pages||[]).forEach(function(p){h+='<tr><td>'+esc(p.page)+'</td><td>'+p.views+'</td></tr>';});
+    document.getElementById('topPagesTbody').innerHTML=h||'<tr><td colspan="2" style="color:var(--muted);padding:12px">Chưa có data</td></tr>';
+    // Referrers
+    var h2='';(s.top_referrers||[]).forEach(function(r){h2+='<tr><td style="max-width:200px;overflow:hidden;text-overflow:ellipsis">'+esc(r.referrer)+'</td><td>'+r.views+'</td></tr>';});
+    document.getElementById('referersTbody').innerHTML=h2||'<tr><td colspan="2" style="color:var(--muted);padding:12px">Chưa có</td></tr>';
+    // Devices
+    var h3='';(s.devices||[]).forEach(function(d2){h3+='<tr><td>'+d2.device+'</td><td>'+d2.views+'</td></tr>';});
+    document.getElementById('devicesTbody').innerHTML=h3||'<tr><td colspan="2" style="color:var(--muted);padding:12px">Chưa có</td></tr>';
+  });
+}
+
+// ============ REFERRALS ============
+function loadReferrals(){
+  api('referrals').then(function(d){
+    if(!d.success)return;
+    var s=d.data;
+    document.getElementById('refStats').innerHTML=statCard('fa-gift','Tổng referrals',s.total,'');
+    var h='';(s.top_inviters||[]).forEach(function(i){h+='<tr><td>'+esc(i.fullname)+'</td><td>'+i.count+'</td></tr>';});
+    document.getElementById('topInvitersTbody').innerHTML=h||'<tr><td colspan="2" style="color:var(--muted);padding:12px">Chưa có</td></tr>';
+    var h2='';(s.recent||[]).forEach(function(r){h2+='<tr><td>'+esc(r.inviter_name)+'</td><td>'+esc(r.invitee_name)+'</td><td>'+fmtD(r.created_at)+'</td></tr>';});
+    document.getElementById('recentRefsTbody').innerHTML=h2||'<tr><td colspan="3" style="color:var(--muted);padding:12px">Chưa có</td></tr>';
+  });
+}
+
+// ============ BROADCAST ============
+function sendBroadcast(){
+  var title=document.getElementById('bcTitle').value.trim();
+  var body=document.getElementById('bcBody').value.trim();
+  var url=document.getElementById('bcUrl').value.trim()||'/';
+  if(!title||!body){alert('Nhập tiêu đề và nội dung');return;}
+  document.getElementById('bcResult').innerHTML='<i class="fas fa-spinner fa-spin"></i> Đang gửi...';
+  api('broadcast',{body:{title:title,body:body,url:url}}).then(function(d){
+    document.getElementById('bcResult').innerHTML=d.success?'<span style="color:var(--green)">'+d.message+'</span>':'<span style="color:var(--red)">'+d.message+'</span>';
+  });
+}
+
+// ============ SYSTEM ============
+function loadSystem(){
+  api('system').then(function(d){
+    if(!d.success)return;
+    var s=d.data;
+    document.getElementById('sysStats').innerHTML=
+      statCard('fa-microchip','PHP',s.php_version,'')+
+      statCard('fa-database','Database',s.db_size_mb+' MB','')+
+      statCard('fa-hard-drive','Disk Free',s.disk_free,'')+
+      statCard('fa-clock','Server Time',s.server_time.substring(11),'');
+    var h='';(s.tables||[]).forEach(function(t){
+      h+='<tr><td style="font-family:monospace;font-size:12px">'+t.table_name+'</td><td>'+fmtN(t.table_rows)+'</td><td>'+t.size_mb+'</td></tr>';
+    });
+    document.getElementById('sysTbody').innerHTML=h;
+  });
+}
+
+function closeModal(){document.getElementById('modal').classList.remove('open');}
+
+// INIT
+loadDashboard();
+</script>
+</body>
+</html>
