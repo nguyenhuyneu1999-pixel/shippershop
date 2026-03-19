@@ -129,16 +129,13 @@ if ($action === 'orders_stats') {
         error('Method not allowed', 405);
     }
     
-    $totalOrders = $db->count('orders', '1=1', []);
+    $totalOrders = $db->fetchOne("SELECT COUNT(*) as c FROM orders WHERE 1=1", [])['c'];
     
-    $pendingOrders = $db->count('orders', 'status = ?', ['pending']);
+    $pendingOrders = $db->fetchOne("SELECT COUNT(*) as c FROM orders WHERE status = ?", ['pending'])['c'];
     
-    $shippingOrders = $db->count('orders', 'status = ?', ['shipping']);
+    $shippingOrders = $db->fetchOne("SELECT COUNT(*) as c FROM orders WHERE status = ?", ['shipping'])['c'];
     
-    $totalRevenue = $db->fetchColumn(
-        "SELECT COALESCE(SUM(total), 0) FROM orders WHERE status != 'cancelled'",
-        []
-    ) ?? 0;
+    $totalRevenue = $db->fetchOne("SELECT COALESCE(SUM(total),0) as val FROM orders WHERE `status` != 'cancelled'", [])['val'];
     
     success('Success', [
         'total_orders' => $totalOrders,
@@ -157,19 +154,11 @@ if ($action === 'wallet_stats') {
         error('Method not allowed', 405);
     }
     
-    $pendingCount = $db->count('transaction_history', 'status = ?', ['pending']);
+    $pendingCount = $db->fetchOne("SELECT COUNT(*) as c FROM wallet_transactions WHERE status = ?", ['pending'])['c'];
     
-    $pendingDepositAmount = $db->fetchColumn(
-        "SELECT COALESCE(SUM(amount), 0) FROM transaction_history 
-         WHERE type = 'deposit' AND status = 'pending'",
-        []
-    ) ?? 0;
+    $pendingDepositAmount = $db->fetchOne("SELECT COALESCE(SUM(amount),0) as val FROM wallet_transactions WHERE type='deposit' AND `status`='pending'", [])['val'];
     
-    $pendingWithdrawAmount = $db->fetchColumn(
-        "SELECT COALESCE(SUM(amount), 0) FROM transaction_history 
-         WHERE type = 'withdraw' AND status = 'pending'",
-        []
-    ) ?? 0;
+    $pendingWithdrawAmount = $db->fetchOne("SELECT COALESCE(SUM(amount),0) as val FROM wallet_transactions WHERE type='withdraw' AND `status`='pending'", [])['val'];
     
     success('Success', [
         'pending_count' => $pendingCount,
@@ -231,7 +220,7 @@ if ($action === 'pending_wallet') {
                 t.*,
                 u.fullname as user_name,
                 u.email as user_email
-            FROM transaction_history t
+            FROM wallet_transactions t
             LEFT JOIN users u ON t.user_id = u.id
             WHERE t.status = 'pending'
             ORDER BY t.created_at DESC
@@ -276,7 +265,7 @@ if ($action === 'wallet_transactions') {
                 t.*,
                 u.fullname as user_name,
                 u.email as user_email
-            FROM transaction_history t
+            FROM wallet_transactions t
             LEFT JOIN users u ON t.user_id = u.id
             WHERE $whereClause
             ORDER BY t.created_at DESC
@@ -342,7 +331,7 @@ if ($action === 'update_order_status') {
             );
             
             // Create refund transaction
-            $db->insert('transaction_history', [
+            $db->insert('wallet_transactions', [
                 'user_id' => $order['user_id'],
                 'type' => 'refund',
                 'amount' => $order['total'],
@@ -546,14 +535,14 @@ if ($action === 'system_stats') {
     }
     
     $stats = [
-        'total_users' => $db->count('users', "status = 'active'", []),
-        'total_orders' => $db->count('orders', '1=1', []),
-        'total_products' => $db->count('products', "status = 'active'", []),
-        'total_posts' => $db->count('posts', "status = 'active'", []),
-        'total_wallet_balance' => $db->fetchColumn("SELECT COALESCE(SUM(balance), 0) FROM wallet", []) ?? 0,
-        'pending_deposits' => $db->count('transaction_history', "type = 'deposit' AND status = 'pending'", []),
-        'pending_withdraws' => $db->count('transaction_history', "type = 'withdraw' AND status = 'pending'", []),
-        'total_revenue_all_time' => $db->fetchColumn("SELECT COALESCE(SUM(total), 0) FROM orders WHERE status != 'cancelled'", []) ?? 0
+        'total_users' => $db->fetchOne("SELECT COUNT(*) as c FROM users WHERE status = 'active'", [])['c'],
+        'total_orders' => $db->fetchOne("SELECT COUNT(*) as c FROM orders WHERE 1=1", [])['c'],
+        'total_products' => $db->fetchOne("SELECT COUNT(*) as c FROM products WHERE status = 'active'", [])['c'],
+        'total_posts' => $db->fetchOne("SELECT COUNT(*) as c FROM posts WHERE status = 'active'", [])['c'],
+        'total_wallet_balance' => $db->fetchOne("SELECT COALESCE(SUM(balance),0) as val FROM wallets", [])['val'],
+        'pending_deposits' => $db->fetchOne("SELECT COUNT(*) as c FROM wallet_transactions WHERE type = 'deposit' AND status = 'pending'", [])['c'],
+        'pending_withdraws' => $db->fetchOne("SELECT COUNT(*) as c FROM wallet_transactions WHERE type = 'withdraw' AND status = 'pending'", [])['c'],
+        'total_revenue_all_time' => $db->fetchOne("SELECT COALESCE(SUM(total),0) as val FROM orders WHERE `status` != 'cancelled'", [])['val']
     ];
     
     success('Success', $stats);
