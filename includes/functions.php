@@ -536,3 +536,124 @@ function dd(...$vars) {
     echo '</pre>';
     die();
 }
+
+// ============================================
+// FEATURE GATING - Free vs Plus limits
+// ============================================
+
+/**
+ * Get user's current subscription plan and limits
+ * Returns: ['plan'=>'free'|'plus', 'limits'=>[...], 'is_plus'=>bool]
+ */
+function getUserPlan($userId) {
+    if (!$userId) return ['plan' => 'free', 'is_plus' => false, 'badge' => null];
+    
+    $sub = db()->fetchOne(
+        "SELECT us.plan_id, sp.slug, sp.badge, sp.max_posts_per_day 
+         FROM user_subscriptions us 
+         JOIN subscription_plans sp ON us.plan_id = sp.id 
+         WHERE us.user_id = ? AND us.`status` = 'active' AND us.expires_at > NOW() 
+         ORDER BY us.expires_at DESC LIMIT 1", 
+        [$userId]
+    );
+    
+    $slug = $sub ? $sub['slug'] : 'free';
+    $isPlus = ($slug === 'plus');
+    
+    return [
+        'plan' => $slug,
+        'is_plus' => $isPlus,
+        'badge' => $sub ? $sub['badge'] : null,
+        'limits' => [
+            'posts_per_day' => $isPlus ? 9999 : 10,
+            'messages_per_month' => $isPlus ? 999999 : 50,
+            'groups_max' => $isPlus ? 999 : 10,
+            'marketplace_max' => $isPlus ? 20 : 3,
+            'call_minutes_per_day' => $isPlus ? 9999 : 10,
+        ]
+    ];
+}
+
+/**
+ * Check a specific limit. Returns null if OK, or error message string if exceeded.
+ * Usage: $err = checkLimit($userId, 'posts_per_day'); if($err) error($err);
+ */
+function checkLimit($userId, $limitKey) {
+    $plan = getUserPlan($userId);
+    $limit = $plan['limits'][$limitKey] ?? 9999;
+    $d = db();
+    
+    switch ($limitKey) {
+        case 'posts_per_day':
+            $count = $d->fetchOne(
+                "SELECT COUNT(*) as c FROM posts WHERE user_id = ? AND DATE(created_at) = CURDATE() AND `status` = 'active'", 
+                [$userId]
+            )['c'];
+            if ($count >= $limit) {
+                return $plan['is_plus'] 
+                    ? null  // Plus users shouldn't hit this
+                    : "Bạn đã đăng $count/$limit bài hôm nay. Nâng cấp Shipper Plus để đăng không giới hạn!";
+            }
+            return null;
+            
+        case 'messages_per_month':
+            $count = $d->fetchOne(
+                "SELECT COUNT(*) as c FROM messages WHERE sender_id = ? AND created_at >= DATE_FORMAT(NOW(), '%Y-%m-01')", 
+                [$userId]
+            )['c'];
+            if ($count >= $limit) {
+                return $plan['is_plus']
+                    ? null
+                    : "Bạn đã gửi $count/$limit tin nhắn tháng này. Nâng cấp Shipper Plus để nhắn không giới hạn!";
+            }
+            return null;
+            
+        case 'groups_max':
+            $count = $d->fetchOne(
+                "SELECT COUNT(*) as c FROM group_members WHERE user_id = ?", 
+                [$userId]
+            )['c'];
+            if ($count >= $limit) {
+                return $plan['is_plus']
+                    ? null
+                    : "Bạn đã tham gia $count/$limit nhóm. Nâng cấp Shipper Plus để tham gia không giới hạn!";
+            }
+            return null;
+            
+        case 'marketplace_max':
+            $count = $d->fetchOne(
+                "SELECT COUNT(*) as c FROM marketplace_listings WHERE user_id = ? AND `status` = 'active'", 
+                [$userId]
+            )['c'];
+            if ($count >= $limit) {
+                return $plan['is_plus']
+                    ? null
+                    : "Bạn đã đăng $count/$limit sản phẩm. Nâng cấp Shipper Plus để đăng tối đa 20!";
+            }
+            return null;
+            
+        default:
+            return null;
+    }
+}
+
+/**
+ * Get usage stats for a user (for frontend display)
+ */
+function getUserUsage($userId) {
+    $d = db();
+    return [
+        'posts_today' => intval($d->fetchOne(
+            "SELECT COUNT(*) as c FROM posts WHERE user_id = ? AND DATE(created_at) = CURDATE() AND `status` = 'active'", [$userId]
+        )['c']),
+        'messages_month' => intval($d->fetchOne(
+            "SELECT COUNT(*) as c FROM messages WHERE sender_id = ? AND created_at >= DATE_FORMAT(NOW(), '%Y-%m-01')", [$userId]
+        )['c']),
+        'groups_joined' => intval($d->fetchOne(
+            "SELECT COUNT(*) as c FROM group_members WHERE user_id = ?", [$userId]
+        )['c']),
+        'marketplace_active' => intval($d->fetchOne(
+            "SELECT COUNT(*) as c FROM marketplace_listings WHERE user_id = ? AND `status` = 'active'", [$userId]
+        )['c']),
+    ];
+}

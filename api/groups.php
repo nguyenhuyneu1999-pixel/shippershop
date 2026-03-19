@@ -167,6 +167,9 @@ if ($method === 'POST') {
             $d->query("UPDATE `groups` SET member_count = GREATEST(member_count - 1, 0) WHERE id = ?", [$gid]);
             gOk('Da roi nhom', ['joined' => false]);
         } else {
+            // Feature gate: check max groups for free users
+            $limitErr = checkLimit($uid, 'groups_max');
+            if ($limitErr) { gErr($limitErr); }
             $d->query("INSERT INTO group_members (group_id, user_id, role) VALUES (?, ?, 'member')", [$gid, $uid]);
             $d->query("UPDATE `groups` SET member_count = member_count + 1 WHERE id = ?", [$gid]);
             gOk('Da tham gia', ['joined' => true]);

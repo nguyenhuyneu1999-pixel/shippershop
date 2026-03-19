@@ -260,6 +260,10 @@ if ($method === 'POST') {
     require_once __DIR__ . "/auth-check.php";
     $userId = getAuthUserId();
 
+    // Feature gate: check daily post limit
+    $limitErr = checkLimit($userId, 'posts_per_day');
+    if ($limitErr) { error($limitErr, 403); }
+
     // Handle both JSON and form-data
     $jsonInput = json_decode(file_get_contents("php://input"), true);
     $content = $jsonInput["content"] ?? ($_POST["content"] ?? "");

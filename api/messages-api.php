@@ -1,6 +1,7 @@
 <?php
 session_start();
 require_once __DIR__ . '/../includes/db.php';
+require_once __DIR__ . '/../includes/functions.php';
 require_once __DIR__ . '/auth-check.php';
 header('Content-Type: application/json; charset=utf-8');
 $d=db();
@@ -302,6 +303,9 @@ $userId=getMsgUserId();
 $input=json_decode(file_get_contents('php://input'),true);
 
 if($action==='send'){
+  // Feature gate: check monthly message limit
+  $limitErr = checkLimit($userId, 'messages_per_month');
+  if ($limitErr) { echo json_encode(['success'=>false,'message'=>$limitErr,'upgrade'=>true]); exit; }
   $oid=intval($input['to_user_id']??0);$ct=trim($input['content']??'');
   $gid=intval($input['group_id']??0);
   

@@ -129,6 +129,10 @@ if ($method === 'POST') {
     }
 
     // Create listing
+    // Feature gate: check max active listings for free users
+    $limitErr = checkLimit($uid, 'marketplace_max');
+    if ($limitErr) { mError($limitErr); }
+    
     $input = mInput();
     $title = trim($input['title'] ?? '');
     $desc = trim($input['description'] ?? '');
