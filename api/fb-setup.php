@@ -1,26 +1,32 @@
 <?php
 header('Content-Type: application/json');
-$token = $_GET['token'] ?? '';
-$action = $_GET['action'] ?? 'info';
+$action = $_GET['action'] ?? $_POST['action'] ?? 'info';
 
-if (empty($token)) { echo json_encode(['error' => 'No token']); exit; }
+// Accept token from POST body or GET
+$input = json_decode(file_get_contents('php://input'), true);
+$token = $input['token'] ?? $_POST['token'] ?? $_GET['token'] ?? '';
+
+if (empty($token)) { echo json_encode(['error' => 'No token provided']); exit; }
 
 if ($action === 'info') {
-    // Get pages
     $url = "https://graph.facebook.com/v19.0/me/accounts?access_token=" . urlencode($token);
     $ch = curl_init($url);
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
     curl_setopt($ch, CURLOPT_TIMEOUT, 15);
+    curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, true);
     $resp = curl_exec($ch);
+    $err = curl_error($ch);
+    $code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
     curl_close($ch);
-    echo $resp;
+    if ($err) { echo json_encode(['error' => 'CURL: '.$err, 'http_code' => $code]); exit; }
+    echo $resp ?: json_encode(['error' => 'Empty response', 'http_code' => $code]);
 } elseif ($action === 'save') {
     require_once __DIR__ . '/../includes/config.php';
     require_once __DIR__ . '/../includes/db.php';
-    $pageId = $_GET['page_id'] ?? '';
-    $pageName = $_GET['name'] ?? 'Facebook Page';
-    $pageToken = $_GET['page_token'] ?? $token;
-    
+    $pageId = $input['page_id'] ?? '';
+    $pageName = $input['name'] ?? 'Facebook Page';
+    $pageToken = $input['page_token'] ?? $token;
+    if (!$pageId) { echo json_encode(['error' => 'No page_id']); exit; }
     $d = db();
     $existing = $d->fetchOne("SELECT id FROM social_accounts WHERE platform = 'facebook'");
     if ($existing) {
@@ -30,10 +36,11 @@ if ($action === 'info') {
         $d->query("INSERT INTO social_accounts (platform, page_id, access_token, account_name) VALUES ('facebook', ?, ?, ?)",
             [$pageId, $pageToken, $pageName]);
     }
-    echo json_encode(['success' => true, 'message' => 'Saved!', 'page_id' => $pageId, 'name' => $pageName]);
+    echo json_encode(['success' => true, 'message' => 'Facebook Page saved!', 'page_id' => $pageId]);
 } elseif ($action === 'test') {
-    $pageId = $_GET['page_id'] ?? '';
-    $msg = "🧪 Test auto-post từ ShipperShop Marketing Automation\n\n📱 shippershop.vn\n" . date('Y-m-d H:i:s');
+    $pageId = $input['page_id'] ?? '';
+    if (!$pageId) { echo json_encode(['error' => 'No page_id']); exit; }
+    $msg = "🚀 ShipperShop - Cộng đồng Shipper Việt Nam\n\n📱 Tham gia ngay: shippershop.vn\n⏰ " . date('Y-m-d H:i:s');
     $url = "https://graph.facebook.com/v19.0/{$pageId}/feed";
     $ch = curl_init($url);
     curl_setopt($ch, CURLOPT_POST, true);
@@ -41,6 +48,8 @@ if ($action === 'info') {
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
     curl_setopt($ch, CURLOPT_TIMEOUT, 15);
     $resp = curl_exec($ch);
+    $err = curl_error($ch);
     curl_close($ch);
-    echo $resp;
+    if ($err) { echo json_encode(['error' => 'CURL: '.$err]); exit; }
+    echo $resp ?: json_encode(['error' => 'Empty response']);
 }
