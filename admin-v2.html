@@ -192,6 +192,9 @@ tr:hover td{background:rgba(124,58,237,.04)}
           <select class="tbl-filter" id="userStatus" onchange="loadUsers()">
             <option value="">Tất cả</option><option value="active">Active</option><option value="banned">Banned</option>
           </select>
+          <select class="tbl-filter" id="userType" onchange="loadUsers()" style="border-color:#7C3AED">
+            <option value="">Thật + Ảo</option><option value="real">🟢 Người thật</option><option value="seed">🟠 Người ảo</option>
+          </select>
           <select class="tbl-filter" id="userSort" onchange="loadUsers()">
             <option value="newest">Mới nhất</option><option value="oldest">Cũ nhất</option><option value="most_posts">Nhiều bài</option>
           </select>
@@ -212,6 +215,9 @@ tr:hover td{background:rgba(124,58,237,.04)}
           <input class="tbl-search" id="postSearch" placeholder="Tìm nội dung..." oninput="debounce(loadPosts,400)">
           <select class="tbl-filter" id="postStatus" onchange="loadPosts()">
             <option value="active">Active</option><option value="hidden">Hidden</option><option value="">Tất cả</option>
+          </select>
+          <select class="tbl-filter" id="postType" onchange="loadPosts()" style="border-color:#7C3AED">
+            <option value="">Thật + Ảo</option><option value="real">🟢 Bài thật</option><option value="seed">🟠 Bài ảo</option>
           </select>
         </div>
         <div style="overflow-x:auto"><table>
@@ -445,13 +451,15 @@ function loadUsers(){
   var search=document.getElementById('userSearch').value;
   var status=document.getElementById('userStatus').value;
   var sort=document.getElementById('userSort').value;
-  api('users',{params:{page:usersP,search:search,status:status,sort:sort,limit:20}}).then(function(d){
+  var type=document.getElementById('userType').value;
+  api('users',{params:{page:usersP,search:search,status:status,sort:sort,type:type,limit:20}}).then(function(d){
     if(!d.success)return;
     var h='';
     d.data.users.forEach(function(u){
       var av=u.avatar?'<img class="user-av" src="'+u.avatar+'" onerror="this.style.display=\'none\'">':'<div class="user-av-ph">'+esc((u.fullname||'?')[0])+'</div>';
       var badge=u.status==='active'?'badge-active':u.status==='banned'?'badge-banned':'badge-hidden';
-      h+='<tr><td><div class="user-row">'+av+'<div class="user-info"><div class="user-name">'+esc(u.fullname)+'</div><div class="user-sub">@'+esc(u.username)+' · ID:'+u.id+'</div></div></div></td>';
+      var typeBadge=u.is_seed?'<span style="font-size:10px;padding:1px 6px;border-radius:10px;background:#FFF3E0;color:#FF9800;font-weight:600;margin-left:4px">ẢO</span>':'<span style="font-size:10px;padding:1px 6px;border-radius:10px;background:#E8F5E9;color:#4CAF50;font-weight:600;margin-left:4px">THẬT</span>';
+      h+='<tr><td><div class="user-row">'+av+'<div class="user-info"><div class="user-name">'+esc(u.fullname)+typeBadge+'</div><div class="user-sub">@'+esc(u.username)+' · ID:'+u.id+'</div></div></div></td>';
       h+='<td>'+esc(u.shipping_company||'-')+'</td>';
       h+='<td>'+u.post_count+'</td>';
       h+='<td>'+u.follower_count+'</td>';
@@ -464,7 +472,8 @@ function loadUsers(){
       h+='</td></tr>';
     });
     document.getElementById('usersTbody').innerHTML=h||'<tr><td colspan="7" style="text-align:center;color:var(--muted);padding:30px">Không có dữ liệu</td></tr>';
-    document.getElementById('usersInfo').textContent='Trang '+d.data.page+'/'+d.data.pages+' · '+d.data.total+' users';
+    var typeLabel=type==='real'?' (thật)':type==='seed'?' (ảo)':'';
+    document.getElementById('usersInfo').textContent='Trang '+d.data.page+'/'+d.data.pages+' · '+d.data.total+' users'+typeLabel;
     document.getElementById('usersPrev').disabled=d.data.page<=1;
     document.getElementById('usersNext').disabled=d.data.page>=d.data.pages;
   });
@@ -500,13 +509,15 @@ var postsP=1;
 function loadPosts(){
   var search=document.getElementById('postSearch').value;
   var status=document.getElementById('postStatus').value;
-  api('posts',{params:{page:postsP,search:search,status:status}}).then(function(d){
+  var type=document.getElementById('postType').value;
+  api('posts',{params:{page:postsP,search:search,status:status,type:type}}).then(function(d){
     if(!d.success)return;
     var h='';
     d.data.posts.forEach(function(p){
       var badge=p.status==='active'?'badge-active':'badge-hidden';
+      var typeBadge=p.is_seed?'<span style="font-size:10px;padding:1px 5px;border-radius:8px;background:#FFF3E0;color:#FF9800;font-weight:600;margin-left:4px">ẢO</span>':'<span style="font-size:10px;padding:1px 5px;border-radius:8px;background:#E8F5E9;color:#4CAF50;font-weight:600;margin-left:4px">THẬT</span>';
       h+='<tr><td>'+p.id+'</td>';
-      h+='<td><div class="user-name">'+esc(p.user_name)+'</div></td>';
+      h+='<td><div class="user-name">'+esc(p.user_name)+typeBadge+'</div></td>';
       h+='<td style="max-width:300px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+esc(p.content)+'</td>';
       h+='<td>'+p.likes_count+'</td><td>'+p.comments_count+'</td>';
       h+='<td><span class="'+badge+'">'+p.status+'</span></td>';
@@ -517,7 +528,8 @@ function loadPosts(){
       h+='</td></tr>';
     });
     document.getElementById('postsTbody').innerHTML=h||'<tr><td colspan="7" style="text-align:center;color:var(--muted);padding:30px">Không có</td></tr>';
-    document.getElementById('postsInfo').textContent='Trang '+d.data.page+'/'+d.data.pages+' · '+d.data.total;
+    var typeLabel=type==='real'?' (thật)':type==='seed'?' (ảo)':'';
+    document.getElementById('postsInfo').textContent='Trang '+d.data.page+'/'+d.data.pages+' · '+d.data.total+typeLabel;
     document.getElementById('postsPrev').disabled=d.data.page<=1;
     document.getElementById('postsNext').disabled=d.data.page>=d.data.pages;
   });

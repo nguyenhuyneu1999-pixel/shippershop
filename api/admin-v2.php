@@ -99,6 +99,10 @@ if ($action === 'users') {
 
     $where = ["u.id > 1"]; // skip id=1
     $params = [];
+    
+    // Real user detection: registered via web form or admin
+    $realUserCond = "(u.email LIKE '%@shippershop.local' OR u.email = 'nguyenhuyneu1999@gmail.com' OR u.email = 'nguyenvanhuy12123@gmail.com')";
+    
     if ($search) {
         $where[] = "(u.fullname LIKE ? OR u.username LIKE ? OR u.id = ?)";
         $params[] = "%$search%";
@@ -109,6 +113,14 @@ if ($action === 'users') {
         $where[] = "u.`status` = ?";
         $params[] = $status;
     }
+    
+    // Type filter: real / seed
+    $type = trim($_GET['type'] ?? '');
+    if ($type === 'real') {
+        $where[] = $realUserCond;
+    } elseif ($type === 'seed') {
+        $where[] = "NOT $realUserCond";
+    }
 
     $orderBy = 'u.id DESC';
     if ($sort === 'oldest') $orderBy = 'u.id ASC';
@@ -118,11 +130,12 @@ if ($action === 'users') {
     $whereStr = implode(' AND ', $where);
     $total = $d->fetchOne("SELECT COUNT(*) as c FROM users u WHERE $whereStr", $params)['c'];
 
-    $users = $d->fetchAll("SELECT u.id, u.fullname, u.username, u.avatar, u.shipping_company,
+    $users = $d->fetchAll("SELECT u.id, u.fullname, u.username, u.email, u.avatar, u.shipping_company,
         u.`status`, u.created_at, u.ref_code,
         (SELECT COUNT(*) FROM posts WHERE user_id=u.id) as post_count,
         (SELECT COUNT(*) FROM comments WHERE user_id=u.id) as comment_count,
-        (SELECT COUNT(*) FROM follows WHERE following_id=u.id) as follower_count
+        (SELECT COUNT(*) FROM follows WHERE following_id=u.id) as follower_count,
+        CASE WHEN $realUserCond THEN 0 ELSE 1 END as is_seed
         FROM users u WHERE $whereStr ORDER BY $orderBy LIMIT $limit OFFSET $offset", $params);
 
     ok(['users' => $users, 'total' => (int)$total, 'page' => $page, 'pages' => ceil($total / $limit)]);
@@ -204,15 +217,25 @@ if ($action === 'posts') {
 
     $where = [];
     $params = [];
+    
+    // Real user detection
+    $realUserCond = "(u.email LIKE '%@shippershop.local' OR u.email = 'nguyenhuyneu1999@gmail.com' OR u.email = 'nguyenvanhuy12123@gmail.com')";
+    
     if ($status) { $where[] = "p.`status` = ?"; $params[] = $status; }
     if ($search) { $where[] = "(p.content LIKE ? OR u.fullname LIKE ?)"; $params[] = "%$search%"; $params[] = "%$search%"; }
+    
+    // Type filter: real / seed
+    $type = trim($_GET['type'] ?? '');
+    if ($type === 'real') { $where[] = $realUserCond; }
+    elseif ($type === 'seed') { $where[] = "NOT $realUserCond"; }
 
     $whereStr = count($where) ? 'WHERE ' . implode(' AND ', $where) : '';
     $total = $d->fetchOne("SELECT COUNT(*) as c FROM posts p JOIN users u ON p.user_id=u.id $whereStr", $params)['c'];
 
     $posts = $d->fetchAll("SELECT p.id, p.user_id, LEFT(p.content,150) as content, p.images, p.type,
         p.likes_count, p.comments_count, p.shares_count, p.`status`, p.created_at,
-        u.fullname as user_name, u.avatar as user_avatar
+        u.fullname as user_name, u.avatar as user_avatar,
+        CASE WHEN $realUserCond THEN 0 ELSE 1 END as is_seed
         FROM posts p JOIN users u ON p.user_id=u.id $whereStr
         ORDER BY p.id DESC LIMIT $limit OFFSET $offset", $params);
 
