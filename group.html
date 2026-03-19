@@ -37,21 +37,36 @@ body{background:var(--bg);font-family:-apple-system,BlinkMacSystemFont,'Segoe UI
 .g-tab{flex:1;padding:12px 8px;text-align:center;font-size:13px;font-weight:600;color:var(--muted);cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-2px;transition:all .2s}
 .g-tab.active{color:var(--primary);border-bottom-color:var(--primary)}
 
-/* Posts */
-.post-card{background:#fff;margin-top:8px;padding:12px 16px}
-.post-head{display:flex;gap:10px;margin-bottom:8px}
-.post-av{width:36px;height:36px;border-radius:50%;background:var(--primary);color:#fff;display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0;overflow:hidden}
+/* Posts - Facebook-style matching feed */
+.post-card{background:#fff;margin-top:8px;overflow:hidden}
+.post-meta{display:flex;gap:10px;padding:10px 16px 4px;align-items:center}
+.post-av{width:40px;height:40px;border-radius:50%;background:var(--primary);color:#fff;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:700;flex-shrink:0;overflow:hidden}
 .post-av img{width:100%;height:100%;object-fit:cover}
-.post-author{font-size:14px;font-weight:600}
+.post-author{font-weight:700;font-size:14px}
 .post-author a{color:var(--text);text-decoration:none}
 .post-time{font-size:12px;color:var(--muted)}
-.post-body{font-size:14px;line-height:1.5;margin-bottom:10px;white-space:pre-wrap}
-.post-stats{display:flex;gap:16px;font-size:12px;color:var(--muted);padding:8px 0;border-top:1px solid #f0f0f0;border-bottom:1px solid #f0f0f0}
-.post-actions{display:flex}
-.post-act{flex:1;padding:8px;text-align:center;font-size:13px;color:var(--muted);font-weight:600;border:none;background:none;cursor:pointer;border-radius:4px}
-.post-act:active{background:var(--bg)}
-.post-act.liked{color:var(--primary)}
-.post-act i{margin-right:4px}
+.post-content{padding:4px 16px 8px;font-size:14px;line-height:1.6;white-space:pre-wrap;word-break:break-word}
+.post-content.trunc{max-height:120px;overflow:hidden}
+.show-more{display:block;padding:0 16px 8px;font-size:13px;color:var(--primary);font-weight:600;cursor:pointer}
+.post-images{width:100%;display:block}
+.post-images img{width:100%;display:block;max-height:500px;object-fit:cover;cursor:pointer}
+.post-images.multi{display:flex;gap:2px;flex-wrap:wrap}
+.post-images.multi img{width:calc(50% - 1px);max-height:250px}
+.pa3-stats{display:flex;padding:6px 16px;font-size:12px;color:var(--muted)}
+.pa3-stats span{flex:1;min-width:0;white-space:nowrap}
+.pa3-stats span:nth-child(2){text-align:center}
+.pa3-stats span:last-child{text-align:right}
+.post-actions-3{display:flex;border-top:1px solid var(--border)}
+.pa3-btn{flex:1;padding:10px 0;text-align:center;font-size:13px;font-weight:600;color:var(--muted);border:none;background:none;cursor:pointer;border-right:1px solid var(--border)}
+.pa3-btn:last-child{border-right:none}
+.pa3-btn:active{background:#EDE9FE}
+.pa3-btn.pa3-active{color:var(--primary);background:#EDE9FE}
+.ship-badge{font-size:11px;font-weight:700}
+.type-badge{font-size:10px;padding:1px 6px;border-radius:8px;font-weight:600;margin-left:4px}
+.type-badge.b-review{background:#FFF3E0;color:#E65100}
+.type-badge.b-question{background:#E3F2FD;color:#1565C0}
+.type-badge.b-tip{background:#FFF8E1;color:#F57F17}
+.type-badge.b-post{background:#F3E5F5;color:#7B1FA2}
 
 /* About tab */
 .about-section{background:#fff;margin-top:8px;padding:16px}
@@ -263,8 +278,8 @@ function loadPosts(){
   var html="";
   // Create post area
   if(GROUP.is_member&&CU){
-    var av=CU.avatar?"<img src='"+CU.avatar+"'>":esc((CU.fullname||"?")[0]);
-    html+="<div class='create-area' onclick='openPM()'><div class='post-av'>"+av+"</div><div class='create-placeholder'>Bạn đang nghĩ gì?</div></div>";
+    var cuAv=CU.avatar?"<img src='"+CU.avatar+"' style='width:40px;height:40px;border-radius:50%;object-fit:cover'>":"<div class='post-av'>"+esc((CU.fullname||"?")[0])+"</div>";
+    html+="<div class='create-area' onclick='openPM()'>"+cuAv+"<div class='create-placeholder'>B\u1ea1n \u0111ang ngh\u0129 g\u00ec?</div></div>";
   }
   // Sort bar
   html+="<div class='sort-bar'>";
@@ -304,27 +319,38 @@ function fetchPosts(append){
   });
 }
 
+var _SC={"GHTK":"#00b14f","J&T":"#d32f2f","GHN":"#ff6600","Viettel Post":"#e21a1a","SPX":"#EE4D2D","Grab":"#00b14f","Be":"#5bc500","Gojek":"#00aa13","Ninja Van":"#c41230"};
+var _BT={"review":"b-review","question":"b-question","tip":"b-tip","post":"b-post"};
+var _BTxt={"review":"\u2b50 Review","question":"\u2753 H\u1ecfi \u0111\u00e1p","tip":"\ud83d\udca1 Tip"};
+
 function mkPost(p){
-  var av=p.user_avatar?"<img src='"+esc(p.user_avatar)+"'>":esc((p.user_name||"?")[0]);
+  var av=p.user_avatar?"<img src='"+esc(p.user_avatar)+"' onerror=\"this.outerHTML='<span>"+esc((p.user_name||"U")[0])+"</span>'\">":esc((p.user_name||"?")[0]);
   var liked=p.user_liked;
-  return "<div class='post-card'>"+
-    "<div class='post-head'>"+
-      "<div class='post-av'>"+av+"</div>"+
-      "<div><div class='post-author'><a href='user.html?id="+p.user_id+"'>"+esc(p.user_name)+"</a></div>"+
-      "<div class='post-time'>"+ago(p.created_at)+"</div></div>"+
-    "</div>"+
-    (p.title?"<div style='font-weight:700;font-size:16px;margin-bottom:4px'>"+esc(p.title)+"</div>":"")+
-    "<div class='post-body'>"+esc(p.content)+"</div>"+
-    "<div class='post-stats'>"+
-      "<span>"+(p.likes_count||0)+" thành công</span>"+
-      "<span>"+(p.comments_count||0)+" ghi chú</span>"+
-    "</div>"+
-    "<div class='post-actions'>"+
-      "<button class='post-act"+(liked?" liked":"")+"' onclick='likePost("+p.id+",this)'><i class='fa"+(liked?"s":"r")+" fa-heart'></i> Thành công</button>"+
-      "<button class='post-act' onclick='openComment("+p.id+")'><i class='far fa-comment'></i> Ghi chú</button>"+
-      "<button class='post-act' onclick='sharePost("+p.id+")'><i class='fas fa-share'></i> Chuyển tiếp</button>"+
-    "</div>"+
-  "</div>";
+  var likes=parseInt(p.likes_count)||0;
+  var cmts=parseInt(p.comments_count)||0;
+  var shares=parseInt(p.shares_count)||0;
+  var shipBadge="";
+  if(p.shipping_company){var sc=p.shipping_company;shipBadge="<span class='ship-badge' style='color:"+(_SC[sc]||"#666")+"'>"+esc(sc)+"</span><span>\u00b7</span>";}
+  var badge=_BTxt[p.type]?"<span class='type-badge "+(_BT[p.type]||"")+"'>"+_BTxt[p.type]+"</span>":"";
+  var title=p.title?"<div style='font-weight:700;font-size:16px;padding:4px 16px 0'>"+esc(p.title)+"</div>":"";
+  var body=esc(p.content||"");
+  var isLong=body.length>300;
+  var contentH="<div class='post-content"+(isLong?" trunc":"")+"' id='gpc"+p.id+"'>"+body+"</div>"+(isLong?"<span class='show-more' onclick='var el=document.getElementById(\"gpc"+p.id+"\");el.classList.toggle(\"trunc\");this.textContent=el.classList.contains(\"trunc\")?\"Xem th\u00eam \u25bc\":\"Thu g\u1ecdn \u25b2\"'>Xem th\u00eam \u25bc</span>":"");
+  var imgH="";
+  if(p.images){try{var a=JSON.parse(p.images);if(a&&a.length){var cl=a.length>1?" multi":"";imgH="<div class='post-images"+cl+"'>";for(var i=0;i<Math.min(a.length,4);i++){imgH+="<img src='"+a[i]+"' loading='lazy' onerror='this.style.display=\"none\"'>";}imgH+="</div>";}}catch(x){}}
+  var vidH="";
+  if(p.video_url){if(p.video_url.indexOf("/uploads/")!==-1){vidH="<video controls playsinline preload='metadata' style='width:100%;max-height:500px'><source src='"+p.video_url+"' type='video/mp4'></video>";}else{vidH="<div style='position:relative;padding-bottom:56%;height:0;overflow:hidden'><iframe src='"+p.video_url+"' style='position:absolute;inset:0;width:100%;height:100%;border:0' allowfullscreen></iframe></div>";}}
+  return "<div class='post-card' id='gp"+p.id+"'>"
+    +"<div class='post-meta'><div class='post-av'>"+av+"</div>"
+    +"<div style='flex:1;min-width:0'><div class='post-author'><a href='user.html?id="+p.user_id+"'>"+esc(p.user_name)+"</a></div>"
+    +"<div style='font-size:12px;color:#65676B;display:flex;align-items:center;gap:4px'>"+shipBadge+"<span>"+ago(p.created_at)+"</span>"+badge+"</div></div></div>"
+    +title+contentH+imgH+vidH
+    +"<div class='pa3-stats'><span>"+(likes>0?fN(likes)+" \u0111\u01a1n giao th\u00e0nh c\u00f4ng":"")+"</span><span>"+(cmts>0?fN(cmts)+" ghi ch\u00fa":"")+"</span><span>"+(shares>0?fN(shares)+" chuy\u1ec3n ti\u1ebfp":"")+"</span></div>"
+    +"<div class='post-actions-3'>"
+    +"<button class='pa3-btn"+(liked?" pa3-active":"")+"' onclick='likePost("+p.id+",this)'>Th\u00e0nh c\u00f4ng</button>"
+    +"<button class='pa3-btn' onclick='openComment("+p.id+")'>Ghi ch\u00fa</button>"
+    +"<button class='pa3-btn' onclick='sharePost("+p.id+")'>Chuy\u1ec3n ti\u1ebfp</button>"
+    +"</div></div>";
 }
 
 function likePost(pid,btn){
@@ -333,10 +359,11 @@ function likePost(pid,btn){
   .then(function(d){
     if(d.success){
       var liked=d.data.liked;
-      if(liked){btn.className="post-act liked";btn.innerHTML="<i class='fas fa-heart'></i> Thành công";}
-      else{btn.className="post-act";btn.innerHTML="<i class='far fa-heart'></i> Thành công";}
+      var count=d.data.count||0;
+      btn.className="pa3-btn"+(liked?" pa3-active":"");
+      btn.textContent="Th\u00e0nh c\u00f4ng";
       var card=btn.closest(".post-card");
-      if(card){var stats=card.querySelector(".post-stats span");if(stats)stats.textContent=(d.data.count||0)+" thành công";}
+      if(card){var s=card.querySelector(".pa3-stats span");if(s)s.textContent=count>0?fN(count)+" \u0111\u01a1n giao th\u00e0nh c\u00f4ng":"";}
     }
   });
 }
