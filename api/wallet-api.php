@@ -232,6 +232,70 @@ if ($method === 'GET') {
         $txns = $db->fetchAll("SELECT * FROM wallet_transactions WHERE user_id=? ORDER BY created_at DESC LIMIT 20 OFFSET $offset", [$uid]);
         wOk('OK', $txns ?: []);
     }
+    // PAYOS: CHECK PAYMENT STATUS (GET request from frontend polling)
+    if ($action === 'payos_check') {
+        $uid = wAuth();
+        if (!$uid) wErr('Đăng nhập', 401);
+        require_once __DIR__ . '/../includes/payos.php';
+        
+        $orderCode = intval($_GET['order_code'] ?? 0);
+        if (!$orderCode) wErr('Missing order_code');
+        
+        $payment = $db->fetchOne("SELECT * FROM payos_payments WHERE order_code=? AND user_id=?", [$orderCode, $uid]);
+        if (!$payment) wErr('Không tìm thấy thanh toán');
+        
+        if ($payment['status'] === 'completed') {
+            wOk('OK', ['status' => 'PAID', 'message' => 'Thanh toán thành công!']);
+        }
+        
+        // Check payOS API for real-time status
+        $payosData = payosGetPayment($orderCode);
+        if ($payosData && ($payosData['status'] === 'PAID' || $payosData['status'] === 'COMPLETED')) {
+            $planId = intval($payment['plan_id']);
+            $type = $payment['type'] ?? 'subscription';
+            $before = 0; $after = 0;
+            
+            try {
+                $pdo = db()->getConnection();
+                $pdo->beginTransaction();
+                $pdo->prepare("UPDATE payos_payments SET `status`='completed',paid_at=NOW() WHERE id=?")->execute([$payment['id']]);
+                
+                if ($type === 'subscription' && $planId > 0) {
+                    $planStmt = $pdo->prepare("SELECT * FROM subscription_plans WHERE id=?");
+                    $planStmt->execute([$planId]);
+                    $plan = $planStmt->fetch(\PDO::FETCH_ASSOC);
+                    if ($plan) {
+                        $pdo->prepare("UPDATE user_subscriptions SET `status`='cancelled' WHERE user_id=? AND `status`='active'")->execute([$uid]);
+                        $pdo->prepare("INSERT INTO user_subscriptions (user_id,plan_id,`status`,started_at,expires_at,auto_renew) VALUES (?,?,'active',NOW(),DATE_ADD(NOW(),INTERVAL ? DAY),0)")->execute([$uid,$planId,intval($plan['duration_days'])]);
+                    }
+                } elseif ($type === 'deposit') {
+                    $walletStmt = $pdo->prepare("SELECT balance FROM wallets WHERE user_id=? FOR UPDATE");
+                    $walletStmt->execute([$uid]);
+                    $w = $walletStmt->fetch(\PDO::FETCH_ASSOC);
+                    $before = $w ? floatval($w['balance']) : 0;
+                    $after = $before + intval($payment['amount']);
+                    if ($w) {
+                        $pdo->prepare("UPDATE wallets SET balance=?,total_deposit=total_deposit+?,updated_at=NOW() WHERE user_id=?")->execute([$after,intval($payment['amount']),$uid]);
+                    } else {
+                        $pdo->prepare("INSERT INTO wallets (user_id,balance,total_deposit,created_at) VALUES (?,?,?,NOW())")->execute([$uid,$after,intval($payment['amount'])]);
+                    }
+                }
+                
+                $ref = 'PAYOS_' . $orderCode;
+                $txType = $type === 'deposit' ? 'deposit' : 'payment';
+                $desc2 = $type === 'subscription' ? 'Đăng ký gói '.($plan['name']??'').' (QR)' : 'Nạp tiền (QR)';
+                $pdo->prepare("INSERT INTO wallet_transactions (user_id,type,amount,balance_before,balance_after,description,reference_id,`status`,created_at) VALUES (?,?,?,?,?,?,?,'completed',NOW())")->execute([$uid,$txType,intval($payment['amount']),$before,$after,$desc2,$ref]);
+                
+                $pdo->commit();
+                auditLog($uid, 'payos_poll_ok', "orderCode=$orderCode type=$type");
+            } catch (Throwable $e) {
+                if (isset($pdo) && $pdo->inTransaction()) $pdo->rollBack();
+            }
+            
+            wOk('OK', ['status' => 'PAID', 'message' => 'Thanh toán thành công!']);
+        }
+        wOk('OK', ['status' => $payosData['status'] ?? 'PENDING', 'message' => 'Đang chờ thanh toán']);
+    }
 }
 
 // ============================================
@@ -459,73 +523,6 @@ if ($method === 'POST') {
             'amount' => $result['amount'] ?? $amount,
             'orderCode' => $result['orderCode'] ?? $orderCode,
         ]);
-    }
-
-    // PAYOS: CHECK PAYMENT STATUS
-    if ($action === 'payos_check') {
-        require_once __DIR__ . '/../includes/payos.php';
-        
-        $orderCode = intval($_GET['order_code'] ?? 0);
-        if (!$orderCode) wErr('Missing order_code');
-        
-        $payment = $db->fetchOne("SELECT * FROM payos_payments WHERE order_code=? AND user_id=?", [$orderCode, $uid]);
-        if (!$payment) wErr('Không tìm thấy thanh toán');
-        
-        if ($payment['status'] === 'completed') {
-            wOk('OK', ['status' => 'PAID', 'message' => 'Thanh toán thành công!']);
-        }
-        
-        // Check payOS API for real-time status
-        if (!empty(PAYOS_CLIENT_ID)) {
-            $payosData = payosGetPayment($orderCode);
-            if ($payosData && ($payosData['status'] === 'PAID' || $payosData['status'] === 'COMPLETED')) {
-                // Activate subscription/deposit
-                $planId = intval($payment['plan_id']);
-                $type = $payment['type'] ?? 'subscription';
-                
-                try {
-                    $pdo = db()->getConnection();
-                    $pdo->beginTransaction();
-                    $pdo->prepare("UPDATE payos_payments SET `status`='completed',paid_at=NOW() WHERE id=?")->execute([$payment['id']]);
-                    
-                    if ($type === 'subscription' && $planId > 0) {
-                        $planStmt = $pdo->prepare("SELECT * FROM subscription_plans WHERE id=?");
-                        $planStmt->execute([$planId]);
-                        $plan = $planStmt->fetch(\PDO::FETCH_ASSOC);
-                        if ($plan) {
-                            $pdo->prepare("UPDATE user_subscriptions SET `status`='cancelled' WHERE user_id=? AND `status`='active'")->execute([$uid]);
-                            $pdo->prepare("INSERT INTO user_subscriptions (user_id,plan_id,`status`,started_at,expires_at,auto_renew) VALUES (?,?,'active',NOW(),DATE_ADD(NOW(),INTERVAL ? DAY),0)")->execute([$uid,$planId,intval($plan['duration_days'])]);
-                        }
-                    } elseif ($type === 'deposit') {
-                        // Add balance
-                        $wallet = $pdo->prepare("SELECT balance FROM wallets WHERE user_id=? FOR UPDATE");
-                        $wallet->execute([$uid]);
-                        $w = $wallet->fetch(\PDO::FETCH_ASSOC);
-                        $before = $w ? floatval($w['balance']) : 0;
-                        $after = $before + intval($payment['amount']);
-                        if ($w) {
-                            $pdo->prepare("UPDATE wallets SET balance=?,updated_at=NOW() WHERE user_id=?")->execute([$after,$uid]);
-                        } else {
-                            $pdo->prepare("INSERT INTO wallets (user_id,balance,created_at) VALUES (?,?,NOW())")->execute([$uid,$after]);
-                        }
-                    }
-                    
-                    $ref = 'PAYOS_' . $orderCode;
-                    $desc2 = $type === 'subscription' ? 'Đăng ký gói '.($plan['name']??'').' (QR)' : 'Nạp tiền (QR)';
-                    $pdo->prepare("INSERT INTO wallet_transactions (user_id,type,amount,balance_before,balance_after,description,reference_id,`status`,created_at) VALUES (?,'payment',?,?,?,?,?,'completed',NOW())")->execute([$uid,intval($payment['amount']),$before??0,$after??0,$desc2,$ref]);
-                    
-                    $pdo->commit();
-                    auditLog($uid, 'payos_poll_ok', "orderCode=$orderCode type=$type");
-                } catch (Throwable $e) {
-                    if (isset($pdo) && $pdo->inTransaction()) $pdo->rollBack();
-                }
-                
-                wOk('OK', ['status' => 'PAID', 'message' => 'Thanh toán thành công!']);
-            }
-            wOk('OK', ['status' => $payosData['status'] ?? 'PENDING', 'message' => 'Đang chờ thanh toán']);
-        }
-        
-        wOk('OK', ['status' => $payment['status']]);
     }
 }
 

@@ -156,18 +156,10 @@ async function startPayOS(){
     document.getElementById("payLoading").style.display="none";
     if(!d.success){alert("❌ "+d.message);document.getElementById("payFoot").style.display="flex";btn.disabled=false;btn.innerHTML='<i class="fas fa-qrcode" style="margin-right:6px"></i>Thử lại';return;}
     payOrderCode=d.data.orderCode;
-    // Show QR
-    var qrData=d.data.qrCode;
+    // Show QR - use payOS checkout URL as QR source (works with all banks)
     var qrImg=document.getElementById("qrImg");
-    if(qrData&&qrData.length>20){
-      // Generate QR image from VietQR data string
-      qrImg.src="https://img.vietqr.io/image/970422-"+d.data.accountNumber+"-qr_only.png?amount="+d.data.amount+"&addInfo="+encodeURIComponent(qrData.substring(qrData.length-20));
-      // Fallback: use payOS checkout URL as QR
-      qrImg.onerror=function(){this.src="https://api.qrserver.com/v1/create-qr-code/?size=200x200&data="+encodeURIComponent(d.data.checkoutUrl);};
-    }else{
-      qrImg.src="https://api.qrserver.com/v1/create-qr-code/?size=200x200&data="+encodeURIComponent(d.data.checkoutUrl);
-    }
-    document.getElementById("payAccInfo").textContent=d.data.accountName+" · "+d.data.accountNumber;
+    qrImg.src="https://api.qrserver.com/v1/create-qr-code/?size=250x250&data="+encodeURIComponent(d.data.checkoutUrl);
+    document.getElementById("payAccInfo").textContent=(d.data.accountName||"")+(d.data.accountNumber?" · "+d.data.accountNumber:"");
     document.getElementById("qrWrap").style.display="block";
     // Also show checkout link
     document.getElementById("payFoot").style.display="flex";

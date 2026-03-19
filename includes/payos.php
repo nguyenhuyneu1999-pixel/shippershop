@@ -42,7 +42,11 @@ function payosVerifyWebhook($body) {
 }
 
 function payosOrderCode($userId, $planId) {
-    return intval((time() - 1700000000) * 100 + $userId % 100);
+    // Max safe integer: 9007199254740991
+    // Format: YYYYMMDD + HHMMSS + userId(4 digits) = 18 digits max
+    // Simplified: timestamp_offset * 10000 + userId * 10 + planId
+    $ts = time() - 1700000000; // ~74M seconds, fits in 8 digits
+    return intval($ts * 10000 + ($userId % 1000) * 10 + ($planId % 10));
 }
 
 function payosHTTP($method, $path, $body = null) {
