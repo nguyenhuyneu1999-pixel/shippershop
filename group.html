@@ -591,51 +591,110 @@ function uploadGroupImg(type,input){
 // Comment bottom sheet
 function openGhiChu(pid){
   var old=document.getElementById("gcOverlay2");if(old)old.remove();
+  window._gcPid2=pid;window._gcRpl2=null;
   var ov=document.createElement("div");
-  ov.id="gcOverlay2";ov.style.cssText="position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:2000;display:flex;align-items:flex-end;justify-content:center;";
-  ov.onclick=function(e){if(e.target===ov)closeComment();};
+  ov.id="gcOverlay2";
+  ov.style.cssText="position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:2000;display:flex;align-items:flex-end;justify-content:center;backdrop-filter:blur(2px)";
+  ov.onclick=function(e){if(e.target===ov)gcClose2();};
   var sh=document.createElement("div");
-  sh.style.cssText="background:#fff;width:100%;max-width:600px;max-height:80vh;border-radius:16px 16px 0 0;display:flex;flex-direction:column;overflow:hidden;";
-  sh.innerHTML="<div style='padding:12px 16px;border-bottom:1px solid #e4e6eb;display:flex;align-items:center'><h3 style='flex:1;font-size:16px;font-weight:700;margin:0'>Ghi chú</h3><button onclick='closeComment()' style='background:#e4e6eb;border:none;width:30px;height:30px;border-radius:50%;cursor:pointer;font-size:14px'><i class='fas fa-times'></i></button></div>"
-  +"<div id='gcCmts2' style='flex:1;overflow-y:auto;padding:8px'><div style='text-align:center;padding:30px;color:#999'><i class='fas fa-spinner fa-spin'></i></div></div>"
-  +"<div style='display:flex;gap:8px;padding:10px 12px calc(10px + env(safe-area-inset-bottom));border-top:1px solid #e4e6eb'><input id='gcInput2' style='flex:1;padding:8px 14px;border-radius:20px;border:1px solid #e4e6eb;font-size:14px;outline:none' placeholder='Viết bình luận...' onkeydown='if(event.key===\"Enter\")sendGroupComment("+pid+")'><button onclick='sendGroupComment("+pid+")' style='background:#7C3AED;color:#fff;border:none;border-radius:50%;width:32px;height:32px;font-size:14px;cursor:pointer'><i class='fas fa-paper-plane'></i></button></div>";
+  sh.style.cssText="background:#fff;width:100%;max-width:600px;max-height:85vh;border-radius:16px 16px 0 0;display:flex;flex-direction:column;overflow:hidden";
+  sh.innerHTML="<div style='width:36px;height:4px;background:#ddd;border-radius:2px;margin:10px auto 0'></div>"
+    +"<div style='padding:12px 16px 8px;border-bottom:1px solid #e4e6eb;display:flex;align-items:center'><h3 style='flex:1;font-size:16px;font-weight:700;margin:0'>Ghi ch\u00fa</h3><button onclick='gcClose2()' style='background:#e4e6eb;border:none;width:30px;height:30px;border-radius:50%;cursor:pointer;font-size:14px'>&times;</button></div>"
+    +"<div id='gcCmts2' style='flex:1;overflow-y:auto;padding:8px 0'><div style='text-align:center;padding:30px;color:#999'><i class='fas fa-spinner fa-spin'></i></div></div>"
+    +"<div id='gcRplBar2' style='display:none;padding:6px 16px;background:#f0f2f5;font-size:12px;color:#65676B'><span>Tr\u1ea3 l\u1eddi <b id='gcRplName2'></b></span> <a onclick='gcCancelRpl2()' style='color:#7C3AED;font-weight:700;cursor:pointer;margin-left:8px'>H\u1ee7y</a></div>"
+    +"<div style='display:flex;gap:8px;padding:10px 12px;border-top:1px solid #e4e6eb'><input id='gcInput2' style='flex:1;padding:8px 14px;border-radius:20px;border:1px solid #e4e6eb;font-size:14px;outline:none;font-family:inherit' placeholder='Vi\u1ebft ghi ch\u00fa...' onkeydown='if(event.key==="Enter")gcSend2()'><button onclick='gcSend2()' style='background:#7C3AED;color:#fff;border:none;border-radius:50%;width:36px;height:36px;font-size:14px;cursor:pointer;flex-shrink:0'><i class='fas fa-paper-plane'></i></button></div>";
   ov.appendChild(sh);document.body.appendChild(ov);
-  // Load comments
-  apiFetch("/api/groups.php?action=comments&post_id="+pid).then(function(d){
+  gcLoadCmts2(pid);
+}
+
+function gcClose2(){var ov=document.getElementById("gcOverlay2");if(ov)ov.remove();window._gcPid2=null;window._gcRpl2=null;}
+
+function gcLoadCmts2(pid){
+  apiFetch("/api/groups.php?action=comments&post_id="+pid+"&_t="+Date.now()).then(function(d){
     var wrap=document.getElementById("gcCmts2");
-    if(!d.success||!d.data||!d.data.length){wrap.innerHTML="<div style='text-align:center;padding:30px;color:#999'>Chưa có bình luận</div>";return;}
-    var h="";d.data.forEach(function(c){
-      var av=c.user_avatar?"<img src='"+esc(c.user_avatar)+"' style='width:28px;height:28px;border-radius:50%;object-fit:cover'>":"<div style='width:28px;height:28px;border-radius:50%;background:#e4e6eb;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700'>"+esc((c.user_name||"U")[0])+"</div>";
-      h+="<div style='display:flex;gap:8px;padding:6px 8px'>"+av+"<div><div style='background:#f0f2f5;border-radius:18px;padding:6px 12px;display:inline-block'><div style='font-weight:700;font-size:13px'>"+esc(c.user_name)+"</div><div style='font-size:14px'>"+esc(c.content)+"</div></div><div style='font-size:11px;color:#65676B;padding:2px 12px'>"+ago(c.created_at)+"</div></div></div>";
-    });
+    if(!wrap)return;
+    if(!d.success||!d.data||!d.data.length){wrap.innerHTML="<div style='text-align:center;padding:30px;color:#999'>Ch\u01b0a c\u00f3 ghi ch\u00fa</div>";return;}
+    var flat=d.data,map={},list=[];
+    flat.forEach(function(c){map[c.id]=c;});
+    function addF(cc,depth,pn){
+      list.push({c:cc,dp:Math.min(depth,1),rpl:depth>0?pn:null});
+      flat.filter(function(x){return parseInt(x.parent_id)===parseInt(cc.id);}).forEach(function(r){addF(r,depth+1,cc.user_name);});
+    }
+    flat.filter(function(c){return !c.parent_id||parseInt(c.parent_id)<=0||!map[c.parent_id];}).forEach(function(c){addF(c,0,null);});
+    var h="";
+    list.forEach(function(item){h+=gcRenderCmt2(item.c,item.dp,item.rpl);});
     wrap.innerHTML=h;
+  }).catch(function(err){console.error("Load comments error:",err);});
+}
+
+function gcRenderCmt2(c,dp,rplTo){
+  var sz=dp>0?22:28;
+  var indent=dp>0?"padding-left:20px;margin-left:14px;border-left:2px solid #e4e6eb":"";
+  var av=c.user_avatar
+    ?"<img src='"+esc(c.user_avatar)+"' style='width:"+sz+"px;height:"+sz+"px;border-radius:50%;object-fit:cover;flex-shrink:0'>"
+    :"<div style='width:"+sz+"px;height:"+sz+"px;border-radius:50%;background:#e4e6eb;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;flex-shrink:0'>"+esc((c.user_name||"U")[0])+"</div>";
+  var lk=c.user_vote==="up"||c.user_liked;
+  var n=parseInt(c.likes_count)||0;
+  var sn=esc(c.user_name||"");
+  var rplTag=rplTo?"<span style='color:#7C3AED;font-size:11px'>\u21a9 "+esc(rplTo)+"</span> ":"";
+  return "<div style='display:flex;gap:6px;padding:4px 16px;"+indent+"'>"+av
+    +"<div style='flex:1;min-width:0'>"
+    +"<div style='background:#f0f2f5;border-radius:18px;padding:6px 12px;display:inline-block;max-width:100%'>"
+    +"<div style='font-weight:700;font-size:13px'>"+sn+"</div>"
+    +"<div style='font-size:14px;line-height:1.4;margin-top:1px'>"+rplTag+esc(c.content)+"</div>"
+    +"</div>"
+    +"<div style='display:flex;gap:12px;padding:2px 12px;font-size:12px;color:#65676B'>"
+    +"<span>"+ago(c.created_at)+"</span>"
+    +"<a style='color:"+(lk?"#7C3AED":"#65676B")+";text-decoration:none;font-weight:600;cursor:pointer' onclick='gcLikeCmt2("+c.id+",this)'>Th\u00e0nh c\u00f4ng"+(n>0?" \u00b7 "+n:"")+"</a>"
+    +"<a style='color:#65676B;text-decoration:none;font-weight:600;cursor:pointer' onclick='gcSetRpl2("+c.id+",""+sn.replace(/"/g,"&quot;")+"")'>Ghi ch\u00fa</a>"
+    +"</div></div></div>";
+}
+
+function gcLikeCmt2(cid,el){
+  if(!CU){toast("\u0110\u0103ng nh\u1eadp!");return;}
+  apiFetch("/api/groups.php?action=like_comment",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({comment_id:cid})}).then(function(d){
+    if(d.success){
+      var liked=d.data.liked;
+      var n=parseInt(d.data.likes_count)||0;
+      el.style.color=liked?"#7C3AED":"#65676B";
+      el.textContent="Th\u00e0nh c\u00f4ng"+(n>0?" \u00b7 "+n:"");
+    }
   });
 }
-function closeComment(){var ov=document.getElementById("gcOverlay2");if(ov)ov.remove();}
-function sendGroupComment(pid){
-  if(!CU)return;
+
+function gcSetRpl2(cid,name){
+  window._gcRpl2=cid;
+  document.getElementById("gcRplBar2").style.display="block";
+  document.getElementById("gcRplName2").textContent=name;
+  document.getElementById("gcInput2").focus();
+  document.getElementById("gcInput2").placeholder="Tr\u1ea3 l\u1eddi "+name+"...";
+}
+
+function gcCancelRpl2(){
+  window._gcRpl2=null;
+  document.getElementById("gcRplBar2").style.display="none";
+  document.getElementById("gcInput2").placeholder="Vi\u1ebft ghi ch\u00fa...";
+}
+
+function gcSend2(){
+  if(!CU){toast("\u0110\u0103ng nh\u1eadp!");return;}
+  var pid=window._gcPid2;if(!pid)return;
   var inp=document.getElementById("gcInput2");var ct=inp.value.trim();if(!ct)return;
   inp.value="";
-  apiFetch("/api/groups.php?action=comment",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({post_id:pid,content:ct})}).then(function(d){
+  var body={post_id:pid,content:ct};
+  if(window._gcRpl2)body.parent_id=window._gcRpl2;
+  gcCancelRpl2();
+  apiFetch("/api/groups.php?action=comment",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(body)}).then(function(d){
     if(d.success){
-      toast("Đã bình luận!");
-      // Reload comments with cache-bust
-      var wrap=document.getElementById("gcCmts2");
-      if(wrap)wrap.innerHTML="<div style='text-align:center;padding:20px;color:#999'><i class='fas fa-spinner fa-spin'></i></div>";
-      apiFetch("/api/groups.php?action=comments&post_id="+pid+"&_t="+Date.now()).then(function(d2){
-        if(!d2.success||!d2.data||!d2.data.length){if(wrap)wrap.innerHTML="<div style='text-align:center;padding:20px;color:#999'>Chưa có bình luận</div>";return;}
-        var h="";d2.data.forEach(function(c){
-          var av=c.user_avatar?"<img src='"+esc(c.user_avatar)+"' style='width:28px;height:28px;border-radius:50%;object-fit:cover'>":"<div style='width:28px;height:28px;border-radius:50%;background:#e4e6eb;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700'>"+esc((c.user_name||"U")[0])+"</div>";
-          h+="<div style='display:flex;gap:8px;padding:6px 8px'>"+av+"<div><div style='background:#f0f2f5;border-radius:18px;padding:6px 12px;display:inline-block'><div style='font-weight:700;font-size:13px'>"+esc(c.user_name)+"</div><div style='font-size:14px'>"+esc(c.content)+"</div></div><div style='font-size:11px;color:#65676B;padding:2px 12px'>"+ago(c.created_at)+"</div></div></div>";
-        });
-        if(wrap)wrap.innerHTML=h;
-        wrap.scrollTop=wrap.scrollHeight;
-      });
-      var card=document.getElementById("P"+pid);if(card){var s=card.querySelectorAll(".pa3-stats span");if(s.length>=2){var cur=parseInt(s[1].textContent)||0;s[1].textContent=(cur+1)+" ghi ch\u00fa";}}
-    }
-    else toast(d.message||"L\u1ed7i");
-  }).catch(function(err){console.error("Fetch error:",err);toast("L\u1ed7i k\u1ebft n\u1ed1i");});
+      toast("\u0110\u00e3 ghi ch\u00fa!");
+      gcLoadCmts2(pid);
+      var card=document.getElementById("GP"+pid);
+      if(card){var s=card.querySelectorAll(".pa3-stats span");if(s.length>=2){var cur=parseInt(s[1].textContent)||0;s[1].textContent=(cur+1)+" ghi ch\u00fa";}}
+    }else{toast(d.message||"L\u1ed7i");inp.value=ct;}
+  }).catch(function(){toast("L\u1ed7i k\u1ebft n\u1ed1i");inp.value=ct;});
 }
+
+
 
 
 </script>

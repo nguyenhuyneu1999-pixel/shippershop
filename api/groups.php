@@ -136,8 +136,41 @@ if ($method === 'GET') {
 
     if ($action === 'comments') {
         $pid = intval($_GET['post_id'] ?? 0);
+        $uid = 0;
+        try { $uid = getAuthUserId(); } catch(Throwable $e) {}
         $cmts = $d->fetchAll("SELECT c.*, u.fullname as user_name, u.avatar as user_avatar, u.username FROM group_post_comments c JOIN users u ON c.user_id = u.id WHERE c.post_id = ? AND c.status = 'active' ORDER BY c.created_at ASC", [$pid]);
+        if ($cmts && $uid) {
+            $cids = array_column($cmts, 'id');
+            if ($cids) {
+                $ph = implode(',', array_fill(0, count($cids), '?'));
+                $liked = $d->fetchAll("SELECT comment_id FROM group_post_comment_likes WHERE user_id = ? AND comment_id IN ($ph)", array_merge([$uid], $cids));
+                $likedSet = [];
+                foreach ($liked as $l) $likedSet[$l['comment_id']] = true;
+                foreach ($cmts as &$cm) {
+                    $cm['user_vote'] = isset($likedSet[$cm['id']]) ? 'up' : null;
+                    $cm['user_liked'] = isset($likedSet[$cm['id']]);
+                }
+            }
+        }
         gOk('OK', $cmts ?: []);
+    }
+
+    if ($action === 'like_comment') {
+        $uid = getAuthUserId();
+        $cid = intval($input['comment_id'] ?? 0);
+        if (!$cid) { echo json_encode(['success'=>false,'message'=>'Missing comment_id']); exit; }
+        $exists = $d->fetchOne("SELECT id FROM group_post_comment_likes WHERE comment_id = ? AND user_id = ?", [$cid, $uid]);
+        if ($exists) {
+            $d->query("DELETE FROM group_post_comment_likes WHERE comment_id = ? AND user_id = ?", [$cid, $uid]);
+            $d->query("UPDATE group_post_comments SET likes_count = GREATEST(likes_count - 1, 0) WHERE id = ?", [$cid]);
+            $cnt = $d->fetchOne("SELECT likes_count FROM group_post_comments WHERE id = ?", [$cid]);
+            gOk('OK', ['liked' => false, 'likes_count' => $cnt ? $cnt['likes_count'] : 0]);
+        } else {
+            $d->query("INSERT IGNORE INTO group_post_comment_likes (comment_id, user_id) VALUES (?, ?)", [$cid, $uid]);
+            $d->query("UPDATE group_post_comments SET likes_count = likes_count + 1 WHERE id = ?", [$cid]);
+            $cnt = $d->fetchOne("SELECT likes_count FROM group_post_comments WHERE id = ?", [$cid]);
+            gOk('OK', ['liked' => true, 'likes_count' => $cnt ? $cnt['likes_count'] : 0]);
+        }
     }
 
     if ($action === 'search') {
