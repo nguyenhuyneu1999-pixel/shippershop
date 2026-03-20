@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <html lang="vi">
 <head>
-<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta charset="UTF-8">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700&display=swap" rel="stylesheet">
 <meta name="theme-color" content="#7C3AED">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -12,6 +12,7 @@
 <link rel="preload" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
 <noscript><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"></noscript>
 <style>
+
 /* Post card buttons (unified) */
 :root{--primary:#7C3AED;--bg:#f0f2f5;--card:#fff;--border:#e4e6eb;--text:#1C1C1C;--muted:#65676B}
 /* Create area - EXACT copy from index.html */
@@ -149,18 +150,51 @@ body{background:var(--bg);font-family:'Be Vietnam Pro',-apple-system,BlinkMacSys
 .pa3-btn{flex:1;display:flex;align-items:center;justify-content:center;gap:4px;padding:10px 4px;border:none;background:#fff;cursor:pointer;font-size:13px;font-weight:600;color:#65676B;border-right:1px solid #e4e6eb;transition:background .15s;overflow:hidden;white-space:nowrap;min-width:0;}
 .pa3-btn:last-child{border-right:none;}
 .pa3-btn:active,.pa3-btn.pa3-active{background:#EDE9FE;color:#7C3AED;}
+
 </style>
+</head>
+<body>
+
+<!-- Header -->
+<div class="gh" id="groupHeader">
+<button class="gh-back" onclick="history.back()"><i class="fas fa-arrow-left"></i></button>
+<div style="flex:1"><div class="gh-name" id="ghName">...</div></div>
+<div class="gh-icons">
+<button class="gh-icon" onclick="shareGroup()"><i class="fas fa-share-alt"></i></button>
+<button class="gh-join join" id="ghJoin" onclick="toggleJoin()">Tham gia</button>
+</div>
+</div>
+
+<!-- Banner -->
+<div class="g-banner" id="gBanner"></div>
+
+<!-- Tabs -->
+<div class="g-tabs">
+<div class="g-tab active" onclick="switchTab('posts',this)">Bài viết</div>
+<div class="g-tab" onclick="switchTab('about',this)">Giới thiệu</div>
+<div class="g-tab" onclick="switchTab('leaderboard',this)">Xếp hạng</div>
+</div>
+
+<!-- Tab contents -->
+<div id="tabPosts"></div>
+<div id="tabAbout" style="display:none"></div>
+<div id="tabLeaderboard" style="display:none"></div>
+
+<!-- Post modal (fallback) -->
+<div class="pm-overlay" id="pmOverlay" onclick="if(event.target===this)closePM()">
+<div class="pm-modal">
+<div class="pm-head"><h3>Tạo bài viết</h3><button class="pm-close" onclick="closePM()"><i class="fas fa-times"></i></button></div>
+<textarea class="pm-ta" id="pmText" placeholder="Bạn đang nghĩ gì?" oninput="document.getElementById('pmSend').disabled=!this.value.trim()"></textarea>
+<button class="pm-submit" id="pmSend" disabled onclick="submitPost()">Đăng bài</button>
+</div>
+</div>
+
+<!-- Toast -->
+<div class="toast" id="toast"></div>
+
+<!-- Main JS -->
 <script>
-if('serviceWorker' in navigator){
-  navigator.serviceWorker.getRegistrations().then(function(regs){
-    regs.forEach(function(r){r.unregister();});
-  });
-  caches.keys().then(function(names){
-    names.forEach(function(n){caches.delete(n);});
-  });
-}
-</script>
-<script>
+
 /* === ShipperShop Group Page - Clean Rewrite === */
 var CU=JSON.parse(localStorage.getItem("user")||"null");
 var P=new URLSearchParams(location.search);
@@ -438,16 +472,20 @@ function uploadGroupImg(type,input){
 window.loadPosts=function(){loadPosts();};
 document.addEventListener("click",function(e){if(!e.target.closest(".post-dots")&&!e.target.closest(".post-menu")){document.querySelectorAll(".post-menu").forEach(function(m){m.style.display="none";});}});
 if(groupSlug||groupId)loadGroup();
+
 </script>
+
+<!-- Bottom nav -->
+<nav id="mobileBottomNav" role="navigation" aria-label="Mobile navigation">
+<a href="index.html"><i class="fas fa-home"></i><span>Trang chủ</span></a>
+<a href="groups.html" class="active"><i class="fas fa-users"></i><span>Cộng đồng</span></a>
+<a href="javascript:void(0)" class="mnav-fab-wrap"><span class="mnav-fab" onclick="if(typeof openPM==='function')openPM()"><i class="fas fa-plus"></i></span></a>
+<a href="messages.html"><i class="fas fa-comment-dots"></i><span>Tin nhắn</span></a>
+<a href="profile.html"><i class="fas fa-user"></i><span>Tài khoản</span></a>
+</nav>
 
 <script src="js/mobile.js"></script>
-<script>
-
-function reportP(pid){gTogMenu(pid);if(typeof toast==="function")toast("Đã gửi báo cáo!");}
-function delP(pid){if(!confirm("Xóa bài viết này?"))return;togMenu(pid);apiFetch("/api/groups.php?action=delete_post",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({post_id:pid})}).then(function(d){if(d.success){var el=document.getElementById("P"+pid);if(el)el.style.display="none";}});}
-
-document.addEventListener("click",function(e){if(!e.target.closest(".post-dots")&&!e.target.closest(".post-menu")){document.querySelectorAll(".post-menu").forEach(function(m){m.style.display="none";});}});
-</script>
-<script src="/js/image-viewer.js"></script><script src="/js/analytics.js"></script><script src="js/post-modal.js"></script>
+<script src="/js/analytics.js"></script>
+<script src="js/post-modal.js"></script>
 </body>
 </html>
