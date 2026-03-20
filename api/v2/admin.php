@@ -93,15 +93,19 @@ if($method==='GET'){
     if($action==='reports'){
         $st=$_GET['status']??'pending';
         $page=max(1,intval($_GET['page']??1));$limit=20;$offset=($page-1)*$limit;
-        $total=intval($d->fetchOne("SELECT COUNT(*) as c FROM post_reports WHERE `status`=?",[$st])['c']);
-        $rows=$d->fetchAll("SELECT r.*,u.fullname as reporter_name,p.content as post_content,p.user_id as post_owner_id,pu.fullname as post_owner_name FROM post_reports r LEFT JOIN users u ON r.user_id=u.id LEFT JOIN posts p ON r.post_id=p.id LEFT JOIN users pu ON p.user_id=pu.id WHERE r.`status`=? ORDER BY r.created_at DESC LIMIT $limit OFFSET $offset",[$st]);
+        try{
+            $total=intval($d->fetchOne("SELECT COUNT(*) as c FROM post_reports WHERE `status`=?",[$st])['c']);
+            $rows=$d->fetchAll("SELECT r.id,r.post_id,r.user_id,r.reason,r.detail,r.`status`,r.created_at,r.reviewed_at,u.fullname as reporter_name,p.content as post_content,p.user_id as post_owner_id,pu.fullname as post_owner_name FROM post_reports r LEFT JOIN users u ON r.user_id=u.id LEFT JOIN posts p ON r.post_id=p.id LEFT JOIN users pu ON p.user_id=pu.id WHERE r.`status`=? ORDER BY r.created_at DESC LIMIT $limit OFFSET $offset",[$st]);
+        }catch(\Throwable $e){
+            $total=0;$rows=[];
+        }
         echo json_encode(['success'=>true,'data'=>['reports'=>$rows,'meta'=>['page'=>$page,'per_page'=>$limit,'total'=>$total]]]);exit;
     }
 
     // --- Deposits list ---
     if($action==='deposits'){
         $st=$_GET['status']??'pending';
-        $rows=$d->fetchAll("SELECT wt.*,u.fullname,u.email FROM wallet_transactions wt LEFT JOIN users u ON wt.user_id=u.id WHERE wt.type='deposit' AND wt.`status`=? ORDER BY wt.created_at DESC LIMIT 50",[$st]);
+        try{$rows=$d->fetchAll("SELECT wt.*,u.fullname,u.email FROM wallet_transactions wt LEFT JOIN users u ON wt.user_id=u.id WHERE wt.type='deposit' AND wt.`status`=? ORDER BY wt.created_at DESC LIMIT 50",[$st]);}catch(\Throwable $e){$rows=[];}
         ok('OK',$rows);
     }
 
