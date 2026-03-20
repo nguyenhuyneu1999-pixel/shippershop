@@ -433,6 +433,7 @@ function fetchLeaderboard(){
 }
 
 // Post modal
+window.loadPosts=function(){fetchPosts();};
 function openPM(){
   if(!CU){location.href='login.html';return;}
   window._spmGroupId=GROUP?GROUP.id:null;
