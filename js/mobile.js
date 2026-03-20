@@ -201,9 +201,9 @@
 
   /* ---------- smooth page transitions ---------- */
   // Fade-in on load
-  document.body.classList.add('page-enter');
+  if(document.body)document.body.classList.add('page-enter');
   document.body.addEventListener('animationend', function() {
-    document.body.classList.remove('page-enter');
+    if(document.body)document.body.classList.remove('page-enter');
   }, { once: true });
 
   // Intercept nav clicks for smooth fade-out

@@ -84,7 +84,7 @@ d.innerHTML='<div class="spm-overlay" id="spmOverlay">'
 +'<input type="file" id="spmImg" style="display:none" accept="image/*" multiple>'
 +'<input type="file" id="spmCam" style="display:none" accept="image/*" capture="environment">'
 +'<input type="file" id="spmVid" style="display:none" accept="video/*">';
-document.body.appendChild(d);
+if(document.body)document.body.appendChild(d);
 
 document.getElementById("spmImg").onchange=function(){addSPMFiles(this);closeMediaPicker();};
 document.getElementById("spmCam").onchange=function(){addSPMFiles(this);closeMediaPicker();};
