@@ -1,5 +1,6 @@
 <?php
 session_start();
+define('DEBUG_MODE', true); // TEMP: show SQL errors
 require_once __DIR__ . '/../includes/db.php';
 require_once __DIR__ . '/../includes/functions.php';
 require_once __DIR__ . '/auth-check.php';
