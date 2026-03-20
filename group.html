@@ -11,6 +11,12 @@
 <link rel="preload" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
 <noscript><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"></noscript>
 <style>
+/* Post card buttons (unified) */
+.pa3-stats{display:flex;padding:2px 8px;margin:0;width:100%}.pa3-stats span{flex:1;text-align:center;font-size:11px;color:#65676B;padding:4px 2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0;line-height:1.3}
+.post-actions-3{display:flex;border-top:1px solid #e4e6eb;background:#fff}
+.pa3-btn{flex:1;display:flex;align-items:center;justify-content:center;gap:4px;padding:10px 4px;border:none;background:#fff;cursor:pointer;font-size:13px;font-weight:600;color:#65676B;border-right:1px solid #e4e6eb;transition:background .15s;overflow:hidden;white-space:nowrap;min-width:0}
+.pa3-btn:last-child{border-right:none}
+.pa3-btn:active,.pa3-btn.pa3-active{background:#EDE9FE;color:#7C3AED}
 :root{--primary:#7C3AED;--bg:#f0f2f5;--card:#fff;--border:#e4e6eb;--text:#1C1C1C;--muted:#65676B}
 *{margin:0;padding:0;box-sizing:border-box}
 body{background:var(--bg);font-family:'Be Vietnam Pro',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;color:var(--text);padding-bottom:80px}
@@ -144,11 +150,6 @@ body{background:var(--bg);font-family:'Be Vietnam Pro',-apple-system,BlinkMacSys
 .post-images.multi-img{display:flex;gap:2px;flex-wrap:wrap;}
 .post-img{width:100%;border-radius:0;display:block;}
 .post-img.multi{width:calc(50% - 1px);max-height:400px;object-fit:cover;}
-.pa3-stats{display:flex;padding:0;margin:0;width:100%;border:none;}.pa3-stats span{flex:1;text-align:center;font-size:11px;color:#65676B;padding:6px 2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0;line-height:1.2;}
-.post-actions-3{display:flex;border-top:1px solid #e4e6eb;background:#fff;}
-.pa3-btn{flex:1;display:flex;align-items:center;justify-content:center;padding:12px 0;border:none;background:#fff;cursor:pointer;font-size:14px;font-weight:600;color:#65676B;border-right:1px solid #e4e6eb;transition:background .15s;}
-.pa3-btn:last-child{border-right:none;}
-.pa3-btn:active,.pa3-btn.pa3-active{background:#EDE9FE;color:#7C3AED;}
 </style>
 </head>
 <body>
@@ -342,8 +343,57 @@ var _SC={"GHTK":"#00b14f","J&T":"#d32f2f","GHN":"#ff6600","Viettel Post":"#e21a1
 var _BT={"review":"b-review","question":"b-question","tip":"b-tip","post":"b-post"};
 var _BTxt={"review":"\u2b50 Review","question":"\u2753 H\u1ecfi \u0111\u00e1p","tip":"\ud83d\udca1 Tip"};
 
-// mkPost from shared JS (reddit-mkpost-1773927135.js)
-// Alias openComment → openGhiChu for group context
+// Group-specific mkPost (same visual as index.html, different API)
+function mkPost(p){
+  var uid=p.user_id;
+  var uName=p.user_name||"Người dùng";
+  var likes=parseInt(p.likes_count)||0;
+  var cmts=parseInt(p.comments_count)||0;
+  var shares=parseInt(p.shares_count)||0;
+  var liked=p.user_liked;
+  var firstChar=esc(uName).charAt(0).toUpperCase();
+  var av=p.user_avatar?"<a href='user.html?id="+uid+"'><img class='avatar-sm' src='"+esc(p.user_avatar)+"' onerror=\"this.outerHTML=\'<span class=avatar-sm>"+firstChar+"</span>\'\"></a>":"<a href='user.html?id="+uid+"'><span class='avatar-sm'>"+firstChar+"</span></a>";
+  var shipBadge="";
+  if(p.shipping_company){var sc=p.shipping_company;var sColors={"GHTK":"#00b14f","J&T":"#d32f2f","GHN":"#ff6600","Viettel Post":"#e21a1a","SPX":"#EE4D2D","Grab":"#00b14f","Be":"#5bc500","Gojek":"#00aa13"};shipBadge="<span style=\"font-size:11px;font-weight:700;color:"+(sColors[sc]||"#666")+"\">"+esc(sc)+"</span><span>\u00b7</span>";}
+  var body=esc(p.content||"");
+  var long=body.length>400;
+  var contentH="<div class='post-content"+(long?"":""+" full")+"' id='gpc"+p.id+"'>"+body+"</div>"+(long?"<span class='show-more' onclick=\"var el=document.getElementById(\'gpc"+p.id+"\');el.classList.toggle(\'full\');this.textContent=el.classList.contains(\'full\')?\'{Xem thêm ▼\':\'Thu gọn ▲\'\">Xem thêm ▼</span>":"");
+  var imgH="";
+  if(p.images){try{var a=JSON.parse(p.images);if(a&&a.length){imgH="<div class='post-images"+(a.length>1?" multi-img":"")+"'>";for(var i=0;i<Math.min(a.length,4);i++){imgH+="<img class='post-img' src='"+a[i]+"' loading='lazy' onerror=\"this.style.display=\'none\'\">"}imgH+="</div>";}}catch(x){}}
+  var canDel=CU&&parseInt(uid)===parseInt(CU.id);
+  return "<div class='post-card' id='GP"+p.id+"'>"
+    +"<div class='post-body'>"
+    +"<div class='post-meta'>"+av+"<div style='flex:1;min-width:0'><div style='display:flex;align-items:center;justify-content:space-between'><a href='user.html?id="+uid+"' class='post-author' style='text-decoration:none;color:#1a1a1a'>"+esc(uName)+"</a><button class='post-dots' onclick='event.stopPropagation();gTogMenu("+p.id+")'><i class='fas fa-ellipsis'></i></button></div><div style='font-size:12px;color:#999;display:flex;align-items:center;gap:4px'>"+shipBadge+"<span>"+ago(p.created_at)+"</span></div></div></div>"
+    +"<div class='post-menu' id='gpm"+p.id+"' style='display:none'>"+(canDel?"<div onclick='gDelP("+p.id+")'><i class='far fa-trash-can'></i> Xóa bài</div>":"")+"<div onclick='gTogMenu("+p.id+")'><i class='fas fa-times'></i> Đóng</div></div>"
+    +contentH+imgH
+    +"</div>"
+    +"<div class='pa3-stats'><span>"+(likes>0?fN(likes)+" thành công":"")+"</span><span>"+(cmts>0?fN(cmts)+" ghi chú":"")+"</span><span>"+(shares>0?fN(shares)+" chuyển tiếp":"")+"</span></div>"
+    +"<div class='post-actions-3'>"
+    +"<button class='pa3-btn"+(liked?" pa3-active":"")+"' onclick='gLike("+p.id+",this)'>Thành công</button>"
+    +"<button class='pa3-btn' onclick='openGhiChu("+p.id+")'>Ghi chú</button>"
+    +"<button class='pa3-btn' onclick='gShare("+p.id+")'>Chuyển tiếp</button>"
+    +"</div></div>";
+}
+function fN(n){if(n>=1e6)return(n/1e6).toFixed(1)+"M";if(n>=1e3)return(n/1e3).toFixed(1)+"K";return n;}
+function esc(t){if(!t)return"";return String(t).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");}
+function ago(dt){if(!dt)return"";var s=Math.floor((Date.now()-new Date(dt.replace(" ","T")+"Z").getTime())/1000);if(s<0)s=Math.abs(s);if(s<60)return s+" giây";if(s<3600)return Math.floor(s/60)+" phút";if(s<86400)return Math.floor(s/3600)+" giờ";if(s<604800)return Math.floor(s/86400)+" ngày";return new Date(dt).toLocaleDateString("vi-VN");}
+
+// Group-specific like (uses groups.php API)
+async function gLike(pid,btn){
+  if(!CU){toast("Đăng nhập!","warning");return;}
+  try{
+    var r=await apiFetch("/api/groups.php?action=like_post",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({post_id:pid})});
+    if(r.success){
+      var liked=r.data.liked;
+      btn.className="pa3-btn"+(liked?" pa3-active":"");
+      var card=document.getElementById("GP"+pid);
+      if(card){var ss=card.querySelectorAll(".pa3-stats span");if(ss[0])ss[0].textContent=(r.data.likes_count||0)>0?(r.data.likes_count)+" thành công":"";}
+    }
+  }catch(e){}
+}
+function gShare(pid){var u="https://shippershop.vn/group.html?id="+(GROUP?GROUP.id:"")+"#post-"+pid;if(navigator.share)navigator.share({url:u});else{navigator.clipboard.writeText(u);toast("Đã copy link!");}}
+function gTogMenu(pid){var m=document.getElementById("gpm"+pid);if(!m)return;var show=m.style.display==="none";document.querySelectorAll(".post-menu").forEach(function(el){el.style.display="none";});if(show)m.style.display="block";}
+function gDelP(pid){if(!confirm("Xóa bài viết này?"))return;gTogMenu(pid);apiFetch("/api/groups.php?action=delete_post",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({post_id:pid})}).then(function(d){if(d.success){var el=document.getElementById("GP"+pid);if(el)el.style.display="none";}});}
 
 
 
@@ -531,7 +581,6 @@ function sendGroupComment(pid){
 
 
 </script>
-<script src="js/reddit-mkpost-1773927135.js"></script>
 <script src="js/mobile.js"></script>
 <script>
 
