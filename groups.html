@@ -444,7 +444,7 @@ function createGroup(){
     var el=document.getElementById("dskCatList");if(!el||!d.success)return;
     var h="";
     d.data.forEach(function(c){
-      h+="<a href='javascript:void(0)' class='sb-link' onclick='showCategory(""+esc(c.slug)+"")'>"+c.icon+" "+esc(c.name)+"</a>";
+      h+="<a href='javascript:void(0)' class='sb-link' onclick='showCategory(\x22"+esc(c.slug)+"\x22)'>"+ c.icon+" "+esc(c.name)+"</a>";
     });
     el.innerHTML=h;
   }).catch(function(){});
