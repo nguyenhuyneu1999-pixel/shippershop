@@ -13,11 +13,12 @@ if($method==='GET'){
     $user=$d->fetchOne("SELECT id,fullname,username,avatar,cover_image,bio,shipping_company,address,created_at FROM users WHERE id=?",[$targetId]);
     if(!$user){echo json_encode(['success'=>false,'message'=>'Not found']);exit;}
     $pc=$d->fetchOne("SELECT COUNT(*) as c FROM posts WHERE user_id=? AND status='active'",[$targetId]);
-    $lk=$d->fetchOne("SELECT COALESCE(SUM(likes_count),0) as c FROM posts WHERE user_id=?",[$targetId]);
-    $glk=$d->fetchOne("SELECT COALESCE(SUM(likes_count),0) as c FROM group_posts WHERE user_id=?",[$targetId]);
+    $gpc=$d->fetchOne("SELECT COUNT(*) as c FROM group_posts WHERE user_id=? AND status='active'",[$targetId]);
+    $lk=$d->fetchOne("SELECT COALESCE(SUM(likes_count),0) as c FROM posts WHERE user_id=? AND status='active'",[$targetId]);
+    $glk=$d->fetchOne("SELECT COALESCE(SUM(likes_count),0) as c FROM group_posts WHERE user_id=? AND status='active'",[$targetId]);
     $fl=$d->fetchOne("SELECT COUNT(*) as c FROM follows WHERE following_id=?",[$targetId]);
     $fg=$d->fetchOne("SELECT COUNT(*) as c FROM follows WHERE follower_id=?",[$targetId]);
-    $user['post_count']=intval($pc['c']??0);
+    $user['post_count']=intval($pc['c']??0)+intval($gpc['c']??0);
     $user['total_success']=intval($lk['c']??0)+intval($glk['c']??0);
     $user['follower_count']=intval($fl['c']??0);
     $user['following_count']=intval($fg['c']??0);
