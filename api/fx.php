@@ -1,35 +1,31 @@
 <?php
 require_once __DIR__.'/../includes/db.php';
-header('Content-Type: application/json');
+header('Content-Type: text/plain');
 $d=db();
 
-// Simulate private message send: find conversation between user 3 and Ngô Thị Thảo
-$thao=$d->fetchOne("SELECT id FROM users WHERE fullname LIKE '%Ng%Th%Thảo%' LIMIT 1");
-$uid3=3; $oid=$thao?$thao['id']:0;
-echo "User 3 → Thảo (id=$oid)\n";
+// Check conversations type column default
+$cols = $d->fetchAll("SHOW COLUMNS FROM conversations WHERE Field='type'");
+echo "type column: ".json_encode($cols[0])."\n\n";
 
-// Step 1: Find conversation
+// Try INSERT without type - same as sendMsg does
 try{
-$cv=$d->fetchOne("SELECT * FROM conversations WHERE (user1_id=? AND user2_id=?) OR (user1_id=? AND user2_id=?)",[$uid3,$oid,$oid,$uid3]);
-echo "Conv: ".json_encode($cv)."\n";
-}catch(Throwable $e){echo "STEP1 ERROR: ".$e->getMessage()."\n";}
-
-// Step 2: Try INSERT message
-if($cv){
-  $cid=$cv['id'];
-  try{
-    $d->query("INSERT INTO messages (conversation_id,sender_id,content,created_at) VALUES (?,?,?,NOW())",[$cid,$uid3,"test debug"]);
-    echo "INSERT OK\n";
-    // Cleanup
-    $d->query("DELETE FROM messages WHERE conversation_id=? AND sender_id=? AND content='test debug'",[$cid,$uid3]);
-    echo "Cleaned up\n";
-  }catch(Throwable $e){echo "STEP2 ERROR: ".$e->getMessage()."\n";}
+  $d->query("INSERT INTO conversations (user1_id,user2_id,last_message,last_message_at,`status`) VALUES (999,998,'test',NOW(),'pending')");
+  $cid=$d->getLastInsertId();
+  echo "INSERT OK, id=$cid\n";
+  // cleanup
+  $d->query("DELETE FROM conversations WHERE id=?",[$cid]);
+  echo "Cleaned\n";
+}catch(Throwable $e){
+  echo "INSERT FAILED: ".$e->getMessage()."\n";
 }
 
-// Step 3: Check if any conversations have NULL ids that could cause issues
-$broken=$d->fetchAll("SELECT id,type,user1_id,user2_id,creator_id FROM conversations WHERE (type IS NULL OR type='') OR (user1_id IS NULL AND user2_id IS NULL AND creator_id IS NULL) LIMIT 5");
-echo "Broken convs: ".json_encode($broken)."\n";
-
-// Step 4: Check if the newly created group broke something
-$recent=$d->fetchAll("SELECT id,type,name,user1_id,user2_id,creator_id,`status` FROM conversations ORDER BY id DESC LIMIT 5");
-echo "Recent convs: ".json_encode($recent,JSON_PRETTY_PRINT)."\n";
+// Try INSERT with type
+try{
+  $d->query("INSERT INTO conversations (type,user1_id,user2_id,last_message,last_message_at,`status`) VALUES ('private',999,998,'test',NOW(),'pending')");
+  $cid=$d->getLastInsertId();
+  echo "INSERT WITH TYPE OK, id=$cid\n";
+  $d->query("DELETE FROM conversations WHERE id=?",[$cid]);
+  echo "Cleaned\n";
+}catch(Throwable $e){
+  echo "INSERT WITH TYPE FAILED: ".$e->getMessage()."\n";
+}
