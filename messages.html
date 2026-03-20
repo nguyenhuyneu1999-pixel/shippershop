@@ -588,13 +588,15 @@ function coCreateGroup(){
   if(!curOtherId){toast("Lỗi: không tìm thấy người dùng");return;}
   var partnerName=document.getElementById("chName").textContent||"";
   var myName=CU?CU.fullname:"";
-  var defaultName=myName+", "+partnerName;
-  var name=prompt("Tên nhóm chat:",defaultName);
-  if(!name||!name.trim())return;
-  fetch("/api/messages-api.php?action=create_group",{method:"POST",headers:{"Content-Type":"application/json"},credentials:"include",body:JSON.stringify({name:name.trim(),member_ids:[curOtherId]})}).then(function(r){return r.json();}).then(function(d){
-    if(d.success){toast("Đã tạo nhóm chat!");loadConvs();openGroupChat(d.data.conversation_id);}
+  var name=myName+", "+partnerName;
+  toast("Đang tạo nhóm...");
+  var tk=localStorage.getItem("token");
+  var hdrs={"Content-Type":"application/json"};
+  if(tk)hdrs["Authorization"]="Bearer "+tk;
+  fetch("/api/messages-api.php?action=create_group",{method:"POST",headers:hdrs,credentials:"include",body:JSON.stringify({name:name,member_ids:[curOtherId]})}).then(function(r){return r.json();}).then(function(d){
+    if(d.success&&d.data){toast("Đã tạo nhóm chat!");loadConvs();setTimeout(function(){openGroupChat(d.data.conversation_id);},500);}
     else{toast(d.message||"Lỗi tạo nhóm");}
-  }).catch(function(){toast("Lỗi kết nối");});
+  }).catch(function(e){toast("Lỗi kết nối: "+e.message);});
 }
 function coAddToGroup(){closeChatOpts();toast("Tính năng đang phát triển");}
 function coSharedGroups(){closeChatOpts();toast("Tính năng đang phát triển");}
@@ -705,6 +707,9 @@ openChatOpts=function(){
   if(isGroupChat){openGroupOpts();return;}
   document.getElementById("coLeaveGroup").style.display="none";
   document.getElementById("coGroupLink").style.display="none";
+  // Restore original onclick for 1-1 chat (undone by openGroupOpts)
+  document.getElementById("coCreateGroupLabel").parentNode.parentNode.onclick=function(){coCreateGroup();};
+  document.getElementById("coAddGroupLabel").parentNode.parentNode.onclick=function(){coAddToGroup();};
   _origOpenChatOpts();
 };
 
