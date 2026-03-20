@@ -4,6 +4,7 @@ const STATIC_ASSETS = [
   '/index.html',
   '/profile.html',
   '/groups.html',
+  '/group.html',
   '/messages.html',
   '/people.html',
   '/user.html',
@@ -13,7 +14,7 @@ const STATIC_ASSETS = [
   '/register.html',
   '/css/style.css',
   '/mobile.css',
-  '/js/reddit-mkpost-1773915587.js',
+  '/js/reddit-mkpost-1773927135.js',
   '/js/mobile.js',
   'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css',
 ];
