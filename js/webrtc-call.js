@@ -7,7 +7,7 @@ var ringtone;
 
 function initFB(){
   if(fbApp)return;
-  fbApp=firebase.initializeApp(FB_CFG);
+  fbApp=firebase.apps.length?firebase.app():firebase.initializeApp(FB_CFG);
   fbDb=firebase.database();
 }
 
