@@ -2,7 +2,12 @@
 require_once __DIR__.'/../includes/db.php';
 header('Content-Type: application/json');
 $pdo=db()->getConnection();
+$pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 
-// Check constraints
-$indexes=$pdo->query("SHOW INDEX FROM conversations WHERE Key_name='unique_pair'")->fetchAll(PDO::FETCH_ASSOC);
-echo json_encode(['indexes'=>$indexes], JSON_PRETTY_PRINT);
+// Drop unique_pair constraint (code already prevents duplicate private convs)
+try {
+    $pdo->exec("ALTER TABLE conversations DROP INDEX unique_pair");
+    echo json_encode(['status'=>'dropped unique_pair']);
+} catch(PDOException $e) {
+    echo json_encode(['status'=>'already dropped or error: '.$e->getMessage()]);
+}
