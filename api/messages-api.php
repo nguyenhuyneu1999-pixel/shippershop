@@ -55,7 +55,7 @@ if($action==="save_category"){
     $n=trim($in["name"]??"");$ic=trim($in["icon"]??"📁");$co=trim($in["color"]??"#0084ff");$ci=intval($in["id"]??0);
     if($n===""){echo json_encode(["success"=>false]);exit;}
     if($ci>0){db()->query("UPDATE chat_categories SET name=?,icon=?,color=? WHERE id=? AND user_id=?",[$n,$ic,$co,$ci,$uid]);}
-    else{db()->query("INSERT INTO chat_categories(user_id,name,icon,color)VALUES(?,?,?,?)",[$uid,$n,$ic,$co]);$ci=db()->getLastInsertId();}
+    else{db()->query("INSERT INTO chat_categories(user_id,name,icon,color)VALUES(?,?,?,?)",[$uid,$n,$ic,$co]);$ci=db()->getLastInsertId();if(!$ci){$r=db()->fetchOne("SELECT MAX(id) as m FROM chat_categories",[]);$ci=$r['m'];}}
     echo json_encode(["success"=>true,"data"=>["id"=>$ci]]);exit;
 }
 
@@ -111,6 +111,7 @@ if($action==="upload_message"){
             if(!$conv){
                 db()->query("INSERT INTO conversations(user1_id,user2_id,last_message,last_message_at,`status`)VALUES(?,?,?,NOW(),?)",[$userId,$toUserId,$content,"pending"]);
                 $convId=db()->getLastInsertId();
+                if(!$convId){$r=db()->fetchOne("SELECT id FROM conversations WHERE user1_id=? AND user2_id=? ORDER BY id DESC LIMIT 1",[$userId,$toUserId]);$convId=$r['id'];}
             } else { $convId=$conv["id"]; }
         }
         db()->query("UPDATE conversations SET last_message=?,last_message_at=NOW() WHERE id=?",[$content,$convId]);
@@ -141,6 +142,7 @@ if($action==="upload_message"){
         if(!$conv){
             db()->query("INSERT INTO conversations(user1_id,user2_id,last_message,last_message_at,`status`)VALUES(?,?,?,NOW(),?)",[$userId,$toUserId,$content,"pending"]);
             $convId=db()->getLastInsertId();
+            if(!$convId){$r=db()->fetchOne("SELECT id FROM conversations WHERE user1_id=? AND user2_id=? ORDER BY id DESC LIMIT 1",[$userId,$toUserId]);$convId=$r['id'];}
         } else { $convId=$conv["id"]; }
     }
     db()->query("UPDATE conversations SET last_message=?,last_message_at=NOW() WHERE id=?",[$content,$convId]);
@@ -316,6 +318,7 @@ if($action==='send'){
     if(!$member){echo json_encode(['success'=>false,'message'=>'Not a member']);exit;}
     $d->query("INSERT INTO messages (conversation_id,sender_id,content,type,created_at) VALUES (?,?,?,'text',NOW())",[$gid,$userId,$ct]);
     $mid=$d->getLastInsertId();
+    if(!$mid){$r=$d->fetchOne("SELECT MAX(id) as m FROM messages",[]);$mid=$r['m'];}
     $d->query("UPDATE conversations SET last_message=?,last_message_at=NOW() WHERE id=?",[$ct,$gid]);
     // Push to group members (except sender)
     try{
@@ -341,9 +344,11 @@ if($action==='send'){
     $st=$mut?'active':'pending';
     $d->query("INSERT INTO conversations (user1_id,user2_id,last_message,last_message_at,`status`) VALUES (?,?,?,NOW(),?)",[$userId,$oid,$ct,$st]);
     $cid=$d->getLastInsertId();
+    if(!$cid){$r=$d->fetchOne("SELECT id FROM conversations WHERE user1_id=? AND user2_id=? ORDER BY id DESC LIMIT 1",[$userId,$oid]);$cid=$r['id'];}
   }else{$cid=$cv['id'];$d->query("UPDATE conversations SET last_message=?,last_message_at=NOW() WHERE id=?",[$ct,$cid]);}
   $d->query("INSERT INTO messages (conversation_id,sender_id,content,created_at) VALUES (?,?,?,NOW())",[$cid,$userId,$ct]);
   $mid=$d->getLastInsertId();
+  if(!$mid){$r=$d->fetchOne("SELECT MAX(id) as m FROM messages",[]);$mid=$r['m'];}
   // Push notification to recipient
   try{
     require_once __DIR__.'/../includes/push-helper.php';
