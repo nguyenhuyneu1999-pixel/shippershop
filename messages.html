@@ -111,10 +111,7 @@ body{background:var(--bg);font-family:'Be Vietnam Pro',-apple-system,BlinkMacSys
 @media (min-width: 769px) {
   body { background: #e4e6eb !important; }
 }
-</style><script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
-<script src="js/webrtc-call.js"></script>
-</head><body>
+</style></head><body>
 <div class="list-view" id="listView">
 <div class="top-bar" id="topBar">
 <div class="top-header"><button class="top-back" onclick="history.back()"><i class="fas fa-arrow-left"></i></button><h1>Đoạn chat</h1><button class="top-btn"><i class="fas fa-user-group"></i></button></div>
@@ -135,7 +132,7 @@ body{background:var(--bg);font-family:'Be Vietnam Pro',-apple-system,BlinkMacSys
 </div>
 
 <div class="chat-view" id="chatView">
-<div class="ch-header"><button class="ch-back" onclick="backToList()"><i class="fas fa-arrow-left"></i></button><img class="ch-av" id="chAv" src="" onerror="this.style.display='none'"><div class="ch-info"><div class="ch-name" id="chName">...</div><div class="ch-sub"><span id="chStatus"></span><span id="chShip"></span></div></div><div class="ch-btns"><button class="ch-btn" onclick="if(isGroupChat){return;}if(!window.curOtherId){return;}SSCall.startCall(window.curOtherId,document.getElementById('chName')?.textContent,'',false)" id="btnCall"><i class="fas fa-phone"></i></button><button class="ch-btn" onclick="if(isGroupChat){return;}if(!window.curOtherId){return;}SSCall.startCall(window.curOtherId,document.getElementById('chName')?.textContent,'',true)" id="btnVideo"><i class="fas fa-video"></i></button><button class="ch-btn" onclick="openChatOpts()"><i class="fas fa-circle-info"></i></button></div></div>
+<div class="ch-header"><button class="ch-back" onclick="backToList()"><i class="fas fa-arrow-left"></i></button><img class="ch-av" id="chAv" src="" onerror="this.style.display='none'"><div class="ch-info"><div class="ch-name" id="chName">...</div><div class="ch-sub"><span id="chStatus"></span><span id="chShip"></span></div></div><div class="ch-btns"><button class="ch-btn" onclick="if(isGroupChat){return;}if(!window.curOtherId){return;}SSCall.startCall(window.curOtherId,(document.getElementById('chName')||{}).textContent||'','',false)" id="btnCall"><i class="fas fa-phone"></i></button><button class="ch-btn" onclick="if(isGroupChat){return;}if(!window.curOtherId){return;}SSCall.startCall(window.curOtherId,(document.getElementById('chName')||{}).textContent||'','',true)" id="btnVideo"><i class="fas fa-video"></i></button><button class="ch-btn" onclick="openChatOpts()"><i class="fas fa-circle-info"></i></button></div></div>
 <div class="ch-msgs" id="chMsgs"></div>
 <div id="pendingBannerChat" style="display:none"></div>
 <div class="ch-input-wrap" id="chInputWrap">
@@ -260,8 +257,9 @@ inp.value="";var c=document.getElementById("chMsgs");
 var empty=c.querySelector(".empty");if(empty)empty.remove();
 c.insertAdjacentHTML("beforeend","<div class='msg-row mine'><div class=msg-bubble>"+esc(ct)+"</div></div>");
 c.scrollTop=c.scrollHeight;
-try{var r=await fetch("/api/messages-api.php?action=send",{method:"POST",headers:{"Content-Type":"application/json"},credentials:"include",body:JSON.stringify({to_user_id:curOtherId,content:ct})});
-var d=await r.json();if(d.success&&!curConvId){curConvId=d.data.conversation_id;startPoll();}else if(!d.success){if(typeof handleApiError==="function"&&handleApiError(d)){}else if(typeof toast==="function")toast(d.message||"Lỗi","error");}}catch(e){}}
+try{var tk=localStorage.getItem("token");var hdrs={"Content-Type":"application/json"};if(tk)hdrs["Authorization"]="Bearer "+tk;
+var r=await fetch("/api/messages-api.php?action=send",{method:"POST",headers:hdrs,credentials:"include",body:JSON.stringify({to_user_id:curOtherId,content:ct})});
+var d=await r.json();if(d.success){if(!curConvId){curConvId=d.data.conversation_id;}startPoll();loadMsgs();}else{toast(d.message||"Không gửi được","error");}}catch(e){toast("Lỗi kết nối","error");}}
 
 function startPoll(){if(pollTimer)clearInterval(pollTimer);
 if(curConvId)pollTimer=setInterval(function(){loadMsgs();},5000);}
@@ -336,6 +334,7 @@ function ago(dt){if(!dt)return"";var s=Math.floor((new Date()-new Date(dt.replac
 <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
 <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
 <script src="js/call.js"></script>
+<script src="js/webrtc-call.js"></script>
 
 <div class="cat-overlay" id="catOverlay" onclick="if(event.target===this)closeCatManager()">
 <div class="cat-sheet">
@@ -661,7 +660,7 @@ function sendMsgGroup(){
   var empty=c.querySelector(".empty");if(empty)empty.remove();
   c.insertAdjacentHTML("beforeend","<div class='msg-row mine'><div><div class=msg-bubble>"+esc(ct)+"</div></div></div>");
   c.scrollTop=c.scrollHeight;
-  fetch("/api/messages-api.php?action=send",{method:"POST",headers:{"Content-Type":"application/json"},credentials:"include",body:JSON.stringify({group_id:curConvId,content:ct})}).then(function(r){return r.json();}).then(function(d){
+  (function(){var tk=localStorage.getItem("token");var hdrs={"Content-Type":"application/json"};if(tk)hdrs["Authorization"]="Bearer "+tk;return fetch("/api/messages-api.php?action=send",{method:"POST",headers:hdrs,credentials:"include",body:JSON.stringify({group_id:curConvId,content:ct})});})().then(function(r){return r.json();}).then(function(d){
     if(d.success)loadMsgs();
   });
 }
@@ -797,8 +796,10 @@ backToList=function(){
 // Override sendMsg for groups  
 var _origSendMsgFn=sendMsg;
 sendMsg=function(){
-  if(isGroupChat){sendMsgGroup();return;}
-  _origSendMsgFn();
+  try{
+    if(isGroupChat){sendMsgGroup();return;}
+    _origSendMsgFn();
+  }catch(e){console.error("sendMsg error:",e);}
 };
 
 function coLeaveGroup(){

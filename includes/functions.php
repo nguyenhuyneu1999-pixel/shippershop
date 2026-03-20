@@ -566,7 +566,7 @@ function getUserPlan($userId) {
         'badge' => $sub ? $sub['badge'] : null,
         'limits' => [
             'posts_per_day' => $isPlus ? 9999 : 10,
-            'messages_per_month' => $isPlus ? 999999 : 50,
+            'messages_per_month' => $isPlus ? 999999 : 500,
             'groups_max' => $isPlus ? 999 : 10,
             'marketplace_max' => $isPlus ? 20 : 3,
             'call_minutes_per_day' => $isPlus ? 9999 : 10,
