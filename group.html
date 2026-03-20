@@ -18,6 +18,12 @@
 .pa3-btn:last-child{border-right:none}
 .pa3-btn:active,.pa3-btn.pa3-active{background:#EDE9FE;color:#7C3AED}
 :root{--primary:#7C3AED;--bg:#f0f2f5;--card:#fff;--border:#e4e6eb;--text:#1C1C1C;--muted:#65676B}
+/* Create area - EXACT copy from index.html */
+.create-area{background:#fff;margin-top:8px;padding:8px 12px;display:flex;gap:8px;align-items:center}
+.create-input{flex:1;padding:8px 12px;border:1px solid var(--border);border-radius:4px;font-size:14px;cursor:pointer;background:#f6f7f8;outline:none;font-family:inherit}
+.create-input:hover{border-color:var(--primary)}
+.icon-btn{width:36px;height:36px;border:1px solid var(--border);border-radius:4px;background:none;cursor:pointer;font-size:16px;color:var(--muted);display:flex;align-items:center;justify-content:center}
+.icon-btn:hover{border-color:var(--primary);color:var(--primary)}
 *{margin:0;padding:0;box-sizing:border-box}
 body{background:var(--bg);font-family:'Be Vietnam Pro',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;color:var(--text);padding-bottom:80px}
 
@@ -88,13 +94,6 @@ body{background:var(--bg);font-family:'Be Vietnam Pro',-apple-system,BlinkMacSys
 .lb-score{font-size:14px;font-weight:600;color:var(--muted)}
 
 /* Create post area */
-.create-area{background:#fff;margin-top:8px;padding:10px 12px;display:flex;gap:8px;align-items:center}
-.create-area .post-av{width:36px;height:36px}
-.create-input{flex:1;padding:8px 12px;border:1px solid var(--border);border-radius:20px;font-size:14px;cursor:pointer;background:#f0f2f5;outline:none;color:#65676B;font-family:inherit}
-.create-input:hover{border-color:var(--primary)}
-.icon-btn{width:36px;height:36px;border-radius:50%;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:16px;background:none;color:#45bd62;flex-shrink:0}
-.icon-btn:active{background:#f0f2f5}
-.create-placeholder{flex:1;padding:8px 14px;border-radius:20px;background:var(--bg);font-size:14px;color:var(--muted)}
 
 /* Post modal */
 .pm-overlay{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:2000;display:none;align-items:flex-end;justify-content:center}
@@ -302,8 +301,8 @@ function loadPosts(){
   var html="";
   // Create post area
   if(GROUP.is_member&&CU){
-    var cuAv=CU.avatar?"<img src='"+CU.avatar+"' style='width:40px;height:40px;border-radius:50%;object-fit:cover'>":"<div class='post-av'>"+esc((CU.fullname||"?")[0])+"</div>";
-    html+="<div class='create-area'>"+cuAv+"<input class='create-input' type='text' placeholder='B\u1ea1n \u0111ang ngh\u0129 g\u00ec? Click \u0111\u1ec3 \u0111\u0103ng b\u00e0i...' readonly onclick='openPM()'><button class='icon-btn' onclick='openPM()' title='\u0110\u0103ng \u1ea3nh/video'><i class='fas fa-image'></i></button></div>";
+    var cuAv=CU.avatar?"<img src='"+CU.avatar+"' style='width:36px;height:36px;border-radius:50%;object-fit:cover;flex-shrink:0'>":"<div style='width:36px;height:36px;border-radius:50%;background:var(--primary);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:14px;flex-shrink:0'>"+esc((CU.fullname||"?")[0])+"</div>";
+    html+="<div class='create-area'>"+cuAv+"<input class='create-input' type='text' placeholder='B\u1ea1n \u0111ang ngh\u0129 g\u00ec? Click \u0111\u1ec3 \u0111\u0103ng b\u00e0i...' readonly onclick='openPM()'><button class='icon-btn' title='\u0110\u0103ng \u1ea3nh/video' onclick='openPM()'><i class='fas fa-image'></i></button><button class='icon-btn' title='Confession' onclick='openPM()'><i class='fas fa-mask'></i></button><button class='icon-btn' title='H\u1ecfi \u0111\u00e1p' onclick='openPM()'><i class='fas fa-question'></i></button></div>";
   }
   // Sort bar
   html+="<div class='sort-bar'>";
@@ -330,8 +329,9 @@ var grpPage=1,grpTotalPg=1;
 function fetchPosts(append){
   if(!append)grpPage=1;
   apiFetch("/api/groups.php?action=posts&group_id="+GROUP.id+"&sort="+curSort+"&page="+grpPage).then(function(d){
-    if(!d.success||!d.data.posts||!d.data.posts.length){
-      if(!append)document.getElementById("postsContainer").innerHTML="<p class='empty-msg'>Chưa có bài viết nào. Hãy là người đầu tiên!</p>";
+    if(!d||!d.success||!d.data||!d.data.posts||!d.data.posts.length){
+      if(!append)document.getElementById("postsContainer").innerHTML="<p class='empty-msg'>Chưa có bài viết. Hãy là người đầu tiên!</p>";
+      console.log("fetchPosts result:",d);
       return;
     }
     grpTotalPg=d.data.total_pages||1;
@@ -378,9 +378,7 @@ function mkPost(p){
     +"<button class='pa3-btn' onclick='gShare("+p.id+")'>Chuyển tiếp</button>"
     +"</div></div>";
 }
-function fN(n){if(n>=1e6)return(n/1e6).toFixed(1)+"M";if(n>=1e3)return(n/1e3).toFixed(1)+"K";return n;}
-function esc(t){if(!t)return"";return String(t).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");}
-function ago(dt){if(!dt)return"";var s=Math.floor((Date.now()-new Date(dt.replace(" ","T")+"Z").getTime())/1000);if(s<0)s=Math.abs(s);if(s<60)return s+" giây";if(s<3600)return Math.floor(s/60)+" phút";if(s<86400)return Math.floor(s/3600)+" giờ";if(s<604800)return Math.floor(s/86400)+" ngày";return new Date(dt).toLocaleDateString("vi-VN");}
+// fN, esc, ago defined in init block above
 
 // Group-specific like (uses groups.php API)
 async function gLike(pid,btn){
