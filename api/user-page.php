@@ -14,10 +14,11 @@ if($method==='GET'){
     if(!$user){echo json_encode(['success'=>false,'message'=>'Not found']);exit;}
     $pc=$d->fetchOne("SELECT COUNT(*) as c FROM posts WHERE user_id=? AND status='active'",[$targetId]);
     $lk=$d->fetchOne("SELECT COALESCE(SUM(likes_count),0) as c FROM posts WHERE user_id=?",[$targetId]);
+    $glk=$d->fetchOne("SELECT COALESCE(SUM(likes_count),0) as c FROM group_posts WHERE user_id=?",[$targetId]);
     $fl=$d->fetchOne("SELECT COUNT(*) as c FROM follows WHERE following_id=?",[$targetId]);
     $fg=$d->fetchOne("SELECT COUNT(*) as c FROM follows WHERE follower_id=?",[$targetId]);
     $user['post_count']=intval($pc['c']??0);
-    $user['karma']=intval($lk['c']??0);
+    $user['total_success']=intval($lk['c']??0)+intval($glk['c']??0);
     $user['follower_count']=intval($fl['c']??0);
     $user['following_count']=intval($fg['c']??0);
     $user['is_following']=false;$user['is_friend']=false;$user['friend_status']=null;
