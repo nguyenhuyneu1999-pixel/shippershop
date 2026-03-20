@@ -138,17 +138,17 @@ input:focus, textarea:focus, select:focus {
 }
 
 .logo {
-    font-size: 32px;
-    font-weight: bold;
-    text-transform: uppercase;
-    letter-spacing: 2px;
+    font-size: 20px;
+    font-weight: 800;
     display: flex;
     align-items: center;
-    gap: 10px;
+    text-decoration: none;
+    color: var(--primary, #7C3AED);
+    white-space: nowrap;
 }
 
 .logo span {
-    color: var(--accent);
+    color: var(--primary, #7C3AED);
 }
 
 .search-bar {
