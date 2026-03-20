@@ -101,3 +101,7 @@ RewriteRule ^ - [L]
 <IfModule LiteSpeed>
     CacheDisable public /api/
 </IfModule>
+
+
+# Security Headers (auto-added by audit)
+Header set Strict-Transport-Security "max-age=31536000; includeSubDomains"
