@@ -477,11 +477,11 @@ if(groupSlug||groupId)loadGroup();
 
 <!-- Bottom nav -->
 <nav id="mobileBottomNav" role="navigation" aria-label="Mobile navigation">
-<a href="index.html"><i class="fas fa-home"></i><span>Trang chủ</span></a>
-<a href="groups.html" class="active"><i class="fas fa-users"></i><span>Cộng đồng</span></a>
-<a href="javascript:void(0)" class="mnav-fab-wrap"><span class="mnav-fab" onclick="if(typeof openPM==='function')openPM()"><i class="fas fa-plus"></i></span></a>
-<a href="messages.html"><i class="fas fa-comment-dots"></i><span>Tin nhắn</span></a>
-<a href="profile.html"><i class="fas fa-user"></i><span>Tài khoản</span></a>
+    <a href="index.html" class="mnav-item" data-page="index.html"><i class="fas fa-home"></i><span>Trang chủ</span></a>
+    <a href="marketplace.html" class="mnav-item" data-page="marketplace.html"><i class="fas fa-store"></i><span>Mua sắm</span></a>
+    <div class="mnav-item mnav-fab-wrap" style="overflow:visible" onclick="if(typeof openPM==='function')openPM();else if(typeof handleFab==='function')handleFab()"><div class="mnav-fab" style="width:46px;height:46px;font-size:18px;margin-top:-16px;cursor:pointer;z-index:1001;position:relative"><i class="fas fa-camera" id="fabIcon"></i></div></div>
+    <a href="map.html" class="mnav-item" data-page="map.html"><i class="fas fa-map-marked-alt"></i><span>Bản đồ</span></a>
+    <a href="profile.html" class="mnav-item" data-page="profile.html"><i class="fas fa-user"></i><span>Tài khoản</span></a>
 </nav>
 
 <script src="js/mobile.js"></script>
