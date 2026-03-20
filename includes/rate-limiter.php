@@ -1,88 +1,46 @@
 <?php
 /**
- * ShipperShop Rate Limiter — DB-based (shared hosting compatible)
- * Usage: if(!rate_check('login:'.$ip, 5, 300)) { error('Too many attempts'); }
+ * ShipperShop Rate Limiter — Uses existing rate_limits table
+ * Schema: id, ip, endpoint, hits, window_start
+ * Usage: rate_enforce('login', 5, 300); // auto IP, 429 if exceeded
+ *        if(!rate_check('post', $ip, 10, 3600)) { ... }
  */
 
-/**
- * Check if action is allowed under rate limit
- * @param string $key e.g. "login:192.168.1.1" or "post:user:5"
- * @param int $max max attempts allowed
- * @param int $window time window in seconds
- * @return bool true if allowed, false if exceeded
- */
-function rate_check($key, $max, $window) {
+function rate_check($endpoint, $ip, $max, $window) {
     $d = db();
+    $now = date('Y-m-d H:i:s');
     $cutoff = date('Y-m-d H:i:s', time() - $window);
+    try { $d->query("DELETE FROM rate_limits WHERE window_start < ?", [$cutoff]); } catch (\Throwable $e) {}
     
-    // Cleanup old entries
-    try {
-        $d->query("DELETE FROM rate_limits WHERE created_at < ?", [$cutoff]);
-    } catch (\Throwable $e) {}
+    $row = $d->fetchOne("SELECT id, hits FROM rate_limits WHERE ip=? AND endpoint=? AND window_start>? LIMIT 1", [$ip, $endpoint, $cutoff]);
     
-    // Count recent attempts
-    $row = $d->fetchOne(
-        "SELECT COUNT(*) as c FROM rate_limits WHERE `key` = ? AND created_at > ?",
-        [$key, $cutoff]
-    );
-    $count = intval($row['c'] ?? 0);
-    
-    if ($count >= $max) {
-        return false; // Rate limited
+    if (!$row) {
+        try { $d->query("INSERT INTO rate_limits (ip,endpoint,hits,window_start) VALUES (?,?,1,?)", [$ip,$endpoint,$now]); } catch (\Throwable $e) {}
+        return true;
     }
-    
-    // Record this attempt
-    try {
-        $d->query(
-            "INSERT INTO rate_limits (`key`, created_at) VALUES (?, NOW())",
-            [$key]
-        );
-    } catch (\Throwable $e) {}
-    
-    return true; // Allowed
+    if (intval($row['hits']) >= $max) return false;
+    try { $d->query("UPDATE rate_limits SET hits=hits+1 WHERE id=?", [$row['id']]); } catch (\Throwable $e) {}
+    return true;
 }
 
-/**
- * Get remaining attempts
- * @param string $key
- * @param int $max
- * @param int $window seconds
- * @return int remaining attempts
- */
-function rate_remaining($key, $max, $window) {
-    $d = db();
+function rate_remaining($endpoint, $ip, $max, $window) {
     $cutoff = date('Y-m-d H:i:s', time() - $window);
-    $row = $d->fetchOne(
-        "SELECT COUNT(*) as c FROM rate_limits WHERE `key` = ? AND created_at > ?",
-        [$key, $cutoff]
-    );
-    return max(0, $max - intval($row['c'] ?? 0));
+    $row = db()->fetchOne("SELECT hits FROM rate_limits WHERE ip=? AND endpoint=? AND window_start>? LIMIT 1", [$ip,$endpoint,$cutoff]);
+    return max(0, $max - intval($row ? $row['hits'] : 0));
 }
 
-/**
- * Reset rate limit for a key
- * @param string $key
- */
-function rate_reset($key) {
+function rate_reset($endpoint, $ip = null) {
     try {
-        db()->query("DELETE FROM rate_limits WHERE `key` = ?", [$key]);
+        if ($ip) db()->query("DELETE FROM rate_limits WHERE endpoint=? AND ip=?", [$endpoint,$ip]);
+        else db()->query("DELETE FROM rate_limits WHERE endpoint=?", [$endpoint]);
     } catch (\Throwable $e) {}
 }
 
-/**
- * Check rate and return 429 if exceeded
- * @param string $key
- * @param int $max
- * @param int $window
- */
-function rate_enforce($key, $max, $window) {
-    if (!rate_check($key, $max, $window)) {
+function rate_enforce($endpoint, $max, $window) {
+    $ip = isset($_SERVER['REMOTE_ADDR']) ? $_SERVER['REMOTE_ADDR'] : '0.0.0.0';
+    if (!rate_check($endpoint, $ip, $max, $window)) {
         http_response_code(429);
-        echo json_encode([
-            'success' => false,
-            'message' => 'Quá nhiều yêu cầu. Vui lòng thử lại sau.',
-            'retry_after' => $window
-        ]);
+        echo json_encode(['success'=>false,'message'=>'Quá nhiều yêu cầu. Thử lại sau.','retry_after'=>$window]);
         exit;
     }
 }
