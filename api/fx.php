@@ -2,14 +2,17 @@
 require_once __DIR__.'/../includes/db.php';
 header("Content-Type: text/plain");
 $d=db();
-echo "=== group_post_comments columns ===\n";
-$cols=$d->fetchAll("SHOW COLUMNS FROM group_post_comments");
-foreach($cols as $c) echo "  {$c['Field']} ({$c['Type']}) {$c['Default']}\n";
 
-echo "\n=== Sample comment ===\n";
-$s=$d->fetchOne("SELECT * FROM group_post_comments WHERE status='active' ORDER BY id DESC LIMIT 1");
-print_r($s);
-
-echo "\n=== Has group_post_comment_likes table? ===\n";
-try{$d->fetchAll("SELECT 1 FROM group_post_comment_likes LIMIT 1");echo "YES\n";}
-catch(Exception $e){echo "NO - ".$e->getMessage()."\n";}
+// Create group_post_comment_likes table
+try{
+$d->getConnection()->exec("CREATE TABLE IF NOT EXISTS group_post_comment_likes (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  comment_id INT NOT NULL,
+  user_id INT NOT NULL,
+  created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+  UNIQUE KEY uq_gcl (comment_id, user_id),
+  KEY idx_comment (comment_id),
+  KEY idx_user (user_id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4");
+echo "✅ group_post_comment_likes table created\n";
+}catch(Exception $e){echo "Table: ".$e->getMessage()."\n";}
