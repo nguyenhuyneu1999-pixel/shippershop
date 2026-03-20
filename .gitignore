@@ -17,11 +17,13 @@ fix-*.sh
 uploads/videos/
 uploads/messages/
 uploads/avatars/
+uploads/covers/
 
 # Keep upload dirs structure
 !uploads/videos/.gitkeep
 !uploads/messages/.gitkeep
 !uploads/avatars/.gitkeep
+!uploads/covers/.gitkeep
 
 # OS files
 .DS_Store

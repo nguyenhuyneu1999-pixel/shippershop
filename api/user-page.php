@@ -21,7 +21,7 @@ if($method==='GET'){
     $user['follower_count']=intval($fl['c']??0);
     $user['following_count']=intval($fg['c']??0);
     $user['is_following']=false;$user['is_friend']=false;$user['friend_status']=null;
-    $user['is_self']=($viewerId===$targetId);
+    $user['is_self']=(intval($viewerId)===intval($targetId)&&$viewerId>0);
     if($viewerId&&$viewerId!==$targetId){
       $fw=$d->fetchOne("SELECT id FROM follows WHERE follower_id=? AND following_id=?",[$viewerId,$targetId]);
       $user['is_following']=!!$fw;
