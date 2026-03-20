@@ -148,15 +148,22 @@ if ($method === 'GET') {
         $params[] = sanitize($_GET['company']);
     }
 
-    // Filter by province
+    // Filter by province (normalize: strip Thành phố/Tỉnh/TP. prefix)
     if (!empty($_GET['province'])) {
-        $where[] = "p.province = ?";
-        $params[] = $_GET['province'];
+        $prov = trim($_GET['province']);
+        $stripped = preg_replace('/^(Thành phố |Tỉnh |TP\.\s*)/u', '', $prov);
+        $where[] = "(p.province = ? OR p.province = ? OR p.province = ?)";
+        $params[] = $prov;
+        $params[] = $stripped;
+        $params[] = "TP. " . $stripped;
     }
-    // Filter by district
+    // Filter by district (normalize: strip Quận/Huyện/Thị xã/Thành phố prefix)
     if (!empty($_GET['district'])) {
-        $where[] = "p.district = ?";
-        $params[] = $_GET['district'];
+        $dist = trim($_GET['district']);
+        $dStripped = preg_replace('/^(Quận |Huyện |Thị xã |Thành phố )/u', '', $dist);
+        $where[] = "(p.district = ? OR p.district = ?)";
+        $params[] = $dist;
+        $params[] = $dStripped;
     }
     // Filter by ward
     if (!empty($_GET['ward'])) {
