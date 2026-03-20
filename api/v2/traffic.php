@@ -23,17 +23,23 @@ function ok($msg,$data=null){echo json_encode(['success'=>true,'message'=>$msg,'
 if($_SERVER['REQUEST_METHOD']==='GET'&&(!$action||$action==='list')){
     $category=$_GET['category']??'';
     $severity=$_GET['severity']??'';
-    $w=["expires_at > NOW() OR expires_at IS NULL"];$p=[];
-    if($category){$w[]="category=?";$p[]=$category;}
-    if($severity){$w[]="severity=?";$p[]=$severity;}
+    $w=["1=1"];$p=[];
+    if($category){$w[]="a.category=?";$p[]=$category;}
+    if($severity){$w[]="a.severity=?";$p[]=$severity;}
     $wc=implode(' AND ',$w);
-    $alerts=$d->fetchAll("SELECT a.*,u.fullname as user_name,u.avatar as user_avatar,(SELECT COUNT(*) FROM traffic_confirms WHERE alert_id=a.id AND type='confirm') as confirms,(SELECT COUNT(*) FROM traffic_confirms WHERE alert_id=a.id AND type='deny') as denies,(SELECT COUNT(*) FROM traffic_comments WHERE alert_id=a.id) as comments_count FROM traffic_alerts a LEFT JOIN users u ON a.user_id=u.id WHERE $wc ORDER BY a.created_at DESC LIMIT 50",$p);
+    try{
+        $alerts=$d->fetchAll("SELECT a.*,u.fullname as user_name,u.avatar as user_avatar,(SELECT COUNT(*) FROM traffic_confirms WHERE alert_id=a.id AND type='confirm') as confirms,(SELECT COUNT(*) FROM traffic_confirms WHERE alert_id=a.id AND type='deny') as denies,(SELECT COUNT(*) FROM traffic_comments WHERE alert_id=a.id) as comments_count FROM traffic_alerts a LEFT JOIN users u ON a.user_id=u.id WHERE $wc ORDER BY a.created_at DESC LIMIT 50",$p);
+    }catch(\Throwable $e){
+        $alerts=[];
+    }
     ok('OK',$alerts);
 }
 
 // GET: Map data (for Leaflet markers)
 if($_SERVER['REQUEST_METHOD']==='GET'&&$action==='map_data'){
-    $alerts=$d->fetchAll("SELECT id,title,category,severity,latitude,longitude,created_at FROM traffic_alerts WHERE (expires_at > NOW() OR expires_at IS NULL) AND latitude IS NOT NULL AND longitude IS NOT NULL");
+    try{
+        $alerts=$d->fetchAll("SELECT id,title,category,severity,latitude,longitude,created_at FROM traffic_alerts WHERE latitude IS NOT NULL AND longitude IS NOT NULL ORDER BY created_at DESC LIMIT 100");
+    }catch(\Throwable $e){$alerts=[];}
     ok('OK',$alerts);
 }
 
