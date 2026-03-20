@@ -2,50 +2,43 @@
 require_once __DIR__.'/../includes/db.php';
 header('Content-Type: text/plain');
 $d=db();
+$pdo=$d->getConnection();
 
-// Simulate conversations API for user 2 (Admin - likely the logged in user)
-echo "=== User 2 active conversations (what API returns) ===\n";
-$rows=$d->fetchAll("SELECT id,user1_id,user2_id,last_message,last_message_at,`status`,type FROM conversations WHERE (user1_id=2 OR user2_id=2) AND `status`='active' AND (type='private' OR type IS NULL) ORDER BY last_message_at DESC");
-foreach($rows as $c){
-  $oid=($c['user1_id']==2)?$c['user2_id']:$c['user1_id'];
-  $other=$d->fetchOne("SELECT fullname,shipping_company FROM users WHERE id=?",[$oid]);
-  echo "conv=".$c['id']." other=$oid (".($other?$other['fullname']:'?').") last=".$c['last_message_at']." type=".$c['type']."\n";
+echo "=== BEFORE CLEANUP ===\n";
+echo "Conversations: ".$d->fetchOne("SELECT COUNT(*) as c FROM conversations")['c']."\n";
+echo "Messages: ".$d->fetchOne("SELECT COUNT(*) as c FROM messages")['c']."\n";
+
+// 1. Delete orphan conv 113 (created by debug, 0 messages)
+$empty113=$d->fetchOne("SELECT id FROM conversations WHERE id=113 AND (SELECT COUNT(*) FROM messages WHERE conversation_id=113)=0");
+if($empty113){
+  $pdo->exec("DELETE FROM conversations WHERE id=113");
+  echo "Deleted orphan conv 113\n";
 }
 
-echo "\n=== User 2 pending conversations ===\n";
-$rows2=$d->fetchAll("SELECT id,user1_id,user2_id,last_message,`status`,type FROM conversations WHERE (user1_id=2 OR user2_id=2) AND `status`='pending' AND (type='private' OR type IS NULL) ORDER BY last_message_at DESC");
-foreach($rows2 as $c){
-  $oid=($c['user1_id']==2)?$c['user2_id']:$c['user1_id'];
-  $other=$d->fetchOne("SELECT fullname FROM users WHERE id=?",[$oid]);
-  echo "conv=".$c['id']." other=$oid (".($other?$other['fullname']:'?').") status=".$c['status']."\n";
+// 2. Delete any conv with user 999/998 (test data)
+$pdo->exec("DELETE FROM conversations WHERE user1_id IN (999,998) OR user2_id IN (999,998)");
+echo "Cleaned test user convs\n";
+
+// 3. Delete empty conversations created after id=102 with 0 messages (all from debug)
+$orphans=$d->fetchAll("SELECT c.id FROM conversations c WHERE c.id > 102 AND (SELECT COUNT(*) FROM messages WHERE conversation_id=c.id)=0");
+foreach($orphans as $o){
+  $pdo->exec("DELETE FROM conversation_members WHERE conversation_id=".$o['id']);
+  $pdo->exec("DELETE FROM conversations WHERE id=".$o['id']);
+  echo "Deleted orphan conv ".$o['id']."\n";
 }
 
-echo "\n=== User 3 active conversations ===\n";
-$rows3=$d->fetchAll("SELECT id,user1_id,user2_id,last_message,last_message_at,`status`,type FROM conversations WHERE (user1_id=3 OR user2_id=3) AND `status`='active' AND (type='private' OR type IS NULL) ORDER BY last_message_at DESC");
-foreach($rows3 as $c){
-  $oid=($c['user1_id']==3)?$c['user2_id']:$c['user1_id'];
-  $other=$d->fetchOne("SELECT fullname FROM users WHERE id=?",[$oid]);
-  echo "conv=".$c['id']." other=$oid (".($other?$other['fullname']:'?').") last=".$c['last_message_at']."\n";
+echo "\n=== AFTER CLEANUP ===\n";
+echo "Conversations: ".$d->fetchOne("SELECT COUNT(*) as c FROM conversations")['c']."\n";
+echo "Messages: ".$d->fetchOne("SELECT COUNT(*) as c FROM messages")['c']."\n";
+
+// 4. Verify all conversations have proper data
+echo "\n=== All remaining conversations ===\n";
+$all=$d->fetchAll("SELECT c.id,c.type,c.user1_id,c.user2_id,c.creator_id,c.name,c.`status`,(SELECT COUNT(*) FROM messages WHERE conversation_id=c.id) as msg_count FROM conversations c ORDER BY c.last_message_at DESC");
+foreach($all as $cv){
+  $u1name='';$u2name='';
+  if($cv['user1_id']){$u=$d->fetchOne("SELECT fullname FROM users WHERE id=?",[$cv['user1_id']]);$u1name=$u?$u['fullname']:'';}
+  if($cv['user2_id']){$u=$d->fetchOne("SELECT fullname FROM users WHERE id=?",[$cv['user2_id']]);$u2name=$u?$u['fullname']:'';}
+  echo "conv=".$cv['id']." ".$cv['type']." [".$u1name." <-> ".$u2name."] status=".$cv['status']." msgs=".$cv['msg_count'].($cv['name']?" name=".$cv['name']:'')."\n";
 }
 
-echo "\n=== User 3 pending conversations ===\n";
-$rows4=$d->fetchAll("SELECT id,user1_id,user2_id,last_message,`status`,type FROM conversations WHERE (user1_id=3 OR user2_id=3) AND `status`='pending' AND (type='private' OR type IS NULL) ORDER BY last_message_at DESC");
-foreach($rows4 as $c){
-  $oid=($c['user1_id']==3)?$c['user2_id']:$c['user1_id'];
-  $other=$d->fetchOne("SELECT fullname FROM users WHERE id=?",[$oid]);
-  echo "conv=".$c['id']." other=$oid (".($other?$other['fullname']:'?').") status=".$c['status']."\n";
-}
-
-// Check messages action query
-echo "\n=== Messages in conv 7 (user 2 <-> Ngô Thị Thảo) ===\n";
-$msgs=$d->fetchAll("SELECT m.*,u.fullname as sender_name FROM messages m LEFT JOIN users u ON m.sender_id=u.id WHERE m.conversation_id=7 ORDER BY m.created_at");
-foreach($msgs as $m) echo "msg=".$m['id']." from=".$m['sender_name']." content=".$m['content']." at=".$m['created_at']."\n";
-if(!$msgs) echo "EMPTY!\n";
-
-echo "\n=== Group conversations ===\n";
-$groups=$d->fetchAll("SELECT c.*, (SELECT COUNT(*) FROM conversation_members WHERE conversation_id=c.id) as member_count FROM conversations c WHERE c.type='group'");
-foreach($groups as $g) echo "id=".$g['id']." name=".$g['name']." members=".$g['member_count']."\n";
-
-echo "\n=== conversation_members ===\n";
-$cm=$d->fetchAll("SELECT * FROM conversation_members ORDER BY conversation_id");
-foreach($cm as $m) echo "conv=".$m['conversation_id']." user=".$m['user_id']." role=".$m['role']."\n";
+echo "\n=== SUCCESS ===\n";
