@@ -360,36 +360,87 @@ var _BTxt={"review":"\u2b50 Review","question":"\u2753 H\u1ecfi \u0111\u00e1p","
 
 // Group-specific mkPost (same visual as index.html, different API)
 function mkPost(p){
-  var uid=p.user_id;
-  var uName=p.user_name||"Người dùng";
+  var uid=p.user_id||0;
+  var uName=p.user_name||"Shipper";
   var likes=parseInt(p.likes_count)||0;
   var cmts=parseInt(p.comments_count)||0;
   var shares=parseInt(p.shares_count)||0;
   var liked=p.user_liked;
-  var firstChar=esc(uName).charAt(0).toUpperCase();
-  var av=p.user_avatar?"<a href='user.html?id="+uid+"'><img class='avatar-sm' src='"+esc(p.user_avatar)+"' onerror=\"this.outerHTML=\'<span class=avatar-sm>"+firstChar+"</span>\'\"></a>":"<a href='user.html?id="+uid+"'><span class='avatar-sm'>"+firstChar+"</span></a>";
-  var shipBadge="";
-  if(p.shipping_company){var sc=p.shipping_company;var sColors={"GHTK":"#00b14f","J&T":"#d32f2f","GHN":"#ff6600","Viettel Post":"#e21a1a","SPX":"#EE4D2D","Grab":"#00b14f","Be":"#5bc500","Gojek":"#00aa13"};shipBadge="<span style=\"font-size:11px;font-weight:700;color:"+(sColors[sc]||"#666")+"\">"+esc(sc)+"</span><span>\u00b7</span>";}
+  var ch=esc(uName).charAt(0).toUpperCase();
+
+  // Avatar
+  var av="";
+  if(p.user_avatar){
+    av="<a href=\"user.html?id="+uid+"\"><img class=\"avatar-sm\" src=\""+esc(p.user_avatar)+"\" onerror=\"this.outerHTML='<span class=avatar-sm>"+ch+"</span>'\"></a>";
+  }else{
+    av="<a href=\"user.html?id="+uid+"\"><span class=\"avatar-sm\">"+ch+"</span></a>";
+  }
+
+  // Ship badge
+  var shipH="";
+  if(p.shipping_company){
+    var sc=p.shipping_company;
+    var colors={"GHTK":"#00b14f","J&T":"#d32f2f","GHN":"#ff6600","Viettel Post":"#e21a1a","SPX":"#EE4D2D","Grab":"#00b14f","Be":"#5bc500","Gojek":"#00aa13","Ninja Van":"#c41230"};
+    shipH="<span style=\"font-size:11px;font-weight:700;color:"+(colors[sc]||"#666")+"\">"+esc(sc)+"</span><span>\u00b7</span>";
+  }
+
+  // Content
   var body=esc(p.content||"");
-  var long=body.length>400;
-  var contentH="<div class='post-content"+(long?"":""+" full")+"' id='gpc"+p.id+"'>"+body+"</div>"+(long?"<span class='show-more' onclick=\"var el=document.getElementById(\'gpc"+p.id+"\');el.classList.toggle(\'full\');this.textContent=el.classList.contains(\'full\')?\'{Xem thêm ▼\':\'Thu gọn ▲\'\">Xem thêm ▼</span>":"");
+  var isLong=body.length>400;
+  var contentId="gpc"+p.id;
+  var contentH="<div class=\"post-content"+(isLong?"":" full")+"\" id=\""+contentId+"\">"+body+"</div>";
+  if(isLong){
+    contentH+="<span class=\"show-more\" onclick=\"var e=document.getElementById('"+contentId+"');e.classList.toggle('full');this.textContent=e.classList.contains('full')?'Thu g\u1ecdn \u25b2':'Xem th\u00eam \u25bc'\">Xem th\u00eam \u25bc</span>";
+  }
+
+  // Images
   var imgH="";
-  if(p.images){try{var a=JSON.parse(p.images);if(a&&a.length){imgH="<div class='post-images"+(a.length>1?" multi-img":"")+"'>";for(var i=0;i<Math.min(a.length,4);i++){imgH+="<img class='post-img' src='"+a[i]+"' loading='lazy' onerror=\"this.style.display=\'none\'\">"}imgH+="</div>";}}catch(x){}}
+  if(p.images){
+    try{
+      var arr=JSON.parse(p.images);
+      if(arr&&arr.length){
+        imgH="<div class=\"post-images"+(arr.length>1?" multi-img":"")+"\">";
+        for(var i=0;i<Math.min(arr.length,4);i++){
+          imgH+="<img class=\"post-img\" src=\""+arr[i]+"\" loading=\"lazy\" onerror=\"this.style.display='none'\">";
+        }
+        imgH+="</div>";
+      }
+    }catch(x){}
+  }
+
+  // Menu
   var canDel=CU&&parseInt(uid)===parseInt(CU.id);
-  return "<div class='post-card' id='GP"+p.id+"'>"
-    +"<div class='post-body'>"
-    +"<div class='post-meta'>"+av+"<div style='flex:1;min-width:0'><div style='display:flex;align-items:center;justify-content:space-between'><a href='user.html?id="+uid+"' class='post-author' style='text-decoration:none;color:#1a1a1a'>"+esc(uName)+"</a><button class='post-dots' onclick='event.stopPropagation();gTogMenu("+p.id+")'><i class='fas fa-ellipsis'></i></button></div><div style='font-size:12px;color:#999;display:flex;align-items:center;gap:4px'>"+shipBadge+"<span>"+ago(p.created_at)+"</span></div></div></div>"
-    +"<div class='post-menu' id='gpm"+p.id+"' style='display:none'>"+(canDel?"<div onclick='gDelP("+p.id+")'><i class='far fa-trash-can'></i> Xóa bài</div>":"")+"<div onclick='gTogMenu("+p.id+")'><i class='fas fa-times'></i> Đóng</div></div>"
-    +contentH+imgH
+  var menuH="<div class=\"post-menu\" id=\"gpm"+p.id+"\" style=\"display:none\">";
+  if(canDel)menuH+="<div onclick=\"gDelP("+p.id+")\"><i class=\"far fa-trash-can\"></i> X\u00f3a b\u00e0i</div>";
+  menuH+="<div onclick=\"gTogMenu("+p.id+")\"><i class=\"fas fa-times\"></i> \u0110\u00f3ng</div></div>";
+
+  // Stats
+  var sH="<div class=\"pa3-stats\">";
+  sH+="<span>"+(likes>0?fN(likes)+" \u0111\u01a1n giao th\u00e0nh c\u00f4ng":"")+"</span>";
+  sH+="<span>"+(cmts>0?fN(cmts)+" ghi ch\u00fa":"")+"</span>";
+  sH+="<span>"+(shares>0?fN(shares)+" \u0111\u01a1n chuy\u1ec3n ti\u1ebfp":"")+"</span>";
+  sH+="</div>";
+
+  // Actions
+  var aH="<div class=\"post-actions-3\">";
+  aH+="<button class=\"pa3-btn"+(liked?" pa3-active":"")+"\" onclick=\"gLike("+p.id+",this)\">Th\u00e0nh c\u00f4ng</button>";
+  aH+="<button class=\"pa3-btn\" onclick=\"openGhiChu("+p.id+")\">Ghi ch\u00fa</button>";
+  aH+="<button class=\"pa3-btn\" onclick=\"gShare("+p.id+")\">Chuy\u1ec3n ti\u1ebfp</button>";
+  aH+="</div>";
+
+  return "<div class=\"post-card\" id=\"GP"+p.id+"\">"
+    +"<div class=\"post-body\">"
+    +"<div class=\"post-meta\">"+av+"<div style=\"flex:1;min-width:0\">"
+    +"<div style=\"display:flex;align-items:center;justify-content:space-between\">"
+    +"<a href=\"user.html?id="+uid+"\" class=\"post-author\" style=\"text-decoration:none;color:#1a1a1a\">"+esc(uName)+"</a>"
+    +"<button class=\"post-dots\" onclick=\"event.stopPropagation();gTogMenu("+p.id+")\"><i class=\"fas fa-ellipsis\"></i></button>"
     +"</div>"
-    +"<div class='pa3-stats'><span>"+(likes>0?fN(likes)+" đơn giao thành công":"")+"</span><span>"+(cmts>0?fN(cmts)+" ghi chú":"")+"</span><span>"+(shares>0?fN(shares)+" đơn chuyển tiếp":"")+"</span></div>"
-    +"<div class='post-actions-3'>"
-    +"<button class='pa3-btn"+(liked?" pa3-active":"")+"' onclick='gLike("+p.id+",this)'>Thành công</button>"
-    +"<button class='pa3-btn' onclick='openGhiChu("+p.id+")'>Ghi chú</button>"
-    +"<button class='pa3-btn' onclick='gShare("+p.id+")'>Chuyển tiếp</button>"
-    +"</div></div>";
+    +"<div style=\"font-size:12px;color:#999;display:flex;align-items:center;gap:4px\">"+shipH+"<span>"+ago(p.created_at)+"</span></div>"
+    +"</div></div>"
+    +menuH+contentH+imgH
+    +"</div>"
+    +sH+aH+"</div>";
 }
-// fN, esc, ago defined in init block above
 
 // Group-specific like (uses groups.php API)
 async function gLike(pid,btn){
