@@ -1,4 +1,4 @@
-const CACHE_NAME = 'shippershop-v9';
+const CACHE_NAME = 'shippershop-v10';
 const STATIC_ASSETS = [
   '/',
   '/index.html',
