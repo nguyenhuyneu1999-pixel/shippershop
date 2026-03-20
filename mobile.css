@@ -124,6 +124,7 @@ a, button, [onclick] {
     z-index: 1000;
     box-shadow: 0 -2px 12px rgba(0,0,0,.1);
     padding-bottom: env(safe-area-inset-bottom);
+    overflow: visible;
   }
 
   .mnav-item {
