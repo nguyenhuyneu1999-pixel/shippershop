@@ -476,13 +476,13 @@ if(groupSlug||groupId)loadGroup();
 </script>
 
 <!-- Bottom nav -->
-<div class="bnav" id="mobileBottomNav">
-<a href="index.html"><i class="fas fa-home"></i>Trang chủ</a>
-<a href="groups.html" class="active"><i class="fas fa-users"></i>Cộng đồng</a>
-<a href="javascript:void(0)" onclick="openPM()"><i class="fas fa-plus-circle"></i>Tạo</a>
-<a href="messages.html"><i class="far fa-bell"></i>Hộp thư đến</a>
-<a href="profile.html"><i class="far fa-user"></i>Bạn</a>
-</div>
+<nav id="mobileBottomNav" role="navigation" aria-label="Mobile navigation">
+    <a href="index.html" class="mnav-item" data-page="index.html"><i class="fas fa-home"></i><span>Trang chủ</span></a>
+    <a href="marketplace.html" class="mnav-item" data-page="marketplace.html"><i class="fas fa-store"></i><span>Mua sắm</span></a>
+    <div class="mnav-item mnav-fab-wrap" style="overflow:visible" onclick="openPM()"><div class="mnav-fab" style="width:46px;height:46px;font-size:18px;margin-top:-16px;cursor:pointer;z-index:1001;position:relative"><i class="fas fa-camera"></i></div></div>
+    <a href="map.html" class="mnav-item" data-page="map.html"><i class="fas fa-map-marked-alt"></i><span>Bản đồ</span></a>
+    <a href="profile.html" class="mnav-item" data-page="profile.html"><i class="fas fa-user"></i><span>Tài khoản</span></a>
+</nav>
 
 <script src="js/mobile.js"></script>
 <script src="/js/analytics.js"></script>
