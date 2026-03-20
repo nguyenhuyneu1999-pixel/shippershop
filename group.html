@@ -469,7 +469,7 @@ function uploadGroupImg(type,input){
 }
 
 /* ========== INIT ========== */
-window.loadPosts=function(){loadPosts();};
+// loadPosts is already global
 document.addEventListener("click",function(e){if(!e.target.closest(".post-dots")&&!e.target.closest(".post-menu")){document.querySelectorAll(".post-menu").forEach(function(m){m.style.display="none";});}});
 if(groupSlug||groupId)loadGroup();
 
