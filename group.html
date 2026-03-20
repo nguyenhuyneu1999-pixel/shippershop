@@ -88,8 +88,12 @@ body{background:var(--bg);font-family:'Be Vietnam Pro',-apple-system,BlinkMacSys
 .lb-score{font-size:14px;font-weight:600;color:var(--muted)}
 
 /* Create post area */
-.create-area{background:#fff;margin-top:8px;padding:12px 16px;display:flex;gap:10px;align-items:center;cursor:pointer}
+.create-area{background:#fff;margin-top:8px;padding:10px 12px;display:flex;gap:8px;align-items:center}
 .create-area .post-av{width:36px;height:36px}
+.create-input{flex:1;padding:8px 12px;border:1px solid var(--border);border-radius:20px;font-size:14px;cursor:pointer;background:#f0f2f5;outline:none;color:#65676B;font-family:inherit}
+.create-input:hover{border-color:var(--primary)}
+.icon-btn{width:36px;height:36px;border-radius:50%;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:16px;background:none;color:#45bd62;flex-shrink:0}
+.icon-btn:active{background:#f0f2f5}
 .create-placeholder{flex:1;padding:8px 14px;border-radius:20px;background:var(--bg);font-size:14px;color:var(--muted)}
 
 /* Post modal */
@@ -299,7 +303,7 @@ function loadPosts(){
   // Create post area
   if(GROUP.is_member&&CU){
     var cuAv=CU.avatar?"<img src='"+CU.avatar+"' style='width:40px;height:40px;border-radius:50%;object-fit:cover'>":"<div class='post-av'>"+esc((CU.fullname||"?")[0])+"</div>";
-    html+="<div class='create-area' onclick='openPM()'>"+cuAv+"<div class='create-placeholder'>B\u1ea1n \u0111ang ngh\u0129 g\u00ec?</div></div>";
+    html+="<div class='create-area'>"+cuAv+"<input class='create-input' type='text' placeholder='B\u1ea1n \u0111ang ngh\u0129 g\u00ec? Click \u0111\u1ec3 \u0111\u0103ng b\u00e0i...' readonly onclick='openPM()'><button class='icon-btn' onclick='openPM()' title='\u0110\u0103ng \u1ea3nh/video'><i class='fas fa-image'></i></button></div>";
   }
   // Sort bar
   html+="<div class='sort-bar'>";

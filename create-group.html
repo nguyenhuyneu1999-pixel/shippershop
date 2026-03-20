@@ -139,17 +139,17 @@ function loadCats(){
     var h="";
     d.data.forEach(function(c){
       var sel=formData.category_id===c.id?" sel":"";
-      h+="<div class='cg-chip"+sel+"' onclick='pickCat("+c.id+",\""+esc(c.name)+"\")'>"+(c.icon||"")+" "+esc(c.name)+"</div>";
+      h+="<div class='cg-chip"+sel+"' onclick='pickCat(this,"+c.id+",\""+esc(c.name)+"\")'>"+(c.icon||"")+" "+esc(c.name)+"</div>";
     });
     document.getElementById("catChips").innerHTML=h;
   });
 }
 
-function pickCat(id,name){
+function pickCat(el,id,name){
   formData.category_id=id;formData.category_name=name;
   document.getElementById("cgNext").disabled=false;
   document.querySelectorAll(".cg-chip").forEach(function(c){c.classList.remove("sel");});
-  event.currentTarget.classList.add("sel");
+  el.classList.add("sel");
 }
 
 function pickFile(type){
