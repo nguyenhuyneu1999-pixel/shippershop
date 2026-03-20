@@ -311,12 +311,16 @@ if($method==='POST'){
         $desc=trim($input['description']??'');
         $link=substr(md5('ss_'.time().$uid),0,12);
 
-        $ins=$pdo->prepare("INSERT INTO conversations (type,name,creator_id,invite_link,last_message,last_message_at,`status`,description) VALUES ('group',?,?,?,?,NOW(),'active',?)");
-        $ins->execute([$name,$uid,$link,$name.' - Nhóm mới',$desc]);
-        $cid=intval($pdo->lastInsertId());
-        if(!$cid){$r=$pdo->query("SELECT MAX(id) as m FROM conversations");$cid=intval($r->fetch(PDO::FETCH_ASSOC)['m']);}
+        try{
+            $ins=$pdo->prepare("INSERT INTO conversations (type,name,creator_id,invite_link,last_message,last_message_at,`status`,description) VALUES ('group',?,?,?,?,NOW(),'active',?)");
+            $ins->execute([$name,$uid,$link,$name.' - Nhóm mới',$desc]);
+            $cid=intval($pdo->lastInsertId());
+            if(!$cid){$r=$pdo->query("SELECT MAX(id) as m FROM conversations");$cid=intval($r->fetch(PDO::FETCH_ASSOC)['m']);}
+        }catch(\Throwable $e){
+            fail('Create group error: '.$e->getMessage());
+        }
 
-        $pdo->prepare("INSERT INTO conversation_members (conversation_id,user_id,role) VALUES (?,?,'admin')")->execute([$cid,$uid]);
+        try{$pdo->prepare("INSERT INTO conversation_members (conversation_id,user_id,role) VALUES (?,?,'admin')")->execute([$cid,$uid]);}catch(\Throwable $e){}
         foreach($members as $mid2){
             $mid2=intval($mid2);
             if($mid2&&$mid2!=$uid){try{$pdo->prepare("INSERT IGNORE INTO conversation_members (conversation_id,user_id,role) VALUES (?,?,'member')")->execute([$cid,$mid2]);}catch(\Throwable $e){}}
