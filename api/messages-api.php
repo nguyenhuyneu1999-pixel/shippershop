@@ -305,11 +305,21 @@ $userId=getMsgUserId();
 $input=json_decode(file_get_contents('php://input'),true);
 
 if($action==='send'){
+  // TEMP DEBUG: log to file
+  $dbg=fopen(__DIR__.'/../uploads/send_debug.log','a');
+  fwrite($dbg,date('H:i:s')." userId=$userId input=".json_encode($input)."\n");
+  
   // Feature gate: check monthly message limit
-  $limitErr = checkLimit($userId, 'messages_per_month');
-  if ($limitErr) { echo json_encode(['success'=>false,'message'=>$limitErr,'upgrade'=>true]); exit; }
+  try{
+    $limitErr = checkLimit($userId, 'messages_per_month');
+  }catch(Throwable $e){
+    fwrite($dbg,"checkLimit ERROR: ".$e->getMessage()." ".$e->getFile().":".$e->getLine()."\n");
+    $limitErr = null;
+  }
+  if ($limitErr) { echo json_encode(['success'=>false,'message'=>$limitErr,'upgrade'=>true]); fclose($dbg); exit; }
   $oid=intval($input['to_user_id']??0);$ct=trim($input['content']??'');
   $gid=intval($input['group_id']??0);
+  fwrite($dbg,"oid=$oid ct=$ct gid=$gid\n");
   
   // Group message
   if($gid){
@@ -335,20 +345,34 @@ if($action==='send'){
   }
   
   // Private message (existing logic)
-  if(!$ct||!$oid){echo json_encode(['success'=>false,'message'=>'Missing']);exit;}
+  if(!$ct||!$oid){echo json_encode(['success'=>false,'message'=>'Missing']);fclose($dbg);exit;}
   $f1=$d->fetchOne("SELECT id FROM follows WHERE follower_id=? AND following_id=?",[$userId,$oid]);
   $f2=$d->fetchOne("SELECT id FROM follows WHERE follower_id=? AND following_id=?",[$oid,$userId]);
   $mut=($f1&&$f2);
   $cv=$d->fetchOne("SELECT id FROM conversations WHERE (user1_id=? AND user2_id=?) OR (user1_id=? AND user2_id=?)",[$userId,$oid,$oid,$userId]);
+  fwrite($dbg,"cv=".json_encode($cv)." mut=$mut\n");
   if(!$cv){
     $st=$mut?'active':'pending';
-    $d->query("INSERT INTO conversations (user1_id,user2_id,last_message,last_message_at,`status`) VALUES (?,?,?,NOW(),?)",[$userId,$oid,$ct,$st]);
-    $cid=$d->getLastInsertId();
-    if(!$cid){$r=$d->fetchOne("SELECT id FROM conversations WHERE user1_id=? AND user2_id=? ORDER BY id DESC LIMIT 1",[$userId,$oid]);$cid=$r['id'];}
-  }else{$cid=$cv['id'];$d->query("UPDATE conversations SET last_message=?,last_message_at=NOW() WHERE id=?",[$ct,$cid]);}
-  $d->query("INSERT INTO messages (conversation_id,sender_id,content,created_at) VALUES (?,?,?,NOW())",[$cid,$userId,$ct]);
-  $mid=$d->getLastInsertId();
-  if(!$mid){$r=$d->fetchOne("SELECT MAX(id) as m FROM messages",[]);$mid=$r['m'];}
+    try{
+      $d->query("INSERT INTO conversations (user1_id,user2_id,last_message,last_message_at,`status`) VALUES (?,?,?,NOW(),?)",[$userId,$oid,$ct,$st]);
+      $cid=$d->getLastInsertId();
+      if(!$cid){$r=$d->fetchOne("SELECT id FROM conversations WHERE user1_id=? AND user2_id=? ORDER BY id DESC LIMIT 1",[$userId,$oid]);$cid=$r['id'];}
+      fwrite($dbg,"NEW conv cid=$cid\n");
+    }catch(Throwable $e){
+      fwrite($dbg,"INSERT CONV ERROR: ".$e->getMessage()."\n");
+      echo json_encode(['success'=>false,'message'=>$e->getMessage()]);fclose($dbg);exit;
+    }
+  }else{$cid=$cv['id'];$d->query("UPDATE conversations SET last_message=?,last_message_at=NOW() WHERE id=?",[$ct,$cid]);fwrite($dbg,"EXISTING cid=$cid\n");}
+  try{
+    $d->query("INSERT INTO messages (conversation_id,sender_id,content,created_at) VALUES (?,?,?,NOW())",[$cid,$userId,$ct]);
+    $mid=$d->getLastInsertId();
+    if(!$mid){$r=$d->fetchOne("SELECT MAX(id) as m FROM messages",[]);$mid=$r['m'];}
+    fwrite($dbg,"MSG OK mid=$mid\n");
+  }catch(Throwable $e){
+    fwrite($dbg,"INSERT MSG ERROR: ".$e->getMessage()."\n");
+    echo json_encode(['success'=>false,'message'=>$e->getMessage()]);fclose($dbg);exit;
+  }
+  fclose($dbg);
   // Push notification to recipient
   try{
     require_once __DIR__.'/../includes/push-helper.php';
