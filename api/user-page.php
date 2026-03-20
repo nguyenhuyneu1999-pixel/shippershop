@@ -10,7 +10,7 @@ if($method==='GET'){
   $viewerId=getOptionalAuthUserId();
   if($action===''||$action==='profile'){
     if(!$targetId){echo json_encode(['success'=>false,'message'=>'Missing id']);exit;}
-    $user=$d->fetchOne("SELECT id,fullname,username,avatar,bio,shipping_company,address,created_at FROM users WHERE id=?",[$targetId]);
+    $user=$d->fetchOne("SELECT id,fullname,username,avatar,cover_image,bio,shipping_company,address,created_at FROM users WHERE id=?",[$targetId]);
     if(!$user){echo json_encode(['success'=>false,'message'=>'Not found']);exit;}
     $pc=$d->fetchOne("SELECT COUNT(*) as c FROM posts WHERE user_id=? AND status='active'",[$targetId]);
     $lk=$d->fetchOne("SELECT COALESCE(SUM(likes_count),0) as c FROM posts WHERE user_id=?",[$targetId]);
@@ -69,6 +69,25 @@ if($method==='POST'){
     if($dn!==null){$s[]="fullname=?";$p[]=$dn;}
     if($s){$p[]=$userId;$d->query("UPDATE users SET ".implode(',',$s)." WHERE id=?",$p);}
     echo json_encode(['success'=>true]);exit;
+  }
+  if($action==='upload_avatar'||$action==='upload_cover'){
+    if(!$userId){echo json_encode(['success'=>false,'message'=>'Auth required']);exit;}
+    if(empty($_FILES['image'])){echo json_encode(['success'=>false,'message'=>'No file']);exit;}
+    $file=$_FILES['image'];
+    $allowed=['image/jpeg','image/png','image/webp','image/gif'];
+    if(!in_array($file['type'],$allowed)){echo json_encode(['success'=>false,'message'=>'Invalid type']);exit;}
+    if($file['size']>5*1024*1024){echo json_encode(['success'=>false,'message'=>'Max 5MB']);exit;}
+    $ext=pathinfo($file['name'],PATHINFO_EXTENSION)?:('jpg');
+    $folder=$action==='upload_avatar'?'avatars':'covers';
+    $dir=__DIR__.'/../uploads/'.$folder;
+    if(!is_dir($dir))mkdir($dir,0755,true);
+    $fname=$userId.'_'.time().'.'.$ext;
+    $path=$dir.'/'.$fname;
+    if(!move_uploaded_file($file['tmp_name'],$path)){echo json_encode(['success'=>false,'message'=>'Upload failed']);exit;}
+    $url='/uploads/'.$folder.'/'.$fname;
+    $col=$action==='upload_avatar'?'avatar':'cover_image';
+    $d->query("UPDATE users SET $col=? WHERE id=?",[$url,$userId]);
+    echo json_encode(['success'=>true,'data'=>['url'=>$url]]);exit;
   }
 }
 } catch(Throwable $e){echo json_encode(['success'=>false,'message'=>$e->getMessage()]);exit;}
