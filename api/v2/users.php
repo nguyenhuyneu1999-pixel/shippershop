@@ -233,7 +233,7 @@ if($method==='POST'){
             // Notification
             try{
                 $me=$d->fetchOne("SELECT fullname FROM users WHERE id=?",[$uid]);
-                $pdo->prepare("INSERT INTO notifications (user_id,type,content,link,created_at) VALUES (?,'follow',?,?,NOW())")->execute([$tid,($me?$me['fullname']:'Ai đó').' đã theo dõi bạn','/user.html?id='.$uid]);
+                $pdo->prepare("INSERT INTO notifications (user_id,type,title,message,data,created_at) VALUES (?,'follow',?,?,?,NOW())")->execute([$tid,'Theo dõi mới',($me?$me['fullname']:'Ai đó').' đã theo dõi bạn',json_encode(['link'=>'/user.html?id='.$uid])]);
             }catch(\Throwable $e){}
             ok('OK',['following'=>true]);
         }

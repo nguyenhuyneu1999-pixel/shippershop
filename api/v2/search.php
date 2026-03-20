@@ -21,15 +21,18 @@ $uid=optional_auth();
 
 function ok($msg,$data=null){echo json_encode(['success'=>true,'message'=>$msg,'data'=>$data],JSON_UNESCAPED_UNICODE);exit;}
 
-if(mb_strlen($q)<1) ok('OK',['users'=>[],'posts'=>[],'groups'=>[]]);
+try {
 
-// Global search
+if(mb_strlen($q)<1&&$action!=='trending'&&$action!=='history'&&$action!=='clear_history'){
+    ok('OK',['users'=>[],'posts'=>[],'groups'=>[]]);
+}
+
 if($action==='global'){
     $users=$d->fetchAll("SELECT id,fullname,avatar,username,shipping_company,total_success FROM users WHERE `status`='active' AND (fullname LIKE ? OR username LIKE ?) ORDER BY total_success DESC LIMIT 5",['%'.$q.'%','%'.$q.'%']);
     $posts=$d->fetchAll("SELECT p.id,p.content,p.likes_count,p.created_at,u.fullname as user_name,u.avatar as user_avatar FROM posts p LEFT JOIN users u ON p.user_id=u.id WHERE p.`status`='active' AND p.content LIKE ? ORDER BY p.likes_count DESC LIMIT 5",['%'.$q.'%']);
-    $groups=$d->fetchAll("SELECT id,name,description,avatar,member_count FROM `groups` WHERE name LIKE ? OR description LIKE ? ORDER BY member_count DESC LIMIT 5",['%'.$q.'%','%'.$q.'%']);
+    $groups=[];
+    try{$groups=$d->fetchAll("SELECT id,name,description,avatar,member_count FROM `groups` WHERE name LIKE ? OR description LIKE ? ORDER BY member_count DESC LIMIT 5",['%'.$q.'%','%'.$q.'%']);}catch(\Throwable $e){$groups=[];}
 
-    // Save search history
     if($uid){
         $total=count($users)+count($posts)+count($groups);
         try{$pdo=$d->getConnection();$pdo->prepare("INSERT INTO search_history (user_id,query,result_count,created_at) VALUES (?,?,?,NOW())")->execute([$uid,$q,$total]);}catch(\Throwable $e){}
@@ -51,17 +54,17 @@ if($action==='posts'){
 }
 
 if($action==='groups'){
-    $groups=$d->fetchAll("SELECT id,name,description,avatar,member_count FROM `groups` WHERE name LIKE ? OR description LIKE ? ORDER BY member_count DESC LIMIT $limit",['%'.$q.'%','%'.$q.'%']);
+    $groups=[];
+    try{$groups=$d->fetchAll("SELECT id,name,description,avatar,member_count FROM `groups` WHERE name LIKE ? OR description LIKE ? ORDER BY member_count DESC LIMIT $limit",['%'.$q.'%','%'.$q.'%']);}catch(\Throwable $e){}
     ok('OK',$groups);
 }
 
 if($action==='trending'){
-    // Extract hashtags from recent posts
     $posts=$d->fetchAll("SELECT content FROM posts WHERE `status`='active' AND created_at>DATE_SUB(NOW(),INTERVAL 7 DAY)");
     $tags=[];
     foreach($posts as $p){
-        preg_match_all('/#([\\p{L}\\p{N}_]+)/u',$p['content'],$m);
-        foreach($m[1] as $tag){$t=mb_strtolower($tag);$tags[$t]=($tags[$t]??0)+1;}
+        preg_match_all('/#([\p{L}\p{N}_]+)/u',$p['content'],$m);
+        if(!empty($m[1])) foreach($m[1] as $tag){$t=mb_strtolower($tag);$tags[$t]=($tags[$t]??0)+1;}
     }
     arsort($tags);$tags=array_slice($tags,0,20,true);
     $result=[];foreach($tags as $tag=>$count){$result[]=['tag'=>$tag,'count'=>$count];}
@@ -80,3 +83,7 @@ if($action==='clear_history'){
 }
 
 ok('OK',[]);
+
+} catch(Throwable $e) {
+    echo json_encode(['success'=>false,'error'=>$e->getMessage(),'line'=>$e->getLine()]);
+}
