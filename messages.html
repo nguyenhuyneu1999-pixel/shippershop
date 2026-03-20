@@ -583,9 +583,21 @@ function coTogglePin(el){el.classList.toggle("on");coPinned=!coPinned;}
 function coToggleHide(el){el.classList.toggle("on");coHidden=!coHidden;}
 
 function coMedia(){closeChatOpts();openMediaGallery();}
-function coCreateGroup(){closeChatOpts();location.href="groups.html";}
-function coAddToGroup(){closeChatOpts();location.href="groups.html";}
-function coSharedGroups(){closeChatOpts();if(typeof toast==="function")toast("Xem nhóm chung trong Cộng đồng","info");else location.href="groups.html";}
+function coCreateGroup(){
+  closeChatOpts();
+  if(!curOtherId){toast("Lỗi: không tìm thấy người dùng");return;}
+  var partnerName=document.getElementById("chName").textContent||"";
+  var myName=CU?CU.fullname:"";
+  var defaultName=myName+", "+partnerName;
+  var name=prompt("Tên nhóm chat:",defaultName);
+  if(!name||!name.trim())return;
+  fetch("/api/messages-api.php?action=create_group",{method:"POST",headers:{"Content-Type":"application/json"},credentials:"include",body:JSON.stringify({name:name.trim(),member_ids:[curOtherId]})}).then(function(r){return r.json();}).then(function(d){
+    if(d.success){toast("Đã tạo nhóm chat!");loadConvs();openGroupChat(d.data.conversation_id);}
+    else{toast(d.message||"Lỗi tạo nhóm");}
+  }).catch(function(){toast("Lỗi kết nối");});
+}
+function coAddToGroup(){closeChatOpts();toast("Tính năng đang phát triển");}
+function coSharedGroups(){closeChatOpts();toast("Tính năng đang phát triển");}
 
 function coCategory(){
   closeChatOpts();
