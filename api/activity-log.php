@@ -30,7 +30,7 @@ if($filter==='all'||$filter==='comments'){
   if($dateFrom){$where.=" AND c.created_at>=?";$params[]=$dateFrom.' 00:00:00';}
   if($dateTo){$where.=" AND c.created_at<=?";$params[]=$dateTo.' 23:59:59';}
   $cmts=$d->fetchAll("SELECT c.id,c.content,c.created_at,c.post_id,p.content as post_content,u.fullname as post_author,u.avatar as post_author_avatar FROM comments c JOIN posts p ON c.post_id=p.id JOIN users u ON p.user_id=u.id $where ORDER BY c.created_at DESC",$params);
-  foreach($cmts as $c){$activities[]=['type'=>'comment','action'=>'Đã bình luận về bài viết của '.$c['post_author'],'content'=>$c['content'],'post_content'=>$c['post_content'],'post_id'=>$c['post_id'],'post_author'=>$c['post_author'],'post_author_avatar'=>$c['post_author_avatar'],'created_at'=>$c['created_at']];}
+  foreach($cmts as $c){$activities[]=['type'=>'comment','action'=>'Đã ghi chú về bài viết của '.$c['post_author'],'content'=>$c['content'],'post_content'=>$c['post_content'],'post_id'=>$c['post_id'],'post_author'=>$c['post_author'],'post_author_avatar'=>$c['post_author_avatar'],'created_at'=>$c['created_at']];}
 }
 
 // Likes by user

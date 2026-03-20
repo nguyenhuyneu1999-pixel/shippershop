@@ -946,7 +946,7 @@ session_start();
                         </div>
                         ${currentUser ? `
                             <div class="comment-input-wrapper">
-                                <input type="text" class="comment-input" id="comment-input-${post.id}" placeholder="Viết bình luận...">
+                                <input type="text" class="comment-input" id="comment-input-${post.id}" placeholder="Viết ghi chú...">
                                 <button class="comment-submit" onclick="submitComment(${post.id})">
                                     <i class="fas fa-paper-plane"></i>
                                 </button>
@@ -1111,7 +1111,7 @@ session_start();
                         `;
                     }).join('');
                 } else {
-                    container.innerHTML = '<p style="text-align: center; color: var(--gray); padding: 10px;">Chưa có bình luận</p>';
+                    container.innerHTML = '<p style="text-align: center; color: var(--gray); padding: 10px;">Chưa có ghi chú</p>';
                 }
             } catch (error) {
                 console.error('Load comments error:', error);

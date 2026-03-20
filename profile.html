@@ -534,7 +534,7 @@
                         <button class="btn-save" style="white-space:nowrap;font-size:13px;padding:8px 16px;border-radius:20px" onclick="location.href='activity-log.html'" id="actBtnPosts">Bài viết</button>
                         <button class="btn-save" style="white-space:nowrap;font-size:13px;padding:8px 16px;border-radius:20px;background:#e0e0e0;color:#333" onclick="loadActivity('saved')" id="actBtnSaved">Đã lưu</button>
                         <button class="btn-save" style="white-space:nowrap;font-size:13px;padding:8px 16px;border-radius:20px;background:#e0e0e0;color:#333" onclick="loadActivity('liked')" id="actBtnLiked">Đã thích</button>
-                        <button class="btn-save" style="white-space:nowrap;font-size:13px;padding:8px 16px;border-radius:20px;background:#e0e0e0;color:#333" onclick="loadActivity('commented')" id="actBtnCommented">Đã bình luận</button>
+                        <button class="btn-save" style="white-space:nowrap;font-size:13px;padding:8px 16px;border-radius:20px;background:#e0e0e0;color:#333" onclick="loadActivity('commented')" id="actBtnCommented">Đã ghi chú</button>
                     </div>
                     <div id="activityFeed" style="background:#f5f5f5;border-radius:10px;min-height:200px;padding:8px">
                         <p style="text-align:center;color:#999;padding:40px">Chọn một tab để xem</p>
@@ -686,7 +686,7 @@
                 try { d = JSON.parse(text); } catch(e) { feed.innerHTML = '<p style="text-align:center;color:#f44;padding:40px">Lỗi: Server trả về không hợp lệ</p>'; return; }
                 if (d.success && d.data && d.data.items && d.data.items.length > 0) {
                     var icons = {posts:'📝',saved:'🔖',liked:'❤️',commented:'💬'};
-                    var labels = {posts:'Đã đăng',saved:'Đã lưu',liked:'Đã thích',commented:'Đã bình luận'};
+                    var labels = {posts:'Đã đăng',saved:'Đã lưu',liked:'Đã thích',commented:'Đã ghi chú'};
                     feed.innerHTML = d.data.items.map(function(p) {
                         var imgs = [];
                         try { if (p.images) imgs = JSON.parse(p.images); } catch(e) {}

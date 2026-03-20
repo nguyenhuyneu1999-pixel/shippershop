@@ -123,7 +123,7 @@ if ($action === 'comment') {
         'status' => 'active'
     ]);
     
-    success('Đã bình luận', [
+    success('Đã ghi chú', [
         'comment_id' => $commentId,
         'post_id' => $postId
     ]);

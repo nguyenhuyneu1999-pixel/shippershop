@@ -263,7 +263,7 @@ function _gcCSS(){
   +".gc-send:disabled{opacity:.4;}"
   +".gc-rpl{font-size:12px;color:#65676B;padding:0 16px 4px;display:none;}"
   +".gc-rpl.show{display:flex;align-items:center;gap:6px;}"
-  +".gc-rpl a{color:#7C3AED;font-weight:700;cursor:pointer;text-decoration:none;}"
+  +".gc-rpl a{color:#7C3AED;font-weight:700;cursor:pointer;text-decoration:none;}.gc-sh .post-menu{position:fixed;right:16px;top:auto;z-index:1200;transform:translateY(-100%);}"
   +".gc-empty{text-align:center;padding:20px;color:#999;font-size:13px;}";
   document.head.appendChild(s);
 }
@@ -333,7 +333,7 @@ function _gcLoadCmts(pid){
   var wrap=document.getElementById("gcCmts");
   if(!wrap)return;
   fetch("/api/posts.php?action=comments&post_id="+pid+"&_t="+Date.now(),{credentials:"include"}).then(function(r){return r.json();}).then(function(d){
-    if(!d.success||!d.data||!d.data.length){wrap.innerHTML="<div class='gc-empty'>Chưa có bình luận</div>";return;}
+    if(!d.success||!d.data||!d.data.length){wrap.innerHTML="<div class='gc-empty'>Chưa có ghi chú</div>";return;}
     var flat=d.data,map={},list=[];
     for(var i=0;i<flat.length;i++){map[flat[i].id]=flat[i];}
     function addF(cc,depth,pn){list.push({c:cc,dp:Math.min(depth,1),rpl:depth>0?pn:null});for(var x=0;x<flat.length;x++){if(flat[x].parent_id===cc.id)addF(flat[x],depth+1,cc.user_name);}}
