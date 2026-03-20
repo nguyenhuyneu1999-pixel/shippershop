@@ -82,7 +82,7 @@ function mkPost(p){
   +'<div class="post-meta">'+av+'<div style="flex:1;min-width:0"><div style="display:flex;align-items:center;justify-content:space-between">'+authorLink+'<button class="post-dots" onclick="event.stopPropagation();togMenu('+p.id+')"><i class="fas fa-ellipsis"></i></button></div><div style="font-size:12px;color:#999;display:flex;align-items:center;gap:4px">'+shipBadge+'<span>·</span><span>'+ago(p.created_at)+'</span>'+badge+pvBadge+anonBadge+'</div></div></div>'
   +title+'<div class="post-menu" id="pm'+p.id+'" style="display:none"><div id="sv'+p.id+'" onclick="togSave('+p.id+')"><i class="'+(isSaved?'fas':'far')+' fa-bookmark" style="color:'+(isSaved?'#7C3AED':'inherit')+'"></i> '+(isSaved?'Bỏ lưu':'Lưu bài viết')+'</div>'+(canDel?'<div onclick="delP('+p.id+')"><i class="far fa-trash-can"></i> Xóa bài</div>':'')+'<div onclick="reportP('+p.id+')"><i class="fas fa-flag"></i> Báo cáo</div><div onclick="togMenu('+p.id+')"><i class="fas fa-times"></i> Đóng</div></div>'+contentH+imgH+vidH
   +'</div>'
-  +'<div class="pa3-stats"><span>'+(likes>0?fN(likes)+' thành công':'')+'</span><span>'+(parseInt(p.comments_count||0)>0?fN(p.comments_count||0)+' ghi chú':'')+'</span><span></span></div>'
+  +'<div class="pa3-stats"><span>'+(likes>0?fN(likes)+' đơn giao thành công':'')+'</span><span>'+(parseInt(p.comments_count||0)>0?fN(p.comments_count||0)+' ghi chú':'')+'</span><span></span></div>'
   +'<div class="post-actions-3">'
   +'<button class="pa3-btn'+(isLiked?' pa3-active':'')+'" id="lk'+p.id+'" onclick="likePost('+p.id+',this)"><span>Thành công</span></button>'
   +'<button class="pa3-btn" onclick="openGhiChu('+p.id+')"><span id="nc'+p.id+'">Ghi chú</span></button>'
@@ -110,7 +110,7 @@ async function likePost(pid,btn){
         var statsDiv=card.querySelector('.pa3-stats');
         if(statsDiv){
           var spans=statsDiv.querySelectorAll('span');
-          if(spans[0]) spans[0].textContent=score>0?score+' thành công':'';
+          if(spans[0]) spans[0].textContent=score>0?score+' đơn giao thành công':'';
         }
       }
     }else{toast(d.message||'Lỗi','error');}
@@ -235,8 +235,8 @@ function _gcCSS(){
   +".gc-av-ph{width:40px;height:40px;border-radius:50%;background:#7C3AED;color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:14px;flex-shrink:0;}"
   +".gc-content{padding:8px 16px;font-size:15px;line-height:1.6;white-space:pre-wrap;word-break:break-word;}"
   +".gc-imgs{width:100%;}.gc-imgs img{width:100%;display:block;}"
-  +".gc-stats{display:flex;padding:8px 16px 4px;font-size:12px;color:#65676B;}"
-  +".gc-stats span{flex:1;text-align:center;}"
+  +".gc-stats{display:flex;padding:4px 12px;font-size:10px;color:#65676B;}"
+  +".gc-stats span{flex:1;text-align:center;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0;}"
   +".gc-stats span:first-child{text-align:left;}"
   +".gc-stats span:last-child{text-align:right;}"
   +".gc-actions{display:flex;border-top:1px solid #e4e6eb;border-bottom:1px solid #e4e6eb;}"
