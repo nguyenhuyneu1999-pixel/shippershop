@@ -39,29 +39,9 @@ body{background:var(--bg);font-family:'Be Vietnam Pro',-apple-system,BlinkMacSys
 .g-tab.active{color:var(--primary);border-bottom-color:var(--primary)}
 
 /* Posts - Facebook-style matching feed */
-.post-card{background:#fff;margin-top:8px;overflow:hidden}
-.post-meta{display:flex;gap:10px;padding:10px 16px 4px;align-items:center}
-.post-av{width:40px;height:40px;border-radius:50%;background:var(--primary);color:#fff;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:700;flex-shrink:0;overflow:hidden}
-.post-av img{width:100%;height:100%;object-fit:cover}
 .post-author{font-weight:700;font-size:14px}
 .post-author a{color:var(--text);text-decoration:none}
 .post-time{font-size:12px;color:var(--muted)}
-.post-content{padding:4px 16px 8px;font-size:14px;line-height:1.6;white-space:pre-wrap;word-break:break-word}
-.post-content.trunc{max-height:120px;overflow:hidden}
-.show-more{display:block;padding:0 16px 8px;font-size:13px;color:var(--primary);font-weight:600;cursor:pointer}
-.post-images{width:100%;display:block}
-.post-images img{width:100%;display:block;max-height:500px;object-fit:cover;cursor:pointer}
-.post-images.multi{display:flex;gap:2px;flex-wrap:wrap}
-.post-images.multi img{width:calc(50% - 1px);max-height:250px}
-.pa3-stats{display:flex;padding:6px 16px;font-size:11px;color:var(--muted)}
-.pa3-stats span{flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.pa3-stats span:nth-child(2){text-align:center}
-.pa3-stats span:last-child{text-align:right}
-.post-actions-3{display:flex;border-top:1px solid var(--border)}
-.pa3-btn{flex:1;padding:10px 0;text-align:center;font-size:13px;font-weight:600;color:var(--muted);border:none;background:none;cursor:pointer;border-right:1px solid var(--border)}
-.pa3-btn:last-child{border-right:none}
-.pa3-btn:active{background:#EDE9FE}
-.pa3-btn.pa3-active{color:var(--primary);background:#EDE9FE}
 .ship-badge{font-size:11px;font-weight:700}
 .type-badge{font-size:10px;padding:1px 6px;border-radius:8px;font-weight:600;margin-left:4px}
 .type-badge.b-review{background:#FFF3E0;color:#E65100}
@@ -131,10 +111,44 @@ body{background:var(--bg);font-family:'Be Vietnam Pro',-apple-system,BlinkMacSys
 .toast{position:fixed;bottom:90px;left:50%;transform:translateX(-50%);background:#333;color:#fff;padding:10px 20px;border-radius:20px;font-size:13px;opacity:0;transition:opacity .3s;z-index:999;pointer-events:none}
 .toast.show{opacity:1}
 .empty-msg{text-align:center;padding:40px 20px;color:var(--muted);font-size:14px}
-.post-dots{background:none;border:none;font-size:18px;color:#65676B;cursor:pointer;padding:4px 8px;border-radius:50%;}.post-dots:hover{background:#f0f2f5;}
+
+/* Post card CSS (same as index.html) */
+.post-card:hover{background:#fafafa;}
+.post-meta{padding:8px 12px 0;}.post-content,.post-content.full{padding:4px 12px;}
+.post-meta{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--muted);margin-bottom:4px;flex-wrap:wrap;position:relative;}
+.post-dots{background:none;border:none;color:var(--muted);cursor:pointer;font-size:16px;padding:4px 8px;margin-left:auto;border-radius:4px;}.post-dots:hover{background:var(--border);}
 .post-menu{position:absolute;right:8px;top:36px;background:#fff;border-radius:8px;box-shadow:0 2px 12px rgba(0,0,0,.15);z-index:50;min-width:160px;padding:4px 0;}
 .post-menu div{padding:10px 14px;font-size:13px;cursor:pointer;display:flex;align-items:center;gap:8px;}.post-menu div:hover{background:#f5f5f5;}
 .post-meta{position:relative;}
+.avatar-sm{width:20px;height:20px;border-radius:50%;object-fit:cover;background:var(--primary);color:#fff;font-size:10px;display:inline-flex;align-items:center;justify-content:center;font-weight:700;flex-shrink:0;}
+.post-author{font-weight:600;color:var(--text);cursor:pointer;}
+.post-author:hover{text-decoration:underline;}
+.province-badge{background:var(--orange-light);color:var(--primary);padding:1px 7px;border-radius:20px;font-size:11px;font-weight:600;cursor:pointer;}
+.anon-badge{background:#f0f0f0;color:#555;padding:1px 7px;border-radius:20px;font-size:11px;}
+.type-badge{padding:2px 8px;border-radius:20px;font-size:11px;font-weight:700;}
+.b-confession{background:#FFE4E1;color:#DC143C;}
+.b-review{background:#E3F2FD;color:#1565C0;}
+.b-question{background:#E8F5E9;color:#2E7D32;}
+.b-tip{background:#FFF8E1;color:#F57F17;}
+.b-discussion{background:#F3E5F5;color:#6A1B9A;}
+.post-title{font-size:18px;font-weight:700;margin-bottom:8px;line-height:1.3;}
+.post-content{font-size:14px;line-height:1.6;color:#333;word-break:break-word;white-space:pre-wrap;max-height:300px;overflow:hidden;position:relative;}
+.post-content.full{max-height:none;}
+.post-content:not(.full)::after{content:'';position:absolute;bottom:0;left:0;right:0;height:60px;background:linear-gradient(transparent,#fff);}
+.show-more{font-size:13px;color:var(--primary);cursor:pointer;font-weight:600;margin-top:2px;display:inline-block;}
+.post-card{background:#fff;border:none;border-radius:0;margin-bottom:6px;display:flex;flex-direction:column;overflow:hidden;}
+.post-body{padding:0;width:100%;}
+.post-meta{padding:8px 12px 4px;}
+.post-content,.post-content.full{padding:4px 12px 8px;}
+.post-images{display:block;width:100%;margin:0;}
+.post-images.multi-img{display:flex;gap:2px;flex-wrap:wrap;}
+.post-img{width:100%;border-radius:0;display:block;}
+.post-img.multi{width:calc(50% - 1px);max-height:400px;object-fit:cover;}
+.pa3-stats{display:flex;padding:0;margin:0;width:100%;border:none;}.pa3-stats span{flex:1;text-align:center;font-size:11px;color:#65676B;padding:6px 2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0;line-height:1.2;}
+.post-actions-3{display:flex;border-top:1px solid #e4e6eb;background:#fff;}
+.pa3-btn{flex:1;display:flex;align-items:center;justify-content:center;padding:12px 0;border:none;background:#fff;cursor:pointer;font-size:14px;font-weight:600;color:#65676B;border-right:1px solid #e4e6eb;transition:background .15s;}
+.pa3-btn:last-child{border-right:none;}
+.pa3-btn:active,.pa3-btn.pa3-active{background:#EDE9FE;color:#7C3AED;}
 </style>
 </head>
 <body>
@@ -328,52 +342,11 @@ var _SC={"GHTK":"#00b14f","J&T":"#d32f2f","GHN":"#ff6600","Viettel Post":"#e21a1
 var _BT={"review":"b-review","question":"b-question","tip":"b-tip","post":"b-post"};
 var _BTxt={"review":"\u2b50 Review","question":"\u2753 H\u1ecfi \u0111\u00e1p","tip":"\ud83d\udca1 Tip"};
 
-function mkPost(p){
-  var av=p.user_avatar?"<img src='"+esc(p.user_avatar)+"' onerror=\"this.outerHTML='<span>"+esc((p.user_name||"U")[0])+"</span>'\">":esc((p.user_name||"?")[0]);
-  var liked=p.user_liked;
-  var likes=parseInt(p.likes_count)||0;
-  var cmts=parseInt(p.comments_count)||0;
-  var shares=parseInt(p.shares_count)||0;
-  var shipBadge="";
-  if(p.shipping_company){var sc=p.shipping_company;shipBadge="<span class='ship-badge' style='color:"+(_SC[sc]||"#666")+"'>"+esc(sc)+"</span><span>\u00b7</span>";}
-  var badge=_BTxt[p.type]?"<span class='type-badge "+(_BT[p.type]||"")+"'>"+_BTxt[p.type]+"</span>":"";
-  var title=p.title?"<div style='font-weight:700;font-size:16px;padding:4px 16px 0'>"+esc(p.title)+"</div>":"";
-  var body=esc(p.content||"");
-  var isLong=body.length>300;
-  var contentH="<div class='post-content"+(isLong?" trunc":"")+"' id='gpc"+p.id+"'>"+body+"</div>"+(isLong?"<span class='show-more' onclick='var el=document.getElementById(\"gpc"+p.id+"\");el.classList.toggle(\"trunc\");this.textContent=el.classList.contains(\"trunc\")?\"Xem th\u00eam \u25bc\":\"Thu g\u1ecdn \u25b2\"'>Xem th\u00eam \u25bc</span>":"");
-  var imgH="";
-  if(p.images){try{var a=JSON.parse(p.images);if(a&&a.length){var cl=a.length>1?" multi":"";window._ssPI=window._ssPI||{};window._ssPI["g"+p.id]=a;window._ssIvGroup=true;window._ssIvGroupId=GROUP?GROUP.id:0;imgH="<div class='post-images"+cl+"'>";for(var i=0;i<Math.min(a.length,4);i++){imgH+="<img src='"+a[i]+"' loading='lazy' onclick='openLb(\""+a[i]+"\","+p.id+",window._ssPI[\"g"+p.id+"\"])' onerror='this.style.display=\"none\"'>";}imgH+="</div>";}}catch(x){}}
-  var vidH="";
-  if(p.video_url){if(p.video_url.indexOf("/uploads/")!==-1){vidH="<video controls playsinline preload='metadata' style='width:100%;max-height:500px'><source src='"+p.video_url+"' type='video/mp4'></video>";}else{vidH="<div style='position:relative;padding-bottom:56%;height:0;overflow:hidden'><iframe src='"+p.video_url+"' style='position:absolute;inset:0;width:100%;height:100%;border:0' allowfullscreen></iframe></div>";}}
-  var canDel=CU&&parseInt(p.user_id)===parseInt(CU.id);
-  return "<div class='post-card' id='gp"+p.id+"'>"
-    +"<div class='post-meta'><div class='post-av'>"+av+"</div>"
-    +"<div style='flex:1;min-width:0'><div style='display:flex;align-items:center;justify-content:space-between'><div class='post-author'><a href='user.html?id="+p.user_id+"'>"+esc(p.user_name)+"</a></div><button class='post-dots' onclick='event.stopPropagation();togMenu("+p.id+")'><i class='fas fa-ellipsis'></i></button></div>"
-    +"<div style='font-size:12px;color:#65676B;display:flex;align-items:center;gap:4px'>"+shipBadge+"<span>"+ago(p.created_at)+"</span>"+badge+"</div></div></div>"
-    +"<div class='post-menu' id='pm"+p.id+"' style='display:none'><div id='sv"+p.id+"' onclick='togSave("+p.id+")'><i class='"+(p.user_saved?"fas":"far")+" fa-bookmark' style='color:"+(p.user_saved?"#7C3AED":"inherit")+"'></i> "+(p.user_saved?"Bỏ lưu":"Lưu bài viết")+"</div>"+(canDel?"<div onclick='delP("+p.id+")'><i class='far fa-trash-can'></i> Xóa bài</div>":"")+"<div onclick='reportP("+p.id+")'><i class='fas fa-flag'></i> Báo cáo</div><div onclick='togMenu("+p.id+")'><i class='fas fa-times'></i> Đóng</div></div>"
-    +title+contentH+imgH+vidH
-    +"<div class='pa3-stats'><span>"+(likes>0?fN(likes)+" \u0111\u01a1n giao th\u00e0nh c\u00f4ng":"")+"</span><span>"+(cmts>0?fN(cmts)+" ghi ch\u00fa":"")+"</span><span>"+(shares>0?fN(shares)+" chuy\u1ec3n ti\u1ebfp":"")+"</span></div>"
-    +"<div class='post-actions-3'>"
-    +"<button class='pa3-btn"+(liked?" pa3-active":"")+"' onclick='likePost("+p.id+",this)'>Th\u00e0nh c\u00f4ng</button>"
-    +"<button class='pa3-btn' onclick='openComment("+p.id+")'>Ghi ch\u00fa</button>"
-    +"<button class='pa3-btn' onclick='sharePost("+p.id+")'>Chuy\u1ec3n ti\u1ebfp</button>"
-    +"</div></div>";
-}
+// mkPost from shared JS (reddit-mkpost-1773927135.js)
+// Alias openComment → openGhiChu for group context
 
-function likePost(pid,btn){
-  if(!CU){location.href="login.html";return;}
-  apiFetch("/api/groups.php?action=like_post",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({post_id:pid})})
-  .then(function(d){
-    if(d.success){
-      var liked=d.data.liked;
-      var count=d.data.count||0;
-      btn.className="pa3-btn"+(liked?" pa3-active":"");
-      btn.textContent="Th\u00e0nh c\u00f4ng";
-      var card=btn.closest(".post-card");
-      if(card){var s=card.querySelector(".pa3-stats span");if(s)s.textContent=count>0?fN(count)+" \u0111\u01a1n giao th\u00e0nh c\u00f4ng":"";}
-    }
-  });
-}
+
+
 
 // About tab
 function renderAbout(){
@@ -507,7 +480,7 @@ function uploadGroupImg(type,input){
 }
 
 // Comment bottom sheet
-function openComment(pid){
+function openGhiChu(pid){
   var old=document.getElementById("gcOverlay2");if(old)old.remove();
   var ov=document.createElement("div");
   ov.id="gcOverlay2";ov.style.cssText="position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:2000;display:flex;align-items:flex-end;justify-content:center;";
@@ -549,24 +522,21 @@ function sendGroupComment(pid){
         if(wrap)wrap.innerHTML=h;
         wrap.scrollTop=wrap.scrollHeight;
       });
-      var card=document.getElementById("gp"+pid);if(card){var s=card.querySelectorAll(".pa3-stats span");if(s.length>=2){var cur=parseInt(s[1].textContent)||0;s[1].textContent=(cur+1)+" ghi ch\u00fa";}}
+      var card=document.getElementById("P"+pid);if(card){var s=card.querySelectorAll(".pa3-stats span");if(s.length>=2){var cur=parseInt(s[1].textContent)||0;s[1].textContent=(cur+1)+" ghi ch\u00fa";}}
     }
     else toast(d.message||"L\u1ed7i");
   }).catch(function(){toast("L\u1ed7i k\u1ebft n\u1ed1i");});
 }
 
-function sharePost(pid){
-  var url=location.origin+"/group.html?"+(groupSlug?"slug="+groupSlug:"id="+GROUP.id)+"&post="+pid;
-  if(navigator.share)navigator.share({url:url,title:GROUP?GROUP.name:"Nhóm"});
-  else{navigator.clipboard.writeText(url);toast("Đã copy link!");}
-}
+
 </script>
+<script src="js/reddit-mkpost-1773927135.js"></script>
 <script src="js/mobile.js"></script>
 <script>
-function togMenu(pid){var m=document.getElementById("pm"+pid);if(!m)return;var show=m.style.display==="none"||!m.style.display;document.querySelectorAll(".post-menu").forEach(function(el){el.style.display="none";});if(show)m.style.display="block";}
+
 function reportP(pid){togMenu(pid);if(typeof toast==="function")toast("Đã gửi báo cáo!");}
-function delP(pid){if(!confirm("Xóa bài viết này?"))return;togMenu(pid);apiFetch("/api/groups.php?action=delete_post",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({post_id:pid})}).then(function(d){if(d.success){var el=document.getElementById("gp"+pid);if(el)el.style.display="none";}});}
-async function togSave(pid){if(!CU){location.href="login.html";return;}togMenu(pid);try{var tk=localStorage.getItem("token");var r=await fetch("/api/posts.php?action=save",{method:"POST",headers:{"Content-Type":"application/json","Authorization":"Bearer "+tk},credentials:"include",body:JSON.stringify({post_id:pid})});var d=await r.json();if(d.success){var saved=d.data&&d.data.saved;var el=document.getElementById("sv"+pid);if(el){el.innerHTML="<i class='"+(saved?"fas":"far")+" fa-bookmark' style='color:"+(saved?"#7C3AED":"inherit")+"'></i> "+(saved?"Bỏ lưu":"Lưu bài viết");}}}catch(e){}}
+function delP(pid){if(!confirm("Xóa bài viết này?"))return;togMenu(pid);apiFetch("/api/groups.php?action=delete_post",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({post_id:pid})}).then(function(d){if(d.success){var el=document.getElementById("P"+pid);if(el)el.style.display="none";}});}
+
 document.addEventListener("click",function(e){if(!e.target.closest(".post-dots")&&!e.target.closest(".post-menu")){document.querySelectorAll(".post-menu").forEach(function(m){m.style.display="none";});}});
 </script>
 <script src="/js/image-viewer.js"></script><script src="/js/analytics.js"></script></body>
