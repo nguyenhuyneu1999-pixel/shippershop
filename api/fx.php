@@ -3,28 +3,49 @@ require_once __DIR__.'/../includes/db.php';
 header('Content-Type: text/plain');
 $d=db();
 
-echo "=== Conversations count ===\n";
-$c=$d->fetchOne("SELECT COUNT(*) as c FROM conversations");
-echo "Total: ".$c['c']."\n";
-
-echo "\n=== Conversations for user 3 (Nguyen Van Huy) ===\n";
-$cvs=$d->fetchAll("SELECT c.*, (SELECT COUNT(*) FROM messages WHERE conversation_id=c.id) as msg_count FROM conversations c WHERE c.user1_id=3 OR c.user2_id=3 OR c.creator_id=3 ORDER BY c.id DESC");
-foreach($cvs as $cv){
-  echo "id=".$cv['id']." type=".$cv['type']." u1=".$cv['user1_id']." u2=".$cv['user2_id']." status=".$cv['status']." msgs=".$cv['msg_count']." last=".$cv['last_message_at']."\n";
+// Simulate conversations API for user 2 (Admin - likely the logged in user)
+echo "=== User 2 active conversations (what API returns) ===\n";
+$rows=$d->fetchAll("SELECT id,user1_id,user2_id,last_message,last_message_at,`status`,type FROM conversations WHERE (user1_id=2 OR user2_id=2) AND `status`='active' AND (type='private' OR type IS NULL) ORDER BY last_message_at DESC");
+foreach($rows as $c){
+  $oid=($c['user1_id']==2)?$c['user2_id']:$c['user1_id'];
+  $other=$d->fetchOne("SELECT fullname,shipping_company FROM users WHERE id=?",[$oid]);
+  echo "conv=".$c['id']." other=$oid (".($other?$other['fullname']:'?').") last=".$c['last_message_at']." type=".$c['type']."\n";
 }
 
-echo "\n=== Messages count ===\n";
-$m=$d->fetchOne("SELECT COUNT(*) as c FROM messages");
-echo "Total messages: ".$m['c']."\n";
-
-echo "\n=== Recent messages ===\n";
-$msgs=$d->fetchAll("SELECT m.id,m.conversation_id,m.sender_id,m.content,m.created_at FROM messages m ORDER BY m.id DESC LIMIT 10");
-foreach($msgs as $msg){
-  echo "msg=".$msg['id']." conv=".$msg['conversation_id']." from=".$msg['sender_id']." content=".substr($msg['content'],0,50)." at=".$msg['created_at']."\n";
+echo "\n=== User 2 pending conversations ===\n";
+$rows2=$d->fetchAll("SELECT id,user1_id,user2_id,last_message,`status`,type FROM conversations WHERE (user1_id=2 OR user2_id=2) AND `status`='pending' AND (type='private' OR type IS NULL) ORDER BY last_message_at DESC");
+foreach($rows2 as $c){
+  $oid=($c['user1_id']==2)?$c['user2_id']:$c['user1_id'];
+  $other=$d->fetchOne("SELECT fullname FROM users WHERE id=?",[$oid]);
+  echo "conv=".$c['id']." other=$oid (".($other?$other['fullname']:'?').") status=".$c['status']."\n";
 }
 
-echo "\n=== All conversations ===\n";
-$all=$d->fetchAll("SELECT c.id,c.type,c.user1_id,c.user2_id,c.creator_id,c.name,c.`status`,(SELECT COUNT(*) FROM messages WHERE conversation_id=c.id) as msg_count FROM conversations c ORDER BY c.id");
-foreach($all as $cv){
-  echo "id=".$cv['id']." type=".$cv['type']." u1=".$cv['user1_id']." u2=".$cv['user2_id']." creator=".$cv['creator_id']." name=".($cv['name']?:'').'' ." status=".$cv['status']." msgs=".$cv['msg_count']."\n";
+echo "\n=== User 3 active conversations ===\n";
+$rows3=$d->fetchAll("SELECT id,user1_id,user2_id,last_message,last_message_at,`status`,type FROM conversations WHERE (user1_id=3 OR user2_id=3) AND `status`='active' AND (type='private' OR type IS NULL) ORDER BY last_message_at DESC");
+foreach($rows3 as $c){
+  $oid=($c['user1_id']==3)?$c['user2_id']:$c['user1_id'];
+  $other=$d->fetchOne("SELECT fullname FROM users WHERE id=?",[$oid]);
+  echo "conv=".$c['id']." other=$oid (".($other?$other['fullname']:'?').") last=".$c['last_message_at']."\n";
 }
+
+echo "\n=== User 3 pending conversations ===\n";
+$rows4=$d->fetchAll("SELECT id,user1_id,user2_id,last_message,`status`,type FROM conversations WHERE (user1_id=3 OR user2_id=3) AND `status`='pending' AND (type='private' OR type IS NULL) ORDER BY last_message_at DESC");
+foreach($rows4 as $c){
+  $oid=($c['user1_id']==3)?$c['user2_id']:$c['user1_id'];
+  $other=$d->fetchOne("SELECT fullname FROM users WHERE id=?",[$oid]);
+  echo "conv=".$c['id']." other=$oid (".($other?$other['fullname']:'?').") status=".$c['status']."\n";
+}
+
+// Check messages action query
+echo "\n=== Messages in conv 7 (user 2 <-> Ngô Thị Thảo) ===\n";
+$msgs=$d->fetchAll("SELECT m.*,u.fullname as sender_name FROM messages m LEFT JOIN users u ON m.sender_id=u.id WHERE m.conversation_id=7 ORDER BY m.created_at");
+foreach($msgs as $m) echo "msg=".$m['id']." from=".$m['sender_name']." content=".$m['content']." at=".$m['created_at']."\n";
+if(!$msgs) echo "EMPTY!\n";
+
+echo "\n=== Group conversations ===\n";
+$groups=$d->fetchAll("SELECT c.*, (SELECT COUNT(*) FROM conversation_members WHERE conversation_id=c.id) as member_count FROM conversations c WHERE c.type='group'");
+foreach($groups as $g) echo "id=".$g['id']." name=".$g['name']." members=".$g['member_count']."\n";
+
+echo "\n=== conversation_members ===\n";
+$cm=$d->fetchAll("SELECT * FROM conversation_members ORDER BY conversation_id");
+foreach($cm as $m) echo "conv=".$m['conversation_id']." user=".$m['user_id']." role=".$m['role']."\n";
