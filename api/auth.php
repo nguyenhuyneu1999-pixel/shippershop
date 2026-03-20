@@ -299,6 +299,71 @@ if ($action === 'upload_avatar') {
 }
 
 // ============================================
+// QUÊN MẬT KHẨU
+// ============================================
+if ($action === 'forgot_password') {
+    $input = getInput();
+    $email = trim($input['email'] ?? '');
+    if (empty($email) || !filter_var($email, FILTER_VALIDATE_EMAIL)) {
+        apiError('Email không hợp lệ');
+    }
+    $user = $db->fetchOne("SELECT id, fullname, email FROM users WHERE email = ? AND `status` = 'active'", [$email]);
+    // Always return success to prevent email enumeration
+    if ($user) {
+        $token = bin2hex(random_bytes(32));
+        $expires = date('Y-m-d H:i:s', time() + 3600); // 1 hour
+        try {
+            $db->query("UPDATE users SET settings = JSON_SET(COALESCE(settings, '{}'), '$.reset_token', ?, '$.reset_expires', ?) WHERE id = ?", [$token, $expires, $user['id']]);
+            // Queue email
+            $resetLink = 'https://shippershop.vn/login.html?reset=' . $token . '&email=' . urlencode($email);
+            $body = '<h2>Đặt lại mật khẩu</h2><p>Xin chào ' . htmlspecialchars($user['fullname']) . ',</p><p>Click link sau để đặt lại mật khẩu:</p><p><a href="' . $resetLink . '" style="background:#7C3AED;color:#fff;padding:12px 24px;border-radius:8px;text-decoration:none;display:inline-block">Đặt lại mật khẩu</a></p><p>Link hết hạn sau 1 giờ.</p><p>Nếu bạn không yêu cầu, vui lòng bỏ qua email này.</p>';
+            $pdo = $db->getConnection();
+            $pdo->prepare("INSERT INTO email_queue (to_email, subject, body, `status`, created_at) VALUES (?, ?, ?, 'pending', NOW())")->execute([$email, 'Đặt lại mật khẩu ShipperShop', $body]);
+        } catch (Throwable $e) {}
+    }
+    apiSuccess('Nếu email tồn tại, bạn sẽ nhận được link đặt lại mật khẩu.');
+}
+
+// ============================================
+// ĐẶT LẠI MẬT KHẨU
+// ============================================
+if ($action === 'reset_password') {
+    $input = getInput();
+    $email = trim($input['email'] ?? '');
+    $token = trim($input['token'] ?? '');
+    $newPassword = trim($input['new_password'] ?? '');
+    if (empty($token) || empty($newPassword)) apiError('Thiếu thông tin');
+    if (strlen($newPassword) < 8) apiError('Mật khẩu tối thiểu 8 ký tự');
+    $user = $db->fetchOne("SELECT id, settings FROM users WHERE email = ? AND `status` = 'active'", [$email]);
+    if (!$user) apiError('Không tìm thấy tài khoản', 404);
+    $settings = json_decode($user['settings'] ?: '{}', true);
+    if (empty($settings['reset_token']) || $settings['reset_token'] !== $token) apiError('Token không hợp lệ');
+    if (!empty($settings['reset_expires']) && strtotime($settings['reset_expires']) < time()) apiError('Token đã hết hạn');
+    $hash = password_hash($newPassword, PASSWORD_BCRYPT, ['cost' => 12]);
+    $db->query("UPDATE users SET password = ?, settings = JSON_REMOVE(COALESCE(settings, '{}'), '$.reset_token', '$.reset_expires'), last_password_change = NOW() WHERE id = ?", [$hash, $user['id']]);
+    apiSuccess('Đã đổi mật khẩu thành công! Vui lòng đăng nhập lại.');
+}
+
+// ============================================
+// REFRESH TOKEN
+// ============================================
+if ($action === 'refresh_token') {
+    $headers = getallheaders();
+    $authHeader = $headers['Authorization'] ?? $headers['authorization'] ?? $_SERVER['HTTP_AUTHORIZATION'] ?? '';
+    if (!preg_match('/Bearer\s+(.+)/', $authHeader, $matches)) apiError('Missing token', 401);
+    $data = verifyJWT($matches[1]);
+    if (!$data || !isset($data['user_id'])) apiError('Token không hợp lệ', 401);
+    // Only refresh if within 2 days of expiry
+    if (isset($data['exp']) && ($data['exp'] - time()) > 2 * 86400) {
+        apiSuccess('Token còn hạn', ['token' => $matches[1], 'expires_in' => $data['exp'] - time()]);
+    }
+    $user = $db->fetchOne("SELECT id, email, role FROM users WHERE id = ? AND `status` = 'active'", [$data['user_id']]);
+    if (!$user) apiError('Tài khoản không tồn tại', 404);
+    $newToken = generateJWT($user['id'], $user['email'], $user['role']);
+    apiSuccess('Token đã được gia hạn', ['token' => $newToken, 'expires_in' => 7 * 86400]);
+}
+
+// ============================================
 // GOOGLE LOGIN (giữ lại cho tương lai)
 // ============================================
 if ($action === 'google_login') {
@@ -307,12 +372,11 @@ if ($action === 'google_login') {
 if ($action === 'facebook_login') {
     apiError('Facebook login chưa được cấu hình', 501);
 }
-
-apiError('Action không hợp lệ: ' . $action, 400);
 if ($action === 'search_users') {
     $q = trim($_GET['q'] ?? '');
     if (strlen($q) < 2) { echo json_encode(['success'=>true,'data'=>[]]); exit; }
-    $db = db();
     $users = $db->fetchAll("SELECT id, fullname, username, avatar FROM users WHERE (fullname LIKE ? OR username LIKE ?) LIMIT 10", ["%$q%", "%$q%"]);
     echo json_encode(['success'=>true,'data'=>$users], JSON_UNESCAPED_UNICODE); exit;
 }
+
+apiError('Action không hợp lệ: ' . $action, 400);
