@@ -222,14 +222,14 @@ var _SC={"GHTK":"#00b14f","J&T":"#d32f2f","GHN":"#ff6600","Viettel Post":"#e21a1
 function _gcCSS(){
   if(_gcStyled)return;_gcStyled=true;
   var s=document.createElement("style");
-  s.textContent=".gc-ov{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:1100;display:flex;align-items:flex-end;justify-content:center;opacity:0;transition:opacity .25s;-webkit-backdrop-filter:blur(2px);backdrop-filter:blur(2px);}"
+  s.textContent=".gc-ov{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:1100;display:flex;align-items:flex-end;justify-content:center;opacity:0;transition:opacity .25s;-webkit-backdrop-filter:blur(2px);backdrop-filter:blur(2px);touch-action:none;overscroll-behavior:contain;}"
   +".gc-ov.open{opacity:1;}"
-  +".gc-sh{background:#fff;width:100%;max-width:600px;max-height:92vh;border-radius:16px 16px 0 0;display:flex;flex-direction:column;transform:translateY(100%);transition:transform .3s cubic-bezier(.32,.72,0,1);overflow:hidden;}"
+  +".gc-sh{background:#fff;width:100%;max-width:600px;max-height:95vh;min-height:60vh;border-radius:16px 16px 0 0;display:flex;flex-direction:column;transform:translateY(100%);transition:transform .3s cubic-bezier(.32,.72,0,1);overflow:hidden;}"
   +".gc-ov.open .gc-sh{transform:translateY(0);}"
   +".gc-hd{display:flex;align-items:center;padding:12px 16px;border-bottom:1px solid #e4e6eb;min-height:48px;}"
   +".gc-hd h3{flex:1;font-size:16px;font-weight:700;margin:0;}"
   +".gc-x{width:32px;height:32px;border-radius:50%;background:#e4e6eb;border:none;font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;}"
-  +".gc-body{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;}"
+  +".gc-body{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding-bottom:8px;}"
   +".gc-post-author{display:flex;gap:10px;padding:12px 16px 0;align-items:center;}"
   +".gc-av{width:40px;height:40px;border-radius:50%;object-fit:cover;flex-shrink:0;}"
   +".gc-av-ph{width:40px;height:40px;border-radius:50%;background:#7C3AED;color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:14px;flex-shrink:0;}"
@@ -255,7 +255,7 @@ function _gcCSS(){
   +".gc-cmt-meta a{color:#65676B;text-decoration:none;font-weight:600;cursor:pointer;}"
   +".gc-cmt-meta a.liked{color:#7C3AED;}"
   +".gc-cmt-reply{padding-left:20px;border-left:2px solid #e4e6eb;margin-left:14px;}"
-  +".gc-bar{display:flex;gap:8px;padding:10px 16px;border-top:1px solid #e4e6eb;background:#fff;align-items:center;}"
+  +".gc-bar{display:flex;gap:8px;padding:10px 16px calc(10px + env(safe-area-inset-bottom));border-top:1px solid #e4e6eb;background:#fff;align-items:center;flex-shrink:0;}"
   +".gc-bar-av{width:28px;height:28px;border-radius:50%;flex-shrink:0;}"
   +".gc-input{flex:1;padding:8px 14px;border-radius:20px;border:1px solid #e4e6eb;font-size:14px;outline:none;font-family:inherit;}"
   +".gc-input:focus{border-color:#7C3AED;}"
@@ -282,7 +282,7 @@ function openGhiChu(pid){
   sh.innerHTML="<div class='gc-hd'><h3>Bài viết</h3><button class='gc-x' onclick='closeGhiChu()'><i class='fas fa-times'></i></button></div>"
   +"<div class='gc-body' id='gcBody'><div style='text-align:center;padding:40px'><i class='fas fa-spinner fa-spin' style='font-size:20px;color:#999'></i></div></div>"
   +"<div class='gc-rpl' id='gcRpl'><span>Trả lời <b id='gcRplName'></b></span> <a onclick='_gcReply=null;document.getElementById(\"gcRpl\").className=\"gc-rpl\"'>Hủy</a></div>"
-  +"<div class='gc-bar' id='gcBar' style='display:none'><input class='gc-input' id='gcInput' placeholder='Viết bình luận...' onkeydown='if(event.key===\"Enter\"&&!event.shiftKey){event.preventDefault();sendGC();}'><button class='gc-send' id='gcSend' onclick='sendGC()'><i class='fas fa-paper-plane'></i></button></div>";
+  +"<div class='gc-bar' id='gcBar' style='display:none'><input class='gc-input' id='gcInput' placeholder='Vi\u1ebft ghi ch\u00fa...' onkeydown='if(event.key===\"Enter\"&&!event.shiftKey){event.preventDefault();sendGC();}'><button class='gc-send' id='gcSend' onclick='sendGC()'><i class='fas fa-paper-plane'></i></button></div>";
   ov.appendChild(sh);
   document.body.appendChild(ov);
   document.body.style.overflow="hidden";
