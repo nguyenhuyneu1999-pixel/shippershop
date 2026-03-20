@@ -673,6 +673,7 @@ function openGroupChat(gid){
   });
   loadMsgs();startPoll();
   document.getElementById("chInputWrap").style.display="flex";
+  document.body.classList.add('in-chat');
 }
 
 function createGroupPrompt(){
