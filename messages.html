@@ -112,9 +112,9 @@ body{background:var(--bg);font-family:'Be Vietnam Pro',-apple-system,BlinkMacSys
   body { background: #e4e6eb !important; }
 }
 
-/* Chat mode: hide nav, raise input */
-.chat-view.active~#mobileBottomNav,.chat-view.active~nav{display:none!important}
-.ch-input-wrap{z-index:1001!important}
+/* Chat mode: hide nav, show input */
+body.in-chat #mobileBottomNav{display:none!important}
+body.in-chat .ch-input-wrap{z-index:1001}
 </style></head><body>
 <div class="list-view" id="listView">
 <div class="top-bar" id="topBar">
@@ -220,6 +220,7 @@ var shEl=document.getElementById("chShip");
 if(ship){shEl.textContent=" · "+ship;shEl.style.color=SC[ship]||"#999";}else shEl.textContent="";
 document.getElementById("pendingBannerChat").style.display="none";
 document.getElementById("pendingBannerChat").innerHTML="";
+document.body.classList.add('in-chat');
 loadMsgs();startPoll();
 setTimeout(function(){document.getElementById("msgInput").focus();},200);}
 
@@ -270,6 +271,7 @@ if(curConvId)pollTimer=setInterval(function(){loadMsgs();},5000);}
 
 function backToList(){document.getElementById("listView").classList.remove("hidden");
 document.getElementById("chatView").classList.remove("active");
+document.body.classList.remove("in-chat");
 curConvId=null;curOtherId=null;if(pollTimer)clearInterval(pollTimer);loadConvs();loadPendingCount();}
 
 function esc(t){if(!t)return"";return String(t).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");}
@@ -306,9 +308,9 @@ function ago(dt){if(!dt)return"";var s=Math.floor((new Date()-new Date(dt.replac
   body { background: #e4e6eb !important; }
 }
 
-/* Chat mode: hide nav, raise input */
-.chat-view.active~#mobileBottomNav,.chat-view.active~nav{display:none!important}
-.ch-input-wrap{z-index:1001!important}
+/* Chat mode: hide nav, show input */
+body.in-chat #mobileBottomNav{display:none!important}
+body.in-chat .ch-input-wrap{z-index:1001}
 </style>
 
 <div id="callOverlay">
@@ -427,9 +429,9 @@ function viewImg(src){var ov=document.getElementById("imgOverlay");document.getE
 .co-danger{color:#E74C3C !important;}
 .co-danger i{color:#E74C3C !important;}
 
-/* Chat mode: hide nav, raise input */
-.chat-view.active~#mobileBottomNav,.chat-view.active~nav{display:none!important}
-.ch-input-wrap{z-index:1001!important}
+/* Chat mode: hide nav, show input */
+body.in-chat #mobileBottomNav{display:none!important}
+body.in-chat .ch-input-wrap{z-index:1001}
 </style>
 
 <!-- Chat Options Panel -->
