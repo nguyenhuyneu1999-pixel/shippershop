@@ -34,7 +34,7 @@ if($method==='GET'){
   }
   if($action==='posts'){
     // Get posts with user_liked and user_saved
-    $sql = "SELECT p.*, u.fullname as user_name, u.avatar as user_avatar, u.username as user_username, u.shipping_company, (SELECT COUNT(*) FROM post_likes WHERE post_id=p.id) as likes_count, (SELECT COUNT(*) FROM comments WHERE post_id=p.id AND status='active') as comments_count";
+    $sql = "SELECT p.*, u.fullname as user_name, u.avatar as user_avatar, u.username as user_username, u.shipping_company";
     if ($viewerId) {
       $sql .= ", (SELECT COUNT(*) FROM likes WHERE post_id=p.id AND user_id=?) as user_liked";
       $sql .= ", (SELECT COUNT(*) FROM saved_posts WHERE post_id=p.id AND user_id=?) as user_saved";
