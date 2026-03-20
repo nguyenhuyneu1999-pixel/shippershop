@@ -368,7 +368,7 @@ if ($method === 'POST') {
             }
         } catch (Exception $he) { error_log('Hashtag save error: ' . $he->getMessage()); }
         
-        try{awardXP(\$userId,'post',10,'Đăng bài mới');}catch(Throwable\$e){} success('Đăng bài thành công!', [
+        try{awardXP($userId,'post',10,'Đăng bài mới');}catch(Throwable$e){} success('Đăng bài thành công!', [
             'post_id' => $postId,
             'images' => $imagesJson,
             'type' => $type
