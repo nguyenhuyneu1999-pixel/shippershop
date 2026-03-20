@@ -20,7 +20,7 @@ body{background:#fff;font-family:'Be Vietnam Pro',-apple-system,BlinkMacSystemFo
 .cg-step{background:var(--bg);padding:4px 12px;border-radius:12px;font-size:13px;font-weight:700;color:var(--muted)}
 .cg-head-spacer{flex:1}
 .cg-next{background:var(--primary);color:#fff;border:none;border-radius:20px;padding:8px 20px;font-size:14px;font-weight:700;cursor:pointer}
-.cg-next:disabled{opacity:.4}
+.cg-next:disabled{opacity:.35;pointer-events:none;background:#ccc;color:#888}
 .cg-body{flex:1;overflow-y:auto;padding:24px 20px}
 .cg-title{font-size:24px;font-weight:800;margin-bottom:8px;line-height:1.3}
 .cg-desc{font-size:14px;color:var(--muted);margin-bottom:20px;line-height:1.5}
@@ -105,11 +105,11 @@ function renderStep(){
     loadCats();
   }
   else if(step===2){
-    btn.textContent="Ti\u1ebfp";btn.disabled=!formData.name||formData.name.length<3;
+    btn.textContent="Ti\u1ebfp";btn.disabled=!formData.name;
     var h="<div class='cg-title'>Th\u00f4ng tin c\u1ed9ng \u0111\u1ed3ng</div>";
     h+="<div class='cg-desc'>T\u00ean v\u00e0 m\u00f4 t\u1ea3 s\u1ebd gi\u00fap m\u1ecdi ng\u01b0\u1eddi hi\u1ec3u v\u1ec1 c\u1ed9ng \u0111\u1ed3ng c\u1ee7a b\u1ea1n</div>";
     h+="<label class='cg-label'>T\u00ean c\u1ed9ng \u0111\u1ed3ng *</label>";
-    h+="<input class='cg-input' id='cgName' placeholder='VD: Shipper GHTK Q.7' value='"+esc(formData.name)+"' oninput='formData.name=this.value.trim();document.getElementById(\"cgNext\").disabled=this.value.trim().length<3' maxlength='100'>";
+    h+="<input class='cg-input' id='cgName' placeholder='VD: Shipper GHTK Q.7' value='"+esc(formData.name)+"' oninput='formData.name=this.value.trim();document.getElementById(\"cgNext\").disabled=!this.value.trim()' maxlength='100'>";
     h+="<label class='cg-label'>M\u00f4 t\u1ea3</label>";
     h+="<textarea class='cg-input' id='cgDesc' placeholder='M\u00f4 t\u1ea3 ng\u1eafn v\u1ec1 c\u1ed9ng \u0111\u1ed3ng...' style='min-height:80px;resize:none' oninput='formData.description=this.value'>"+esc(formData.description)+"</textarea>";
     h+="<label class='cg-label' style='margin-top:8px'>Lo\u1ea1i c\u1ed9ng \u0111\u1ed3ng</label>";

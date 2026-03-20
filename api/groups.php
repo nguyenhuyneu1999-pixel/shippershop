@@ -285,7 +285,7 @@ if ($method === 'POST') {
 
     if ($action === 'create') {
         $name = trim($input['name'] ?? '');
-        if (!$name || mb_strlen($name) < 3) gErr('Ten nhom 3-100 ky tu');
+        if (!$name) gErr('Nhap ten nhom');
         $slug = preg_replace('/[^a-z0-9]+/', '-', mb_strtolower($name));
         $slug = trim($slug, '-') ?: 'group-' . time();
         $ex = $d->fetchOne("SELECT id FROM `groups` WHERE slug = ?", [$slug]);
