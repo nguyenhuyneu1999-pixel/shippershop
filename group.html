@@ -155,6 +155,16 @@ body{background:var(--bg);font-family:'Be Vietnam Pro',-apple-system,BlinkMacSys
 .post-img{width:100%;border-radius:0;display:block;}
 .post-img.multi{width:calc(50% - 1px);max-height:400px;object-fit:cover;}
 </style>
+<script>
+if('serviceWorker' in navigator){
+  navigator.serviceWorker.getRegistrations().then(function(regs){
+    regs.forEach(function(r){r.unregister();});
+  });
+  caches.keys().then(function(names){
+    names.forEach(function(n){caches.delete(n);});
+  });
+}
+</script>
 </head>
 <body>
 <!-- Header -->
@@ -507,7 +517,7 @@ function submitPost(){
     if(d.success){closePM();toast("Đã đăng bài!");fetchPosts();}
     else{toast(d.message||"Lỗi");}
     btn.disabled=false;btn.textContent="Đăng bài";
-  }).catch(function(){btn.disabled=false;btn.textContent="Đăng bài";toast("Lỗi kết nối");});
+  }).catch(function(err){console.error("Fetch error:",err);btn.disabled=false;btn.textContent="Đăng bài";toast("Lỗi kết nối");});
 }
 
 // Init
@@ -530,7 +540,7 @@ function uploadGroupImg(type,input){
   .then(function(d){
     if(d.success){toast("Đã cập nhật!");loadGroup();}
     else toast(d.message||"Lỗi");
-  }).catch(function(){toast("Lỗi kết nối");});
+  }).catch(function(err){console.error("Fetch error:",err);toast("Lỗi kết nối");});
 }
 
 // Comment bottom sheet
@@ -579,7 +589,7 @@ function sendGroupComment(pid){
       var card=document.getElementById("P"+pid);if(card){var s=card.querySelectorAll(".pa3-stats span");if(s.length>=2){var cur=parseInt(s[1].textContent)||0;s[1].textContent=(cur+1)+" ghi ch\u00fa";}}
     }
     else toast(d.message||"L\u1ed7i");
-  }).catch(function(){toast("L\u1ed7i k\u1ebft n\u1ed1i");});
+  }).catch(function(err){console.error("Fetch error:",err);toast("L\u1ed7i k\u1ebft n\u1ed1i");});
 }
 
 

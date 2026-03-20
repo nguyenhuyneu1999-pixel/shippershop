@@ -59,6 +59,16 @@ body{background:#fff;font-family:'Be Vietnam Pro',-apple-system,BlinkMacSystemFo
 .toast{position:fixed;bottom:90px;left:50%;transform:translateX(-50%);background:#333;color:#fff;padding:10px 20px;border-radius:20px;font-size:13px;opacity:0;transition:opacity .3s;z-index:999;pointer-events:none}
 .toast.show{opacity:1}
 </style>
+<script>
+if('serviceWorker' in navigator){
+  navigator.serviceWorker.getRegistrations().then(function(regs){
+    regs.forEach(function(r){r.unregister();});
+  });
+  caches.keys().then(function(names){
+    names.forEach(function(n){caches.delete(n);});
+  });
+}
+</script>
 </head>
 <body>
 <div class="cg-head">
