@@ -13,4 +13,12 @@ function pdTogMenu(){var m=document.getElementById("pdMenu");if(!m)return;m.styl
 async function pdTogSave(){if(!CU){toast("Đăng nhập!");return;}pdTogMenu();try{var hdrs={"Content-Type":"application/json"};var tk=localStorage.getItem("token");if(tk)hdrs["Authorization"]="Bearer "+tk;var r=await fetch("/api/posts.php?action=save",{method:"POST",headers:hdrs,credentials:"include",body:JSON.stringify({post_id:postId})});var d=await r.json();if(d.success){var saved=d.data&&d.data.saved;var el=document.getElementById("pdSave");if(el){el.innerHTML="<i class='"+(saved?"fas":"far")+" fa-bookmark' style='color:"+(saved?"#7C3AED":"inherit")+"'></i> "+(saved?"Bỏ lưu":"Lưu bài viết");}toast(saved?"Đã lưu bài viết":"Đã bỏ lưu");}}catch(e){toast("Lỗi");}}
 async function pdDelPost(){if(!confirm("Xóa bài viết này?"))return;pdTogMenu();try{var hdrs={"Content-Type":"application/json"};var tk=localStorage.getItem("token");if(tk)hdrs["Authorization"]="Bearer "+tk;var r=await fetch("/api/posts.php?action=delete",{method:"POST",headers:hdrs,credentials:"include",body:JSON.stringify({post_id:postId})});var d=await r.json();if(d.success){toast("Đã xóa!");setTimeout(function(){history.back();},1000);}else{toast(d.message||"Lỗi");}}catch(e){toast("Lỗi");}}
 document.addEventListener("click",function(e){if(!e.target.closest(".post-dots")&&!e.target.closest(".post-menu")){var m=document.getElementById("pdMenu");if(m)m.style.display="none";}});</script><script>if("serviceWorker" in navigator)navigator.serviceWorker.register("/sw.js");</script><script src="/js/image-viewer.js"></script><script src="/js/analytics.js"></script><img src="/api/auto-cron.php" style="display:none" width="1" height="1" alt="">
+
+<!-- Join CTA for guests -->
+<div id="joinCTA" style="display:none;position:fixed;bottom:0;left:0;right:0;background:linear-gradient(135deg,#EE4D2D,#d43a1a);color:#fff;padding:12px 16px;z-index:999;text-align:center">
+  <div style="font-size:13px;margin-bottom:6px"><b>Tham gia ShipperShop</b> — Cộng đồng Shipper #1 Việt Nam</div>
+  <a href="register.html" style="display:inline-block;background:#fff;color:#EE4D2D;padding:8px 24px;border-radius:8px;font-size:13px;font-weight:700;text-decoration:none">Đăng ký miễn phí</a>
+</div>
+<script>if(!localStorage.getItem("token")){var jc=document.getElementById("joinCTA");if(jc){setTimeout(function(){jc.style.display="block";},3000);}}</script>
+
 </body></html>

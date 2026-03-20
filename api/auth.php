@@ -107,6 +107,8 @@ if ($action === 'register') {
 
         try { $db->insert('wallets', ['user_id' => $userId, 'balance' => 0]); } catch (Exception $e) {}
         try { $db->query("INSERT INTO login_attempts (ip, user_id, email, success, created_at) VALUES (?, ?, ?, 1, NOW())", [$ip, $userId, $username]); } catch (Throwable $e) {}
+        // Welcome new user
+        try { require_once __DIR__ . '/welcome.php'; welcomeNewUser($userId); } catch (Throwable $e) {}
 
         $_SESSION['user_id'] = $userId;
         $token = generateJWT($userId, $username . '@shippershop.local', 'user');

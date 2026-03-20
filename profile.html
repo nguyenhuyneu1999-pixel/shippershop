@@ -991,7 +991,7 @@ fetch("/api/gamification.php?action=checkin",{method:"POST",headers:{"Authorizat
 }).catch(function(){btn.textContent="❌ Lỗi kết nối";});
 }
 
-function shareRef(type){var url=document.getElementById("refLink").value;var text="Tham gia ShipperShop - Cộng đồng Shipper #1 Việt Nam! "+url;if(type==="zalo"){window.open("https://zalo.me/share?url="+encodeURIComponent(url)+"&title="+encodeURIComponent("Tham gia ShipperShop"));}else if(type==="fb"){window.open("https://www.facebook.com/sharer/sharer.php?u="+encodeURIComponent(url));}else{if(navigator.share)navigator.share({title:"ShipperShop",text:"Tham gia cộng đồng shipper #1 VN",url:url});else{copyRef();}}}
+function shareRef(type){var url=document.getElementById("refLink").value;var text="🏍️ Ae shipper ơi! Tham gia cộng đồng ShipperShop - tips giao hàng, cảnh báo GT real-time, chợ đồ nghề. 100% free! "+url;if(type==="zalo"){window.open("https://zalo.me/share?url="+encodeURIComponent(url)+"&title="+encodeURIComponent("Tham gia ShipperShop"));}else if(type==="fb"){window.open("https://www.facebook.com/sharer/sharer.php?u="+encodeURIComponent(url));}else{if(navigator.share)navigator.share({title:"ShipperShop",text:"Tham gia cộng đồng shipper #1 VN",url:url});else{copyRef();}}}
 </script>
 <script src="js/post-modal.js"></script><script>
 (function(){
