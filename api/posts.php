@@ -142,6 +142,12 @@ if ($method === 'GET') {
         $params[] = "%$search%";
     }
     
+    // Filter by shipping company
+    if (!empty($_GET['company'])) {
+        $where[] = "u.shipping_company = ?";
+        $params[] = sanitize($_GET['company']);
+    }
+
     // Filter by province
     if (!empty($_GET['province'])) {
         $where[] = "p.province = ?";
@@ -161,7 +167,7 @@ if ($method === 'GET') {
     $whereClause = implode(' AND ', $where);
     
     // Count total
-    $total = $db->fetchOne("SELECT COUNT(*) as c FROM posts p WHERE $whereClause", $params)['c'];
+    $total = $db->fetchOne("SELECT COUNT(*) as c FROM posts p LEFT JOIN users u ON p.user_id = u.id WHERE $whereClause", $params)['c'];
     
     $pagination = paginate($total, $page, $limit);
     
