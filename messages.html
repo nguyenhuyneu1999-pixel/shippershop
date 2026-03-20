@@ -183,9 +183,11 @@ loadConvs();if(t==='active')loadOnline();}
 async function loadConvs(){
 var list=document.getElementById("convList");
 list.innerHTML="<div class=empty><i class='fas fa-spinner fa-spin'></i></div>";
-try{var r=await fetch("/api/messages-api.php?action=conversations&tab="+curTab,{credentials:"include"});
+try{var tk=localStorage.getItem("token");var hdrs={};if(tk)hdrs["Authorization"]="Bearer "+tk;
+var r=await fetch("/api/messages-api.php?action=conversations&tab="+curTab,{credentials:"include",headers:hdrs});
 var d=await r.json();
-if(!d.success||!d.data.length){list.innerHTML="<div class=empty><i class='far fa-comment-dots'></i><p>"+(curTab==="pending"?"Không có tin nhắn đang chờ":"Chưa có tin nhắn")+"</p></div>";return;}
+if(!d.success){if(r.status===401){location.href="login.html";}else{list.innerHTML="<div class=empty><i class='fas fa-exclamation-circle'></i><p>"+esc(d.message||"Lỗi")+"</p></div>";}return;}
+if(!d.data||!d.data.length){list.innerHTML="<div class=empty><i class='far fa-comment-dots'></i><p>"+(curTab==="pending"?"Không có tin nhắn đang chờ":"Chưa có tin nhắn")+"</p></div>";return;}
 list.innerHTML=d.data.map(function(c){
 var av=c.other_avatar?"<img class=cv-av src='"+c.other_avatar+"'onerror='this.className=\"cv-av-ph\";this.innerHTML=\""+(c.other_name||"U").charAt(0)+"\"'>"
 :"<div class=cv-av-ph>"+(c.other_name||"U").charAt(0)+"</div>";
@@ -201,7 +203,7 @@ return "<div class='conv-item"+(unread?" unread":"")+"'onclick='openConv("+c.id+
 "<div class=cv-right><div class=cv-time>"+ago(c.last_message_at)+"</div>"+(unread?"<div class=cv-unread></div>":"")+"</div></div>";
 }).join("");}catch(e){list.innerHTML="<div class=empty><p>Lỗi kết nối</p></div>";}}
 
-async function loadOnline(){try{var r=await fetch("/api/messages-api.php?action=online_friends",{credentials:"include"});
+async function loadOnline(){try{var tkO=localStorage.getItem("token");var hO={};if(tkO)hO["Authorization"]="Bearer "+tkO;var r=await fetch("/api/messages-api.php?action=online_friends",{credentials:"include",headers:hO});
 var d=await r.json();var bar=document.getElementById("onlineBar");
 if(!d.success||!d.data.length){bar.style.display="none";return;}
 bar.innerHTML=d.data.map(function(f){
@@ -210,7 +212,7 @@ var av=f.avatar?"<img class=ol-av src='"+f.avatar+"'onerror='this.className=\"ol
 return "<div class=ol-item onclick='openFromUser("+f.id+")'>"+av+(f.is_online?"<div class=ol-dot></div>":"")+"<div class=ol-name>"+esc((f.fullname||"").split(" ").pop())+"</div></div>";
 }).join("");}catch(e){}}
 
-async function loadPendingCount(){try{var r=await fetch("/api/messages-api.php?action=pending_count",{credentials:"include"});
+async function loadPendingCount(){try{var tkP=localStorage.getItem("token");var hP={};if(tkP)hP["Authorization"]="Bearer "+tkP;var r=await fetch("/api/messages-api.php?action=pending_count",{credentials:"include",headers:hP});
 var d=await r.json();var b=document.getElementById("pendingBadge");
 if(d.success&&d.count>0){b.textContent=d.count;b.style.display="flex";var sb=document.getElementById("stBadge");if(sb){sb.textContent=d.count;sb.style.display="inline-flex";}}else{b.style.display="none";var sb=document.getElementById("stBadge");if(sb)sb.style.display="none";}}catch(e){}}
 
@@ -249,7 +251,8 @@ document.getElementById("pendingBannerChat").style.display="none";}catch(e){}}
 
 async function loadMsgs(){var c=document.getElementById("chMsgs");
 if(!curConvId){c.innerHTML="<div class=empty style=padding-top:40vh><i class='far fa-hand-peace' style=font-size:48px;color:#ddd></i><p style=margin-top:8px>Gửi lời chào!</p></div>";return;}
-try{var r=await fetch("/api/messages-api.php?action=messages&conversation_id="+curConvId,{credentials:"include"});
+try{var tk2=localStorage.getItem("token");var mh={};if(tk2)mh["Authorization"]="Bearer "+tk2;
+var r=await fetch("/api/messages-api.php?action=messages&conversation_id="+curConvId,{credentials:"include",headers:mh});
 var d=await r.json();if(!d.success){c.innerHTML="<div class=empty><p>Lỗi</p></div>";return;}
 if(!d.data.length){c.innerHTML="<div class=empty style=padding-top:40vh><i class='far fa-hand-peace' style=font-size:48px;color:#ddd></i><p>Gửi lời chào!</p></div>";return;}
 var html="",lastDate="";
@@ -643,7 +646,8 @@ var isGroupChat=false,groupInfo=null;
 function loadGroupConvs(){
   var list=document.getElementById("convList");
   list.innerHTML="<div style='text-align:center;padding:40px;color:#999'><i class='fas fa-spinner fa-spin'></i></div>";
-  fetch("/api/messages-api.php?action=group_conversations",{credentials:"include"}).then(function(r){return r.json();}).then(function(d){
+  var tkG=localStorage.getItem("token");var hG={};if(tkG)hG["Authorization"]="Bearer "+tkG;
+  fetch("/api/messages-api.php?action=group_conversations",{credentials:"include",headers:hG}).then(function(r){return r.json();}).then(function(d){
     if(!d.success||!d.data||!d.data.length){list.innerHTML="<div style='text-align:center;padding:40px;color:#999'>Chưa có nhóm chat nào<br><button onclick='createGroupPrompt()' style='margin-top:12px;padding:8px 20px;border-radius:20px;border:none;background:#0084ff;color:#fff;font-weight:700;cursor:pointer'>+ Tạo nhóm mới</button></div>";return;}
     var h="";
     for(var i=0;i<d.data.length;i++){
@@ -663,7 +667,8 @@ function openGroupChat(gid){
   document.getElementById("listView").classList.add("hidden");
   document.getElementById("chatView").classList.add("active");
       // Load group info
-  fetch("/api/messages-api.php?action=group_info&conversation_id="+gid,{credentials:"include"}).then(function(r){return r.json();}).then(function(d){
+  var tkGI=localStorage.getItem("token");var hGI={};if(tkGI)hGI["Authorization"]="Bearer "+tkGI;
+  fetch("/api/messages-api.php?action=group_info&conversation_id="+gid,{credentials:"include",headers:hGI}).then(function(r){return r.json();}).then(function(d){
     if(d.success){
       groupInfo=d.data;
       document.getElementById("chName").textContent=d.data.name;
