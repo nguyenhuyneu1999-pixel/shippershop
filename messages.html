@@ -61,7 +61,7 @@ body{background:var(--bg);font-family:'Be Vietnam Pro',-apple-system,BlinkMacSys
 .msg-row.other .msg-bubble{background:var(--bubble-other);color:var(--text);border-bottom-left-radius:4px;}
 .msg-row.mine .msg-bubble{background:var(--bubble-me);color:#fff;border-bottom-right-radius:4px;}
 .msg-time{text-align:center;font-size:10px;color:var(--muted);padding:2px 0;}
-.ch-input{display:none!important;}
+.ch-input{display:none;}
 .ch-input input{flex:1;padding:10px 16px;border:1px solid var(--border);border-radius:24px;font-size:14px;outline:none;background:#f0f2f5;}
 .ch-input input:focus{border-color:var(--primary);background:#fff;}
 .ch-send{width:36px;height:36px;border-radius:50%;background:var(--primary);border:none;color:#fff;font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
@@ -217,6 +217,8 @@ if(ship){shEl.textContent=" · "+ship;shEl.style.color=SC[ship]||"#999";}else sh
 document.getElementById("pendingBannerChat").style.display="none";
 document.getElementById("pendingBannerChat").innerHTML="";
 loadMsgs();startPoll();
+var bn=document.getElementById("mobileBottomNav");if(bn)bn.style.display="none";
+var iw=document.getElementById("chInputWrap");if(iw)iw.style.display="";
 setTimeout(function(){document.getElementById("msgInput").focus();},200);}
 
 async function openFromUser(uid){
@@ -266,6 +268,8 @@ if(curConvId)pollTimer=setInterval(function(){loadMsgs();},5000);}
 
 function backToList(){document.getElementById("listView").classList.remove("hidden");
 document.getElementById("chatView").classList.remove("active");
+var bn=document.getElementById("mobileBottomNav");if(bn)bn.style.display="";
+var iw=document.getElementById("chInputWrap");if(iw)iw.style.display="";
 curConvId=null;curOtherId=null;if(pollTimer)clearInterval(pollTimer);loadConvs();loadPendingCount();}
 
 function esc(t){if(!t)return"";return String(t).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");}
@@ -627,6 +631,8 @@ function openGroupChat(gid){
   var bc=document.getElementById("btnCall");var bv=document.getElementById("btnVideo");if(bc)bc.style.display="none";if(bv)bv.style.display="none";
   document.getElementById("listView").classList.add("hidden");
   document.getElementById("chatView").classList.add("active");
+  var bn2=document.getElementById("mobileBottomNav");if(bn2)bn2.style.display="none";
+  var iw2=document.getElementById("chInputWrap");if(iw2)iw2.style.display="";
   // Load group info
   fetch("/api/messages-api.php?action=group_info&conversation_id="+gid,{credentials:"include"}).then(function(r){return r.json();}).then(function(d){
     if(d.success){
