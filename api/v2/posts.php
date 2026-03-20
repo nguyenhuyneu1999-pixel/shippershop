@@ -278,18 +278,20 @@ if($method==='POST'){
   // === REPORT ===
   if($action==='report'){
     $pid=intval($input['post_id']??0);
-    $reason=sanitize($input['reason']??'other');
-    $detail=sanitize($input['detail']??'');
+    $reason=$input['reason']??'other';
+    if(!in_array($reason,['spam','inappropriate','harassment','misinformation','other'])) $reason='other';
+    $detail=trim($input['detail']??'');
     if(!$pid) fail('Missing post_id');
     $ex=$d->fetchOne("SELECT id FROM post_reports WHERE post_id=? AND user_id=?",[$pid,$uid]);
     if($ex) fail('Bạn đã báo cáo bài này');
-    $pdo->prepare("INSERT INTO post_reports (post_id,user_id,reason,detail,`status`,created_at) VALUES (?,?,?,?,'pending',NOW())")->execute([$pid,$uid,$reason,$detail]);
-    $d->query("UPDATE posts SET report_count=report_count+1 WHERE id=?",[$pid]);
-    // Auto-hide if 5+ reports
-    $rc=$d->fetchOne("SELECT report_count FROM posts WHERE id=?",[$pid]);
-    if($rc && intval($rc['report_count'])>=5){
-      $d->query("UPDATE posts SET `status`='hidden' WHERE id=?",[$pid]);
-    }
+    try{
+      $pdo->prepare("INSERT INTO post_reports (post_id,user_id,reason,detail,`status`,created_at) VALUES (?,?,?,?,'pending',NOW())")->execute([$pid,$uid,$reason,$detail]);
+      $d->query("UPDATE posts SET report_count=report_count+1 WHERE id=?",[$pid]);
+      $rc=$d->fetchOne("SELECT report_count FROM posts WHERE id=?",[$pid]);
+      if($rc && intval($rc['report_count'])>=5){
+        $d->query("UPDATE posts SET `status`='hidden' WHERE id=?",[$pid]);
+      }
+    }catch(\Throwable $e){fail('Report error: '.$e->getMessage());}
     ok('Đã báo cáo. Cảm ơn bạn!');
   }
 
