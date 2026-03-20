@@ -155,23 +155,7 @@ if ($method === 'GET') {
         gOk('OK', $cmts ?: []);
     }
 
-    if ($action === 'like_comment') {
-        $uid = getAuthUserId();
-        $cid = intval($input['comment_id'] ?? 0);
-        if (!$cid) { echo json_encode(['success'=>false,'message'=>'Missing comment_id']); exit; }
-        $exists = $d->fetchOne("SELECT id FROM group_post_comment_likes WHERE comment_id = ? AND user_id = ?", [$cid, $uid]);
-        if ($exists) {
-            $d->query("DELETE FROM group_post_comment_likes WHERE comment_id = ? AND user_id = ?", [$cid, $uid]);
-            $d->query("UPDATE group_post_comments SET likes_count = GREATEST(likes_count - 1, 0) WHERE id = ?", [$cid]);
-            $cnt = $d->fetchOne("SELECT likes_count FROM group_post_comments WHERE id = ?", [$cid]);
-            gOk('OK', ['liked' => false, 'likes_count' => $cnt ? $cnt['likes_count'] : 0]);
-        } else {
-            $d->query("INSERT IGNORE INTO group_post_comment_likes (comment_id, user_id) VALUES (?, ?)", [$cid, $uid]);
-            $d->query("UPDATE group_post_comments SET likes_count = likes_count + 1 WHERE id = ?", [$cid]);
-            $cnt = $d->fetchOne("SELECT likes_count FROM group_post_comments WHERE id = ?", [$cid]);
-            gOk('OK', ['liked' => true, 'likes_count' => $cnt ? $cnt['likes_count'] : 0]);
-        }
-    }
+
 
     if ($action === 'search') {
         $q = trim($_GET['q'] ?? '');
@@ -258,6 +242,25 @@ if ($method === 'POST') {
             }catch(Throwable $e){}
         }
         gOk('OK', ['liked' => !$ex, 'count' => intval($cnt['likes_count'] ?? 0)]);
+    }
+
+
+    if ($action === 'like_comment') {
+        $uid = getAuthUserId();
+        $cid = intval($input['comment_id'] ?? 0);
+        if (!$cid) { echo json_encode(['success'=>false,'message'=>'Missing comment_id']); exit; }
+        $exists = $d->fetchOne("SELECT id FROM group_post_comment_likes WHERE comment_id = ? AND user_id = ?", [$cid, $uid]);
+        if ($exists) {
+            $d->query("DELETE FROM group_post_comment_likes WHERE comment_id = ? AND user_id = ?", [$cid, $uid]);
+            $d->query("UPDATE group_post_comments SET likes_count = GREATEST(likes_count - 1, 0) WHERE id = ?", [$cid]);
+            $cnt = $d->fetchOne("SELECT likes_count FROM group_post_comments WHERE id = ?", [$cid]);
+            gOk('OK', ['liked' => false, 'likes_count' => $cnt ? $cnt['likes_count'] : 0]);
+        } else {
+            $d->query("INSERT IGNORE INTO group_post_comment_likes (comment_id, user_id) VALUES (?, ?)", [$cid, $uid]);
+            $d->query("UPDATE group_post_comments SET likes_count = likes_count + 1 WHERE id = ?", [$cid]);
+            $cnt = $d->fetchOne("SELECT likes_count FROM group_post_comments WHERE id = ?", [$cid]);
+            gOk('OK', ['liked' => true, 'likes_count' => $cnt ? $cnt['likes_count'] : 0]);
+        }
     }
 
     if ($action === 'comment') {
