@@ -161,7 +161,9 @@ body.in-chat .ch-input-wrap{z-index:1001}
 <input type="file" id="fileInput" style="display:none" accept="image/*,video/*,.pdf,.doc,.docx,.xls,.xlsx,.zip,.rar" onchange="handleFileSelect(this)">
 <input type="file" id="imgInput" style="display:none" accept="image/*,video/*" onchange="handleFileSelect(this)">
 <div class="img-overlay" id="imgOverlay" onclick="this.classList.remove('show')"><span class="img-overlay-close">&times;</span><img id="imgOverlayImg" src=""></div>
+<div class="toast" id="ssToast" style="position:fixed;bottom:90px;left:50%;transform:translateX(-50%) translateY(100px);background:#333;color:#fff;padding:12px 20px;border-radius:8px;font-size:14px;z-index:9999;opacity:0;transition:.3s;pointer-events:none"></div>
 </div><script src="js/reddit-mkpost-1773927135.js"></script><script>
+function toast(msg){var t=document.getElementById("ssToast");t.textContent=msg;t.style.opacity="1";t.style.transform="translateX(-50%) translateY(0)";clearTimeout(t._tm);t._tm=setTimeout(function(){t.style.opacity="0";t.style.transform="translateX(-50%) translateY(100px)";},2500);}
 var CU=JSON.parse(localStorage.getItem("user")||"null");
 if(!CU)location.href="login.html";
 var curConvId=null,curOtherId=null,curTab="active",pollTimer=null;
