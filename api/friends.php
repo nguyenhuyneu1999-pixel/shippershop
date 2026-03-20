@@ -17,7 +17,11 @@ echo json_encode(['success'=>true,'data'=>$reqs]);exit;}
 if($action==='suggestions'){
 $sug=$d->fetchAll("SELECT u.id,u.fullname,u.avatar,u.username,u.shipping_company,u.bio FROM users u WHERE u.id!=? AND u.status='active' AND u.id NOT IN (SELECT CASE WHEN user_id=? THEN friend_id ELSE user_id END FROM friends WHERE user_id=? OR friend_id=?) ORDER BY RAND() LIMIT 20",[$userId,$userId,$userId,$userId]);
 echo json_encode(['success'=>true,'data'=>$sug]);exit;}
-if($action==='online'){echo json_encode(['success'=>true,'data'=>[]]);exit;}}
+if($action==='online'){
+  $limit=intval($_GET['limit']??12);
+  $online=$d->fetchAll("SELECT id,fullname,avatar,shipping_company FROM users WHERE is_online=1 AND id!=? ORDER BY last_active DESC LIMIT ?",[$userId,$limit]);
+  echo json_encode(['success'=>true,'data'=>$online?:[]]);exit;
+}}
 if($method==='POST'){
 $userId=getAuthUserId();$input=json_decode(file_get_contents('php://input'),true);$fid=intval($input['friend_id']??0);
 if($action==='add'){

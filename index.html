@@ -214,6 +214,44 @@ video{width:100%;max-height:600px;display:block;background:#000;}
 .loc-filter .loc-icon{color:#1976d2;font-size:14px;flex-shrink:0;}
 .loc-filter .loc-clear{background:none;border:1px solid #ddd;border-radius:20px;padding:4px 10px;font-size:11px;cursor:pointer;color:#999;flex-shrink:0;}
 @keyframes xpIn{from{transform:translateX(100px);opacity:0}to{transform:translateX(0);opacity:1}}
+
+/* === Desktop sidebar enhancements === */
+.sb-user-link{display:flex;align-items:center;gap:10px;padding:12px;text-decoration:none;color:var(--text);border-radius:4px;transition:.15s}
+.sb-user-link:hover{background:var(--border)}
+.sb-user-av{width:36px;height:36px;border-radius:50%;object-fit:cover;flex-shrink:0}
+.sb-user-info{flex:1;min-width:0}
+.sb-user-name{font-weight:700;font-size:14px}
+.sb-user-sub{font-size:11px;color:var(--muted)}
+.sidebar-item{text-decoration:none !important}
+.sidebar-item i{width:22px;text-align:center}
+.sb-footer{padding:12px;font-size:11px;color:var(--muted)}
+.sb-footer a{color:var(--muted);text-decoration:none}
+.sb-footer a:hover{text-decoration:underline}
+.sb-see-all{display:block;text-align:center;padding:10px;font-size:13px;font-weight:600;color:var(--primary);text-decoration:none;border-top:1px solid var(--border)}
+.sb-see-all:hover{background:var(--border)}
+.sg-item{display:flex;align-items:center;gap:10px;padding:8px 12px;cursor:pointer;transition:.15s}
+.sg-item:hover{background:#f5f5f5}
+.sg-icon{width:36px;height:36px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:700;color:#fff;flex-shrink:0}
+.sg-info{flex:1;min-width:0}
+.sg-name{font-size:13px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sg-meta{font-size:11px;color:var(--muted)}
+.sg-join{padding:4px 12px;border-radius:6px;border:none;font-size:12px;font-weight:600;cursor:pointer;background:var(--primary);color:#fff;flex-shrink:0}
+.sg-join:hover{opacity:.9}
+.sg-join.joined{background:#e4e6eb;color:#65676B}
+.ol-avatar{width:32px;height:32px;border-radius:50%;object-fit:cover;cursor:pointer;border:2px solid #22c55e;transition:transform .15s}
+.ol-avatar:hover{transform:scale(1.1)}
+.ol-ph{width:32px;height:32px;border-radius:50%;background:#e4e6eb;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;border:2px solid #22c55e;cursor:pointer}
+@media(min-width:769px){
+  .left-sidebar{position:sticky;top:110px;max-height:calc(100vh - 120px);overflow-y:auto;scrollbar-width:thin}
+  .left-sidebar::-webkit-scrollbar{width:4px}
+  .left-sidebar::-webkit-scrollbar-thumb{background:#ccc;border-radius:2px}
+  .right-sidebar{position:sticky;top:110px;max-height:calc(100vh - 120px);overflow-y:auto;scrollbar-width:thin}
+  .right-sidebar::-webkit-scrollbar{width:4px}
+  .right-sidebar::-webkit-scrollbar-thumb{background:#ccc;border-radius:2px}
+  .main-layout{max-width:1280px;grid-template-columns:240px 1fr 320px;gap:20px}
+}
+@media(min-width:1400px){.main-layout{max-width:1400px;grid-template-columns:260px 1fr 340px}}
+
 </style>
 
 <style id="fabFix">
@@ -373,19 +411,52 @@ if("serviceWorker" in navigator){
 </div>
 <div class="main-layout">
 <aside class="left-sidebar">
+  <!-- User card -->
+  <div class="sidebar-card sb-user" id="sbUserCard" style="display:none">
+    <a href="profile.html" class="sb-user-link">
+      <img class="sb-user-av" id="sbUserAv" src="" onerror="this.style.display='none'">
+      <div class="sb-user-info">
+        <div class="sb-user-name" id="sbUserName">Tài khoản</div>
+        <div class="sb-user-sub" id="sbUserSub">Xem trang cá nhân</div>
+      </div>
+    </a>
+  </div>
+
+  <!-- Quick Navigation -->
+  <div class="sidebar-card">
+    <a href="index.html" class="sidebar-item active"><i class="fas fa-newspaper" style="color:#7C3AED"></i>Bảng tin</a>
+    <a href="groups.html" class="sidebar-item"><i class="fas fa-users" style="color:#1877F2"></i>Cộng đồng</a>
+    <a href="messages.html" class="sidebar-item"><i class="fas fa-comment-dots" style="color:#0084ff"></i>Tin nhắn</a>
+    <a href="marketplace.html" class="sidebar-item"><i class="fas fa-store" style="color:#E74C3C"></i>Chợ mua bán</a>
+    <a href="traffic.html" class="sidebar-item"><i class="fas fa-road" style="color:#F59E0B"></i>Giao thông</a>
+    <a href="people.html" class="sidebar-item"><i class="fas fa-user-group" style="color:#00b14f"></i>Bạn bè</a>
+    <a href="wallet.html" class="sidebar-item"><i class="fas fa-wallet" style="color:#8B5CF6"></i>Ví tiền</a>
+    <a href="map.html" class="sidebar-item"><i class="fas fa-map-marked-alt" style="color:#0EA5E9"></i>Bản đồ</a>
+    <a href="leaderboard.html" class="sidebar-item"><i class="fas fa-trophy" style="color:#F59E0B"></i>Xếp hạng</a>
+  </div>
+
+  <!-- Topics -->
   <div class="sidebar-card">
     <div class="sidebar-title">Chủ đề</div>
     <span class="sidebar-item active" id="t-all" onclick="fType('all')"><i class="fas fa-fire"></i>Tất cả</span>
-    <span class="sidebar-item" id="t-confession" onclick="fType('confession')"><i class="fas fa-mask"></i>Confession ẩn danh</span>
-    <span class="sidebar-item" id="t-review" onclick="fType('review')"><i class="fas fa-star"></i>Review sản phẩm</span>
+    <span class="sidebar-item" id="t-confession" onclick="fType('confession')"><i class="fas fa-mask"></i>Confession</span>
+    <span class="sidebar-item" id="t-review" onclick="fType('review')"><i class="fas fa-star"></i>Review</span>
     <span class="sidebar-item" id="t-tip" onclick="fType('tip')"><i class="fas fa-lightbulb"></i>Mẹo hay</span>
     <span class="sidebar-item" id="t-question" onclick="fType('question')"><i class="fas fa-question-circle"></i>Hỏi đáp</span>
     <span class="sidebar-item" id="t-discussion" onclick="fType('discussion')"><i class="fas fa-comments"></i>Thảo luận</span>
   </div>
+
+  <!-- Province filter -->
   <div class="sidebar-card">
     <div class="sidebar-title">Lọc theo tỉnh/thành phố</div>
     <div class="province-search"><input type="text" id="pSearch" placeholder="Tìm tỉnh thành..." oninput="renderProvinces(this.value)"></div>
     <div class="province-list" id="pList"></div>
+  </div>
+
+  <!-- Footer links -->
+  <div class="sb-footer">
+    <a href="/guide.html">Hướng dẫn</a> · <a href="/luong-shipper.html">Lương shipper</a> · <a href="/landing.html">Giới thiệu</a>
+    <div style="margin-top:6px;font-size:11px;color:#999">© 2026 ShipperShop</div>
   </div>
 </aside>
 
@@ -416,6 +487,7 @@ if("serviceWorker" in navigator){
 </main>
 
 <aside class="right-sidebar">
+  <!-- Community banner -->
   <div class="community-banner">
     <h3><i class="fas fa-users"></i> Cộng đồng ShipperShop</h3>
     <p>Chia sẻ · Mua sắm · Kết nối 63 tỉnh thành!</p>
@@ -426,17 +498,38 @@ if("serviceWorker" in navigator){
     <div class="stat"><div class="stat-n" id="stP">--</div><div class="stat-l">Bài viết</div></div>
     <div class="stat"><div class="stat-n" id="stT">--</div><div class="stat-l">Hôm nay</div></div>
   </div>
-  <div class="rules-box">
-    <div class="sidebar-title" style="padding:10px 12px">📋 Nội quy</div>
+
+  <!-- Suggested Groups -->
+  <div class="sidebar-card" id="suggestedGroups">
+    <div class="sidebar-title"><i class="fas fa-users" style="margin-right:4px"></i> Nhóm gợi ý</div>
+    <div id="sgList" style="padding:4px 0">
+      <div style="text-align:center;padding:16px;color:#999"><i class="fas fa-spinner fa-spin"></i></div>
+    </div>
+    <a href="groups.html" class="sb-see-all">Xem tất cả nhóm <i class="fas fa-chevron-right"></i></a>
+  </div>
+
+  <!-- Rules -->
+  <div class="sidebar-card">
+    <div class="sidebar-title">📋 Nội quy</div>
     <div class="rule">1. Tôn trọng lẫn nhau</div>
     <div class="rule">2. Không spam, không quảng cáo tràn lan</div>
     <div class="rule">3. Confession ẩn danh — không xúc phạm cá nhân</div>
     <div class="rule">4. Review phải có trải nghiệm thực tế</div>
-    <div class="rule">5. Nội dung phải liên quan mua sắm / tiêu dùng</div>
+    <div class="rule">5. Nội dung phải liên quan shipper / giao hàng</div>
   </div>
-  <div class="trending-box" id="trendBox">
-    <div class="sidebar-title" style="padding:10px 12px">🔥 Đang thịnh hành</div>
-    <div class="empty" style="padding:20px"><i class="fas fa-spinner spin"></i></div>
+
+  <!-- Trending -->
+  <div class="sidebar-card" id="trendBox">
+    <div class="sidebar-title">🔥 Đang thịnh hành</div>
+    <div style="padding:16px;text-align:center;color:#999"><i class="fas fa-spinner fa-spin"></i></div>
+  </div>
+
+  <!-- Online shipper -->
+  <div class="sidebar-card" id="onlineBox">
+    <div class="sidebar-title"><span class="dot-online" style="display:inline-block;width:8px;height:8px;border-radius:50%;background:#22c55e;margin-right:4px"></span> Đang hoạt động</div>
+    <div id="olList" style="padding:8px 12px;display:flex;flex-wrap:wrap;gap:6px">
+      <div style="text-align:center;padding:8px;color:#999;width:100%"><i class="fas fa-spinner fa-spin"></i></div>
+    </div>
   </div>
 </aside>
 </div>
@@ -821,7 +914,45 @@ if(up.get('post'))setTimeout(function(){scrollTo2(parseInt(up.get('post')));},20
 if(up.get('type'))fType(up.get('type'));
 function handleFab(){if(!CU){toast('Đăng nhập để đăng bài!','warning');setTimeout(function(){location='login.html'},1000);return;}if(typeof openSPM==="function")openSPM();}
 </script>
-    <script src="js/mobile.js"></script>
+    <script src="js/mobile.js">
+/* === Desktop sidebar population === */
+(function(){
+  // User card
+  var u=JSON.parse(localStorage.getItem("user")||"null");
+  if(u){
+    var card=document.getElementById("sbUserCard");
+    if(card){card.style.display="block";document.getElementById("sbUserName").textContent=u.fullname||"Tài khoản";}
+    var av=document.getElementById("sbUserAv");
+    if(av&&u.avatar){av.src=u.avatar;av.style.display="";}
+  }
+  
+  // Suggested groups
+  fetch("/api/groups.php?action=discover&limit=5").then(function(r){return r.json();}).then(function(d){
+    var el=document.getElementById("sgList");if(!el)return;
+    if(!d.success||!d.data||!d.data.length){el.innerHTML="<div style='padding:12px;text-align:center;color:#999;font-size:13px'>Không có gợi ý</div>";return;}
+    var colors=["#7C3AED","#1877F2","#E74C3C","#F59E0B","#00b14f","#0EA5E9","#c41230","#ff6600"];
+    var h="";
+    d.data.slice(0,5).forEach(function(g,i){
+      var icon=g.icon_image?"<img src='"+g.icon_image+"' style='width:100%;height:100%;object-fit:cover;border-radius:10px'>":"<span>"+(g.name||"G")[0]+"</span>";
+      h+="<div class='sg-item' onclick='location.href="group.html?id="+g.id+""'><div class='sg-icon' style='background:"+colors[i%colors.length]+"'>"+icon+"</div><div class='sg-info'><div class='sg-name'>"+(g.name||"")+"</div><div class='sg-meta'>"+(g.member_count||0)+" thành viên</div></div>"+(g.is_member?"<span class='sg-join joined'>Đã tham gia</span>":"")+"</div>";
+    });
+    el.innerHTML=h;
+  }).catch(function(){});
+
+  // Online users
+  fetch("/api/friends.php?action=online&limit=12").then(function(r){return r.json();}).then(function(d){
+    var el=document.getElementById("olList");if(!el)return;
+    if(!d.success||!d.data||!d.data.length){el.innerHTML="<div style='padding:8px;color:#999;font-size:12px;width:100%;text-align:center'>Không ai online</div>";return;}
+    var h="";
+    d.data.forEach(function(u){
+      if(u.avatar){h+="<img class='ol-avatar' src='"+u.avatar+"' title='"+(u.fullname||"")+"' onclick='location.href="messages.html?user="+u.id+""'>";}
+      else{h+="<div class='ol-ph' title='"+(u.fullname||"")+"' onclick='location.href="messages.html?user="+u.id+""'>"+(u.fullname||"U")[0]+"</div>";}
+    });
+    el.innerHTML=h;
+  }).catch(function(){});
+})();
+
+</script>
 
   <!-- MOBILE BOTTOM NAV - rendered in HTML, no JS injection -->
   <nav id="mobileBottomNav" role="navigation" aria-label="Mobile navigation">
