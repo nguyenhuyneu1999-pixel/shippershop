@@ -5,7 +5,7 @@
 <meta name="description" content="ShipperShop - Nơi ae shipper chia sẻ kinh nghiệm giao hàng, tips tiết kiệm xăng, cảnh báo giao thông, so sánh hãng ship GHTK GHN J&T SPX">
 <meta property="og:title" content="ShipperShop - Cộng đồng Shipper #1 Việt Nam">
 <meta property="og:description" content="Tips giao hàng, cảnh báo GT real-time, chợ đồ nghề shipper. 100% miễn phí!">
-<meta property="og:image" content="https://shippershop.vn/icons/icon-512x512.png">
+<meta property="og:image" content="https://shippershop.vn/api/og-image.php">
 <meta property="og:url" content="https://shippershop.vn/landing.html">
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
@@ -44,7 +44,7 @@ footer{text-align:center;padding:20px;font-size:12px;color:#999;background:#f5f5
   </div>
 </div>
 
-<div class="stats-bar">
+<div class="stats-bar" id="liveStats">
   <div><b>700+</b><br>Bài viết</div>
   <div><b>100+</b><br>Shipper</div>
   <div><b>24/7</b><br>Cảnh báo GT</div>
@@ -111,4 +111,12 @@ footer{text-align:center;padding:20px;font-size:12px;color:#999;background:#f5f5
 </footer>
 
 <script src="/js/analytics.js"></script>
+
+<script>
+fetch("/api/posts.php?limit=1").then(function(r){return r.json()}).then(function(d){
+  var total = d.total || d.pagination?.total || 700;
+  var el = document.getElementById("liveStats");
+  if(el) el.innerHTML = '<div><b>'+total+'</b><br>Bài viết</div><div><b>100+</b><br>Shipper</div><div><b>24/7</b><br>Cảnh báo GT</div>';
+}).catch(function(){});
+</script>
 </body></html>
