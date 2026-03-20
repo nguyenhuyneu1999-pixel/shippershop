@@ -460,7 +460,7 @@ function createGroup(){
     var h="";
     joined.slice(0,8).forEach(function(g,i){
       var icon=g.icon_image?"<img src='"+g.icon_image+"' style='width:100%;height:100%;object-fit:cover;border-radius:10px'>":"<span>"+(g.name||"G")[0]+"</span>";
-      h+="<div class='sb-item' onclick='goGroup(""+esc(g.slug)+"")'><div class='sb-icon' style='background:"+colors[i%colors.length]+"'>"+icon+"</div><div style='flex:1;min-width:0'><div class='sb-name'>"+esc(g.name)+"</div><div class='sb-meta'>"+fN(g.member_count)+" thành viên</div></div></div>";
+      h+="<div class='sb-item' onclick='goGroup(\x22"+esc(g.slug)+"\x22)'><div class='sb-icon' style='background:"+colors[i%colors.length]+"'>"+icon+"</div><div style='flex:1;min-width:0'><div class='sb-name'>"+esc(g.name)+"</div><div class='sb-meta'>"+fN(g.member_count)+" thành viên</div></div></div>";
     });
     el.innerHTML=h;
   }).catch(function(){});
