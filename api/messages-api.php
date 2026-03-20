@@ -1,6 +1,5 @@
 <?php
 session_start();
-define('DEBUG_MODE', true); // TEMP: show SQL errors
 require_once __DIR__ . '/../includes/db.php';
 require_once __DIR__ . '/../includes/functions.php';
 require_once __DIR__ . '/auth-check.php';
@@ -306,82 +305,56 @@ $userId=getMsgUserId();
 $input=json_decode(file_get_contents('php://input'),true);
 
 if($action==='send'){
-  // TEMP DEBUG: log to file
-  $dbg=fopen(__DIR__.'/../uploads/send_debug.log','a');
-  fwrite($dbg,date('H:i:s')." userId=$userId input=".json_encode($input)."\n");
-  
-  // Feature gate: check monthly message limit
-  try{
-    $limitErr = checkLimit($userId, 'messages_per_month');
-  }catch(Throwable $e){
-    fwrite($dbg,"checkLimit ERROR: ".$e->getMessage()." ".$e->getFile().":".$e->getLine()."\n");
-    $limitErr = null;
-  }
-  if ($limitErr) { echo json_encode(['success'=>false,'message'=>$limitErr,'upgrade'=>true]); fclose($dbg); exit; }
+  // Feature gate
+  try{$limitErr=checkLimit($userId,'messages_per_month');}catch(Throwable $e){$limitErr=null;}
+  if($limitErr){echo json_encode(['success'=>false,'message'=>$limitErr,'upgrade'=>true]);exit;}
   $oid=intval($input['to_user_id']??0);$ct=trim($input['content']??'');
   $gid=intval($input['group_id']??0);
-  fwrite($dbg,"oid=$oid ct=$ct gid=$gid\n");
-  
+  $pdo=db()->getConnection();
+  $pdo->setAttribute(PDO::ATTR_ERRMODE,PDO::ERRMODE_EXCEPTION);
+
   // Group message
   if($gid){
     if(!$ct){echo json_encode(['success'=>false,'message'=>'Missing content']);exit;}
-    $member=$d->fetchOne("SELECT id FROM conversation_members WHERE conversation_id=? AND user_id=?",[$gid,$userId]);
-    if(!$member){echo json_encode(['success'=>false,'message'=>'Not a member']);exit;}
-    $d->query("INSERT INTO messages (conversation_id,sender_id,content,type,created_at) VALUES (?,?,?,'text',NOW())",[$gid,$userId,$ct]);
-    $mid=$d->getLastInsertId();
-    if(!$mid){$r=$d->fetchOne("SELECT MAX(id) as m FROM messages",[]);$mid=$r['m'];}
-    $d->query("UPDATE conversations SET last_message=?,last_message_at=NOW() WHERE id=?",[$ct,$gid]);
-    // Push to group members (except sender)
-    try{
-      require_once __DIR__.'/../includes/push-helper.php';
-      $sender=$d->fetchOne("SELECT fullname FROM users WHERE id=?",[$userId]);
-      $grp=$d->fetchOne("SELECT name FROM conversations WHERE id=?",[$gid]);
-      $members=$d->fetchAll("SELECT user_id FROM conversation_members WHERE conversation_id=? AND user_id!=?",[$gid,$userId]);
-      $sName=$sender?$sender['fullname']:'Ai đó';
-      $gName=$grp?$grp['name']:'Nhóm';
-      $preview=mb_substr($ct,0,50);
-      foreach($members as $m){notifyUser($m['user_id'],'Nhóm: '.$gName,$sName.': '.$preview,'message','/messages.html?group='.$gid);}
-    }catch(Throwable $e){}
-    echo json_encode(['success'=>true,'data'=>['id'=>$mid,'conversation_id'=>$gid]]);exit;
+    $chk=$pdo->prepare("SELECT id FROM conversation_members WHERE conversation_id=? AND user_id=?");
+    $chk->execute([$gid,$userId]);
+    if(!$chk->fetch()){echo json_encode(['success'=>false,'message'=>'Not a member']);exit;}
+    $ins=$pdo->prepare("INSERT INTO messages (conversation_id,sender_id,content,type,created_at) VALUES (?,?,?,'text',NOW())");
+    $ins->execute([$gid,$userId,$ct]);
+    $mid=$pdo->lastInsertId();
+    $upd=$pdo->prepare("UPDATE conversations SET last_message=?,last_message_at=NOW() WHERE id=?");
+    $upd->execute([$ct,$gid]);
+    try{require_once __DIR__.'/../includes/push-helper.php';$sn=$d->fetchOne("SELECT fullname FROM users WHERE id=?",[$userId]);$gn=$d->fetchOne("SELECT name FROM conversations WHERE id=?",[$gid]);$ms=$d->fetchAll("SELECT user_id FROM conversation_members WHERE conversation_id=? AND user_id!=?",[$gid,$userId]);foreach($ms as $m){notifyUser($m['user_id'],'Nhóm: '.($gn?$gn['name']:'Nhóm'),($sn?$sn['fullname']:'Ai đó').': '.mb_substr($ct,0,50),'message','/messages.html?group='.$gid);}}catch(Throwable $e){}
+    echo json_encode(['success'=>true,'data'=>['id'=>intval($mid),'conversation_id'=>$gid]]);exit;
   }
-  
-  // Private message (existing logic)
-  if(!$ct||!$oid){echo json_encode(['success'=>false,'message'=>'Missing']);fclose($dbg);exit;}
-  $f1=$d->fetchOne("SELECT id FROM follows WHERE follower_id=? AND following_id=?",[$userId,$oid]);
-  $f2=$d->fetchOne("SELECT id FROM follows WHERE follower_id=? AND following_id=?",[$oid,$userId]);
-  $mut=($f1&&$f2);
-  $cv=$d->fetchOne("SELECT id FROM conversations WHERE (user1_id=? AND user2_id=?) OR (user1_id=? AND user2_id=?)",[$userId,$oid,$oid,$userId]);
-  fwrite($dbg,"cv=".json_encode($cv)." mut=$mut\n");
-  if(!$cv){
-    $st=$mut?'active':'pending';
-    try{
-      $d->query("INSERT INTO conversations (user1_id,user2_id,last_message,last_message_at,`status`) VALUES (?,?,?,NOW(),?)",[$userId,$oid,$ct,$st]);
-      $cid=$d->getLastInsertId();
-      if(!$cid){$r=$d->fetchOne("SELECT id FROM conversations WHERE user1_id=? AND user2_id=? ORDER BY id DESC LIMIT 1",[$userId,$oid]);$cid=$r['id'];}
-      fwrite($dbg,"NEW conv cid=$cid\n");
-    }catch(Throwable $e){
-      fwrite($dbg,"INSERT CONV ERROR: ".$e->getMessage()."\n");
-      echo json_encode(['success'=>false,'message'=>$e->getMessage()]);fclose($dbg);exit;
+
+  // Private message
+  if(!$ct||!$oid){echo json_encode(['success'=>false,'message'=>'Missing']);exit;}
+  try{
+    $f1=$d->fetchOne("SELECT id FROM follows WHERE follower_id=? AND following_id=?",[$userId,$oid]);
+    $f2=$d->fetchOne("SELECT id FROM follows WHERE follower_id=? AND following_id=?",[$oid,$userId]);
+    $mut=($f1&&$f2);
+    $cv=$pdo->prepare("SELECT id FROM conversations WHERE (user1_id=? AND user2_id=?) OR (user1_id=? AND user2_id=?)");
+    $cv->execute([$userId,$oid,$oid,$userId]);
+    $row=$cv->fetch(PDO::FETCH_ASSOC);
+    if(!$row){
+      $st=$mut?'active':'pending';
+      $ic=$pdo->prepare("INSERT INTO conversations (user1_id,user2_id,last_message,last_message_at,`status`) VALUES (?,?,?,NOW(),?)");
+      $ic->execute([$userId,$oid,$ct,$st]);
+      $cid=intval($pdo->lastInsertId());
+      if(!$cid){$fc=$pdo->query("SELECT MAX(id) as m FROM conversations");$cid=intval($fc->fetch(PDO::FETCH_ASSOC)['m']);}
+    }else{
+      $cid=intval($row['id']);
+      $uc=$pdo->prepare("UPDATE conversations SET last_message=?,last_message_at=NOW() WHERE id=?");
+      $uc->execute([$ct,$cid]);
     }
-  }else{$cid=$cv['id'];$d->query("UPDATE conversations SET last_message=?,last_message_at=NOW() WHERE id=?",[$ct,$cid]);fwrite($dbg,"EXISTING cid=$cid\n");}
-  try{
-    $d->query("INSERT INTO messages (conversation_id,sender_id,content,created_at) VALUES (?,?,?,NOW())",[$cid,$userId,$ct]);
-    $mid=$d->getLastInsertId();
-    if(!$mid){$r=$d->fetchOne("SELECT MAX(id) as m FROM messages",[]);$mid=$r['m'];}
-    fwrite($dbg,"MSG OK mid=$mid\n");
-  }catch(Throwable $e){
-    fwrite($dbg,"INSERT MSG ERROR: ".$e->getMessage()."\n");
-    echo json_encode(['success'=>false,'message'=>$e->getMessage()]);fclose($dbg);exit;
+    $im=$pdo->prepare("INSERT INTO messages (conversation_id,sender_id,content,created_at) VALUES (?,?,?,NOW())");
+    $im->execute([$cid,$userId,$ct]);
+    $mid=intval($pdo->lastInsertId());
+  }catch(PDOException $e){
+    echo json_encode(['success'=>false,'message'=>'DB error: '.$e->getMessage()]);exit;
   }
-  fclose($dbg);
-  // Push notification to recipient
-  try{
-    require_once __DIR__.'/../includes/push-helper.php';
-    $sender=$d->fetchOne("SELECT fullname,avatar FROM users WHERE id=?",[$userId]);
-    $sName=$sender?$sender['fullname']:'Ai đó';
-    $preview=mb_substr($ct,0,60);
-    notifyUser($oid,'Tin nhắn: '.$sName,$preview,'message','/messages.html?user='.$userId);
-  }catch(Throwable $e){}
+  try{require_once __DIR__.'/../includes/push-helper.php';$sn=$d->fetchOne("SELECT fullname,avatar FROM users WHERE id=?",[$userId]);notifyUser($oid,'Tin nhắn: '.($sn?$sn['fullname']:'Ai đó'),mb_substr($ct,0,60),'message','/messages.html?user='.$userId);}catch(Throwable $e){}
   echo json_encode(['success'=>true,'data'=>['id'=>$mid,'conversation_id'=>$cid]]);exit;
 }
 if($action==='accept'){
