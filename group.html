@@ -434,10 +434,10 @@ function fetchLeaderboard(){
 
 // Post modal
 function openPM(){
-  if(!CU){location.href="login.html";return;}
-  document.getElementById("pmOverlay").classList.add("open");
-  setTimeout(function(){document.getElementById("pmText").focus();},200);
-}
+  if(!CU){location.href='login.html';return;}
+  window._spmGroupId=GROUP?GROUP.id:null;
+  window._spmOnSuccess=function(){fetchPosts();};
+  if(typeof openSPM==='function'){openSPM();}else{alert('Đang tải...');}}
 function closePM(){
   document.getElementById("pmOverlay").classList.remove("open");
   document.getElementById("pmText").value="";
@@ -539,5 +539,6 @@ function delP(pid){if(!confirm("Xóa bài viết này?"))return;togMenu(pid);api
 
 document.addEventListener("click",function(e){if(!e.target.closest(".post-dots")&&!e.target.closest(".post-menu")){document.querySelectorAll(".post-menu").forEach(function(m){m.style.display="none";});}});
 </script>
-<script src="/js/image-viewer.js"></script><script src="/js/analytics.js"></script></body>
+<script src="/js/image-viewer.js"></script><script src="/js/analytics.js"></script><script src="js/post-modal.js"></script>
+</body>
 </html>

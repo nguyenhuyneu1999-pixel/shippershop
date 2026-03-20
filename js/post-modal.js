@@ -133,7 +133,7 @@ window.openSPM=function(){
   setTimeout(function(){document.getElementById("spmText").focus();},200);
 };
 
-window.closeSPM=function(){
+window.closeSPM=function(){window._spmGroupId=null;
   document.getElementById("spmOverlay").classList.remove("open");
   document.body.style.overflow="";
   document.getElementById("spmText").value="";
@@ -197,7 +197,14 @@ window.submitSPM=function(){
   var fd=new FormData();fd.append("content",ct);fd.append("type",spmType);
   spmFiles.forEach(function(f){if(f){if(f.type.indexOf("video")>-1)fd.append("video",f);else fd.append("images[]",f);}});
   var tk=localStorage.getItem("token");var hdrs={};if(tk)hdrs["Authorization"]="Bearer "+tk;
-  fetch("/api/posts.php",{method:"POST",headers:hdrs,credentials:"include",body:fd})
+  (function(){
+    var url="/api/posts.php";
+    if(window._spmGroupId){
+      fd.append("group_id",window._spmGroupId);
+      url="/api/groups.php?action=post";
+    }
+    return fetch(url,{method:"POST",headers:hdrs,credentials:"include",body:fd});
+  })()
   .then(function(r){return r.json();})
   .then(function(d){if(d.success){closeSPM();if(typeof loadPosts==="function")loadPosts();else location.reload();}else{if(typeof handleApiError==="function"&&handleApiError(d)){}else if(typeof toast==="function")toast(d.message||"L\u1ed7i","error");}})
   .catch(function(){if(typeof toast==="function")toast("L\u1ed7i k\u1ebft n\u1ed1i","error");})
