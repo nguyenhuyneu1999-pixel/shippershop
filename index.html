@@ -46,7 +46,7 @@ body{background:var(--bg);font-family:'Be Vietnam Pro',-apple-system,BlinkMacSys
 .tab-item{position:relative;}
 .tab-badge{position:absolute;top:2px;right:calc(50% - 18px);background:#7C3AED;color:#fff;font-size:9px;min-width:16px;height:16px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-weight:700;padding:0 4px;}
 .top-nav{background:#fff;position:fixed;top:0;left:0;right:0;z-index:100;padding:8px 10px;display:flex;align-items:center;gap:8px;}
-.nav-logo{font-size:20px;font-weight:800;color:var(--primary);text-decoration:none;display:flex;align-items:center;gap:6px;white-space:nowrap;flex-shrink:0;}
+.nav-logo{font-size:20px;font-weight:800;color:var(--primary);text-decoration:none;display:flex;align-items:center;white-space:nowrap;flex-shrink:0;}
 .nav-search{flex:1;min-width:0;max-width:660px;position:relative;}
 .nav-search input{width:100%;padding:8px 16px 8px 40px;border:1px solid var(--border);border-radius:20px;font-size:14px;background:#f6f7f8;outline:none;}
 .nav-search input:focus{border-color:var(--primary);background:#fff;}
@@ -350,7 +350,7 @@ if("serviceWorker" in navigator){
 </head>
 <body>
 <nav class="top-nav">
-  <a href="index.html" class="nav-logo"><i class="fa-solid fa-truck-fast"></i><span class="no-wrap">ShipperShop</span></a>
+  <a href="index.html" class="nav-logo"><span class="no-wrap">ShipperShop</span></a>
   <div class="nav-search">
     <i class="fas fa-search"></i>
     <input id="q" type="text" placeholder="Tìm kiếm bài viết, #hashtag..." onkeydown="if(event.key==='Enter')search()" onfocus="openSearch()" readonly>
