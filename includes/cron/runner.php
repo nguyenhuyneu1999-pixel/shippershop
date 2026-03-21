@@ -1,9 +1,7 @@
 <?php
-/**
- * ShipperShop Cron Runner
- * Setup: cPanel → Cron Jobs → */5 * * * * php /home/nhshiw2j/public_html/includes/cron/runner.php
- * Or: curl https://shippershop.vn/api/cron-run.php?key=CRON_SECRET
- */
+// ShipperShop Cron Runner
+// Setup: cPanel > Cron Jobs > every 5 min: php /home/nhshiw2j/public_html/includes/cron/runner.php
+// Or: curl https://shippershop.vn/api/cron-run.php?key=CRON_SECRET
 define('CRON_SECRET', 'ss_cron_8f3a2b1c');
 $isWeb = php_sapi_name() !== 'cli';
 
