@@ -17,7 +17,11 @@ $d=db();$key='maintenance_mode';
 // Public check (no auth)
 if($_SERVER['REQUEST_METHOD']==='GET'){
     $row=$d->fetchOne("SELECT value FROM settings WHERE `key`=?",[$key]);
-    $data=$row?json_decode($row['value'],true):['active'=>false];
+    $data=['active'=>false,'message'=>'','eta'=>''];
+    if($row&&$row['value']){
+        $parsed=json_decode($row['value'],true);
+        if(is_array($parsed)) $data=array_merge($data,$parsed);
+    }
     echo json_encode(['success'=>true,'data'=>$data],JSON_UNESCAPED_UNICODE);exit;
 }
 
