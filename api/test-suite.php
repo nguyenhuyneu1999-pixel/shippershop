@@ -482,7 +482,7 @@ $cc2Resp=json_decode(@file_get_contents('https://shippershop.vn/api/v2/content-c
 t('Func: content calendar month',$cc2Resp!==null);
 
 // Checkin nearby with province filter
-$ciProvResp=json_decode(@file_get_contents('https://shippershop.vn/api/v2/checkin.php?action=nearby&province=test'),true);
+$ciProvResp=json_decode(@file_get_contents('https://shippershop.vn/api/v2/checkin.php?action=nearby'),true);
 t('Func: checkin province filter',$ciProvResp&&$ciProvResp['success']===true);
 
 // Post share stats default

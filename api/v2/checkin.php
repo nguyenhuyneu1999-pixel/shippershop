@@ -28,7 +28,7 @@ if($_SERVER['REQUEST_METHOD']==='GET'){
         $district=$_GET['district']??'';
         $limit=min(intval($_GET['limit']??20),50);
         $w=["1=1"];$p=[];
-        if($province){$w[]="mp.province=?";$p[]=$province;}
+        if($province){$w[]="mp.address LIKE ?";$p[]=$province;}
         if($district){$w[]="mp.district=?";$p[]=$district;}
         $wc=implode(' AND ',$w);
         $pins=$d->fetchAll("SELECT mp.*,u.fullname,u.avatar,u.shipping_company FROM map_pins mp JOIN users u ON mp.user_id=u.id WHERE $wc ORDER BY mp.created_at DESC LIMIT $limit",$p);
@@ -69,7 +69,7 @@ if($_SERVER['REQUEST_METHOD']==='POST'){
     $recent=$d->fetchOne("SELECT id FROM map_pins WHERE user_id=? AND created_at > DATE_SUB(NOW(), INTERVAL 30 MINUTE)",[$uid]);
     if($recent) ci_fail('Bạn đã check-in gần đây. Vui lòng đợi 30 phút');
 
-    $pdo->prepare("INSERT INTO map_pins (user_id,lat,lng,note,province,district,created_at) VALUES (?,?,?,?,?,?,NOW())")->execute([$uid,$lat,$lng,$note,$province,$district]);
+    $pdo->prepare("INSERT INTO map_pins (user_id,lat,lng,title,address,created_at) VALUES (?,?,?,?,?,NOW())")->execute([$uid,$lat,$lng,$note,$province]);
     $id=intval($pdo->lastInsertId());
     if(!$id){$r=$pdo->query("SELECT MAX(id) as m FROM map_pins");$id=intval($r->fetch(PDO::FETCH_ASSOC)['m']);}
 
