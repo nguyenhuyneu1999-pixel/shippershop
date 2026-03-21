@@ -1332,7 +1332,8 @@ function sendSubToServer(sub){
   fetch("/api/push.php?action=subscribe",{method:"POST",headers:hdrs,credentials:"include",body:JSON.stringify(data)}).catch(function(){});
 }
 })();
-</script><script src="/js/analytics.js"></script><script src="/js/image-viewer.js"></script>
+</script><script src="/js/ss-error-tracker.js"></script>
+<script src="/js/analytics.js"></script><script src="/js/image-viewer.js"></script>
 <!-- Daily Check-in Banner -->
 <div id="checkinBanner" style="display:none;position:fixed;bottom:70px;left:50%;transform:translateX(-50%);z-index:999;background:linear-gradient(135deg,#7C3AED,#5B21B6);color:#fff;padding:10px 20px;border-radius:12px;box-shadow:0 4px 20px rgba(124,58,237,.4);font-size:13px;display:flex;align-items:center;gap:10px;max-width:360px;width:90%;cursor:pointer" onclick="doFeedCheckin()">
   <span style="font-size:22px">🔥</span>

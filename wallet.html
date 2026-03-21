@@ -195,6 +195,7 @@ async function startPayOS(){
 function esc(t){return t?String(t).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;"):"";}
 function fmtD(d){if(!d)return"";try{return new Date(d.replace(" ","T")).toLocaleDateString("vi-VN",{day:"2-digit",month:"2-digit",year:"numeric",hour:"2-digit",minute:"2-digit"});}catch(e){return d;}}
 </script>
+<script src="/js/ss-error-tracker.js"></script>
 <script src="/js/analytics.js"></script><nav id="mobileBottomNav" role="navigation" aria-label="Mobile navigation">
     <a href="index.html" class="mnav-item" data-page="index.html">
       <i class="fas fa-home"></i><span>Trang chủ</span>
