@@ -71,7 +71,7 @@ require_once __DIR__.'/../includes/upload-handler.php';
 t('Service: handle_upload exists',function_exists('handle_upload'));
 
 // ============ API FILES EXIST ============
-$apiFiles=['posts.php','messages.php','users.php','notifications.php','search.php','admin.php','wallet.php','traffic.php','marketplace.php','analytics.php','health.php','groups.php','gamification.php'];
+$apiFiles=['posts.php','messages.php','users.php','notifications.php','search.php','admin.php','wallet.php','traffic.php','marketplace.php','analytics.php','health.php','groups.php','gamification.php','social.php'];
 foreach($apiFiles as $af){
     t("API v2: $af exists",file_exists(__DIR__.'/v2/'.$af));
 }
