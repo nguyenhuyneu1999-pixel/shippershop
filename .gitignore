@@ -29,3 +29,9 @@ uploads/covers/
 .DS_Store
 Thumbs.db
 api/fx.php
+
+# Cleanup
+fix-*.sh
+*.bak
+api/fx.php
+api/test-*.php
