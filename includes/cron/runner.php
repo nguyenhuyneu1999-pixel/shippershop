@@ -147,6 +147,48 @@ try {
     $results['clean_stories'] = ['status' => 'FAIL'];
 }
 
+// ===== JOB 7: Auto-renew subscriptions =====
+$start = microtime(true);
+try {
+    // Find expired subscriptions with auto_renew=1
+    $expired = $d->fetchAll("SELECT us.*, sp.price, sp.name as plan_name FROM user_subscriptions us JOIN subscription_plans sp ON us.plan_id=sp.id WHERE us.end_date < NOW() AND us.auto_renew=1 AND us.`status`='active'");
+    $renewed = 0;
+    foreach ($expired as $sub) {
+        $userId = intval($sub['user_id']);
+        $price = intval($sub['price']);
+        $wallet = $d->fetchOne("SELECT balance FROM wallets WHERE user_id=?", [$userId]);
+        if ($wallet && intval($wallet['balance']) >= $price) {
+            // Deduct + extend
+            $d->query("UPDATE wallets SET balance=balance-? WHERE user_id=?", [$price, $userId]);
+            $d->query("UPDATE user_subscriptions SET end_date=DATE_ADD(NOW(), INTERVAL 30 DAY) WHERE id=?", [$sub['id']]);
+            $pdo = $d->getConnection();
+            $pdo->prepare("INSERT INTO wallet_transactions (user_id,type,amount,description,created_at) VALUES (?,'subscription',?,?,NOW())")->execute([$userId, -$price, 'Auto-renew: ' . $sub['plan_name']]);
+            try { $pdo->prepare("INSERT INTO notifications (user_id,type,title,message,data,created_at) VALUES (?,'wallet','Gia hạn tự động',?,?,NOW())")->execute([$userId, 'Gói ' . $sub['plan_name'] . ' đã được gia hạn', json_encode(['plan_id' => $sub['plan_id']])]); } catch (\Throwable $e) {}
+            $renewed++;
+        } else {
+            // Insufficient balance — cancel
+            $d->query("UPDATE user_subscriptions SET `status`='expired',auto_renew=0 WHERE id=?", [$sub['id']]);
+            try { $pdo = $d->getConnection(); $pdo->prepare("INSERT INTO notifications (user_id,type,title,message,data,created_at) VALUES (?,'wallet','Gói hết hạn',?,?,NOW())")->execute([$userId, 'Gói ' . $sub['plan_name'] . ' đã hết hạn do không đủ số dư', '{}']); } catch (\Throwable $e) {}
+        }
+    }
+    $ms = round((microtime(true) - $start) * 1000);
+    $results['auto_renew'] = ['status' => 'OK', 'ms' => $ms, 'renewed' => $renewed, 'expired' => count($expired)];
+} catch (\Throwable $e) {
+    $results['auto_renew'] = ['status' => 'FAIL', 'error' => $e->getMessage()];
+}
+
+// ===== JOB 8: Clean stale typing indicators + old analytics =====
+$start = microtime(true);
+try {
+    $d->query("DELETE FROM typing_indicators WHERE started_at < DATE_SUB(NOW(), INTERVAL 30 SECOND)");
+    // Clean analytics older than 90 days
+    $d->query("DELETE FROM analytics_views WHERE created_at < DATE_SUB(NOW(), INTERVAL 90 DAY)");
+    $ms = round((microtime(true) - $start) * 1000);
+    $results['clean_stale'] = ['status' => 'OK', 'ms' => $ms];
+} catch (\Throwable $e) {
+    $results['clean_stale'] = ['status' => 'FAIL'];
+}
+
 // Output
 if ($isWeb) {
     echo json_encode(['cron' => 'OK', 'timestamp' => date('Y-m-d H:i:s'), 'jobs' => $results], JSON_PRETTY_PRINT);
