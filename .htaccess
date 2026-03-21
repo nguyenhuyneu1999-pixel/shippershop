@@ -89,6 +89,20 @@ RewriteRule ^ - [L]
 # ETag for cache validation
 FileETag MTime Size
 
+# Immutable cache for versioned assets (bundle, minified CSS)
+<FilesMatch "ss-bundle\.min\.js|design-system\.min\.css">
+    <IfModule mod_headers.c>
+        Header set Cache-Control "public, max-age=604800, immutable"
+    </IfModule>
+</FilesMatch>
+
+# Short cache for SVG assets
+<FilesMatch "\.(svg)$">
+    <IfModule mod_headers.c>
+        Header set Cache-Control "public, max-age=2592000"
+    </IfModule>
+</FilesMatch>
+
 # ============================================
 # GZIP COMPRESSION
 # ============================================

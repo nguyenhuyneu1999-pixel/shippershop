@@ -1,5 +1,31 @@
 # ShipperShop Changelog
 
+## v2.2.0 (March 21, 2026) — Sessions 23-27, Final Production Release
+
+### New Features
+- **Post Reactions** — 6 emoji types (like/love/haha/wow/sad/angry) with picker popup
+- **@Mentions** — Autocomplete dropdown, notifications, linkify in text
+- **Pin Posts** — Pin up to 3 posts to profile or group
+- **User Blocking** — Block/unblock, blocked list, auto-unfollow
+- **Post Edit** — Edit content with history tracking
+- **Data Export** — GDPR-compliant full data download as JSON
+- **QR Profile Sharing** — QR codes for profiles, groups, posts, invites
+- **Post View Tracking** — Impressions, unique viewers, batch tracking, author analytics
+- **Message Polling** — 5s adaptive polling, typing indicators, unread counts
+- **Reactions UI** — Long-press emoji picker, quick like, reaction summary
+- **Profile Completeness** — SVG progress ring with actionable suggestions
+- **Notification Preferences** — Toggle per type + quiet hours
+- **Post Types** — 10 categories (delivery, pickup, search, job, review, tip, etc.)
+- **Admin Batch Ops** — Bulk delete posts, ban users, resolve reports, approve deposits, send notifications
+- **Universal Media Upload** — Single endpoint for all file types
+
+### Infrastructure
+- **Accessibility** — Skip links, ARIA live regions, keyboard focus management, reduced-motion
+- **Error Boundary** — Global error catching, dedup, server reporting
+- **Lazy Images** — IntersectionObserver + blur placeholder + MutationObserver auto-scan
+- **.htaccess** — Immutable cache for bundle, SVG long-cache, CSP headers
+- 212+ automated tests, 66 JS files, 39+ API files, 78 DB tables
+
 ## v2.1.0 (March 21, 2026) — Sessions 13-22
 
 ### New Features
