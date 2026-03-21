@@ -85,22 +85,23 @@ if($_SERVER['REQUEST_METHOD']==='POST'){
         ];
         $payData['signature']=payos_sign(['amount'=>$amount,'cancelUrl'=>PAYOS_CANCEL_URL,'description'=>$description,'orderCode'=>$orderCode,'returnUrl'=>PAYOS_RETURN_URL]);
 
-        // Call PayOS API
-        $ch=curl_init(PAYOS_API_URL.'/v2/payment-requests');
-        curl_setopt_array($ch,[
-            CURLOPT_POST=>true,
-            CURLOPT_RETURNTRANSFER=>true,
-            CURLOPT_TIMEOUT=>15,
-            CURLOPT_HTTPHEADER=>[
-                'Content-Type: application/json',
-                'x-client-id: '.PAYOS_CLIENT_ID,
-                'x-api-key: '.PAYOS_API_KEY,
-            ],
-            CURLOPT_POSTFIELDS=>json_encode($payData),
-        ]);
-        $resp=curl_exec($ch);
-        $httpCode=curl_getinfo($ch,CURLINFO_HTTP_CODE);
-        curl_close($ch);
+        // Call PayOS API (file_get_contents — shared hosting compatible)
+        $httpCode=0;$resp='';
+        try {
+            $ctx=stream_context_create(['http'=>[
+                'method'=>'POST',
+                'header'=>"Content-Type: application/json\r\nx-client-id: ".PAYOS_CLIENT_ID."\r\nx-api-key: ".PAYOS_API_KEY."\r\n",
+                'content'=>json_encode($payData),
+                'timeout'=>15,
+                'ignore_errors'=>true,
+            ]]);
+            $resp=@file_get_contents(PAYOS_API_URL.'/v2/payment-requests',false,$ctx);
+            if(isset($http_response_header)){
+                foreach($http_response_header as $hdr){
+                    if(preg_match('/^HTTP\/\S+\s+(\d+)/',$hdr,$m)){$httpCode=intval($m[1]);}
+                }
+            }
+        } catch (\Throwable $e) { $resp=''; }
 
         $result=json_decode($resp,true);
 

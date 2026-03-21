@@ -1,5 +1,46 @@
 # ShipperShop Changelog
 
+## v2.1.0 (March 21, 2026) — Sessions 13-22
+
+### New Features
+- **Stories** — 24h expiring content with fullscreen viewer, progress bars, grouped by user
+- **Bookmarks & Collections** — Save posts to collections, manage saved content
+- **User Verification** — Blue checkmark, request/approve/reject flow
+- **Scheduled Posts & Drafts** — Schedule posts, save drafts, auto-publish via cron
+- **PayOS Payment** — QR bank transfer integration + manual fallback + admin approve
+- **Content Moderation** — Report posts (8 reasons), admin queue, auto-hide at 3 reports
+- **Hashtags** — Trending tags, posts by hashtag, autocomplete suggest
+- **Friends API** — Mutual friends, common friends, pending requests
+- **Share Sheet** — Native Web Share + Zalo/Facebook/Twitter/Telegram/Email fallback
+- **Dark Mode** — System preference detection, manual toggle, localStorage persist
+- **PWA Install** — beforeinstallprompt capture, 7-day dismiss memory
+- **FAB Menu** — Expandable quick actions (create post, sell, traffic alert)
+- **Admin Analytics Charts** — Bar/sparkline/donut charts (pure CSS, no libraries)
+- **Notification Polling** — 30s interval, badge update, page title, toast
+- **Notification Preferences** — Toggle per type, quiet hours
+- **Online Widget** — Sidebar showing online users, auto-refresh
+- **Scroll-to-top + Heartbeat** — Online status tracking every 2 min
+- **Report Dialog** — Report posts with reason selector + detail
+
+### Performance
+- JS Bundle: 95.9 KB (26 components minified, 31% savings vs source)
+- CSS Minified: 15.5 KB (24% savings)
+- Production loader: single `<script>` tag loads entire v2 stack
+- Service Worker v12 with 3 cache strategies
+
+### Infrastructure
+- 6 Cron jobs (cleanup, sync, publish, offline, scheduled, stories)
+- 188 automated tests (100% pass)
+- Health dashboard at /api/v2/status.php
+- 73 DB tables (+4 new: stories, story_views, bookmark_collections, bookmark_items)
+- 28 API v2 files, 160+ endpoints
+
+### Code Stats
+- PHP API v2: 28 files, ~3,900 lines
+- JS Components: 26 files, ~2,600 lines
+- JS Pages: 18 files, ~2,100 lines
+- Total new code: ~11,000 lines across ~120 files
+
 ## v2.0.0 (March 2026) — Full Rewrite
 
 ### Database (69 tables, was 62)

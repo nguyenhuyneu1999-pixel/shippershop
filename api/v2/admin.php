@@ -121,7 +121,7 @@ if($method==='GET'){
 
     // --- Analytics ---
     if($action==='analytics'){
-        $days=min(intval($_GET['days']??7),30);
+        $days=min(intval($_GET['days']??7),90);
         // User growth per day
         $ug=$d->fetchAll("SELECT DATE(created_at) as day,COUNT(*) as count FROM users WHERE created_at>=DATE_SUB(NOW(),INTERVAL $days DAY) GROUP BY DATE(created_at) ORDER BY day");
         // Post activity per day
@@ -130,19 +130,38 @@ if($method==='GET'){
         $pv=$d->fetchAll("SELECT DATE(created_at) as day,COUNT(*) as count FROM page_views WHERE created_at>=DATE_SUB(NOW(),INTERVAL $days DAY) GROUP BY DATE(created_at) ORDER BY day");
         // Top pages
         $tp=$d->fetchAll("SELECT page,COUNT(*) as views FROM page_views WHERE created_at>=DATE_SUB(NOW(),INTERVAL $days DAY) GROUP BY page ORDER BY views DESC LIMIT 10");
-        ok('OK',['user_growth'=>$ug,'post_activity'=>$pa,'page_views'=>$pv,'top_pages'=>$tp]);
+        // Engagement (likes + comments per day)
+        $eng=$d->fetchAll("SELECT DATE(created_at) as day,COUNT(*) as count FROM likes WHERE created_at>=DATE_SUB(NOW(),INTERVAL $days DAY) GROUP BY DATE(created_at) ORDER BY day");
+        $cmt=$d->fetchAll("SELECT DATE(created_at) as day,COUNT(*) as count FROM comments WHERE created_at>=DATE_SUB(NOW(),INTERVAL $days DAY) GROUP BY DATE(created_at) ORDER BY day");
+        // Shipping company breakdown
+        $companies=$d->fetchAll("SELECT shipping_company as name,COUNT(*) as count FROM users WHERE shipping_company IS NOT NULL AND shipping_company!='' AND `status`='active' GROUP BY shipping_company ORDER BY count DESC LIMIT 15");
+        // Active users (posted or liked in last N days)
+        $activeUsers=intval($d->fetchOne("SELECT COUNT(DISTINCT user_id) as c FROM (SELECT user_id FROM posts WHERE created_at>=DATE_SUB(NOW(),INTERVAL $days DAY) UNION SELECT user_id FROM likes WHERE created_at>=DATE_SUB(NOW(),INTERVAL $days DAY)) x")['c']);
+        // Subscription revenue
+        $revenue=$d->fetchAll("SELECT DATE(created_at) as day,SUM(amount) as total FROM wallet_transactions WHERE type='subscription' AND created_at>=DATE_SUB(NOW(),INTERVAL $days DAY) GROUP BY DATE(created_at) ORDER BY day");
+        ok('OK',['user_growth'=>$ug,'post_activity'=>$pa,'page_views'=>$pv,'top_pages'=>$tp,'engagement_likes'=>$eng,'engagement_comments'=>$cmt,'companies'=>$companies,'active_users'=>$activeUsers,'revenue'=>$revenue,'period_days'=>$days]);
     }
 
     // --- System info ---
     if($action==='system'){
         $dbSize=$d->fetchOne("SELECT SUM(data_length+index_length) as s FROM information_schema.tables WHERE table_schema=DATABASE()");
         $tables=$d->fetchOne("SELECT COUNT(*) as c FROM information_schema.tables WHERE table_schema=DATABASE()");
+        $diskFree=function_exists('disk_free_space')?disk_free_space('/'):0;
+        $diskTotal=function_exists('disk_total_space')?disk_total_space('/'):1;
         ok('OK',[
             'php_version'=>PHP_VERSION,
             'db_size_mb'=>round(intval($dbSize['s']??0)/1024/1024,2),
             'db_tables'=>intval($tables['c']??0),
+            'disk_free_mb'=>round($diskFree/1048576),
+            'disk_used_pct'=>round((1-$diskFree/$diskTotal)*100,1),
             'server_time'=>date('Y-m-d H:i:s'),
-            'disk_free'=>function_exists('disk_free_space')?round(disk_free_space('/')/1024/1024/1024,2).'GB':'N/A',
+            'uptime'=>@file_get_contents('/proc/uptime')?trim(explode(' ',file_get_contents('/proc/uptime'))[0]).'s':'N/A',
+            'total_users'=>intval($d->fetchOne("SELECT COUNT(*) as c FROM users WHERE `status`='active'")['c']),
+            'total_posts'=>intval($d->fetchOne("SELECT COUNT(*) as c FROM posts WHERE `status`='active'")['c']),
+            'total_groups'=>intval($d->fetchOne("SELECT COUNT(*) as c FROM groups")['c']),
+            'active_stories'=>intval($d->fetchOne("SELECT COUNT(*) as c FROM stories WHERE expires_at>NOW()")['c']),
+            'pending_reports'=>intval($d->fetchOne("SELECT COUNT(*) as c FROM post_reports WHERE `status`='pending'")['c']),
+            'pending_deposits'=>intval($d->fetchOne("SELECT COUNT(*) as c FROM payos_payments WHERE `status` IN ('pending','manual')")['c']),
         ]);
     }
 

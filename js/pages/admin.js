@@ -30,6 +30,7 @@ SS.AdminPage = {
     else if (tab === 'users') SS.AdminPage.loadUsers();
     else if (tab === 'reports') SS.AdminPage.loadReports();
     else if (tab === 'deposits') SS.AdminPage.loadDeposits();
+    else if (tab === 'analytics') SS.AdminPage.loadAnalytics();
     else if (tab === 'system') SS.AdminPage.loadSystem();
   },
 
@@ -195,10 +196,70 @@ SS.AdminPage = {
       var s = d.data;
       el.innerHTML = '<div class="card"><div class="card-header">Hệ thống</div><div class="card-body">'
         + '<div class="list-item"><div class="flex-1">PHP</div><div class="font-bold">' + SS.utils.esc(s.php_version) + '</div></div>'
-        + '<div class="list-item"><div class="flex-1">Database</div><div class="font-bold">' + s.db_size_mb + ' MB</div></div>'
-        + '<div class="list-item"><div class="flex-1">Disk</div><div class="font-bold">' + s.disk_free_mb + ' MB free</div></div>'
-        + '<div class="list-item"><div class="flex-1">Uptime</div><div class="font-bold">' + (s.uptime || 'N/A') + '</div></div>'
+        + '<div class="list-item"><div class="flex-1">Database</div><div class="font-bold">' + s.db_size_mb + ' MB (' + s.db_tables + ' tables)</div></div>'
+        + '<div class="list-item"><div class="flex-1">Disk</div><div class="font-bold">' + SS.utils.fN(s.disk_free_mb) + ' MB free (' + s.disk_used_pct + '% used)</div></div>'
+        + '<div class="list-item"><div class="flex-1">Users</div><div class="font-bold">' + SS.utils.fN(s.total_users) + '</div></div>'
+        + '<div class="list-item"><div class="flex-1">Posts</div><div class="font-bold">' + SS.utils.fN(s.total_posts) + '</div></div>'
+        + '<div class="list-item"><div class="flex-1">Active Stories</div><div class="font-bold">' + (s.active_stories || 0) + '</div></div>'
+        + '<div class="list-item"><div class="flex-1">Pending Reports</div><div class="font-bold" style="color:' + (s.pending_reports > 0 ? 'var(--danger)' : 'var(--success)') + '">' + (s.pending_reports || 0) + '</div></div>'
+        + '<div class="list-item"><div class="flex-1">Pending Deposits</div><div class="font-bold" style="color:' + (s.pending_deposits > 0 ? 'var(--warning)' : 'var(--success)') + '">' + (s.pending_deposits || 0) + '</div></div>'
+        + '<div class="list-item"><div class="flex-1">Server Time</div><div class="font-bold">' + (s.server_time || '') + '</div></div>'
         + '</div></div>';
     }).catch(function() { el.innerHTML = '<div class="text-center text-muted p-4">Lỗi</div>'; });
+  },
+
+  // Analytics tab — charts
+  loadAnalytics: function() {
+    var el = document.getElementById('admin-content');
+    if (!el) return;
+    el.innerHTML = '<div class="flex gap-2 mb-3">'
+      + '<button class="btn btn-sm btn-primary" onclick="SS.AdminPage._loadCharts(7)">7 ngày</button>'
+      + '<button class="btn btn-sm btn-outline" onclick="SS.AdminPage._loadCharts(14)">14 ngày</button>'
+      + '<button class="btn btn-sm btn-outline" onclick="SS.AdminPage._loadCharts(30)">30 ngày</button>'
+      + '</div><div id="admin-charts"><div class="p-4 text-center"><div class="spin" style="width:24px;height:24px;border:2px solid var(--border);border-top-color:var(--primary);border-radius:50%;display:inline-block"></div></div></div>';
+    SS.AdminPage._loadCharts(7);
+  },
+
+  _loadCharts: function(days) {
+    var el = document.getElementById('admin-charts');
+    if (!el) return;
+    el.innerHTML = '<div class="p-4 text-center"><div class="spin" style="width:24px;height:24px;border:2px solid var(--border);border-top-color:var(--primary);border-radius:50%;display:inline-block"></div></div>';
+
+    SS.api.get('/admin.php?action=analytics&days=' + days).then(function(d) {
+      var data = d.data || {};
+      el.innerHTML = '<div class="card mb-3"><div class="card-body"><div class="flex items-center gap-3 mb-2"><div class="text-lg font-bold">Active users</div><div class="badge badge-primary">' + SS.utils.fN(data.active_users || 0) + '</div></div><div class="text-sm text-muted">' + days + ' ngày qua</div></div></div>'
+        + '<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">'
+        + '<div class="card"><div class="card-body"><div id="ac-users"></div></div></div>'
+        + '<div class="card"><div class="card-body"><div id="ac-posts"></div></div></div>'
+        + '<div class="card"><div class="card-body"><div id="ac-likes"></div></div></div>'
+        + '<div class="card"><div class="card-body"><div id="ac-views"></div></div></div>'
+        + '</div>'
+        + '<div class="card mt-3"><div class="card-body"><div id="ac-companies"></div></div></div>';
+
+      // Charts
+      if (SS.Charts) {
+        var mkData = function(arr, color) {
+          var r = [];
+          for (var i = 0; i < (arr || []).length; i++) {
+            r.push({label: (arr[i].day || '').substring(5), value: parseInt(arr[i].count || 0), color: color});
+          }
+          return r;
+        };
+        SS.Charts.bar('ac-users', mkData(data.user_growth, '#7C3AED'), {title: 'User mới', height: 120});
+        SS.Charts.bar('ac-posts', mkData(data.post_activity, '#3b82f6'), {title: 'Bài viết', height: 120});
+        SS.Charts.bar('ac-likes', mkData(data.engagement_likes, '#22c55e'), {title: 'Lượt thích', height: 120});
+        SS.Charts.bar('ac-views', mkData(data.page_views, '#f59e0b'), {title: 'Page views', height: 120});
+
+        // Company donut
+        var companyColors = ['#00b14f','#d32f2f','#ff6600','#e21a1a','#ffc107','#c41230','#EE4D2D','#f5a623','#5bc500','#00aa13','#7C3AED','#3b82f6'];
+        var segments = [];
+        for (var j = 0; j < (data.companies || []).length; j++) {
+          segments.push({label: data.companies[j].name, value: parseInt(data.companies[j].count), color: companyColors[j % companyColors.length]});
+        }
+        if (segments.length) SS.Charts.donut('ac-companies', segments, {title: 'Hãng vận chuyển', size: 140});
+      }
+    }).catch(function() {
+      el.innerHTML = '<div class="text-center text-muted p-4">Lỗi tải analytics</div>';
+    });
   }
 };
