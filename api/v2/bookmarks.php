@@ -19,6 +19,16 @@ function bk_fail($msg,$code=400){http_response_code($code);echo json_encode(['su
 
 try {
 
+// Public: view shared collection (no auth)
+if($_SERVER['REQUEST_METHOD']==='GET'&&$action==='shared'){
+    $key=trim($_GET['key']??'');
+    if(!$key) bk_ok('OK',[]);
+    $col=$d->fetchOne("SELECT bc.*,u.fullname as owner_name,u.avatar as owner_avatar FROM bookmark_collections bc JOIN users u ON bc.user_id=u.id WHERE bc.share_key=?",[$key]);
+    if(!$col) bk_ok('OK',null);
+    $posts=$d->fetchAll("SELECT p.*,u.fullname as user_name,u.avatar as user_avatar FROM bookmark_items bi JOIN posts p ON bi.post_id=p.id LEFT JOIN users u ON p.user_id=u.id WHERE bi.collection_id=? AND p.`status`='active' ORDER BY bi.created_at DESC LIMIT 50",[$col['id']]);
+    bk_ok('OK',['collection'=>$col,'posts'=>$posts]);
+}
+
 if($_SERVER['REQUEST_METHOD']==='GET'){
     $uid=require_auth();
 
