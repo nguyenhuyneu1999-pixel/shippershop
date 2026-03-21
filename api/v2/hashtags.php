@@ -25,8 +25,8 @@ if(!$action||$action==='trending'){
     $period=$_GET['period']??'week'; // week, month, all
     $limit=min(intval($_GET['limit']??20),50);
     $dateFilter='';
-    if($period==='week') $dateFilter="AND p.created_at > DATE_SUB(NOW(), INTERVAL 7 DAY)";
-    elseif($period==='month') $dateFilter="AND p.created_at > DATE_SUB(NOW(), INTERVAL 30 DAY)";
+    if($period==='week') $dateFilter="AND created_at > DATE_SUB(NOW(), INTERVAL 7 DAY)";
+    elseif($period==='month') $dateFilter="AND created_at > DATE_SUB(NOW(), INTERVAL 30 DAY)";
 
     $tags=cache_remember('trending_tags_'.$period.'_'.$limit, function() use($d,$dateFilter,$limit) {
         // Extract hashtags from recent posts
