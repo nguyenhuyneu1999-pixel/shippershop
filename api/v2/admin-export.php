@@ -1,69 +1,98 @@
 <?php
-// ShipperShop API v2 — Admin Data Export (CSV)
-// Export users, posts, transactions as CSV for admin
+// ShipperShop API v2 — Admin Data Export
+// Export users, posts, transactions as CSV/JSON for admin
 session_start();
 require_once __DIR__.'/../../includes/config.php';
 require_once __DIR__.'/../../includes/db.php';
 require_once __DIR__.'/../../includes/functions.php';
 require_once __DIR__.'/../../includes/auth-v2.php';
-require_once __DIR__.'/../../includes/rate-limiter.php';
 
-$d=db();$action=$_GET['action']??'users';
-$format=$_GET['format']??'json';
+header('Access-Control-Allow-Origin: *');
+header('Access-Control-Allow-Headers: Content-Type, Authorization');
+if($_SERVER['REQUEST_METHOD']==='OPTIONS'){http_response_code(204);exit;}
 
+$d=db();$action=$_GET['action']??'';
+
+function ae_ok($msg,$data=null){header('Content-Type: application/json; charset=utf-8');echo json_encode(['success'=>true,'message'=>$msg,'data'=>$data],JSON_UNESCAPED_UNICODE);exit;}
 function ae_fail($msg,$code=400){header('Content-Type: application/json');http_response_code($code);echo json_encode(['success'=>false,'message'=>$msg]);exit;}
 
 try {
 
 $uid=require_auth();
-$user=$d->fetchOne("SELECT role FROM users WHERE id=?",[$uid]);
-if(!$user||$user['role']!=='admin') ae_fail('Admin only',403);
+$admin=$d->fetchOne("SELECT role FROM users WHERE id=?",[$uid]);
+if(!$admin||$admin['role']!=='admin') ae_fail('Admin only',403);
 
-rate_enforce('admin_export',5,3600);
+$format=$_GET['format']??'json'; // json or csv
 
-$data=[];$headers=[];
-
+// Export users
 if($action==='users'){
-    $headers=['ID','Tên','Email','SĐT','Hãng','Posts','Followers','Following','Ngày tạo','Trạng thái'];
-    $rows=$d->fetchAll("SELECT id,fullname,email,phone,shipping_company,total_posts,total_followers,total_following,created_at,`status` FROM users ORDER BY id");
-    foreach($rows as $r) $data[]=[$r['id'],$r['fullname'],$r['email'],$r['phone'],$r['shipping_company'],$r['total_posts'],$r['total_followers'],$r['total_following'],$r['created_at'],$r['status']];
+    $users=$d->fetchAll("SELECT id,fullname,email,phone,shipping_company,`status`,is_verified,total_posts,total_success,created_at FROM users ORDER BY id");
+    if($format==='csv'){
+        header('Content-Type: text/csv; charset=utf-8');
+        header('Content-Disposition: attachment; filename="users_'.date('Y-m-d').'.csv"');
+        echo "\xEF\xBB\xBF"; // BOM for Excel UTF-8
+        echo "ID,Name,Email,Phone,Company,Status,Verified,Posts,Deliveries,Created\n";
+        foreach($users as $u){
+            echo implode(',',[$u['id'],'"'.str_replace('"','""',$u['fullname']).'"',$u['email'],$u['phone']??'',$u['shipping_company']??'',$u['status'],$u['is_verified'],$u['total_posts'],$u['total_success'],$u['created_at']])."\n";
+        }
+        exit;
+    }
+    ae_ok('OK',['users'=>$users,'count'=>count($users)]);
 }
 
+// Export transactions
+if($action==='transactions'){
+    $from=$_GET['from']??date('Y-m-d',strtotime('-30 days'));
+    $to=$_GET['to']??date('Y-m-d');
+    $txns=$d->fetchAll("SELECT wt.*,u.fullname FROM wallet_transactions wt LEFT JOIN users u ON wt.user_id=u.id WHERE wt.created_at BETWEEN ? AND ? ORDER BY wt.created_at DESC",[$from.' 00:00:00',$to.' 23:59:59']);
+    if($format==='csv'){
+        header('Content-Type: text/csv; charset=utf-8');
+        header('Content-Disposition: attachment; filename="transactions_'.$from.'_'.$to.'.csv"');
+        echo "\xEF\xBB\xBF";
+        echo "ID,User ID,User Name,Type,Amount,Description,Created\n";
+        foreach($txns as $t){
+            echo implode(',',[$t['id'],$t['user_id'],'"'.str_replace('"','""',$t['fullname']??'').'"',$t['type'],$t['amount'],'"'.str_replace('"','""',$t['description']??'').'"',$t['created_at']])."\n";
+        }
+        exit;
+    }
+    ae_ok('OK',['transactions'=>$txns,'count'=>count($txns),'from'=>$from,'to'=>$to]);
+}
+
+// Export posts summary
 if($action==='posts'){
     $days=min(intval($_GET['days']??30),365);
-    $headers=['ID','User','Nội dung','Likes','Comments','Shares','Type','Province','Ngày tạo'];
-    $rows=$d->fetchAll("SELECT p.id,u.fullname,p.content,p.likes_count,p.comments_count,p.shares_count,p.type,p.province,p.created_at FROM posts p LEFT JOIN users u ON p.user_id=u.id WHERE p.`status`='active' AND p.created_at>=DATE_SUB(NOW(),INTERVAL $days DAY) ORDER BY p.created_at DESC");
-    foreach($rows as $r) $data[]=[$r['id'],$r['fullname'],mb_substr($r['content']??'',0,100),$r['likes_count'],$r['comments_count'],$r['shares_count'],$r['type'],$r['province'],$r['created_at']];
+    $posts=$d->fetchAll("SELECT p.id,p.user_id,u.fullname,p.type,p.likes_count,p.comments_count,p.province,p.district,p.`status`,p.created_at FROM posts p LEFT JOIN users u ON p.user_id=u.id WHERE p.created_at >= DATE_SUB(NOW(), INTERVAL $days DAY) ORDER BY p.created_at DESC");
+    if($format==='csv'){
+        header('Content-Type: text/csv; charset=utf-8');
+        header('Content-Disposition: attachment; filename="posts_'.date('Y-m-d').'.csv"');
+        echo "\xEF\xBB\xBF";
+        echo "ID,User ID,Author,Type,Likes,Comments,Province,District,Status,Created\n";
+        foreach($posts as $p){
+            echo implode(',',[$p['id'],$p['user_id'],'"'.str_replace('"','""',$p['fullname']??'').'"',$p['type']??'post',$p['likes_count'],$p['comments_count'],$p['province']??'',$p['district']??'',$p['status'],$p['created_at']])."\n";
+        }
+        exit;
+    }
+    ae_ok('OK',['posts'=>$posts,'count'=>count($posts),'days'=>$days]);
 }
 
-if($action==='transactions'){
-    $headers=['ID','User','Loại','Số tiền','Mô tả','Ngày'];
-    $rows=$d->fetchAll("SELECT wt.id,u.fullname,wt.type,wt.amount,wt.description,wt.created_at FROM wallet_transactions wt LEFT JOIN users u ON wt.user_id=u.id ORDER BY wt.created_at DESC LIMIT 1000");
-    foreach($rows as $r) $data[]=[$r['id'],$r['fullname'],$r['type'],$r['amount'],$r['description'],$r['created_at']];
+// Export overview (summary stats)
+if(!$action||$action==='overview'){
+    $totalUsers=intval($d->fetchOne("SELECT COUNT(*) as c FROM users WHERE `status`='active'")['c']);
+    $totalPosts=intval($d->fetchOne("SELECT COUNT(*) as c FROM posts WHERE `status`='active'")['c']);
+    $totalRevenue=intval($d->fetchOne("SELECT COALESCE(SUM(amount),0) as s FROM wallet_transactions WHERE type='deposit' AND amount>0")['s']);
+    $monthlyActive=intval($d->fetchOne("SELECT COUNT(DISTINCT user_id) as c FROM posts WHERE created_at >= DATE_SUB(NOW(), INTERVAL 30 DAY)")['c']);
+    ae_ok('OK',[
+        'total_users'=>$totalUsers,
+        'total_posts'=>$totalPosts,
+        'total_revenue'=>$totalRevenue,
+        'monthly_active'=>$monthlyActive,
+        'export_options'=>['users','transactions','posts'],
+        'formats'=>['json','csv'],
+    ]);
 }
 
-if($action==='audit'){
-    $headers=['ID','User','Action','Detail','IP','Ngày'];
-    $rows=$d->fetchAll("SELECT a.id,u.fullname,a.action,a.detail,a.ip,a.created_at FROM audit_log a LEFT JOIN users u ON a.user_id=u.id ORDER BY a.created_at DESC LIMIT 500");
-    foreach($rows as $r) $data[]=[$r['id'],$r['fullname'],$r['action'],mb_substr($r['detail']??'',0,80),$r['ip'],$r['created_at']];
-}
-
-// CSV output
-if($format==='csv'){
-    header('Content-Type: text/csv; charset=utf-8');
-    header('Content-Disposition: attachment; filename=shippershop-'.$action.'-'.date('Y-m-d').'.csv');
-    echo "\xEF\xBB\xBF"; // UTF-8 BOM for Excel
-    $out=fopen('php://output','w');
-    fputcsv($out,$headers);
-    foreach($data as $row) fputcsv($out,$row);
-    fclose($out);
-    exit;
-}
-
-// JSON output
-header('Content-Type: application/json; charset=utf-8');
-echo json_encode(['success'=>true,'data'=>['headers'=>$headers,'rows'=>$data,'count'=>count($data),'exported_at'=>date('Y-m-d H:i:s')]],JSON_UNESCAPED_UNICODE);
+ae_ok('OK',[]);
 
 } catch (\Throwable $e) {
-    ae_fail('Error: '.$e->getMessage());
+    echo json_encode(['success'=>false,'message'=>'Error: '.$e->getMessage()]);
 }
