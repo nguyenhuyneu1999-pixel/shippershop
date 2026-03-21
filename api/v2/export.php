@@ -22,10 +22,9 @@ try {
 
 $uid=require_auth();
 
-// Rate limit: 1 export per hour
-rate_enforce('data_export',1,3600);
-
 if(!$action||$action==='full'){
+    // Rate limit: 1 full export per hour
+    rate_enforce('data_export',1,3600);
     $user=$d->fetchOne("SELECT id,fullname,email,phone,avatar,cover_photo,bio,shipping_company,is_verified,verified_at,role,total_posts,total_success,total_followers,total_following,is_online,created_at FROM users WHERE id=?",[$uid]);
     if(!$user) ex_fail('User not found',404);
 
