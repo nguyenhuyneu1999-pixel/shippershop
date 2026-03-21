@@ -543,6 +543,8 @@ if("serviceWorker" in navigator){
   <div id="ss-trending" style="margin-top:16px"></div>
   <!-- Online users widget -->
   <div id="ss-online" style="margin-top:16px"></div>
+  <!-- Trending posts + top users widget -->
+  <div id="ss-trending-widget" style="margin-top:16px"></div>
 </aside><!-- MODAL TẠO BÀI -->
 <div class="modal-overlay" id="modal">
 <div class="modal">
@@ -1381,6 +1383,8 @@ function doFeedCheckin(){
 <script src="/js/components/report-dialog.js"></script>
 <script src="/js/components/block-user.js"></script>
 <script src="/js/components/mention-picker.js"></script>
+<script src="/js/components/trending-widget.js"></script>
+<script src="/js/components/link-preview.js"></script>
 <script src="/js/components/post-edit.js"></script>
 <script src="/js/components/payment.js"></script>
 <script src="/js/components/notif-poll.js"></script>
@@ -1449,6 +1453,8 @@ function doFeedCheckin(){
   if(SS.Hashtags&&document.getElementById('ss-trending')) SS.Hashtags.renderTrending('ss-trending');
   // Online users sidebar
   if(SS.OnlineWidget&&document.getElementById('ss-online')) SS.OnlineWidget.render('ss-online');
+  // Trending sidebar
+  if(SS.TrendingWidget&&document.getElementById('ss-trending-widget')) SS.TrendingWidget.render('ss-trending-widget');
   // Profile completeness
   if(SS.ProfileComplete&&SS.store.isLoggedIn()) SS.ProfileComplete.render('ss-profile-score');
   // Announce page load
