@@ -51,10 +51,10 @@
   </div>
 </div>
 <div class="stats-bar">
-  <div class="stat-item"><div class="num">719+</div><div class="lbl">Shipper</div></div>
-  <div class="stat-item"><div class="num">1.400+</div><div class="lbl">Bài viết</div></div>
-  <div class="stat-item"><div class="num">14</div><div class="lbl">Hội nhóm</div></div>
-  <div class="stat-item"><div class="num">10+</div><div class="lbl">Hãng vận chuyển</div></div>
+  <div class="stat-item"><div class="num" id="ls-users">719+</div><div class="lbl">Shipper</div></div>
+  <div class="stat-item"><div class="num" id="ls-posts">1.400+</div><div class="lbl">Bài viết</div></div>
+  <div class="stat-item"><div class="num" id="ls-groups">14</div><div class="lbl">Hội nhóm</div></div>
+  <div class="stat-item"><div class="num" id="ls-online">0</div><div class="lbl">Đang online</div></div>
 </div>
 <div class="features">
   <h2>Tính năng nổi bật</h2>
@@ -92,5 +92,15 @@
   <p>Cộng đồng Shipper Việt Nam · shippershop.vn</p>
   <p style="margin-top:12px"><a href="/index.html">Trang chủ</a> · <a href="/groups.html">Hội nhóm</a> · <a href="/marketplace.html">Chợ</a> · <a href="/traffic.html">Giao thông</a></p>
 </div>
+<script>
+fetch('/api/v2/stats.php').then(function(r){return r.json()}).then(function(d){
+  if(!d.success)return;var s=d.data;
+  var el=function(id,v){var e=document.getElementById(id);if(e)e.textContent=v;};
+  el('ls-users',s.users>999?(s.users/1000).toFixed(1)+'K+':s.users+'+');
+  el('ls-posts',s.posts>999?(s.posts/1000).toFixed(1)+'K+':s.posts+'+');
+  el('ls-groups',s.groups);
+  el('ls-online',s.online);
+}).catch(function(){});
+</script>
 </body>
 </html>
