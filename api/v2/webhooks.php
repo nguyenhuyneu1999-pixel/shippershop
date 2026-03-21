@@ -22,16 +22,16 @@ function wh_fail($msg,$code=400){http_response_code($code);echo json_encode(['su
 
 try {
 
+// Public: list available events (no auth needed)
+if($_SERVER['REQUEST_METHOD']==='GET'&&$action==='events'){
+    wh_ok('OK',$VALID_EVENTS);
+}
+
 $uid=require_auth();
 $admin=$d->fetchOne("SELECT role FROM users WHERE id=?",[$uid]);
 $isAdmin=$admin&&$admin['role']==='admin';
 
 if($_SERVER['REQUEST_METHOD']==='GET'){
-    // List available events
-    if($action==='events'){
-        wh_ok('OK',$VALID_EVENTS);
-    }
-
     // List registered webhooks (admin)
     if(!$action||$action==='list'){
         if(!$isAdmin) wh_fail('Admin only',403);
