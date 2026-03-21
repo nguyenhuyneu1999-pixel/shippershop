@@ -71,7 +71,7 @@ require_once __DIR__.'/../includes/upload-handler.php';
 t('Service: handle_upload exists',function_exists('handle_upload'));
 
 // ============ API FILES EXIST ============
-$apiFiles=['account.php','achievements.php','activity-feed.php','admin.php','admin-batch.php','admin-export.php','admin-notes.php','admin-stats-cache.php','admin-user-notes.php','admin-users.php','admin-widgets.php','analytics.php','announcement-banner.php','announcements.php','badge-showcase.php','badges.php','batch.php','bookmarks.php','calendar.php','chat-extras.php','collections.php','content.php','content-filter.php','content-insights.php','content-queue.php','conv-archive.php','conv-labels.php','conv-pin.php','conv-search.php','dashboard-summary.php','events.php','export.php','feed-prefs.php','follow-suggest.php','friends.php','gamification.php','group-admin.php','group-chat.php','group-settings.php','groups.php','hashtags.php','health.php','health-alerts.php','heatmap.php','insights.php','link-preview.php','logs.php','marketplace.php','media.php','mentions.php','messages.php','milestones.php','moderation.php','msg-forward.php','msg-poll.php','mute.php','notif-grouped.php','notif-prefs.php','notifications.php','og-tags.php','outgoing-hooks.php','payment.php','perf.php','pins.php','polls.php','post-analytics.php','post-boost.php','post-collections.php','post-polls.php','post-views.php','posts.php','preferences.php','presence.php','privacy.php','profile-card.php','profile-score.php','profile-theme.php','profile-themes.php','push.php','qr.php','queue-dashboard.php','rate-monitor.php','reactions.php','recommend.php','referrals.php','report-analytics.php','reputation.php','saved-collections.php','saved-replies.php','schedule-calendar.php','scheduled.php','search.php','share-to-group.php','site-config.php','sitemap.php','sitemap-gen.php','smart-suggest.php','social.php','sse.php','stats.php','status.php','stories.php','suggest.php','system-config.php','system-health.php','templates.php','timeline.php','traffic.php','trending.php','two-factor.php','upload-media.php','user-activity.php','user-prefs.php','users.php','verification.php','wallet.php','webhooks.php','index.php'];
+$apiFiles=['account.php','achievements.php','activity-feed.php','admin.php','admin-batch.php','admin-export.php','admin-notes.php','admin-stats-cache.php','admin-user-notes.php','admin-users.php','admin-widgets.php','analytics.php','announcement-banner.php','announcements.php','badge-showcase.php','badges.php','batch.php','bookmarks.php','calendar.php','chat-extras.php','checkin.php','collections.php','content.php','content-filter.php','content-insights.php','content-queue.php','conv-archive.php','conv-labels.php','conv-pin.php','conv-search.php','daily-digest.php','dashboard-summary.php','delivery-stats.php','events.php','export.php','feed-prefs.php','follow-suggest.php','friends.php','gamification.php','group-admin.php','group-chat.php','group-settings.php','groups.php','hashtags.php','health.php','health-alerts.php','heatmap.php','insights.php','link-preview.php','logs.php','marketplace.php','media.php','mentions.php','messages.php','milestones.php','moderation.php','msg-forward.php','msg-poll.php','mute.php','notif-grouped.php','notif-prefs.php','notifications.php','og-tags.php','outgoing-hooks.php','payment.php','perf.php','pins.php','polls.php','post-analytics.php','post-boost.php','post-collections.php','post-polls.php','post-views.php','posts.php','preferences.php','presence.php','privacy.php','profile-card.php','profile-score.php','profile-theme.php','profile-themes.php','push.php','qr.php','queue-dashboard.php','rate-monitor.php','reactions.php','recommend.php','referrals.php','report-analytics.php','reputation.php','saved-collections.php','saved-replies.php','schedule-calendar.php','scheduled.php','search.php','share-to-group.php','site-config.php','sitemap.php','sitemap-gen.php','smart-suggest.php','social.php','sse.php','stats.php','status.php','stories.php','suggest.php','system-config.php','system-health.php','templates.php','timeline.php','traffic.php','trending.php','two-factor.php','upload-media.php','user-activity.php','user-prefs.php','users.php','verification.php','wallet.php','webhooks.php','index.php'];
 foreach($apiFiles as $af){
     t("API v2: $af exists",file_exists(__DIR__.'/v2/'.$af));
 }
@@ -193,6 +193,48 @@ t('Func: badges list',$bdgResp&&$bdgResp['success']===true&&count($bdgResp['data
 // Polls (get for post without poll)
 $pollResp=json_decode(@file_get_contents('https://shippershop.vn/api/v2/polls.php?post_id=5'),true);
 t('Func: polls get',$pollResp&&$pollResp['success']===true);
+
+// Daily Digest
+$digestResp=json_decode(@file_get_contents('https://shippershop.vn/api/v2/daily-digest.php'),true);
+t('Func: daily digest',$digestResp&&$digestResp['success']===true&&isset($digestResp['data']['greeting']));
+t('Func: digest trending',isset($digestResp['data']['trending'])&&is_array($digestResp['data']['trending']));
+t('Func: digest today stats',isset($digestResp['data']['today'])&&isset($digestResp['data']['today']['new_posts']));
+
+// Delivery Stats (platform)
+$delResp=json_decode(@file_get_contents('https://shippershop.vn/api/v2/delivery-stats.php?action=platform'),true);
+t('Func: delivery platform',$delResp&&$delResp['success']===true&&isset($delResp['data']['total_deliveries']));
+t('Func: delivery companies',isset($delResp['data']['top_companies'])&&is_array($delResp['data']['top_companies']));
+
+// Checkin (leaderboard - no auth needed)
+$ciResp=json_decode(@file_get_contents('https://shippershop.vn/api/v2/checkin.php?action=leaderboard'),true);
+t('Func: checkin leaderboard',$ciResp&&$ciResp['success']===true);
+
+// Profile Themes (presets)
+$ptResp=json_decode(@file_get_contents('https://shippershop.vn/api/v2/profile-themes.php?action=presets'),true);
+t('Func: profile themes',$ptResp&&$ptResp['success']===true&&count($ptResp['data']['presets'])>=8);
+
+// Health Alerts
+$haResp=json_decode(@file_get_contents('https://shippershop.vn/api/v2/health-alerts.php'),true);
+t('Func: health alerts',$haResp&&$haResp['success']===true&&isset($haResp['data']['status']));
+t('Func: health status ok',$haResp['data']['status']==='healthy'||$haResp['data']['status']==='warning');
+
+// Site Config
+$scResp=json_decode(@file_get_contents('https://shippershop.vn/api/v2/site-config.php'),true);
+t('Func: site config',$scResp&&$scResp['success']===true&&isset($scResp['data']['site']));
+t('Func: site features',count($scResp['data']['features']??[])>=10);
+t('Func: shipping companies',count($scResp['data']['shipping_companies']??[])>=8);
+
+// Suggest (search autocomplete)
+$sugResp=json_decode(@file_get_contents('https://shippershop.vn/api/v2/suggest.php?q=admin'),true);
+t('Func: suggest search',$sugResp&&$sugResp['success']===true);
+
+// Sitemap
+$smResp=json_decode(@file_get_contents('https://shippershop.vn/api/v2/sitemap-gen.php?format=json'),true);
+t('Func: sitemap gen',$smResp&&$smResp['success']===true&&$smResp['data']['count']>=100);
+
+// Timeline
+$tlResp=json_decode(@file_get_contents('https://shippershop.vn/api/v2/timeline.php?user_id=2&limit=5'),true);
+t('Func: timeline',$tlResp&&$tlResp['success']===true&&isset($tlResp['data']['events']));
 
 // ============ RESULTS ============
 $total=$P+$F;
