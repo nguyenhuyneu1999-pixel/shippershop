@@ -175,7 +175,7 @@ body{background:var(--bg);font-family:'Be Vietnam Pro',-apple-system,BlinkMacSys
 .sub-btn:disabled{opacity:.6;cursor:not-allowed;}
 .conf-note{background:#fff3cd;border-radius:4px;padding:10px;font-size:13px;margin-bottom:12px;display:none;}
 .char-cnt{font-size:12px;color:var(--muted);text-align:right;margin-top:3px;}
-.post-video{width:100%;border-radius:8px;margin:8px 0;max-height:500px;}.post-video{width:100%;border-radius:8px;margin:8px 0;max-height:500px;}.img-previews{display:flex;gap:6px;flex-wrap:wrap;margin-top:6px;}
+.post-video{width:100%;border-radius:0;margin:0;max-height:600px;display:block;}.img-previews{display:flex;gap:6px;flex-wrap:wrap;margin-top:6px;}
 .img-prev{width:72px;height:72px;object-fit:cover;border-radius:4px;}
 /* lightbox handled by image-viewer.js */
 .lb-close{position:absolute;top:16px;right:16px;background:none;border:none;color:#fff;font-size:32px;cursor:pointer;}
@@ -885,7 +885,7 @@ async function uploadVideo(file){
 function renderVideo(url){
   if(!url)return '';
   if(url.includes('/uploads/videos/')){
-    return '<video controls playsinline preload="metadata" style="width:100%;max-height:500px;border-radius:8px;margin:8px 0"><source src="'+url+'" type="video/mp4">Video không hỗ trợ</video>';
+    return '<video controls playsinline preload="metadata" class="post-video" style="width:100%;max-height:600px;border-radius:0;display:block"><source src="'+url+'" type="video/mp4">Video không hỗ trợ</video>';
   }
   var eid=url;
   if(url.includes('youtube.com/watch'))eid='https://www.youtube.com/embed/'+url.split('v=')[1].split('&')[0];
@@ -1380,6 +1380,10 @@ function doFeedCheckin(){
 <script src="/js/components/image-viewer.js"></script>
 <script src="/js/components/notification-bell.js"></script>
 <script src="/js/components/scroll-heartbeat.js"></script>
+<script src="/js/components/notif-sound.js"></script>
+<script src="/js/components/image-optimizer.js"></script>
+<script src="/js/components/connection-status.js"></script>
+<script src="/js/components/shortcuts.js"></script>
 <script src="/js/components/report-dialog.js"></script>
 <script src="/js/components/block-user.js"></script>
 <script src="/js/components/mention-picker.js"></script>
