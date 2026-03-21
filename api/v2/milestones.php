@@ -1,7 +1,6 @@
 <?php
-// ShipperShop API v2 — Achievement Milestones
-// Track user milestones (first 10 posts, 100 likes, 7-day streak, etc.)
-// Returns unlocked milestones + next goals
+// ShipperShop API v2 — User Milestones
+// Track and celebrate user milestones (first post, 100 likes, 1000 deliveries, etc.)
 session_start();
 require_once __DIR__.'/../../includes/config.php';
 require_once __DIR__.'/../../includes/db.php';
@@ -16,69 +15,57 @@ if($_SERVER['REQUEST_METHOD']==='OPTIONS'){http_response_code(204);exit;}
 
 $d=db();
 
-function ml_ok($msg,$data=null){echo json_encode(['success'=>true,'message'=>$msg,'data'=>$data],JSON_UNESCAPED_UNICODE);exit;}
+function ms_ok($msg,$data=null){echo json_encode(['success'=>true,'message'=>$msg,'data'=>$data],JSON_UNESCAPED_UNICODE);exit;}
 
 $MILESTONES=[
-    ['id'=>'post_1','cat'=>'content','icon'=>'📝','name'=>'Bước đầu tiên','desc'=>'Đăng bài đầu tiên','metric'=>'posts','target'=>1,'xp'=>10],
-    ['id'=>'post_10','cat'=>'content','icon'=>'✍️','name'=>'Người viết chăm chỉ','desc'=>'Đăng 10 bài viết','metric'=>'posts','target'=>10,'xp'=>50],
-    ['id'=>'post_50','cat'=>'content','icon'=>'📰','name'=>'Blogger','desc'=>'Đăng 50 bài viết','metric'=>'posts','target'=>50,'xp'=>200],
-    ['id'=>'post_200','cat'=>'content','icon'=>'📚','name'=>'Tác giả','desc'=>'Đăng 200 bài viết','metric'=>'posts','target'=>200,'xp'=>500],
-    ['id'=>'like_10','cat'=>'engage','icon'=>'👍','name'=>'Được thích','desc'=>'Nhận 10 lượt thích','metric'=>'likes_received','target'=>10,'xp'=>20],
-    ['id'=>'like_100','cat'=>'engage','icon'=>'❤️','name'=>'Người được yêu','desc'=>'Nhận 100 lượt thích','metric'=>'likes_received','target'=>100,'xp'=>100],
-    ['id'=>'like_500','cat'=>'engage','icon'=>'🌟','name'=>'Ngôi sao sáng','desc'=>'Nhận 500 lượt thích','metric'=>'likes_received','target'=>500,'xp'=>300],
-    ['id'=>'ship_10','cat'=>'delivery','icon'=>'📦','name'=>'10 đơn đầu','desc'=>'Giao 10 đơn thành công','metric'=>'deliveries','target'=>10,'xp'=>30],
-    ['id'=>'ship_50','cat'=>'delivery','icon'=>'🚚','name'=>'50 đơn','desc'=>'Giao 50 đơn thành công','metric'=>'deliveries','target'=>50,'xp'=>150],
-    ['id'=>'ship_200','cat'=>'delivery','icon'=>'🏆','name'=>'200 đơn','desc'=>'Giao 200 đơn thành công','metric'=>'deliveries','target'=>200,'xp'=>500],
-    ['id'=>'ship_1000','cat'=>'delivery','icon'=>'👑','name'=>'Vua giao hàng','desc'=>'Giao 1000 đơn thành công','metric'=>'deliveries','target'=>1000,'xp'=>2000],
-    ['id'=>'follow_10','cat'=>'social','icon'=>'👥','name'=>'Có bạn','desc'=>'10 người theo dõi','metric'=>'followers','target'=>10,'xp'=>30],
-    ['id'=>'follow_100','cat'=>'social','icon'=>'📢','name'=>'Influencer','desc'=>'100 người theo dõi','metric'=>'followers','target'=>100,'xp'=>200],
-    ['id'=>'streak_7','cat'=>'streak','icon'=>'🔥','name'=>'7 ngày liên tục','desc'=>'Hoạt động 7 ngày liền','metric'=>'streak','target'=>7,'xp'=>70],
-    ['id'=>'streak_30','cat'=>'streak','icon'=>'💪','name'=>'30 ngày liên tục','desc'=>'Hoạt động 30 ngày liền','metric'=>'streak','target'=>30,'xp'=>300],
-    ['id'=>'streak_100','cat'=>'streak','icon'=>'🏅','name'=>'100 ngày liên tục','desc'=>'Hoạt động 100 ngày liền','metric'=>'streak','target'=>100,'xp'=>1000],
-    ['id'=>'comment_20','cat'=>'engage','icon'=>'💬','name'=>'Người ghi chú','desc'=>'Viết 20 bình luận','metric'=>'comments','target'=>20,'xp'=>40],
-    ['id'=>'comment_100','cat'=>'engage','icon'=>'🗣️','name'=>'Diễn giả','desc'=>'Viết 100 bình luận','metric'=>'comments','target'=>100,'xp'=>200],
-    ['id'=>'days_30','cat'=>'loyalty','icon'=>'📅','name'=>'1 tháng','desc'=>'Thành viên 30 ngày','metric'=>'days','target'=>30,'xp'=>30],
-    ['id'=>'days_365','cat'=>'loyalty','icon'=>'🎂','name'=>'1 năm','desc'=>'Thành viên 365 ngày','metric'=>'days','target'=>365,'xp'=>500],
+    ['id'=>'first_post','name'=>'Bai viet dau tien','icon'=>'📝','desc'=>'Dang bai viet dau tien','check'=>'posts','threshold'=>1],
+    ['id'=>'10_posts','name'=>'10 bai viet','icon'=>'✍️','desc'=>'Dang 10 bai viet','check'=>'posts','threshold'=>10],
+    ['id'=>'50_posts','name'=>'50 bai viet','icon'=>'🏅','desc'=>'Dang 50 bai viet','check'=>'posts','threshold'=>50],
+    ['id'=>'100_posts','name'=>'Tram bai','icon'=>'💯','desc'=>'Dang 100 bai viet','check'=>'posts','threshold'=>100],
+    ['id'=>'first_like','name'=>'Duoc thich','icon'=>'❤️','desc'=>'Nhan like dau tien','check'=>'likes','threshold'=>1],
+    ['id'=>'100_likes','name'=>'100 luot thich','icon'=>'🔥','desc'=>'Nhan 100 luot thich','check'=>'likes','threshold'=>100],
+    ['id'=>'500_likes','name'=>'500 luot thich','icon'=>'⭐','desc'=>'Nhan 500 luot thich','check'=>'likes','threshold'=>500],
+    ['id'=>'first_follower','name'=>'Nguoi theo doi dau tien','icon'=>'👤','desc'=>'Co nguoi theo doi dau tien','check'=>'followers','threshold'=>1],
+    ['id'=>'50_followers','name'=>'50 nguoi theo doi','icon'=>'👥','desc'=>'Co 50 nguoi theo doi','check'=>'followers','threshold'=>50],
+    ['id'=>'100_deliveries','name'=>'100 don giao','icon'=>'📦','desc'=>'Giao 100 don thanh cong','check'=>'deliveries','threshold'=>100],
+    ['id'=>'500_deliveries','name'=>'500 don giao','icon'=>'🚀','desc'=>'Giao 500 don thanh cong','check'=>'deliveries','threshold'=>500],
+    ['id'=>'1000_deliveries','name'=>'1000 don giao','icon'=>'🏆','desc'=>'Giao 1000 don thanh cong','check'=>'deliveries','threshold'=>1000],
+    ['id'=>'7_streak','name'=>'Streak 7 ngay','icon'=>'🔥','desc'=>'Hoat dong 7 ngay lien tiep','check'=>'streak','threshold'=>7],
+    ['id'=>'30_streak','name'=>'Streak 30 ngay','icon'=>'💪','desc'=>'Hoat dong 30 ngay lien tiep','check'=>'streak','threshold'=>30],
+    ['id'=>'join_group','name'=>'Tham gia nhom','icon'=>'👥','desc'=>'Tham gia nhom dau tien','check'=>'groups','threshold'=>1],
 ];
 
 try {
 
 $userId=intval($_GET['user_id']??0);
 if(!$userId){$uid=optional_auth();$userId=$uid;}
-if(!$userId) ml_ok('OK',['unlocked'=>[],'next'=>[]]);
-
-$action=$_GET['action']??'';
+if(!$userId) ms_ok('OK',['milestones'=>$MILESTONES,'earned'=>[],'progress'=>[]]);
 
 $data=cache_remember('milestones_'.$userId, function() use($d,$userId,$MILESTONES) {
-    $u=$d->fetchOne("SELECT total_posts,total_success,is_verified,created_at FROM users WHERE id=?",[$userId]);
-    if(!$u) return ['unlocked'=>[],'next'=>[],'total_xp'=>0];
-
+    $u=$d->fetchOne("SELECT total_posts,total_success FROM users WHERE id=?",[$userId]);
+    $posts=intval($u['total_posts']??0);
+    $deliveries=intval($u['total_success']??0);
     $likes=intval($d->fetchOne("SELECT COALESCE(SUM(likes_count),0) as s FROM posts WHERE user_id=?",[$userId])['s']);
-    $comments=intval($d->fetchOne("SELECT COUNT(*) as c FROM comments WHERE user_id=?",[$userId])['c']);
     $followers=intval($d->fetchOne("SELECT COUNT(*) as c FROM follows WHERE following_id=?",[$userId])['c']);
-    $streak=intval($d->fetchOne("SELECT GREATEST(COALESCE(current_streak,0),COALESCE(longest_streak,0)) as s FROM user_streaks WHERE user_id=?",[$userId])['s']??0);
-    $days=max(1,floor((time()-strtotime($u['created_at']))/86400));
+    $streak=intval($d->fetchOne("SELECT current_streak FROM user_streaks WHERE user_id=?",[$userId])['current_streak']??0);
+    $groups=intval($d->fetchOne("SELECT COUNT(*) as c FROM group_members WHERE user_id=?",[$userId])['c']);
 
-    $metrics=['posts'=>intval($u['total_posts']),'deliveries'=>intval($u['total_success']),'likes_received'=>$likes,'comments'=>$comments,'followers'=>$followers,'streak'=>$streak,'days'=>$days];
-
-    $unlocked=[];$next=[];$totalXp=0;
+    $values=['posts'=>$posts,'likes'=>$likes,'followers'=>$followers,'deliveries'=>$deliveries,'streak'=>$streak,'groups'=>$groups];
+    $earned=[];$progress=[];
     foreach($MILESTONES as $m){
-        $current=$metrics[$m['metric']]??0;
-        $pct=min(100,round($current/$m['target']*100));
-        $done=$current>=$m['target'];
-        $entry=array_merge($m,['current'=>$current,'progress'=>$pct,'unlocked'=>$done]);
-        if($done){$unlocked[]=$entry;$totalXp+=$m['xp'];}
-        else{$next[]=$entry;}
+        $current=$values[$m['check']]??0;
+        $pct=min(100,round($current/$m['threshold']*100));
+        $done=$current>=$m['threshold'];
+        $m['current']=$current;$m['progress']=$pct;$m['earned']=$done;
+        if($done) $earned[]=$m;
+        $progress[]=$m;
     }
 
-    // Sort next by progress desc (closest to unlock)
-    usort($next,function($a,$b){return $b['progress']-$a['progress'];});
-
-    return ['unlocked'=>$unlocked,'next'=>array_slice($next,0,5),'total_xp'=>$totalXp,'metrics'=>$metrics,'total_milestones'=>count($MILESTONES)];
+    return ['earned'=>$earned,'progress'=>$progress,'total_earned'=>count($earned),'total'=>count($MILESTONES),'values'=>$values];
 }, 300);
 
-ml_ok('OK',$data);
+ms_ok('OK',$data);
 
 } catch (\Throwable $e) {
-    echo json_encode(['success'=>false,'message'=>'Error: '.$e->getMessage()]);
+    echo json_encode(['success'=>false,'message'=>$e->getMessage()]);
 }
