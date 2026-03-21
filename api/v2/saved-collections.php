@@ -58,7 +58,7 @@ if($_SERVER['REQUEST_METHOD']==='POST'){
         if(!$name) sc_fail('Nhập tên bộ sưu tập');
         $count=intval($d->fetchOne("SELECT COUNT(*) as c FROM bookmark_collections WHERE user_id=?",[$uid])['c']);
         if($count>=20) sc_fail('Tối đa 20 bộ sưu tập');
-        $pdo->prepare("INSERT INTO bookmark_collections (user_id,name,description,created_at) VALUES (?,?,?,NOW())")->execute([$uid,$name,$icon]);
+        $pdo->prepare("INSERT INTO bookmark_collections (user_id,name,created_at) VALUES (?,?,NOW())")->execute([$uid,$icon.' '.$name]);
         $id=intval($pdo->lastInsertId());
         if(!$id){$r=$pdo->query("SELECT MAX(id) as m FROM bookmark_collections");$id=intval($r->fetch(PDO::FETCH_ASSOC)['m']);}
         sc_ok('Đã tạo!',['id'=>$id]);
