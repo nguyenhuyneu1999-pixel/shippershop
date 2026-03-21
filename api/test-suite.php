@@ -467,7 +467,7 @@ $smHeatResp=json_decode(@file_get_contents('https://shippershop.vn/api/v2/shippe
 t('Func: shipper province heat',$smHeatResp&&$smHeatResp['success']===true&&is_array($smHeatResp['data']));
 
 // Post stats detail (public partial)
-$psdResp=json_decode(@file_get_contents('https://shippershop.vn/api/v2/post-stats-detail.php?post_id=5'),true);
+$psdResp=json_decode(@file_get_contents('https://shippershop.vn/api/v2/post-stats-detail.php?post_id=125'),true);
 t('Func: post stats detail',$psdResp&&$psdResp['success']===true&&isset($psdResp['data']['likes']));
 t('Func: post stats views',isset($psdResp['data']['views']));
 
