@@ -27,7 +27,8 @@
     'admin': '/js/pages/admin.js',
     'scheduled': '/js/pages/scheduled.js',
     'bookmarks': '/js/pages/bookmarks.js',
-    'auth': '/js/pages/auth.js'
+    'auth': '/js/pages/auth.js',
+    'account-settings': '/js/pages/account-settings.js'
   };
 
   // Init common components after bundle loads
