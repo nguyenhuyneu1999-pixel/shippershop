@@ -19,6 +19,10 @@ SS.SettingsPage = {
       + '<div class="list-item" onclick="SS.NotifPrefs&&SS.NotifPrefs.open()"><i class="fa-solid fa-bell" style="width:20px;color:var(--primary)"></i><div class="flex-1">Cài đặt thông báo</div><i class="fa-solid fa-chevron-right text-muted" style="font-size:12px"></i></div>'
 
       + '<div class="divider"></div>'
+      + '<div class="text-sm font-bold text-muted mb-2" style="text-transform:uppercase;letter-spacing:.5px">Ứng dụng</div>'
+      + '<div class="list-item" onclick="SS.PrefsPage&&SS.PrefsPage.open()"><i class="fa-solid fa-sliders" style="width:20px;color:var(--primary)"></i><div class="flex-1">Tùy chỉnh ứng dụng</div><i class="fa-solid fa-chevron-right text-muted" style="font-size:12px"></i></div>'
+
+      + '<div class="divider"></div>'
       + '<div class="text-sm font-bold text-muted mb-2" style="text-transform:uppercase;letter-spacing:.5px">Quyền riêng tư</div>'
       + '<div class="list-item" onclick="SS.BlockUser&&SS.BlockUser.showBlockedList()"><i class="fa-solid fa-user-slash" style="width:20px;color:var(--danger)"></i><div class="flex-1">Người đã chặn</div><i class="fa-solid fa-chevron-right text-muted" style="font-size:12px"></i></div>'
 
