@@ -13,7 +13,6 @@ header('Access-Control-Allow-Headers: Content-Type, Authorization');
 if($_SERVER['REQUEST_METHOD']==='OPTIONS'){http_response_code(204);exit;}
 
 $d=db();$pdo=$d->getConnection();$pdo->setAttribute(PDO::ATTR_ERRMODE,PDO::ERRMODE_EXCEPTION);
-$action=$_GET['action']??'';
 
 function cp_ok($msg,$data=null){echo json_encode(['success'=>true,'message'=>$msg,'data'=>$data],JSON_UNESCAPED_UNICODE);exit;}
 
@@ -23,7 +22,7 @@ $uid=require_auth();
 
 // Get pinned conversations
 if($_SERVER['REQUEST_METHOD']==='GET'){
-    $pinned=$d->fetchAll("SELECT pm.message_id as conversation_id,pm.created_at as pinned_at FROM pinned_messages pm WHERE pm.user_id=? ORDER BY pm.created_at DESC",[$uid]);
+    $pinned=$d->fetchAll("SELECT conversation_id,created_at as pinned_at FROM pinned_messages WHERE pinned_by=? ORDER BY created_at DESC",[$uid]);
     cp_ok('OK',$pinned);
 }
 
@@ -33,15 +32,14 @@ if($_SERVER['REQUEST_METHOD']==='POST'){
     $convId=intval($input['conversation_id']??0);
     if(!$convId) cp_ok('Missing conversation_id');
 
-    $existing=$d->fetchOne("SELECT id FROM pinned_messages WHERE message_id=? AND user_id=?",[$convId,$uid]);
+    $existing=$d->fetchOne("SELECT id FROM pinned_messages WHERE conversation_id=? AND pinned_by=?",[$convId,$uid]);
     if($existing){
-        $d->query("DELETE FROM pinned_messages WHERE message_id=? AND user_id=?",[$convId,$uid]);
+        $d->query("DELETE FROM pinned_messages WHERE conversation_id=? AND pinned_by=?",[$convId,$uid]);
         cp_ok('Đã bỏ ghim',['pinned'=>false]);
     }else{
-        // Max 5 pinned
-        $count=intval($d->fetchOne("SELECT COUNT(*) as c FROM pinned_messages WHERE user_id=?",[$uid])['c']);
+        $count=intval($d->fetchOne("SELECT COUNT(*) as c FROM pinned_messages WHERE pinned_by=?",[$uid])['c']);
         if($count>=5) cp_ok('Tối đa 5 cuộc trò chuyện ghim');
-        $pdo->prepare("INSERT INTO pinned_messages (message_id,user_id,created_at) VALUES (?,?,NOW())")->execute([$convId,$uid]);
+        $pdo->prepare("INSERT INTO pinned_messages (conversation_id,message_id,pinned_by,created_at) VALUES (?,0,?,NOW())")->execute([$convId,$uid]);
         cp_ok('Đã ghim!',['pinned'=>true]);
     }
 }
