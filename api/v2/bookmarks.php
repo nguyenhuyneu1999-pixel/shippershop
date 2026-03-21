@@ -64,6 +64,17 @@ if($_SERVER['REQUEST_METHOD']==='POST'){
         bk_ok('Đã tạo!',['id'=>$id]);
     }
 
+    // Share collection (generate public link)
+    if($action==='share_collection'){
+        $colId=intval($input['collection_id']??0);
+        if(!$colId) bk_fail('Missing collection_id');
+        $col=$d->fetchOne("SELECT id,name FROM bookmark_collections WHERE id=? AND user_id=?",[$colId,$uid]);
+        if(!$col) bk_fail('Not found',404);
+        $shareKey=substr(md5($colId.'_'.$uid.'_'.time()),0,12);
+        $d->query("UPDATE bookmark_collections SET share_key=? WHERE id=?",[$shareKey,$colId]);
+        bk_ok('Link chia sẻ',['share_url'=>'https://shippershop.vn/bookmarks.html?share='.$shareKey,'share_key'=>$shareKey]);
+    }
+
     // Delete collection
     if($action==='delete_collection'){
         $colId=intval($input['collection_id']??0);
