@@ -145,6 +145,11 @@ a{text-decoration:none;color:inherit;}
 
 </head>
 <body>
+<script>
+// Auto-inject Bearer token on ALL fetch calls to /api/
+(function(){var of=window.fetch;window.fetch=function(url,opts){opts=opts||{};if(typeof url==='string'&&url.indexOf('/api/')>-1){opts.headers=opts.headers||{};var tk=localStorage.getItem('token');if(tk&&!opts.headers['Authorization']&&!opts.headers['authorization']){opts.headers['Authorization']='Bearer '+tk;}}return of.call(this,url,opts);};})();
+</script>
+
 
 <!-- HEADER -->
 <div class="hd">

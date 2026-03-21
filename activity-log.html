@@ -80,6 +80,11 @@ body{background:var(--bg);font-family:'Be Vietnam Pro',-apple-system,BlinkMacSys
 </style>
 </head>
 <body>
+<script>
+// Auto-inject Bearer token on ALL fetch calls to /api/
+(function(){var of=window.fetch;window.fetch=function(url,opts){opts=opts||{};if(typeof url==='string'&&url.indexOf('/api/')>-1){opts.headers=opts.headers||{};var tk=localStorage.getItem('token');if(tk&&!opts.headers['Authorization']&&!opts.headers['authorization']){opts.headers['Authorization']='Bearer '+tk;}}return of.call(this,url,opts);};})();
+</script>
+
 <div class="header"><button class="header-back" onclick="history.back()"><i class="fas fa-chevron-left"></i></button><h1>Nhật ký hoạt động</h1><button class="header-search"><i class="fas fa-search"></i></button></div>
 
 <!-- Main menu (like Facebook) -->

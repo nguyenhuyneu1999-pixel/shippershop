@@ -167,6 +167,8 @@ body.in-chat .ch-input-wrap{z-index:1001}
 </div><script src="js/reddit-mkpost-1773927135.js"></script><script>
 function toast(msg){var t=document.getElementById("ssToast");t.textContent=msg;t.style.opacity="1";t.style.transform="translateX(-50%) translateY(0)";clearTimeout(t._tm);t._tm=setTimeout(function(){t.style.opacity="0";t.style.transform="translateX(-50%) translateY(100px)";},2500);}
 var CU=JSON.parse(localStorage.getItem("user")||"null");
+// Auto-inject Bearer token on ALL fetch calls to /api/
+(function(){var of=window.fetch;window.fetch=function(url,opts){opts=opts||{};if(typeof url==='string'&&url.indexOf('/api/')>-1){opts.headers=opts.headers||{};var tk=localStorage.getItem('token');if(tk&&!opts.headers['Authorization']&&!opts.headers['authorization']){opts.headers['Authorization']='Bearer '+tk;}}return of.call(this,url,opts);};})();
 if(!CU)location.href="login.html";
 var curConvId=null,curOtherId=null,curTab="active",pollTimer=null;
 var SC={"GHTK":"#00b14f","J&T":"#d32f2f","GHN":"#ff6600","Viettel Post":"#e21a1a","SPX":"#EE4D2D","Grab":"#00b14f","Be":"#5bc500","Gojek":"#00aa13","Ninja Van":"#c41230"};

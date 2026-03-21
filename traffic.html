@@ -152,6 +152,11 @@ body{background:var(--bg);font-family:'Be Vietnam Pro',-apple-system,BlinkMacSys
 <link rel="stylesheet" href="css/style-v2.css">
 </head>
 <body>
+<script>
+// Auto-inject Bearer token on ALL fetch calls to /api/
+(function(){var of=window.fetch;window.fetch=function(url,opts){opts=opts||{};if(typeof url==='string'&&url.indexOf('/api/')>-1){opts.headers=opts.headers||{};var tk=localStorage.getItem('token');if(tk&&!opts.headers['Authorization']&&!opts.headers['authorization']){opts.headers['Authorization']='Bearer '+tk;}}return of.call(this,url,opts);};})();
+</script>
+
 
 <!-- HEADER -->
 <div class="tf-hd">

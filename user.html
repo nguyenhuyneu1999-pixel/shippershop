@@ -130,6 +130,11 @@ body{background:var(--bg);font-family:'Be Vietnam Pro',-apple-system,BlinkMacSys
 </style>
 <link rel="manifest" href="/manifest.json"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="default"><meta name="apple-mobile-web-app-title" content="ShipperShop"></head>
 <body>
+<script>
+// Auto-inject Bearer token on ALL fetch calls to /api/
+(function(){var of=window.fetch;window.fetch=function(url,opts){opts=opts||{};if(typeof url==='string'&&url.indexOf('/api/')>-1){opts.headers=opts.headers||{};var tk=localStorage.getItem('token');if(tk&&!opts.headers['Authorization']&&!opts.headers['authorization']){opts.headers['Authorization']='Bearer '+tk;}}return of.call(this,url,opts);};})();
+</script>
+
 <div class="back-nav" id="backNav"><button class="back-btn" onclick="history.back()"><i class="fas fa-arrow-left"></i></button><span class="back-nav-title" id="navTitle"></span></div>
 <div class="cover" id="cover"><button class="cover-edit" id="coverEditBtn" onclick="document.getElementById('coverInput').click()"><i class="fas fa-camera"></i> Sửa ảnh bìa</button></div>
 <input type="file" id="coverInput" accept="image/*" style="display:none" onchange="uploadImg('cover')">
