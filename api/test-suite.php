@@ -71,7 +71,7 @@ require_once __DIR__.'/../includes/upload-handler.php';
 t('Service: handle_upload exists',function_exists('handle_upload'));
 
 // ============ API FILES EXIST ============
-$apiFiles=['posts.php','messages.php','users.php','notifications.php','search.php','admin.php','wallet.php','traffic.php','marketplace.php','analytics.php','health.php'];
+$apiFiles=['posts.php','messages.php','users.php','notifications.php','search.php','admin.php','wallet.php','traffic.php','marketplace.php','analytics.php','health.php','groups.php','gamification.php'];
 foreach($apiFiles as $af){
     t("API v2: $af exists",file_exists(__DIR__.'/v2/'.$af));
 }
@@ -86,7 +86,7 @@ foreach($pages as $pg){
 }
 
 // ============ JS/CSS FILES ============
-$staticFiles=['css/design-system.css','js/core/api.js','js/core/store.js','js/core/ui.js','js/core/utils.js','js/components/post-card.js','js/components/comment-sheet.js','js/components/image-viewer.js','js/components/notification-bell.js','js/components/search-overlay.js','js/components/upload.js','js/components/video-player.js','js/components/location-picker.js'];
+$staticFiles=['css/design-system.css','js/core/api.js','js/core/store.js','js/core/ui.js','js/core/utils.js','js/components/post-card.js','js/components/comment-sheet.js','js/components/image-viewer.js','js/components/notification-bell.js','js/components/search-overlay.js','js/components/upload.js','js/components/video-player.js','js/components/location-picker.js','js/components/gamification.js','js/pages/feed.js'];
 foreach($staticFiles as $sf){t("Static: $sf",file_exists(__DIR__.'/../'.$sf));}
 
 // ============ SVG ASSETS ============
