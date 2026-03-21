@@ -1,6 +1,6 @@
 <?php
-// ShipperShop API v2 — System Health Alerts
-// Auto-detect issues: high error rate, disk full, slow queries, expired certs
+// ShipperShop API v2 — Health Alerts
+// Monitor thresholds, trigger alerts when exceeded
 session_start();
 require_once __DIR__.'/../../includes/config.php';
 require_once __DIR__.'/../../includes/db.php';
@@ -12,58 +12,57 @@ header('Access-Control-Allow-Origin: *');
 header('Access-Control-Allow-Headers: Content-Type, Authorization');
 if($_SERVER['REQUEST_METHOD']==='OPTIONS'){http_response_code(204);exit;}
 
-$d=db();
+$d=db();$pdo=$d->getConnection();$action=$_GET['action']??'';
 
 function ha_ok($msg,$data=null){echo json_encode(['success'=>true,'message'=>$msg,'data'=>$data],JSON_UNESCAPED_UNICODE);exit;}
+function ha_fail($msg,$code=400){http_response_code($code);echo json_encode(['success'=>false,'message'=>$msg]);exit;}
 
 try {
 
-$uid=require_auth();
-$admin=$d->fetchOne("SELECT role FROM users WHERE id=?",[$uid]);
-if(!$admin||$admin['role']!=='admin'){http_response_code(403);echo json_encode(['success'=>false,'message'=>'Admin only']);exit;}
+// Public: check system status
+if(!$action||$action==='check'){
+    $alerts=[];
 
-$alerts=[];
+    // Error rate
+    $errors=intval($d->fetchOne("SELECT COUNT(*) as c FROM analytics_views WHERE page LIKE '_js_error%' AND created_at > DATE_SUB(NOW(), INTERVAL 1 HOUR)")['c']);
+    if($errors>50) $alerts[]=['type'=>'danger','metric'=>'error_rate','value'=>$errors,'threshold'=>50,'message'=>'Lỗi JS cao: '.$errors.' trong 1 giờ'];
+    elseif($errors>10) $alerts[]=['type'=>'warning','metric'=>'error_rate','value'=>$errors,'threshold'=>10,'message'=>'Lỗi JS tăng: '.$errors.' trong 1 giờ'];
 
-// 1. Error rate check
-$errors=intval($d->fetchOne("SELECT COUNT(*) as c FROM analytics_views WHERE page LIKE '_js_error%' AND created_at > DATE_SUB(NOW(), INTERVAL 1 HOUR)")['c']);
-if($errors>50) $alerts[]=['severity'=>'critical','type'=>'errors','title'=>'Lỗi JS cao','detail'=>$errors.' lỗi trong 1 giờ qua','action'=>'Kiểm tra /api/v2/perf.php'];
-elseif($errors>10) $alerts[]=['severity'=>'warning','type'=>'errors','title'=>'Có lỗi JS','detail'=>$errors.' lỗi trong 1 giờ qua'];
+    // Disk usage
+    $diskFree=@disk_free_space('/');$diskTotal=@disk_total_space('/');
+    if($diskTotal&&$diskFree){
+        $usedPct=round(($diskTotal-$diskFree)/$diskTotal*100,1);
+        if($usedPct>90) $alerts[]=['type'=>'danger','metric'=>'disk','value'=>$usedPct,'threshold'=>90,'message'=>'Disk gần đầy: '.$usedPct.'%'];
+        elseif($usedPct>80) $alerts[]=['type'=>'warning','metric'=>'disk','value'=>$usedPct,'threshold'=>80,'message'=>'Disk cao: '.$usedPct.'%'];
+    }
 
-// 2. Disk space
-$total=@disk_total_space('/');$free=@disk_free_space('/');
-if($total&&$free){
-    $usedPct=round((1-$free/$total)*100);
-    if($usedPct>90) $alerts[]=['severity'=>'critical','type'=>'disk','title'=>'Disk gần đầy','detail'=>$usedPct.'% đã sử dụng'];
-    elseif($usedPct>80) $alerts[]=['severity'=>'warning','type'=>'disk','title'=>'Disk cao','detail'=>$usedPct.'% đã sử dụng'];
+    // DB connection
+    try{$d->fetchOne("SELECT 1 as ok");}catch(\Throwable $e){$alerts[]=['type'=>'danger','metric'=>'database','message'=>'DB connection failed'];}
+
+    // Pending deposits
+    $pendingDeposits=intval($d->fetchOne("SELECT COUNT(*) as c FROM payos_payments WHERE `status` IN ('pending','manual')")['c']);
+    if($pendingDeposits>10) $alerts[]=['type'=>'warning','metric'=>'deposits','value'=>$pendingDeposits,'message'=>$pendingDeposits.' khoản nạp chờ duyệt'];
+
+    // Pending reports
+    $pendingReports=intval($d->fetchOne("SELECT COUNT(*) as c FROM post_reports WHERE `status`='pending'")['c']);
+    if($pendingReports>20) $alerts[]=['type'=>'warning','metric'=>'reports','value'=>$pendingReports,'message'=>$pendingReports.' báo cáo chờ xử lý'];
+
+    $status=count($alerts)?'warning':'healthy';
+    foreach($alerts as $a){if($a['type']==='danger'){$status='critical';break;}}
+
+    ha_ok('OK',['status'=>$status,'alerts'=>$alerts,'checked_at'=>date('c')]);
 }
 
-// 3. Failed login attempts
-$failedLogins=intval($d->fetchOne("SELECT COUNT(*) as c FROM login_attempts WHERE success=0 AND created_at > DATE_SUB(NOW(), INTERVAL 1 HOUR)")['c']);
-if($failedLogins>50) $alerts[]=['severity'=>'warning','type'=>'security','title'=>'Nhiều login thất bại','detail'=>$failedLogins.' lần trong 1 giờ','action'=>'Có thể bị brute force'];
+// Admin: alert history
+if($action==='history'){
+    $uid=require_auth();
+    $admin=$d->fetchOne("SELECT role FROM users WHERE id=?",[$uid]);
+    if(!$admin||$admin['role']!=='admin') ha_fail('Admin only',403);
+    $logs=$d->fetchAll("SELECT * FROM audit_log WHERE action LIKE 'alert:%' ORDER BY created_at DESC LIMIT 50");
+    ha_ok('OK',$logs);
+}
 
-// 4. Pending deposits
-$pending=intval($d->fetchOne("SELECT COUNT(*) as c FROM payos_payments WHERE `status` IN ('pending','manual')")['c']);
-if($pending>0) $alerts[]=['severity'=>'info','type'=>'payment','title'=>$pending.' nạp tiền chờ duyệt','detail'=>'Vào admin để duyệt'];
-
-// 5. Unresolved reports
-$reports=intval($d->fetchOne("SELECT COUNT(*) as c FROM post_reports WHERE `status`='pending'")['c']);
-if($reports>0) $alerts[]=['severity'=>'info','type'=>'moderation','title'=>$reports.' báo cáo chưa xử lý','detail'=>'Vào admin để xử lý'];
-
-// 6. Expired subscriptions
-$expiredSubs=intval($d->fetchOne("SELECT COUNT(*) as c FROM user_subscriptions WHERE `status`='active' AND expires_at < NOW()")['c']);
-if($expiredSubs>0) $alerts[]=['severity'=>'info','type'=>'subscription','title'=>$expiredSubs.' gói hết hạn','detail'=>'Cần chạy cron auto_renew'];
-
-// 7. DB size
-$dbSize=$d->fetchOne("SELECT ROUND(SUM(data_length+index_length)/1024/1024,1) as size_mb FROM information_schema.tables WHERE table_schema=DATABASE()");
-$sizeMb=floatval($dbSize['size_mb']??0);
-if($sizeMb>500) $alerts[]=['severity'=>'warning','type'=>'database','title'=>'DB lớn','detail'=>$sizeMb.'MB — cần cleanup'];
-
-// Summary
-$critical=count(array_filter($alerts,function($a){return $a['severity']==='critical';}));
-$warning=count(array_filter($alerts,function($a){return $a['severity']==='warning';}));
-$info=count(array_filter($alerts,function($a){return $a['severity']==='info';}));
-
-ha_ok('OK',['alerts'=>$alerts,'summary'=>['critical'=>$critical,'warning'=>$warning,'info'=>$info,'total'=>count($alerts)],'status'=>$critical>0?'critical':($warning>0?'warning':'healthy')]);
+ha_ok('OK',[]);
 
 } catch (\Throwable $e) {
     echo json_encode(['success'=>false,'message'=>'Error: '.$e->getMessage()]);
