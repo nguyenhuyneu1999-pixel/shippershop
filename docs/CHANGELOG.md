@@ -1,5 +1,51 @@
 # ShipperShop Changelog
 
+## v2.4.0 (March 21, 2026) — Session 40 Milestone
+
+### New Features (Sessions 31-40)
+- **Post Reactions** — 6 emoji types, long-press picker, reactor list
+- **Post Analytics** — Per-post views/engagement, creator dashboard, best posting hour
+- **Two-Factor Auth** — TOTP setup with QR code (pure PHP, no external lib)
+- **Polls** — Create polls on posts, single/multi-choice, time limit, vote/unvote
+- **Post Templates** — 8 shipper-specific templates with field fill
+- **Content Recommendations** — Personalized "For You" feed, similar posts, suggested follows
+- **Reputation Score** — 9-factor composite score, 6 levels (Tân binh → Huyền thoại)
+- **User Badges** — 12 badge types (subscription/verified/streak/earned), display + leaderboard
+- **Admin Announcements** — System-wide banners with type/schedule/toggle
+- **User Mute** — Hide posts without blocking
+- **Message Forwarding** — Forward messages between conversations
+- **Conversation Archive/Pin** — Archive old chats, pin important ones
+- **Batch API** — Up to 10 parallel API calls in 1 request
+- **User Preferences** — 10 app settings (font, feed sort, dark mode, sound, etc.)
+- **Admin CSV Export** — Export users/posts/transactions/audit as CSV
+- **Report Analytics** — Breakdown by reason, resolution rate, top reported
+- **Admin User Notes** — Internal notes on users
+- **Dynamic Sitemap** — XML sitemap with 350+ URLs, 1h cache
+- **OG Meta Tags** — Social sharing previews for posts/users/groups
+- **Bookmark Sharing** — Share collections via public links
+- **Quick Post** — Lightweight inline posting from feed
+- **Notification Sound** — Web Audio API (3 sound types) + vibrate
+- **Image Optimizer** — Client-side resize/compress before upload
+- **Connection Status** — Offline/online detection banner
+- **Keyboard Shortcuts** — Desktop navigation (? help, / search, g+key nav)
+- **Infinite Scroll** — IntersectionObserver-based reusable loader
+- **Text Formatter** — Auto-linkify URLs, phones, hashtags, @mentions
+- **Swipe Gestures** — Mobile touch navigation
+- **Post Location** — Location badge + Google Maps link
+- **Celebration** — Confetti animation for milestones
+- **Profile Completion** — Progress bar + checklist
+- **Performance Monitor** — API timing, P95, slow request warnings
+- **Lazy Loader** — On-demand component loading
+
+### Stats
+- 285+ automated tests (100% pass)
+- 65 PHP API files, ~8,250 lines
+- 67 JS components + 25 page modules, ~9,300 lines
+- 83 DB tables, 64 API endpoints
+- 184 KB minified JS bundle
+- 73+ features across 12 categories
+- 640+ git commits
+
 ## v2.3.0 (March 21, 2026) — Session 30 Milestone
 
 ### New Features

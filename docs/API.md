@@ -250,3 +250,118 @@ Index: `GET /api/v2/` — auto-lists all endpoints
 - `GET /link-preview.php?url=X` — OG metadata fetcher
 - `GET /analytics.php` — Page view tracking
 - `GET /index.php` — API index (auto-detect all endpoints)
+
+## Reactions (reactions.php)
+- `GET /?post_id=X` — Reaction counts + user's reaction
+- `GET /?action=reactors&post_id=X` — Who reacted (with avatars)
+- `POST /?action=react` — Toggle reaction (like/love/fire/wow/sad/angry)
+
+## Polls (polls.php)
+- `GET /?post_id=X` — Get poll for a post
+- `POST /?action=create` — Create poll (2-10 options, single/multi, time limit)
+- `POST /?action=vote` — Vote/unvote
+- `POST /?action=delete` — Delete poll (owner only)
+
+## Reputation (reputation.php)
+- `GET /?user_id=X` — Reputation score + 9-factor breakdown
+- `GET /?action=leaderboard` — Top users by engagement
+
+## Badges (badges.php)
+- `GET /?user_id=X` — User's badges (sub/verified/streak/earned)
+- `GET /?action=all` — All 12 badge definitions
+- `GET /?action=leaderboard` — Badge leaderboard
+
+## Announcements (announcements.php)
+- `GET /` — Active announcements (public)
+- `GET /?action=all` — All announcements (admin)
+- `POST /?action=create` — Create announcement (admin)
+- `POST /?action=delete` — Delete (admin)
+- `POST /?action=toggle` — Toggle active (admin)
+
+## Recommendations (recommend.php)
+- `GET /?action=for_you` — Personalized feed
+- `GET /?action=similar&post_id=X` — Similar posts
+- `GET /?action=suggested_follows` — Suggested users to follow
+
+## Mute (mute.php)
+- `GET /` — List muted users
+- `GET /?action=check&user_id=X` — Check if muted
+- `GET /?action=ids` — Muted user IDs (for feed filter)
+- `POST /?action=toggle` — Toggle mute
+
+## Templates (templates.php)
+- `GET /` — List all 8 templates
+- `GET /?action=get&id=X` — Single template + fields
+- `GET /?action=categories` — Template categories
+- `POST /?action=fill` — Fill template with data
+
+## Preferences (preferences.php)
+- `GET /` — User preferences (10 settings)
+- `POST /` — Update preferences
+
+## Batch (batch.php)
+- `POST /` — Execute up to 10 API calls in 1 request
+
+## Presence (presence.php)
+- `GET /?action=check&user_id=X` — Single user online status
+- `GET /?action=batch&ids=X,Y` — Batch check multiple users
+- `GET /?action=conversation&conversation_id=X` — Members presence
+- `POST /?action=heartbeat` — Update online status
+
+## Account (account.php)
+- `GET /` — Account status
+- `POST /?action=deactivate` — Deactivate account
+- `POST /?action=reactivate` — Reactivate
+- `POST /?action=delete` — Schedule deletion (30 days)
+- `POST /?action=cancel_delete` — Cancel deletion
+- `POST /?action=change_email` — Change email
+
+## Two-Factor (two-factor.php)
+- `GET /` — 2FA status
+- `POST /?action=setup` — Generate TOTP secret + QR
+- `POST /?action=verify` — Verify code + enable
+- `POST /?action=disable` — Disable (requires password + code)
+
+## Post Analytics (post-analytics.php)
+- `GET /?post_id=X` — Single post stats (views, engagement, saves)
+- `GET /?action=overview` — Creator dashboard (daily, top posts, best hour)
+
+## Activity Feed (activity-feed.php)
+- `GET /?action=friends` — Friends' activity stream
+- `GET /?action=me` — My activity
+- `GET /?action=author_stats&user_id=X` — Author stats
+
+## OG Tags (og-tags.php)
+- `GET /?type=post&id=X` — OG meta for social sharing
+- `GET /?type=user&id=X` — User OG meta
+- `GET /?type=group&id=X` — Group OG meta
+
+## Report Analytics (report-analytics.php) — Admin
+- `GET /?days=X` — Report breakdown by reason, resolution, top reported
+
+## Admin Export (admin-export.php) — Admin
+- `GET /?action=users` — Export users (JSON/CSV)
+- `GET /?action=posts` — Export posts
+- `GET /?action=transactions` — Export transactions
+- `GET /?action=audit` — Export audit log
+
+## Admin Notes (admin-notes.php) — Admin
+- `GET /?user_id=X` — Notes for a user
+- `POST /?action=add` — Add note
+- `POST /?action=delete` — Delete note
+
+## Group Settings (group-settings.php)
+- `GET /?action=get&group_id=X` — Group notification prefs
+- `GET /?action=muted` — List muted groups
+- `POST /?action=toggle_mute` — Toggle mute
+- `POST /?action=update` — Update per-type prefs
+
+## Webhooks (webhooks.php)
+- `GET /?action=events` — Available webhook events (public)
+- `GET /` — Registered webhooks (admin)
+- `POST /?action=register` — Register webhook
+- `POST /?action=delete` — Delete webhook
+- `POST /?action=test` — Send test ping
+
+## Dynamic Sitemap (sitemap.php)
+- `GET /` — XML sitemap (posts + groups + users + listings, 1h cache)

@@ -71,7 +71,7 @@ require_once __DIR__.'/../includes/upload-handler.php';
 t('Service: handle_upload exists',function_exists('handle_upload'));
 
 // ============ API FILES EXIST ============
-$apiFiles=['posts.php','messages.php','users.php','notifications.php','search.php','admin.php','wallet.php','traffic.php','marketplace.php','analytics.php','health.php','groups.php','gamification.php','social.php','content.php','push.php','referrals.php','stats.php','status.php','hashtags.php','friends.php','stories.php','bookmarks.php','verification.php','scheduled.php','payment.php','moderation.php','notif-prefs.php','media.php','mentions.php','export.php','reactions.php','chat-extras.php','profile-score.php','msg-poll.php','upload-media.php','post-views.php','qr.php','admin-batch.php','webhooks.php','account.php','trending.php','link-preview.php','post-analytics.php','two-factor.php','activity-feed.php','logs.php','group-settings.php','presence.php','og-tags.php','batch.php','preferences.php','recommend.php','mute.php','admin-export.php','polls.php','admin-notes.php','sitemap.php','templates.php','badges.php','report-analytics.php','reputation.php','announcements.php','index.php'];
+$apiFiles=['posts.php','messages.php','users.php','notifications.php','search.php','admin.php','wallet.php','traffic.php','marketplace.php','analytics.php','health.php','groups.php','gamification.php','social.php','content.php','push.php','referrals.php','stats.php','status.php','hashtags.php','friends.php','stories.php','bookmarks.php','verification.php','scheduled.php','payment.php','moderation.php','notif-prefs.php','media.php','mentions.php','export.php','reactions.php','chat-extras.php','profile-score.php','msg-poll.php','upload-media.php','post-views.php','qr.php','admin-batch.php','webhooks.php','account.php','trending.php','link-preview.php','post-analytics.php','two-factor.php','activity-feed.php','logs.php','group-settings.php','presence.php','og-tags.php','batch.php','preferences.php','recommend.php','mute.php','admin-export.php','polls.php','admin-notes.php','sitemap.php','templates.php','badges.php','report-analytics.php','reputation.php','announcements.php','pins.php','index.php'];
 foreach($apiFiles as $af){
     t("API v2: $af exists",file_exists(__DIR__.'/v2/'.$af));
 }
@@ -172,6 +172,27 @@ t('Func: webhook events',$whResp&&is_array($whResp['data']??null)&&count($whResp
 // Link preview
 $lpResp=json_decode(@file_get_contents('https://shippershop.vn/api/v2/link-preview.php?url=https://github.com'),true);
 t('Func: link preview',$lpResp&&$lpResp['success']===true&&!empty($lpResp['data']['title']));
+
+
+// Announcements (public)
+$annResp=json_decode(@file_get_contents('https://shippershop.vn/api/v2/announcements.php'),true);
+t('Func: announcements',$annResp&&$annResp['success']===true);
+
+// Reputation (public)
+$repResp=json_decode(@file_get_contents('https://shippershop.vn/api/v2/reputation.php?user_id=2'),true);
+t('Func: reputation',$repResp&&$repResp['success']===true&&isset($repResp['data']['score']));
+
+// Templates (public)
+$tplResp=json_decode(@file_get_contents('https://shippershop.vn/api/v2/templates.php'),true);
+t('Func: templates',$tplResp&&$tplResp['success']===true&&count($tplResp['data'])>=5);
+
+// Badges (public)
+$bdgResp=json_decode(@file_get_contents('https://shippershop.vn/api/v2/badges.php?action=all'),true);
+t('Func: badges list',$bdgResp&&$bdgResp['success']===true&&count($bdgResp['data'])>=8);
+
+// Polls (get for post without poll)
+$pollResp=json_decode(@file_get_contents('https://shippershop.vn/api/v2/polls.php?post_id=5'),true);
+t('Func: polls get',$pollResp&&$pollResp['success']===true);
 
 // ============ RESULTS ============
 $total=$P+$F;
