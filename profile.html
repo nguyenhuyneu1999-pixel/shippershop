@@ -699,7 +699,7 @@
                         try { if (p.images) imgs = JSON.parse(p.images); } catch(e) {}
                         if (!Array.isArray(imgs)) imgs = [];
                         var thumb = imgs.length > 0
-                            ? '<img src="' + imgs[0] + '" style="width:64px;height:64px;border-radius:8px;object-fit:cover;flex-shrink:0" onerror="this.style.display=\'none\'">'
+                            ? '<img src="' + imgs[0] + '" style="width:64px;height:64px;border-radius:8px;object-fit:cover;flex-shrink:0" onerror="this.style.display=\'none\'" loading="lazy">'
                             : '<div style="width:64px;height:64px;border-radius:8px;background:linear-gradient(135deg,#e8e8e8,#f5f5f5);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:24px">' + (icons[tab]||'📄') + '</div>';
                         var content = (p.content||'').substring(0, 140);
                         var timeAgo = p.created_at ? new Date(p.created_at).toLocaleDateString('vi-VN') : '';
@@ -885,7 +885,7 @@ async function loadNotifs(){
             var timeAgo=ntimeAgo(n.created_at);
             var bg=n.is_read?'background:#fff;':'background:#FFF0EB;';
             var av=n.actor_avatar
-                ?'<img src="'+n.actor_avatar+'" style="width:40px;height:40px;border-radius:50%;object-fit:cover;flex-shrink:0">'
+                ?'<img src="'+n.actor_avatar+'" style="width:40px;height:40px;border-radius:50%;object-fit:cover;flex-shrink:0" loading="lazy">'
                 :'<div style="width:40px;height:40px;border-radius:50%;background:#7C3AED;color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;flex-shrink:0">'+((n.actor_name||'U').charAt(0))+'</div>';
             return '<div class="notif-item" data-key="'+n.notif_key+'" data-postid="'+n.post_id+'" data-read="'+(n.is_read?'1':'0')+'" style="display:flex;gap:10px;padding:10px 12px;border-radius:8px;cursor:pointer;margin-bottom:2px;'+bg+'" onclick="markRead(this)">'
                 +av

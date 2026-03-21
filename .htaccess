@@ -21,9 +21,6 @@ RewriteRule ^includes/ - [F,L]
 RewriteRule ^\.git - [F,L]
 RewriteRule ^\.env - [F,L]
 
-# Sitemap.xml → dynamic PHP
-RewriteRule ^sitemap\.xml$ /sitemap.php [L]
-
 # Landing page SEO URL
 RewriteRule ^gioi-thieu/?$ /gioi-thieu.html [L]
 
@@ -41,6 +38,9 @@ RewriteRule ^ - [L]
     Header always set X-XSS-Protection "1; mode=block"
     Header always set Referrer-Policy "strict-origin-when-cross-origin"
     Header always set Permissions-Policy "camera=self, microphone=self, geolocation=self"
+    Header always set Strict-Transport-Security "max-age=31536000; includeSubDomains; preload"
+    # CSP - allow inline styles/scripts (needed for current architecture), restrict sources
+    Header always set Content-Security-Policy "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' cdnjs.cloudflare.com fonts.googleapis.com provinces.open-api.vn www.gstatic.com *.firebaseio.com *.googleapis.com; style-src 'self' 'unsafe-inline' cdnjs.cloudflare.com fonts.googleapis.com; font-src 'self' fonts.gstatic.com cdnjs.cloudflare.com; img-src 'self' data: blob: https:; connect-src 'self' https: wss:; media-src 'self' blob: https:; frame-src 'self' https:"
 </IfModule>
 
 # ============================================
@@ -72,9 +72,9 @@ RewriteRule ^ - [L]
 <IfModule mod_expires.c>
     ExpiresActive On
     ExpiresDefault "access plus 1 week"
-    ExpiresByType text/css "access plus 1 day"
-    ExpiresByType application/javascript "access plus 1 day"
-    ExpiresByType text/javascript "access plus 1 day"
+    ExpiresByType text/css "access plus 1 week"
+    ExpiresByType application/javascript "access plus 1 week"
+    ExpiresByType text/javascript "access plus 1 week"
     ExpiresByType image/gif "access plus 1 year"
     ExpiresByType image/jpeg "access plus 1 year"
     ExpiresByType image/png "access plus 1 year"
@@ -85,6 +85,9 @@ RewriteRule ^ - [L]
     ExpiresByType font/woff2 "access plus 1 year"
     ExpiresByType application/json "access plus 0 seconds"
 </IfModule>
+
+# ETag for cache validation
+FileETag MTime Size
 
 # ============================================
 # GZIP COMPRESSION
@@ -101,7 +104,3 @@ RewriteRule ^ - [L]
 <IfModule LiteSpeed>
     CacheDisable public /api/
 </IfModule>
-
-
-# Security Headers (auto-added by audit)
-Header set Strict-Transport-Security "max-age=31536000; includeSubDomains"

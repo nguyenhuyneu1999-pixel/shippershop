@@ -143,7 +143,7 @@ body.in-chat .ch-input-wrap{z-index:1001}
 </div>
 
 <div class="chat-view" id="chatView">
-<div class="ch-header"><button class="ch-back" onclick="backToList()"><i class="fas fa-arrow-left"></i></button><img class="ch-av" id="chAv" src="" onerror="this.style.display='none'"><div class="ch-info"><div class="ch-name" id="chName">...</div><div class="ch-sub"><span id="chStatus"></span><span id="chShip"></span></div></div><div class="ch-btns"><button class="ch-btn" onclick="if(isGroupChat){return;}if(!window.curOtherId){return;}SSCall.startCall(window.curOtherId,(document.getElementById('chName')||{}).textContent||'','',false)" id="btnCall"><i class="fas fa-phone"></i></button><button class="ch-btn" onclick="if(isGroupChat){return;}if(!window.curOtherId){return;}SSCall.startCall(window.curOtherId,(document.getElementById('chName')||{}).textContent||'','',true)" id="btnVideo"><i class="fas fa-video"></i></button><button class="ch-btn" onclick="openChatOpts()"><i class="fas fa-circle-info"></i></button></div></div>
+<div class="ch-header"><button class="ch-back" onclick="backToList()"><i class="fas fa-arrow-left"></i></button><img class="ch-av" id="chAv" src="" onerror="this.style.display='none'" loading="lazy"><div class="ch-info"><div class="ch-name" id="chName">...</div><div class="ch-sub"><span id="chStatus"></span><span id="chShip"></span></div></div><div class="ch-btns"><button class="ch-btn" onclick="if(isGroupChat){return;}if(!window.curOtherId){return;}SSCall.startCall(window.curOtherId,(document.getElementById('chName')||{}).textContent||'','',false)" id="btnCall"><i class="fas fa-phone"></i></button><button class="ch-btn" onclick="if(isGroupChat){return;}if(!window.curOtherId){return;}SSCall.startCall(window.curOtherId,(document.getElementById('chName')||{}).textContent||'','',true)" id="btnVideo"><i class="fas fa-video"></i></button><button class="ch-btn" onclick="openChatOpts()"><i class="fas fa-circle-info"></i></button></div></div>
 <div class="ch-msgs" id="chMsgs"></div>
 <div id="pendingBannerChat" style="display:none"></div>
 <div class="ch-input-wrap" id="chInputWrap">
@@ -162,7 +162,7 @@ body.in-chat .ch-input-wrap{z-index:1001}
 </div>
 <input type="file" id="fileInput" style="display:none" accept="image/*,video/*,.pdf,.doc,.docx,.xls,.xlsx,.zip,.rar" onchange="handleFileSelect(this)">
 <input type="file" id="imgInput" style="display:none" accept="image/*,video/*" onchange="handleFileSelect(this)">
-<div class="img-overlay" id="imgOverlay" onclick="this.classList.remove('show')"><span class="img-overlay-close">&times;</span><img id="imgOverlayImg" src=""></div>
+<div class="img-overlay" id="imgOverlay" onclick="this.classList.remove('show')"><span class="img-overlay-close">&times;</span><img id="imgOverlayImg" src="" loading="lazy"></div>
 <div class="toast" id="ssToast" style="position:fixed;bottom:90px;left:50%;transform:translateX(-50%) translateY(100px);background:#333;color:#fff;padding:12px 20px;border-radius:8px;font-size:14px;z-index:9999;opacity:0;transition:.3s;pointer-events:none"></div>
 </div><script src="js/reddit-mkpost-1773927135.js"></script><script>
 function toast(msg){var t=document.getElementById("ssToast");t.textContent=msg;t.style.opacity="1";t.style.transform="translateX(-50%) translateY(0)";clearTimeout(t._tm);t._tm=setTimeout(function(){t.style.opacity="0";t.style.transform="translateX(-50%) translateY(100px)";},2500);}
@@ -193,7 +193,7 @@ var d=await r.json();
 if(!d.success){if(r.status===401){location.href="login.html";}else{list.innerHTML="<div class=empty><i class='fas fa-exclamation-circle'></i><p>"+esc(d.message||"Lỗi")+"</p></div>";}return;}
 if(!d.data||!d.data.length){list.innerHTML="<div class=empty><i class='far fa-comment-dots'></i><p>"+(curTab==="pending"?"Không có tin nhắn đang chờ":"Chưa có tin nhắn")+"</p></div>";return;}
 list.innerHTML=d.data.map(function(c){
-var av=c.other_avatar?"<img class=cv-av src='"+c.other_avatar+"'onerror='this.className=\"cv-av-ph\";this.innerHTML=\""+(c.other_name||"U").charAt(0)+"\"'>"
+var av=c.other_avatar?"<img class=cv-av src='"+c.other_avatar+"'onerror='this.className=\"cv-av-ph\";this.innerHTML=\""+(c.other_name||"U").charAt(0)+"\"' loading="lazy">"
 :"<div class=cv-av-ph>"+(c.other_name||"U").charAt(0)+"</div>";
 var dot=c.other_online?"<div class=cv-dot></div>":"";
 var ship=c.other_ship?"<span class=cv-ship style=color:"+(SC[c.other_ship]||"#999")+">"+esc(c.other_ship)+"</span>":"";
@@ -211,7 +211,7 @@ async function loadOnline(){try{var tkO=localStorage.getItem("token");var hO={};
 var d=await r.json();var bar=document.getElementById("onlineBar");
 if(!d.success||!d.data.length){bar.style.display="none";return;}
 bar.innerHTML=d.data.map(function(f){
-var av=f.avatar?"<img class=ol-av src='"+f.avatar+"'onerror='this.className=\"ol-av-ph\";this.textContent=\""+(f.fullname||"U").charAt(0)+"\"'>"
+var av=f.avatar?"<img class=ol-av src='"+f.avatar+"'onerror='this.className=\"ol-av-ph\";this.textContent=\""+(f.fullname||"U").charAt(0)+"\"' loading="lazy">"
 :"<div class=ol-av-ph>"+(f.fullname||"U").charAt(0)+"</div>";
 return "<div class=ol-item onclick='openFromUser("+f.id+")'>"+av+(f.is_online?"<div class=ol-dot></div>":"")+"<div class=ol-name>"+esc((f.fullname||"").split(" ").pop())+"</div></div>";
 }).join("");}catch(e){}}
@@ -266,7 +266,7 @@ var dateStr=dt.toLocaleDateString("vi-VN",{day:"numeric",month:"short"});
 if(dateStr!==lastDate){html+="<div class=msg-date>"+dateStr+" "+dt.toLocaleTimeString("vi-VN",{hour:"2-digit",minute:"2-digit"})+"</div>";lastDate=dateStr;}
 var mine=parseInt(m.sender_id)===parseInt(CU.id);
 var av="";
-if(!mine){av=m.sender_avatar?"<img class=msg-av src='"+m.sender_avatar+"'onerror='this.className=\"msg-av-ph\";this.textContent=\""+(m.sender_name||"U").charAt(0)+"\"'>":"<div class=msg-av-ph>"+(m.sender_name||"U").charAt(0)+"</div>";}
+if(!mine){av=m.sender_avatar?"<img class=msg-av src='"+m.sender_avatar+"'onerror='this.className=\"msg-av-ph\";this.textContent=\""+(m.sender_name||"U").charAt(0)+"\"' loading="lazy">":"<div class=msg-av-ph>"+(m.sender_name||"U").charAt(0)+"</div>";}
 var senderLabel="";if(!mine&&isGroupChat){senderLabel="<div style='font-size:11px;font-weight:700;color:#65676B;margin-bottom:2px'>"+esc(m.sender_name||"")+"</div>";}
 var bubble="";if(m.type==="image"&&m.file_url){bubble="<img class=msg-img src='"+m.file_url+"' onclick='viewImg(this.src)' loading=lazy>";}else if(m.type==="video"&&m.file_url){bubble="<video class=msg-img controls playsinline preload=metadata style='max-width:240px;border-radius:12px'><source src='"+m.file_url+"'>Video</video>";}else if(m.type==="file"&&m.file_url){bubble="<a class=msg-file href='"+m.file_url+"' target=_blank download><i class='fas fa-file-alt'></i><span>"+esc(m.file_name||m.content||"File")+"</span></a>";}else if(m.type==="location"&&m.file_url){bubble="<a class=msg-loc href='"+m.file_url+"' target=_blank><span>📍 Xem vị trí trên bản đồ</span></a>";}else{bubble="<div class=msg-bubble>"+esc(m.content)+"</div>";}html+="<div class='msg-row "+(mine?"mine":"other")+"'>"+av+"<div>"+senderLabel+bubble+"</div></div>";});
 c.innerHTML=html;c.scrollTop=c.scrollHeight;}catch(e){c.innerHTML="<div class=empty><p>Lỗi tải</p></div>";}}
@@ -375,7 +375,7 @@ var curFilter="",curSearch="",searchTimer=null,catData=[],ctxConvId=0,ctxConvNam
 function onSearchInput(v){clearTimeout(searchTimer);curSearch=v.trim();searchTimer=setTimeout(function(){applyFilter();},300);}
 function setFilter(el,f){document.querySelectorAll(".f-chip").forEach(function(c){c.classList.remove("active");});el.classList.add("active");curFilter=f;if(f==="groups"){loadGroupConvs();return;}if(f==="strangers"){curTab="pending";loadConvs();return;}if(f===""){curTab="active";curSearch="";document.getElementById("searchInput").value="";}applyFilter();}
 function applyFilter(){if(curFilter===""&&curSearch===""){loadConvs();return;}var url="/api/messages-api.php?action=filter_conversations&filter="+encodeURIComponent(curFilter)+"&search="+encodeURIComponent(curSearch);if(curFilter==="category"){var ac=document.querySelector(".f-chip.active[data-cat-id]");if(ac)url+="&category_id="+ac.getAttribute("data-cat-id");}var list=document.getElementById("convList");list.innerHTML="<div class=empty><i class='fas fa-spinner fa-spin'></i></div>";fetch(url,{credentials:"include"}).then(function(r){return r.json();}).then(function(d){if(!d.success||!d.data.length){list.innerHTML="<div class=empty><i class='far fa-comment-dots'></i><p>Không tìm thấy</p></div>";return;}list.innerHTML=d.data.map(function(c){return renderConvItem(c);}).join("");attachLongPress();}).catch(function(){list.innerHTML="<div class=empty><p>Lỗi</p></div>";});}
-function renderConvItem(c){var av=c.other_avatar?"<img class=cv-av src='"+c.other_avatar+"' onerror='this.className=\"cv-av-ph\";this.innerHTML=\""+(c.other_name||"U").charAt(0)+"\"'>":"<div class=cv-av-ph>"+(c.other_name||"U").charAt(0)+"</div>";var dot=parseInt(c.other_online)?"<div class=cv-dot></div>":"";var ship=c.other_ship?"<span class=cv-ship style=color:"+(SC[c.other_ship]||"#999")+">"+esc(c.other_ship)+"</span>":"";var unread=parseInt(c.unread_count)>0;var cb="";if(c.category_id&&catData.length){for(var i=0;i<catData.length;i++){if(parseInt(catData[i].id)===parseInt(c.category_id)){cb=" <span style='font-size:10px;background:"+catData[i].color+";color:#fff;padding:1px 6px;border-radius:8px'>"+esc(catData[i].name)+"</span>";break;}}}return "<div class='conv-item"+(unread?" unread":"")+"' data-conv-id='"+c.id+"' onclick='openConv("+c.id+","+c.other_id+",\""+esc(c.other_name)+"\",\""+esc(c.other_avatar||"")+"\","+c.other_online+",\""+esc(c.other_ship||"")+"\")'>"+
+function renderConvItem(c){var av=c.other_avatar?"<img class=cv-av src='"+c.other_avatar+"' onerror='this.className=\"cv-av-ph\";this.innerHTML=\""+(c.other_name||"U").charAt(0)+"\"' loading="lazy">":"<div class=cv-av-ph>"+(c.other_name||"U").charAt(0)+"</div>";var dot=parseInt(c.other_online)?"<div class=cv-dot></div>":"";var ship=c.other_ship?"<span class=cv-ship style=color:"+(SC[c.other_ship]||"#999")+">"+esc(c.other_ship)+"</span>":"";var unread=parseInt(c.unread_count)>0;var cb="";if(c.category_id&&catData.length){for(var i=0;i<catData.length;i++){if(parseInt(catData[i].id)===parseInt(c.category_id)){cb=" <span style='font-size:10px;background:"+catData[i].color+";color:#fff;padding:1px 6px;border-radius:8px'>"+esc(catData[i].name)+"</span>";break;}}}return "<div class='conv-item"+(unread?" unread":"")+"' data-conv-id='"+c.id+"' onclick='openConv("+c.id+","+c.other_id+",\""+esc(c.other_name)+"\",\""+esc(c.other_avatar||"")+"\","+c.other_online+",\""+esc(c.other_ship||"")+"\")'>"+
 "<div class=cv-av-wrap>"+av+dot+"</div>"+
 "<div class=cv-info><div class=cv-name>"+esc(c.other_name)+" "+ship+cb+"</div><div class=cv-last>"+esc((c.last_message||"").substring(0,40))+"</div></div>"+
 "<div class=cv-right><div class=cv-time>"+ago(c.last_message_at)+"</div>"+(unread?"<div class=cv-unread></div>":"")+"</div></div>";}
@@ -401,7 +401,7 @@ function onMsgInput(){var inp=document.getElementById("msgInput");var btn=docume
 function sendLikeOrMsg(){var inp=document.getElementById("msgInput");if(inp.value.trim()){sendMsg();}else{inp.value="👍";sendMsg();}}
 function pickFile(){closeAttach();document.getElementById("fileInput").click();}
 function pickImage(){closeAttach();document.getElementById("imgInput").click();}
-function handleFileSelect(input){if(!input.files||!input.files[0])return;var file=input.files[0];var fd=new FormData();fd.append("file",file);if(isGroupChat){fd.append("group_id",curConvId);}else{fd.append("to_user_id",curOtherId);}fd.append("type",file.type.startsWith("image/")?"image":(file.type.startsWith("video/")?"video":"file"));var c=document.getElementById("chMsgs");var preview="";if(file.type.startsWith("image/")){preview="<img class=msg-img src='"+URL.createObjectURL(file)+"' style='opacity:.6'>";}else if(file.type.startsWith("video/")){preview="<video class=msg-img style='opacity:.6;max-width:240px;border-radius:12px' controls><source src='"+URL.createObjectURL(file)+"'>Video</video>";}else{preview="<div class=msg-file style='opacity:.6'><i class='fas fa-file-alt'></i><span>"+file.name+"</span></div>";}c.insertAdjacentHTML("beforeend","<div class='msg-row mine'>"+preview+"</div>");c.scrollTop=c.scrollHeight;fetch("/api/messages-api.php?action=upload_message",{method:"POST",credentials:"include",body:fd}).then(function(r){return r.json();}).then(function(d){if(d.success){if(!curConvId){curConvId=d.data.conversation_id;startPoll();}loadMsgs();}}).catch(function(){});input.value="";}
+function handleFileSelect(input){if(!input.files||!input.files[0])return;var file=input.files[0];var fd=new FormData();fd.append("file",file);if(isGroupChat){fd.append("group_id",curConvId);}else{fd.append("to_user_id",curOtherId);}fd.append("type",file.type.startsWith("image/")?"image":(file.type.startsWith("video/")?"video":"file"));var c=document.getElementById("chMsgs");var preview="";if(file.type.startsWith("image/")){preview="<img class=msg-img src='"+URL.createObjectURL(file)+"' style='opacity:.6' loading="lazy">";}else if(file.type.startsWith("video/")){preview="<video class=msg-img style='opacity:.6;max-width:240px;border-radius:12px' controls><source src='"+URL.createObjectURL(file)+"'>Video</video>";}else{preview="<div class=msg-file style='opacity:.6'><i class='fas fa-file-alt'></i><span>"+file.name+"</span></div>";}c.insertAdjacentHTML("beforeend","<div class='msg-row mine'>"+preview+"</div>");c.scrollTop=c.scrollHeight;fetch("/api/messages-api.php?action=upload_message",{method:"POST",credentials:"include",body:fd}).then(function(r){return r.json();}).then(function(d){if(d.success){if(!curConvId){curConvId=d.data.conversation_id;startPoll();}loadMsgs();}}).catch(function(){});input.value="";}
 function shareLocation(){closeAttach();if(!navigator.geolocation){alert("Trình duyệt không hỗ trợ vị trí");return;}navigator.geolocation.getCurrentPosition(function(pos){var fd=new FormData();if(isGroupChat){fd.append("group_id",curConvId);}else{fd.append("to_user_id",curOtherId);}fd.append("type","location");fd.append("lat",pos.coords.latitude);fd.append("lng",pos.coords.longitude);var c=document.getElementById("chMsgs");c.insertAdjacentHTML("beforeend","<div class='msg-row mine'><div class=msg-bubble>📍 Đang gửi vị trí...</div></div>");c.scrollTop=c.scrollHeight;fetch("/api/messages-api.php?action=upload_message",{method:"POST",credentials:"include",body:fd}).then(function(r){return r.json();}).then(function(d){if(d.success){if(!curConvId){curConvId=d.data.conversation_id;startPoll();}loadMsgs();}}).catch(function(){});},function(){alert("Không thể lấy vị trí. Vui lòng cho phép truy cập GPS.");},{enableHighAccuracy:true,timeout:10000});}
 function insertEmoji(){var inp=document.getElementById("msgInput");inp.value+="😊";inp.focus();onMsgInput();}
 function viewImg(src){var ov=document.getElementById("imgOverlay");document.getElementById("imgOverlayImg").src=src;ov.classList.add("show");}
@@ -454,7 +454,7 @@ body.in-chat .ch-input-wrap{z-index:1001}
 <div class="co-panel">
 <div class="co-head"><button class="co-x" onclick="closeChatOpts()"><i class="fas fa-arrow-left"></i></button><h3>Tùy chọn</h3></div>
 <div class="co-profile">
-<img class="co-profile-av" id="coAv" src="" onerror="this.style.display='none'">
+<img class="co-profile-av" id="coAv" src="" onerror="this.style.display='none'" loading="lazy">
 <div class="co-profile-name" id="coName">...</div>
 <div class="co-profile-sub" id="coSub"></div>
 </div>
@@ -540,7 +540,7 @@ function coLoadMedia(){
   fetch("/api/messages-api.php?action=media&conversation_id="+curConvId+"&type=image",{credentials:"include"}).then(function(r){return r.json();}).then(function(d){
     if(!d.success||!d.data||!d.data.length){row.innerHTML="<span style='font-size:12px;color:#999;padding:4px'>Chưa có ảnh</span>";return;}
     var h="";
-    for(var j=0;j<Math.min(d.data.length,4);j++){h+="<img class='co-media-thumb' src='"+d.data[j].file_url+"' onclick='viewImg(\""+d.data[j].file_url+"\")'>";}
+    for(var j=0;j<Math.min(d.data.length,4);j++){h+="<img class='co-media-thumb' src='"+d.data[j].file_url+"' onclick='viewImg(\""+d.data[j].file_url+"\")' loading="lazy">";}
     h+="<div class='co-media-more' onclick='coMedia()'><i class='fas fa-arrow-right'></i></div>";
     row.innerHTML=h;
   }).catch(function(){});
@@ -656,7 +656,7 @@ function loadGroupConvs(){
     var h="";
     for(var i=0;i<d.data.length;i++){
       var g=d.data[i];
-      var av=g.avatar?"<img class='cv-av' src='"+g.avatar+"'>":"<div class='cv-av' style='background:#0084ff;color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:14px;border-radius:50%;width:52px;height:52px'>"+((g.name||"G")[0])+"</div>";
+      var av=g.avatar?"<img class='cv-av' src='"+g.avatar+"' loading="lazy">":"<div class='cv-av' style='background:#0084ff;color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:14px;border-radius:50%;width:52px;height:52px'>"+((g.name||"G")[0])+"</div>";
       var unr=g.unread_count>0?"<div class='cv-unread'></div>":"";
       h+="<div class='conv-item' onclick='openGroupChat("+g.id+")' data-conv-id='"+g.id+"'>"+av+"<div class='cv-info'><div class='cv-name'>"+esc(g.name)+"</div><div class='cv-last'>"+esc(g.last_message||"")+"</div></div><div class='cv-right'><div class='cv-time'>"+ago(g.last_message_at)+"</div><div style='font-size:11px;color:#65676B'>"+g.member_count+" TV</div>"+unr+"</div></div>";
     }
@@ -761,7 +761,7 @@ function openMembersList(){
     var h="<div style='padding:4px 16px;font-size:13px;color:#65676B;font-weight:600'>Thành viên ("+d.data.length+")</div>";
     for(var i=0;i<d.data.length;i++){
       var m=d.data[i];
-      var av=m.avatar?"<img src='"+esc(m.avatar)+"' style='width:44px;height:44px;border-radius:50%;object-fit:cover'>":"<div style='width:44px;height:44px;border-radius:50%;background:#e4e6eb;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:14px'>"+esc((m.fullname||"U")[0])+"</div>";
+      var av=m.avatar?"<img src='"+esc(m.avatar)+"' style='width:44px;height:44px;border-radius:50%;object-fit:cover' loading="lazy">":"<div style='width:44px;height:44px;border-radius:50%;background:#e4e6eb;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:14px'>"+esc((m.fullname||"U")[0])+"</div>";
       var role=m.role==="admin"?"<span style='font-size:12px;color:#0084ff'>Trưởng nhóm</span>":"";
       var online=m.is_online?"<span style='display:inline-block;width:8px;height:8px;border-radius:50%;background:#22c55e;margin-right:4px'></span>":"";
       h+="<div style='display:flex;align-items:center;gap:12px;padding:10px 16px;cursor:pointer' onclick='document.getElementById(\"membersOv\").remove();openFromUser("+m.id+")'>"+av+"<div style='flex:1'><div style='font-weight:600;font-size:15px'>"+online+esc(m.fullname)+"</div>"+role+(m.shipping_company?"<div style='font-size:12px;color:#65676B'>"+esc(m.shipping_company)+"</div>":"")+"</div></div>";

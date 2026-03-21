@@ -174,7 +174,7 @@ a{text-decoration:none;color:inherit;}
 <!-- LIGHTBOX -->
 <div class="lightbox" id="lightbox" onclick="this.classList.remove('open')">
   <button class="lightbox-close"><i class="fas fa-times"></i></button>
-  <img id="lbImg" src="">
+  <img id="lbImg" src="" loading="lazy">
 </div>
 
 <script>
@@ -213,7 +213,7 @@ function renderItem(){
   // === IMAGE + VIDEO CAROUSEL ===
   if(imgs.length>0 || p.video_url){
     h+='<div class="carousel"><div class="carousel-track" id="carouselTrack" onscroll="onCarouselScroll()">';
-    imgs.forEach(function(img){h+='<div class="carousel-slide"><img src="'+img+'" onclick="openLB(this.src)"></div>';});
+    imgs.forEach(function(img){h+='<div class="carousel-slide"><img src="'+img+'" onclick="openLB(this.src)" loading="lazy"></div>';});
     if(p.video_url){
       h+='<div class="carousel-slide" style="display:flex;align-items:center;justify-content:center;background:#000">';
       if(p.video_url.indexOf('/uploads/')!==-1){
@@ -244,7 +244,7 @@ function renderItem(){
 
   // === SELLER ===
   h+='<div class="seller-section">';
-  if(p.seller_avatar) h+='<img class="seller-av" src="'+p.seller_avatar+'">';
+  if(p.seller_avatar) h+='<img class="seller-av" src="'+p.seller_avatar+'" loading="lazy">';
   else h+='<div class="seller-av-ph">'+esc((p.seller_name||"U")[0])+'</div>';
   h+='<div class="seller-info"><div class="seller-name">'+esc(p.seller_name||"")+'</div>';
   if(p.shipping_company) h+='<div class="seller-sub"><span style="color:'+({"GHTK":"#00b14f","J&T":"#d32f2f","GHN":"#ff6600","Viettel Post":"#e21a1a","SPX":"#7C3AED"}[p.shipping_company]||"#999")+'">'+esc(p.shipping_company)+'</span></div>';

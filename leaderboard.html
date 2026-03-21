@@ -107,7 +107,7 @@ function loadLB(period,btn){
       var rank=i+1;
       var rClass=rank===1?"r1":rank===2?"r2":rank===3?"r3":"r-n";
       var medal=rank===1?"🥇":rank===2?"🥈":rank===3?"🥉":rank;
-      var av=u.avatar?"<img src='"+u.avatar+"' class='lb-av' onerror=\"this.outerHTML='<div class=lb-av-ph>'+(this.alt||'?')[0]+'</div>'\">":"<div class='lb-av-ph'>"+(u.fullname||"?")[0]+"</div>";
+      var av=u.avatar?"<img src='"+u.avatar+"' class='lb-av' onerror=\"this.outerHTML='<div class=lb-av-ph loading="lazy">'+(this.alt||'?')[0]+'</div>'\">":"<div class='lb-av-ph'>"+(u.fullname||"?")[0]+"</div>";
       var xpVal=period==="referral"?(u.referral_count||0):(u.total_xp||0);
       var xpUnit=period==="referral"?"refs":"XP";
       var isMe=CU&&u.id==CU.id;

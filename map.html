@@ -475,7 +475,7 @@ function listenShippers(){
             var age=(Date.now()-d.ts)/60000;
             if(age>30)return; // Skip stale (>30min)
             var icon=L.divIcon({
-                html:d.avatar?'<div class="shipper-marker"><img src="'+d.avatar+'"></div>':'<div class="shipper-marker-ph">🛵</div>',
+                html:d.avatar?'<div class="shipper-marker"><img src="'+d.avatar+'" loading="lazy"></div>':'<div class="shipper-marker-ph">🛵</div>',
                 className:"",iconSize:[36,36],iconAnchor:[18,18]
             });
             if(shipperMarkers[uid]){

@@ -325,7 +325,7 @@
                     </div>
 
                     ${isDeposit && tx.proof_url ? `
-                        <img src="${tx.proof_url}" class="proof-image" onclick="viewImage('${tx.proof_url}')" alt="Proof">
+                        <img src="${tx.proof_url}" class="proof-image" onclick="viewImage('${tx.proof_url}')" alt="Proof" loading="lazy">
                     ` : ''}
 
                     ${tx.status === 'pending' ? `

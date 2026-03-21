@@ -301,7 +301,7 @@ function loadPosts(){
   if(!tp)return;
   var h="";
   if(GROUP.is_member&&CU){
-    var av=CU.avatar?"<img src='"+CU.avatar+"' style='width:36px;height:36px;border-radius:50%;object-fit:cover;flex-shrink:0'>":"<div style='width:36px;height:36px;border-radius:50%;background:var(--primary);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:14px;flex-shrink:0'>"+esc((CU.fullname||"?")[0])+"</div>";
+    var av=CU.avatar?"<img src='"+CU.avatar+"' style='width:36px;height:36px;border-radius:50%;object-fit:cover;flex-shrink:0' loading="lazy">":"<div style='width:36px;height:36px;border-radius:50%;background:var(--primary);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:14px;flex-shrink:0'>"+esc((CU.fullname||"?")[0])+"</div>";
     h+="<div class='create-area'>"+av+"<input class='create-input' type='text' placeholder='B\u1ea1n \u0111ang ngh\u0129 g\u00ec? Click \u0111\u1ec3 \u0111\u0103ng b\u00e0i...' readonly onclick='openPM()'><button class='icon-btn' title='\u0110\u0103ng \u1ea3nh/video' onclick='openPM()'><i class='fas fa-image'></i></button><button class='icon-btn' title='Confession' onclick='openPM()'><i class='fas fa-mask'></i></button><button class='icon-btn' title='H\u1ecfi \u0111\u00e1p' onclick='openPM()'><i class='fas fa-question'></i></button></div>";
   }
   h+="<div class='sort-bar'><div class='sort-btn"+(curSort==="hot"?" active":"")+"' onclick='changeSort(\"hot\",this)'>\ud83d\udd25 N\u1ed5i b\u1eadt</div><div class='sort-btn"+(curSort==="new"?" active":"")+"' onclick='changeSort(\"new\",this)'>\ud83c\udd95 M\u1edbi nh\u1ea5t</div><div class='sort-btn"+(curSort==="top"?" active":"")+"' onclick='changeSort(\"top\",this)'>\u2b06 Nhi\u1ec1u th\u00edch</div></div>";
@@ -340,7 +340,7 @@ function mkPost(p){
   var shares=parseInt(p.shares_count)||0;
   var liked=p.user_liked;
   var ch=esc(uName).charAt(0).toUpperCase();
-  var av=p.user_avatar?"<a href='user.html?id="+uid+"'><img class='avatar-sm' src='"+esc(p.user_avatar)+"' onerror=\"this.outerHTML='<span class=avatar-sm>"+ch+"</span>'\"></a>":"<a href='user.html?id="+uid+"'><span class='avatar-sm'>"+ch+"</span></a>";
+  var av=p.user_avatar?"<a href='user.html?id="+uid+"'><img class='avatar-sm' src='"+esc(p.user_avatar)+"' onerror=\"this.outerHTML='<span class=avatar-sm loading="lazy">"+ch+"</span>'\"></a>":"<a href='user.html?id="+uid+"'><span class='avatar-sm'>"+ch+"</span></a>";
   var shipH="";
   if(p.shipping_company){var sc=p.shipping_company;var colors={"GHTK":"#00b14f","J&T":"#d32f2f","GHN":"#ff6600","Viettel Post":"#e21a1a","SPX":"#EE4D2D","Grab":"#00b14f","Be":"#5bc500","Gojek":"#00aa13","Ninja Van":"#c41230"};shipH="<span style='font-size:11px;font-weight:700;color:"+(colors[sc]||"#666")+"'>"+esc(sc)+"</span><span>\u00b7</span>";}
   var body=esc(p.content||"");
@@ -403,7 +403,7 @@ function gcLoadCmts(pid){
 function gcCmt(c,dp,rplTo){
   var sz=dp>0?22:28;
   var indent=dp>0?"padding-left:20px;margin-left:14px;border-left:2px solid #e4e6eb":"";
-  var av=c.user_avatar?"<img src='"+esc(c.user_avatar)+"' style='width:"+sz+"px;height:"+sz+"px;border-radius:50%;object-fit:cover;flex-shrink:0'>":"<div style='width:"+sz+"px;height:"+sz+"px;border-radius:50%;background:#e4e6eb;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;flex-shrink:0'>"+esc((c.user_name||"U")[0])+"</div>";
+  var av=c.user_avatar?"<img src='"+esc(c.user_avatar)+"' style='width:"+sz+"px;height:"+sz+"px;border-radius:50%;object-fit:cover;flex-shrink:0' loading="lazy">":"<div style='width:"+sz+"px;height:"+sz+"px;border-radius:50%;background:#e4e6eb;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;flex-shrink:0'>"+esc((c.user_name||"U")[0])+"</div>";
   var lk=c.user_vote==="up"||c.user_liked;
   var n=parseInt(c.likes_count)||0;
   var sn=esc(c.user_name||"");
@@ -453,7 +453,7 @@ function fetchLeaderboard(){
     var h="<div style='display:flex;gap:8px;padding:12px 16px'><button class='lb-tab"+(lbType==="posts"?" active":"")+"' onclick='changeLbType(\"posts\",this)'>B\u00e0i vi\u1ebft</button><button class='lb-tab"+(lbType==="comments"?" active":"")+"' onclick='changeLbType(\"comments\",this)'>Ghi ch\u00fa</button></div>";
     if(!d.success||!d.data||!d.data.length){h+="<p style='text-align:center;padding:30px;color:#999'>Ch\u01b0a c\u00f3 d\u1eef li\u1ec7u</p>";tl.innerHTML=h;return;}
     d.data.forEach(function(u,i){
-      var av=u.avatar?"<img src='"+esc(u.avatar)+"' style='width:36px;height:36px;border-radius:50%;object-fit:cover'>":"<div style='width:36px;height:36px;border-radius:50%;background:#e4e6eb;display:flex;align-items:center;justify-content:center;font-weight:700'>"+esc((u.fullname||"U")[0])+"</div>";
+      var av=u.avatar?"<img src='"+esc(u.avatar)+"' style='width:36px;height:36px;border-radius:50%;object-fit:cover' loading="lazy">":"<div style='width:36px;height:36px;border-radius:50%;background:#e4e6eb;display:flex;align-items:center;justify-content:center;font-weight:700'>"+esc((u.fullname||"U")[0])+"</div>";
       var medal=i===0?"\ud83e\udd47":i===1?"\ud83e\udd48":i===2?"\ud83e\udd49":"#"+(i+1);
       var stat=lbType==="posts"?(u.post_count||0)+" b\u00e0i \u00b7 "+(u.total_likes||0)+" \u0111\u01a1n GTC":(u.comment_count||0)+" ghi ch\u00fa \u00b7 "+(u.total_likes||0)+" \u0111\u01a1n GTC";
       h+="<div style='display:flex;gap:10px;padding:10px 16px;align-items:center'><span style='width:28px;text-align:center;font-weight:700;font-size:14px'>"+medal+"</span>"+av+"<div style='flex:1'><div style='font-weight:700;font-size:14px'>"+esc(u.fullname)+"</div><div style='font-size:12px;color:#65676B'>"+stat+"</div></div></div>";

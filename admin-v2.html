@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="vi">
 <head>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 
@@ -481,7 +482,7 @@ function loadUsers(){
     if(!d.success)return;
     var h='';
     d.data.users.forEach(function(u){
-      var av=u.avatar?'<img class="user-av" src="'+u.avatar+'" onerror="this.style.display=\'none\'">':'<div class="user-av-ph">'+esc((u.fullname||'?')[0])+'</div>';
+      var av=u.avatar?'<img class="user-av" src="'+u.avatar+'" onerror="this.style.display=\'none\'" loading="lazy">':'<div class="user-av-ph">'+esc((u.fullname||'?')[0])+'</div>';
       var badge=u.status==='active'?'badge-active':u.status==='banned'?'badge-banned':'badge-hidden';
       var typeBadge=u.is_seed?'<span style="font-size:10px;padding:1px 6px;border-radius:10px;background:#FFF3E0;color:#FF9800;font-weight:600;margin-left:4px">ẢO</span>':'<span style="font-size:10px;padding:1px 6px;border-radius:10px;background:#E8F5E9;color:#4CAF50;font-weight:600;margin-left:4px">THẬT</span>';
       h+='<tr><td><div class="user-row">'+av+'<div class="user-info"><div class="user-name">'+esc(u.fullname)+typeBadge+'</div><div class="user-sub">@'+esc(u.username)+' · ID:'+u.id+'</div></div></div></td>';

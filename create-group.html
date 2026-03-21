@@ -131,11 +131,11 @@ function renderStep(){
     h+="<div class='cg-desc'>Th\u00eam \u1ea3nh \u0111\u1ea1i di\u1ec7n v\u00e0 \u1ea3nh b\u00eca \u0111\u1ec3 c\u1ed9ng \u0111\u1ed3ng n\u1ed5i b\u1eadt h\u01a1n</div>";
     h+="<div class='cg-upload-row'>";
     h+="<div class='cg-upload' onclick='pickFile(\"icon\")'>"+(formData.iconPreview?"<img src='"+formData.iconPreview+"'>":"<i class='fas fa-user-circle'></i><span>\u1ea2nh \u0111\u1ea1i di\u1ec7n</span>")+"</div>";
-    h+="<div class='cg-upload' onclick='pickFile(\"banner\")' style='flex:2'>"+(formData.bannerPreview?"<img src='"+formData.bannerPreview+"'>":"<i class='fas fa-panorama'></i><span>\u1ea2nh b\u00eca</span>")+"</div>";
+    h+="<div class='cg-upload' onclick='pickFile(\"banner\")' style='flex:2'>"+(formData.bannerPreview?"<img src='"+formData.bannerPreview+"' loading="lazy">":"<i class='fas fa-panorama'></i><span>\u1ea2nh b\u00eca</span>")+"</div>";
     h+="</div>";
     h+="<div class='cg-preview'><div style='font-size:12px;color:var(--muted);margin-bottom:8px;font-weight:600'>XEM TR\u01af\u1edaC</div>";
     h+="<div class='cg-preview-card'>";
-    h+="<div class='cg-preview-banner'"+(formData.bannerPreview?" style='background:none'":"")+">"+(formData.bannerPreview?"<img src='"+formData.bannerPreview+"'>":"")+"</div>";
+    h+="<div class='cg-preview-banner'"+(formData.bannerPreview?" style='background:none'":"")+">"+(formData.bannerPreview?"<img src='"+formData.bannerPreview+"' loading="lazy">":"")+"</div>";
     h+="<div class='cg-preview-info'><div class='cg-preview-icon'>"+(formData.iconPreview?"<img src='"+formData.iconPreview+"'>":esc(formData.name?formData.name[0]:"?"))+"</div><div><div class='cg-preview-name'>"+esc(formData.name||"T\u00ean c\u1ed9ng \u0111\u1ed3ng")+"</div><div class='cg-preview-meta'>1 th\u00e0nh vi\u00ean \u00b7 "+esc(formData.category_name)+"</div></div></div>";
     h+="</div></div>";
     body.innerHTML=h;

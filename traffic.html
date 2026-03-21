@@ -341,7 +341,7 @@ async function loadAlerts(){
 }
 
 function renderCard(a){
-  var av=a.user_avatar?'<img class="tf-av" src="'+a.user_avatar+'">':'<div class="tf-av-ph">'+esc((a.user_name||"U")[0])+'</div>';
+  var av=a.user_avatar?'<img class="tf-av" src="'+a.user_avatar+'" loading="lazy">':'<div class="tf-av-ph">'+esc((a.user_name||"U")[0])+'</div>';
   var imgs="";
   try{var im=JSON.parse(a.images||"[]");if(im.length){imgs='<div class="tf-card-imgs">';im.forEach(function(s){imgs+='<img src="'+s+'" style="max-height:200px;width:100%;object-fit:cover;cursor:pointer" onclick="openTfLb(this.src)">';});imgs+='</div>';}}catch(e){}
 
@@ -448,7 +448,7 @@ function addRMedia(input,type){
     reader.onload=function(e){
       var prev=document.getElementById("rMediaPrev");
       var div=document.createElement("div");div.className="r-media-item";div.id="rm"+idx;
-      if(type==="image") div.innerHTML='<img src="'+e.target.result+'"><button class="r-media-rm" onclick="rmRMedia('+idx+')"><i class="fas fa-times"></i></button>';
+      if(type==="image") div.innerHTML='<img src="'+e.target.result+'" loading="lazy"><button class="r-media-rm" onclick="rmRMedia('+idx+')"><i class="fas fa-times"></i></button>';
       else div.innerHTML='<video src="'+e.target.result+'"></video><button class="r-media-rm" onclick="rmRMedia('+idx+')"><i class="fas fa-times"></i></button>';
       prev.appendChild(div);
     };
@@ -636,7 +636,7 @@ async function loadTfCmts(id){
     var d=await r.json();
     if(d.success&&d.data.length){
       list.innerHTML=d.data.map(function(c){
-        var av=c.user_avatar?'<img src="'+c.user_avatar+'" style="width:28px;height:28px;border-radius:50%;object-fit:cover;flex-shrink:0">':'<div style="width:28px;height:28px;border-radius:50%;background:#e4e6eb;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0">'+esc((c.user_name||"U")[0])+'</div>';
+        var av=c.user_avatar?'<img src="'+c.user_avatar+'" style="width:28px;height:28px;border-radius:50%;object-fit:cover;flex-shrink:0" loading="lazy">':'<div style="width:28px;height:28px;border-radius:50%;background:#e4e6eb;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0">'+esc((c.user_name||"U")[0])+'</div>';
         return '<div style="display:flex;gap:8px;margin-bottom:10px">'+av+'<div style="flex:1;min-width:0"><div style="background:#f0f2f5;border-radius:14px;padding:6px 10px;display:inline-block;max-width:100%"><div style="font-weight:700;font-size:12px">'+esc(c.user_name)+'</div><div style="font-size:13px;margin-top:1px">'+esc(c.content)+'</div></div><div style="font-size:11px;color:#999;margin-top:2px;padding-left:10px">'+ago(c.created_at)+'</div></div></div>';
       }).join("");
     }else{

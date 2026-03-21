@@ -1,4 +1,5 @@
 (function(){
+function _esc(s){if(!s)return '';var d=document.createElement('div');d.appendChild(document.createTextNode(s));return d.innerHTML;}
 var CU=JSON.parse(localStorage.getItem("user")||"null");
 var SC={"GHTK":"#00b14f","J&T":"#d32f2f","GHN":"#ff6600","Viettel Post":"#e21a1a","SPX":"#EE4D2D","Grab":"#00b14f","Be":"#5bc500","Gojek":"#00aa13"};
 var spmFiles=[],spmType="post";
@@ -123,10 +124,10 @@ document.getElementById("spmText").addEventListener("input",function(){
 window.openSPM=function(){
   if(!CU){location.href="login.html";return;}
   var avEl=document.getElementById("spmAvatar");
-  avEl.innerHTML=CU.avatar?"<img class='spm-av' src='"+CU.avatar+"'>":"<div class='spm-av-ph'>"+CU.fullname[0]+"</div>";
+  avEl.innerHTML=CU.avatar?"<img class='spm-av' src='"+_esc(CU.avatar)+"'>":"<div class='spm-av-ph'>"+_esc((CU.fullname||"?")[0])+"</div>";
   document.getElementById("spmName").textContent=CU.fullname;
   var shipEl=document.getElementById("spmShip");
-  if(CU.shipping_company){shipEl.innerHTML="<span class='spm-ship' style='color:"+(SC[CU.shipping_company]||"#999")+"'>"+CU.shipping_company+"</span>";}
+  if(CU.shipping_company){shipEl.innerHTML="<span class='spm-ship' style='color:"+(SC[CU.shipping_company]||"#999")+"'>"+_esc(CU.shipping_company)+"</span>";}
   else{shipEl.innerHTML="";}
   document.getElementById("spmOverlay").classList.add("open");
   document.body.style.overflow="hidden";

@@ -202,13 +202,13 @@ function renderActivity(a){
   else if(a.type==='save'){icon='<i class="fas fa-bookmark"></i>';badge='<div class="act-badge save"><i class="fas fa-bookmark" style="font-size:9px"></i></div>';}
   
   var avatar='';
-  if(a.post_author_avatar)avatar='<div style="position:relative"><img src="'+a.post_author_avatar+'" class="act-avatar" onerror="this.className=\'act-avatar-ph\';this.innerHTML=\'?\'">';
+  if(a.post_author_avatar)avatar='<div style="position:relative"><img src="'+a.post_author_avatar+'" class="act-avatar" onerror="this.className=\'act-avatar-ph\';this.innerHTML=\'?\'" loading="lazy">';
   else avatar='<div style="position:relative"><div class="act-avatar-ph">'+icon+'</div>';
   avatar+=badge+'</div>';
   
   var imgs=[];
   try{if(a.images)imgs=JSON.parse(a.images);}catch(x){}
-  if(imgs&&imgs.length)thumb='<img src="'+imgs[0]+'" class="act-thumb" onerror="this.remove()">';
+  if(imgs&&imgs.length)thumb='<img src="'+imgs[0]+'" class="act-thumb" onerror="this.remove()" loading="lazy">';
   
   var preview=esc(a.content||a.post_content||'').substring(0,100);
   var time=new Date(a.created_at).toLocaleTimeString('vi-VN',{hour:'2-digit',minute:'2-digit'});

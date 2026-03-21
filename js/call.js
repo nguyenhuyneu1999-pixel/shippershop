@@ -1,5 +1,6 @@
 // ShipperShop Call System v2
 (function(){
+function _esc(s){if(!s)return '';var d=document.createElement('div');d.appendChild(document.createTextNode(s));return d.innerHTML;}
 var FB_CFG={apiKey:"AIzaSyDNwf6FKPX10szjFJ2Ei6YoKJWRA6NAkKs",authDomain:"shippershop-5f8d9.firebaseapp.com",databaseURL:"https://shippershop-5f8d9-default-rtdb.asia-southeast1.firebasedatabase.app",projectId:"shippershop-5f8d9"};
 var ICE={iceServers:[{urls:"stun:stun.l.google.com:19302"},{urls:"stun:stun1.l.google.com:19302"}]};
 var db,pc,localStream,remoteStream,callDocId,myId,callInterval,ringAudio;
@@ -43,7 +44,7 @@ document.getElementById("callName").textContent=name;
 document.getElementById("callStatus").textContent=status;
 document.getElementById("callTime").style.display="none";
 var av=document.getElementById("callAvatar");
-if(avatar)av.innerHTML="<img src=\""+avatar+"\" style=\"width:100%;height:100%;object-fit:cover\">";
+if(avatar)av.innerHTML="<img src=\""+_esc(avatar)+"\" style=\"width:100%;height:100%;object-fit:cover\">";
 else av.textContent=(name||"?")[0];
 document.getElementById("callActions").style.display=incoming?"none":"flex";
 document.getElementById("incomingActions").style.display=incoming?"flex":"none";

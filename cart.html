@@ -142,7 +142,7 @@
             container.innerHTML = cart.items.map(item => `
                 <div class="cart-item" data-id="${item.id}">
                     <div class="cart-item-image">
-                        <img src="${item.image}" alt="${item.name}">
+                        <img src="${item.image}" alt="${item.name}" loading="lazy">
                     </div>
 
                     <div class="cart-item-info">

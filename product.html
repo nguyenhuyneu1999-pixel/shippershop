@@ -431,7 +431,7 @@
             <!-- Gallery -->
             <div class="product-gallery">
                 <div class="main-image" id="mainImage">
-                    <img src="https://via.placeholder.com/600x600" alt="Product">
+                    <img src="https://via.placeholder.com/600x600" alt="Product" loading="lazy">
                 </div>
                 <div class="thumbnail-images" id="thumbnails">
                     <!-- Thumbnails loaded by JS -->
@@ -634,11 +634,11 @@
             const mainImg = document.getElementById('mainImage');
             const thumbsContainer = document.getElementById('thumbnails');
 
-            mainImg.innerHTML = `<img src="${currentProduct.gallery[0]}" alt="${currentProduct.name}">`;
+            mainImg.innerHTML = `<img src="${currentProduct.gallery[0]}" alt="${currentProduct.name}" loading="lazy">`;
 
             thumbsContainer.innerHTML = currentProduct.gallery.map((img, index) => `
                 <div class="thumbnail ${index === 0 ? 'active' : ''}" onclick="changeImage(${index})">
-                    <img src="${img}" alt="Image ${index + 1}">
+                    <img src="${img}" alt="Image ${index + 1}" loading="lazy">
                 </div>
             `).join('');
         }
@@ -648,7 +648,7 @@
             const mainImg = document.getElementById('mainImage');
             const thumbs = document.querySelectorAll('.thumbnail');
 
-            mainImg.innerHTML = `<img src="${currentProduct.gallery[index]}" alt="${currentProduct.name}">`;
+            mainImg.innerHTML = `<img src="${currentProduct.gallery[index]}" alt="${currentProduct.name}" loading="lazy">`;
 
             thumbs.forEach((thumb, i) => {
                 if (i === index) {
