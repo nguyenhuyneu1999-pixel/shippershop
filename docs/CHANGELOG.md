@@ -73,6 +73,24 @@
 
 ## v2.2.0 (March 21, 2026) — Sessions 23-27, Final Production Release
 
+### v3.0.0 (March 22, 2026) — Sessions 28-35, Complete Platform
+- 345 automated tests, 93 API endpoints, 92 JS components
+- 84 DB tables, 8 cron jobs, 22,500+ lines new code
+- Post Polls (create/vote/results with expiry)
+- Outgoing Webhooks (register/test/manage)
+- Content Filter (keyword blacklist + spam patterns)
+- Reputation System (7 factors, 6 levels, leaderboard)
+- Share to Group (cross-post with comment + notify)
+- Feed Preferences (mute users, hide types, compact mode)
+- Post Templates (8 pre-made shipper templates)
+- Admin Export (CSV/JSON users/posts/transactions)
+- Conversation Pin, Conversation Search
+- Dynamic Sitemap (330+ URLs from DB)
+- Performance Monitoring (Web Vitals LCP/FID/CLS)
+- API Response Timer (X-Response-Time header)
+- Events Log (webhook-ready)
+- Rate Limit Monitor (admin dashboard)
+
 ### Session 30 (v2.5.0) — Final Production Release
 - Rate limit monitor API (admin: view limits, top consumers, audit log, clear)
 - Conversation search API (search messages, find conversations by name)
