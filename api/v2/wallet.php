@@ -24,8 +24,8 @@ $action=$_GET['action']??'';
 function ok($msg,$data=null){echo json_encode(['success'=>true,'message'=>$msg,'data'=>$data],JSON_UNESCAPED_UNICODE);exit;}
 function fail($msg,$code=400){http_response_code($code);echo json_encode(['success'=>false,'message'=>$msg]);exit;}
 
-// GET: Plans (public)
-if($_SERVER['REQUEST_METHOD']==='GET'&&$action==='plans'){
+// GET: Plans (public) — also default for bare GET
+if($_SERVER['REQUEST_METHOD']==='GET'&&($action==='plans'||!$action)){
     $plans=$d->fetchAll("SELECT * FROM subscription_plans ORDER BY price ASC");
     ok('OK',$plans);
 }
