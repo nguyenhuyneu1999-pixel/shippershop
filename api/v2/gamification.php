@@ -44,6 +44,7 @@ if($_SERVER['REQUEST_METHOD']==='GET'){
     if($action==='profile'){
         $tid=intval($_GET['user_id']??($uid??0));
         if(!$tid) fail('Missing user');
+        try{
         $xpRow=$d->fetchOne("SELECT COALESCE(SUM(xp),0) as total FROM user_xp WHERE user_id=?",[$tid]);
         $totalXp=intval($xpRow['total']);
         $level=getLevel($totalXp);
@@ -72,6 +73,7 @@ if($_SERVER['REQUEST_METHOD']==='GET'){
             'today_xp'=>$todayXp,
             'checked_in'=>$checkedIn
         ]);
+        }catch(\Throwable $e){fail('Profile error: '.$e->getMessage());}
     }
 
     // Leaderboard
