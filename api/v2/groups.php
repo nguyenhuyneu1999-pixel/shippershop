@@ -80,7 +80,7 @@ if($method==='GET'){
             $g['is_member']=!!$m;
             $g['my_role']=$m?$m['role']:null;
         }
-        $rules=$d->fetchAll("SELECT * FROM group_rules WHERE group_id=? ORDER BY `order`",[$gid]);
+        try{$rules=$d->fetchAll("SELECT * FROM group_rules WHERE group_id=? ORDER BY `order`",[$gid]);}catch(\Throwable $e){$rules=[];}
         $g['rules']=$rules;
         ok('OK',$g);
     }
