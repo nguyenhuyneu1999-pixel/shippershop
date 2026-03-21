@@ -151,7 +151,7 @@ try {
 $start = microtime(true);
 try {
     // Find expired subscriptions with auto_renew=1
-    $expired = $d->fetchAll("SELECT us.*, sp.price, sp.name as plan_name FROM user_subscriptions us JOIN subscription_plans sp ON us.plan_id=sp.id WHERE us.end_date < NOW() AND us.auto_renew=1 AND us.`status`='active'");
+    $expired = $d->fetchAll("SELECT us.*, sp.price, sp.name as plan_name FROM user_subscriptions us JOIN subscription_plans sp ON us.plan_id=sp.id WHERE us.expires_at < NOW() AND us.auto_renew=1 AND us.`status`='active'");
     $renewed = 0;
     foreach ($expired as $sub) {
         $userId = intval($sub['user_id']);
@@ -160,7 +160,7 @@ try {
         if ($wallet && intval($wallet['balance']) >= $price) {
             // Deduct + extend
             $d->query("UPDATE wallets SET balance=balance-? WHERE user_id=?", [$price, $userId]);
-            $d->query("UPDATE user_subscriptions SET end_date=DATE_ADD(NOW(), INTERVAL 30 DAY) WHERE id=?", [$sub['id']]);
+            $d->query("UPDATE user_subscriptions SET expires_at=DATE_ADD(NOW(), INTERVAL 30 DAY) WHERE id=?", [$sub['id']]);
             $pdo = $d->getConnection();
             $pdo->prepare("INSERT INTO wallet_transactions (user_id,type,amount,description,created_at) VALUES (?,'subscription',?,?,NOW())")->execute([$userId, -$price, 'Auto-renew: ' . $sub['plan_name']]);
             try { $pdo->prepare("INSERT INTO notifications (user_id,type,title,message,data,created_at) VALUES (?,'wallet','Gia hạn tự động',?,?,NOW())")->execute([$userId, 'Gói ' . $sub['plan_name'] . ' đã được gia hạn', json_encode(['plan_id' => $sub['plan_id']])]); } catch (\Throwable $e) {}
