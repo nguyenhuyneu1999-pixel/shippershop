@@ -23,7 +23,8 @@
     'group-detail': '/js/pages/group-detail.js',
     'profile-settings': '/js/pages/profile-settings.js',
     'listing-detail': '/js/pages/listing-detail.js',
-    'map': '/js/pages/map-page.js'
+    'map': '/js/pages/map-page.js',
+    'admin': '/js/pages/admin.js'
   };
 
   // Init common components after bundle loads
