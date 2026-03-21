@@ -50,11 +50,14 @@ if($_SERVER['REQUEST_METHOD']==='GET'){
         $level=getLevel($totalXp);
 
         // Streak
-        $streak=$d->fetchOne("SELECT current_streak,longest_streak,last_checkin FROM user_streaks WHERE user_id=?",[$tid]);
-        $streakData=['current'=>intval($streak['current_streak']??0),'longest'=>intval($streak['longest_streak']??0),'last_checkin'=>$streak['last_checkin']??null];
+        $streak=$d->fetchOne("SELECT current_streak,longest_streak,last_active_date FROM user_streaks WHERE user_id=?",[$tid]);
+        $streakData=['current'=>intval($streak['current_streak']??0),'longest'=>intval($streak['longest_streak']??0),'last_checkin'=>$streak['last_active_date']??null];
 
         // Badges
-        try{$badges=$d->fetchAll("SELECT badge_type,badge_name,badge_icon,earned_at FROM user_badges WHERE user_id=? ORDER BY earned_at DESC",[$tid]);}catch(\Throwable $e){$badges=[];}
+        try{$badges=$d->fetchAll("SELECT badge_id,earned_at FROM user_badges WHERE user_id=? ORDER BY earned_at DESC",[$tid]);}catch(\Throwable $e){$badges=[];}
+        // Map badge_id to display info
+        $badgeMap=['1'=>['type'=>'first_post','name'=>'Bài đầu tiên','icon'=>'📝'],'2'=>['type'=>'streak_7','name'=>'7 ngày streak','icon'=>'🔥'],'3'=>['type'=>'popular','name'=>'Bài hot','icon'=>'💯']];
+        foreach($badges as &$b){$info=$badgeMap[$b['badge_id']??'']??['type'=>'unknown','name'=>'Huy hiệu','icon'=>'🏅'];$b['badge_type']=$info['type'];$b['badge_name']=$info['name'];$b['badge_icon']=$info['icon'];}unset($b);
 
         // Recent XP
         $recent=$d->fetchAll("SELECT action,xp,detail,created_at FROM user_xp WHERE user_id=? ORDER BY created_at DESC LIMIT 10",[$tid]);
@@ -142,24 +145,24 @@ if($_SERVER['REQUEST_METHOD']==='POST'){
 
         $xp=5;
         // Update streak
-        $streak=$d->fetchOne("SELECT current_streak,longest_streak,last_checkin FROM user_streaks WHERE user_id=?",[$uid]);
+        $streak=$d->fetchOne("SELECT current_streak,longest_streak,last_active_date FROM user_streaks WHERE user_id=?",[$uid]);
         if(!$streak){
-            $pdo->prepare("INSERT INTO user_streaks (user_id,current_streak,longest_streak,last_checkin) VALUES (?,1,1,?)")->execute([$uid,$today]);
+            try{$pdo->prepare("INSERT INTO user_streaks (user_id,current_streak,longest_streak,last_active_date) VALUES (?,1,1,?)")->execute([$uid,$today]);}catch(\Throwable $e){$d->query("UPDATE user_streaks SET current_streak=1,longest_streak=1,last_active_date=? WHERE user_id=?",[$today,$uid]);}
             $currentStreak=1;
         }else{
-            $lastDate=$streak['last_checkin'];
+            $lastDate=$streak['last_active_date'];
             $yesterday=date('Y-m-d',strtotime('-1 day'));
             if($lastDate===$yesterday){
                 $newStreak=intval($streak['current_streak'])+1;
                 $longest=max($newStreak,intval($streak['longest_streak']));
-                $d->query("UPDATE user_streaks SET current_streak=?,longest_streak=?,last_checkin=? WHERE user_id=?",[$newStreak,$longest,$today,$uid]);
+                $d->query("UPDATE user_streaks SET current_streak=?,longest_streak=?,last_active_date=? WHERE user_id=?",[$newStreak,$longest,$today,$uid]);
                 $currentStreak=$newStreak;
                 // Bonus XP for streaks
                 if($newStreak===7) $xp+=50;
                 if($newStreak===30) $xp+=200;
                 if($newStreak%7===0) $xp+=10; // Weekly bonus
             }else{
-                $d->query("UPDATE user_streaks SET current_streak=1,last_checkin=? WHERE user_id=?",[$today,$uid]);
+                $d->query("UPDATE user_streaks SET current_streak=1,last_active_date=? WHERE user_id=?",[$today,$uid]);
                 $currentStreak=1;
             }
         }
