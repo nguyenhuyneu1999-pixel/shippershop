@@ -4,7 +4,9 @@
 <link rel="icon" type="image/png" sizes="32x32" href="/icons/icon-32.png">
 <link rel="icon" type="image/png" sizes="16x16" href="/icons/icon-16.png">
 <link rel="apple-touch-icon" sizes="180x180" href="/icons/apple-touch-icon.png">
-<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700&display=swap" rel="stylesheet"><meta name="theme-color" content="#7C3AED"><meta name="viewport" content="width=device-width,initial-scale=1.0"><title>Tin nhắn - ShipperShop</title><link rel="stylesheet" href="css/style.css"><link rel="stylesheet" href="mobile.css"><link rel="preload" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" as="style" onload="this.onload=null;this.rel='stylesheet'"><noscript><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"></noscript><link rel="manifest" href="/manifest.json"><style>:root{--primary:#0084ff;--bg:#fff;--border:#e4e6eb;--text:#1C1C1C;--muted:#65676B;--bubble-me:#0084ff;--bubble-other:#f0f0f0;}
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700&display=swap" rel="stylesheet"><meta name="theme-color" content="#7C3AED"><meta name="viewport" content="width=device-width,initial-scale=1.0"><title>Tin nhắn - ShipperShop</title><link rel="stylesheet" href="css/style.css"><link rel="stylesheet" href="mobile.css"><link rel="preload" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" as="style" onload="this.onload=null;this.rel='stylesheet'"><noscript><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="stylesheet" href="/css/design-system.css">
+</noscript><link rel="manifest" href="/manifest.json"><style>:root{--primary:#0084ff;--bg:#fff;--border:#e4e6eb;--text:#1C1C1C;--muted:#65676B;--bubble-me:#0084ff;--bubble-other:#f0f0f0;}
 *{margin:0;padding:0;box-sizing:border-box;}
 body{background:var(--bg);font-family:'Be Vietnam Pro',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;color:var(--text);height:100vh;overflow:hidden;}
 .top-bar{position:fixed;top:0;left:0;right:0;z-index:100;background:#fff;border-bottom:1px solid var(--border);}
@@ -896,4 +898,25 @@ function ss(s){var k=s.getKey("p256dh"),a=s.getKey("auth");var d={endpoint:s.end
   </nav>
 <script src="js/mobile.js"></script>
 <img src="/api/auto-cron.php" style="display:none" width="1" height="1" alt="">
+<!-- SS v2 Core + Components -->
+<script src="/js/core/utils.js"></script>
+<script src="/js/core/store.js"></script>
+<script src="/js/core/ui.js"></script>
+<script src="/js/core/api.js"></script>
+<script src="/js/components/notification-bell.js"></script>
+<script src="/js/components/search-overlay.js"></script>
+<script src="/js/components/image-viewer.js"></script>
+<script src="/js/components/upload.js"></script>
+
+<script>
+(function(){
+  if(typeof SS!=='undefined'&&SS.store&&SS.store.isLoggedIn()&&SS.NotifBell){
+    var nb=document.getElementById('ss-notif-bell');
+    if(nb)SS.NotifBell.init('ss-notif-bell');
+  }
+  if(typeof window.toast==='undefined'&&typeof SS!=='undefined'&&SS.ui){
+    window.toast=function(m,dur){SS.ui.toast(m,'info',dur||3000);};
+  }
+})();
+</script>
 </body></html><!-- 1773891378 -->

@@ -13,7 +13,9 @@
     <link rel="stylesheet" href="css/style.css">
     <link rel="stylesheet" href="css/mobile.css">
     <link rel="preload" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
-    <noscript><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"></noscript>
+    <noscript><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="stylesheet" href="/css/design-system.css">
+</noscript>
     <style>
         .product-detail {
             padding: 40px 0;
@@ -803,5 +805,24 @@
     <span>Kéo xuống để làm mới</span>
   </div>
 
+<!-- SS v2 Core + Components -->
+<script src="/js/core/utils.js"></script>
+<script src="/js/core/store.js"></script>
+<script src="/js/core/ui.js"></script>
+<script src="/js/core/api.js"></script>
+<script src="/js/components/notification-bell.js"></script>
+<script src="/js/components/search-overlay.js"></script>
+<script src="/js/components/image-viewer.js"></script>
+<script>
+(function(){
+  if(typeof SS!=='undefined'&&SS.store&&SS.store.isLoggedIn()&&SS.NotifBell){
+    var nb=document.getElementById('ss-notif-bell');
+    if(nb)SS.NotifBell.init('ss-notif-bell');
+  }
+  if(typeof window.toast==='undefined'&&typeof SS!=='undefined'&&SS.ui){
+    window.toast=function(m,dur){SS.ui.toast(m,'info',dur||3000);};
+  }
+})();
+</script>
 </body>
 </html>

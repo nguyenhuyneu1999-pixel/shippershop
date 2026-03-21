@@ -14,7 +14,9 @@
 <link rel="stylesheet" href="css/style.css">
 <link rel="stylesheet" href="mobile.css">
 <link rel="preload" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
-<noscript><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"></noscript>
+<noscript><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="stylesheet" href="/css/design-system.css">
+</noscript>
 <style>
 :root{--primary:#7C3AED;--bg:#fff;--border:#e4e6eb;--text:#1C1C1C;--muted:#65676B;}
 *{margin:0;padding:0;box-sizing:border-box;}
@@ -97,4 +99,23 @@ loadAll();
 </script>
 <nav id="mobileBottomNav" role="navigation"><a href="index.html" class="mnav-item"><i class="fas fa-home"></i><span>Trang chủ</span></a><a href="marketplace.html" class="mnav-item"><i class="fas fa-store"></i><span>Mua sắm</span></a><button class="mnav-item mnav-fab-wrap" onclick="handleFab()"><div class="mnav-fab"><i class="fas fa-camera"></i></div></button><a href="map.html" class="mnav-item"><i class="fas fa-map-marked-alt"></i><span>Bản đồ</span></a><a href="profile.html" class="mnav-item"><i class="fas fa-user"></i><span>Tài khoản</span></a></nav>
 <script>if("serviceWorker" in navigator)navigator.serviceWorker.register("/sw.js");</script><script src="js/post-modal.js"></script>
-<script src="/js/analytics.js"></script></body></html>
+<script src="/js/analytics.js"></script><!-- SS v2 Core + Components -->
+<script src="/js/core/utils.js"></script>
+<script src="/js/core/store.js"></script>
+<script src="/js/core/ui.js"></script>
+<script src="/js/core/api.js"></script>
+<script src="/js/components/notification-bell.js"></script>
+<script src="/js/components/search-overlay.js"></script>
+<script src="/js/components/image-viewer.js"></script>
+<script>
+(function(){
+  if(typeof SS!=='undefined'&&SS.store&&SS.store.isLoggedIn()&&SS.NotifBell){
+    var nb=document.getElementById('ss-notif-bell');
+    if(nb)SS.NotifBell.init('ss-notif-bell');
+  }
+  if(typeof window.toast==='undefined'&&typeof SS!=='undefined'&&SS.ui){
+    window.toast=function(m,dur){SS.ui.toast(m,'info',dur||3000);};
+  }
+})();
+</script>
+</body></html>

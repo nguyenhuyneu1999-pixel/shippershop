@@ -11,6 +11,7 @@
 <meta name="theme-color" content="#7C3AED">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Cộng đồng - ShipperShop</title>
+<link rel="stylesheet" href="/css/design-system.css">
 <link rel="stylesheet" href="css/style-v2.css">
 <link rel="stylesheet" href="mobile.css">
 <link rel="preload" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
@@ -496,5 +497,28 @@ function sb(r){r.pushManager.subscribe({userVisibleOnly:true,applicationServerKe
 function ss(s){var k=s.getKey("p256dh"),a=s.getKey("auth");var d={endpoint:s.endpoint,keys:{p256dh:btoa(String.fromCharCode.apply(null,new Uint8Array(k))).replace(/\+/g,"-").replace(/\//g,"_").replace(/=+$/,""),auth:btoa(String.fromCharCode.apply(null,new Uint8Array(a))).replace(/\+/g,"-").replace(/\//g,"_").replace(/=+$/,"")}};var t=localStorage.getItem("token"),h={"Content-Type":"application/json"};if(t)h["Authorization"]="Bearer "+t;fetch("/api/push.php?action=subscribe",{method:"POST",headers:h,credentials:"include",body:JSON.stringify(d)}).catch(function(){});}
 })();
 </script><script src="/js/analytics.js"></script><img src="/api/auto-cron.php" style="display:none" width="1" height="1" alt="">
+<!-- SS v2 Core + Components -->
+<script src="/js/core/utils.js"></script>
+<script src="/js/core/store.js"></script>
+<script src="/js/core/ui.js"></script>
+<script src="/js/core/api.js"></script>
+<script src="/js/components/notification-bell.js"></script>
+<script src="/js/components/search-overlay.js"></script>
+<script src="/js/components/image-viewer.js"></script>
+<script src="/js/components/post-card.js"></script>
+<script src="/js/components/comment-sheet.js"></script>
+<script src="/js/components/video-player.js"></script>
+
+<script>
+(function(){
+  if(typeof SS!=='undefined'&&SS.store&&SS.store.isLoggedIn()&&SS.NotifBell){
+    var nb=document.getElementById('ss-notif-bell');
+    if(nb)SS.NotifBell.init('ss-notif-bell');
+  }
+  if(typeof window.toast==='undefined'&&typeof SS!=='undefined'&&SS.ui){
+    window.toast=function(m,dur){SS.ui.toast(m,'info',dur||3000);};
+  }
+})();
+</script>
 </body>
 </html>

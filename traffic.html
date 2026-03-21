@@ -148,6 +148,7 @@ body{background:var(--bg);font-family:'Be Vietnam Pro',-apple-system,BlinkMacSys
 <meta property="og:type" content="website">
 <meta property="og:locale" content="vi_VN">
 <meta property="og:site_name" content="ShipperShop">
+<link rel="stylesheet" href="/css/design-system.css">
 <link rel="stylesheet" href="css/style-v2.css">
 </head>
 <body>
@@ -683,5 +684,26 @@ setInterval(loadAlerts, 120000);
   </nav>
 <script src="js/mobile.js"></script>
 <img src="/api/auto-cron.php" style="display:none" width="1" height="1" alt="">
+<!-- SS v2 Core + Components -->
+<script src="/js/core/utils.js"></script>
+<script src="/js/core/store.js"></script>
+<script src="/js/core/ui.js"></script>
+<script src="/js/core/api.js"></script>
+<script src="/js/components/notification-bell.js"></script>
+<script src="/js/components/search-overlay.js"></script>
+<script src="/js/components/image-viewer.js"></script>
+<script src="/js/components/location-picker.js"></script>
+
+<script>
+(function(){
+  if(typeof SS!=='undefined'&&SS.store&&SS.store.isLoggedIn()&&SS.NotifBell){
+    var nb=document.getElementById('ss-notif-bell');
+    if(nb)SS.NotifBell.init('ss-notif-bell');
+  }
+  if(typeof window.toast==='undefined'&&typeof SS!=='undefined'&&SS.ui){
+    window.toast=function(m,dur){SS.ui.toast(m,'info',dur||3000);};
+  }
+})();
+</script>
 </body>
 </html>

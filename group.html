@@ -12,6 +12,7 @@
 <meta name="theme-color" content="#7C3AED">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Nhóm - ShipperShop</title>
+<link rel="stylesheet" href="/css/design-system.css">
 <link rel="stylesheet" href="css/style-v2.css">
 <link rel="stylesheet" href="mobile.css">
 <link rel="preload" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
@@ -506,5 +507,28 @@ if(groupSlug||groupId)loadGroup();
 <script src="js/mobile.js"></script>
 <script src="/js/analytics.js"></script>
 <script src="js/post-modal.js"></script>
+<!-- SS v2 Core + Components -->
+<script src="/js/core/utils.js"></script>
+<script src="/js/core/store.js"></script>
+<script src="/js/core/ui.js"></script>
+<script src="/js/core/api.js"></script>
+<script src="/js/components/notification-bell.js"></script>
+<script src="/js/components/search-overlay.js"></script>
+<script src="/js/components/image-viewer.js"></script>
+<script src="/js/components/post-card.js"></script>
+<script src="/js/components/comment-sheet.js"></script>
+<script src="/js/components/video-player.js"></script>
+
+<script>
+(function(){
+  if(typeof SS!=='undefined'&&SS.store&&SS.store.isLoggedIn()&&SS.NotifBell){
+    var nb=document.getElementById('ss-notif-bell');
+    if(nb)SS.NotifBell.init('ss-notif-bell');
+  }
+  if(typeof window.toast==='undefined'&&typeof SS!=='undefined'&&SS.ui){
+    window.toast=function(m,dur){SS.ui.toast(m,'info',dur||3000);};
+  }
+})();
+</script>
 </body>
 </html>

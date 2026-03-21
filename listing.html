@@ -141,6 +141,8 @@ a{text-decoration:none;color:inherit;}
 }
 </style>
 <link rel="stylesheet" href="mobile.css">
+<link rel="stylesheet" href="/css/design-system.css">
+
 </head>
 <body>
 
@@ -373,5 +375,24 @@ function esc(t){return t?String(t).replace(/&/g,"&amp;").replace(/</g,"&lt;").re
 function catName(c){var m={"xe_co":"Xe cộ","dien_thoai":"Điện thoại","do_dien_tu":"Đồ điện tử","thoi_trang":"Thời trang","do_gia_dung":"Đồ gia dụng","khac":"Khác"};return m[c]||c||"Khác";}
 function formatDate(dt){if(!dt)return"";try{var d=new Date(dt.replace(" ","T"));return d.toLocaleDateString("vi-VN");}catch(e){return dt;}}
 </script>
-<script src="/js/analytics.js"></script></body>
+<script src="/js/analytics.js"></script><!-- SS v2 Core + Components -->
+<script src="/js/core/utils.js"></script>
+<script src="/js/core/store.js"></script>
+<script src="/js/core/ui.js"></script>
+<script src="/js/core/api.js"></script>
+<script src="/js/components/notification-bell.js"></script>
+<script src="/js/components/search-overlay.js"></script>
+<script src="/js/components/image-viewer.js"></script>
+<script>
+(function(){
+  if(typeof SS!=='undefined'&&SS.store&&SS.store.isLoggedIn()&&SS.NotifBell){
+    var nb=document.getElementById('ss-notif-bell');
+    if(nb)SS.NotifBell.init('ss-notif-bell');
+  }
+  if(typeof window.toast==='undefined'&&typeof SS!=='undefined'&&SS.ui){
+    window.toast=function(m,dur){SS.ui.toast(m,'info',dur||3000);};
+  }
+})();
+</script>
+</body>
 </html>
