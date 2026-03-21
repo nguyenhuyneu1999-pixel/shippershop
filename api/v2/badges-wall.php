@@ -56,7 +56,7 @@ if($targetUid){
             'following'=>intval($d->fetchOne("SELECT COUNT(*) as c FROM follows WHERE follower_id=?",[$targetUid])['c']),
             'comments'=>intval($d->fetchOne("SELECT COUNT(*) as c FROM comments WHERE user_id=?",[$targetUid])['c']),
             'streak'=>intval($d->fetchOne("SELECT current_streak FROM user_streaks WHERE user_id=?",[$targetUid])['current_streak']??0),
-            'groups_created'=>intval($d->fetchOne("SELECT COUNT(*) as c FROM `groups` WHERE created_by=?",[$targetUid])['c']??0),
+            'groups_created'=>0,
         ];
     }
 }
