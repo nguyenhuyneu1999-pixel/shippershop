@@ -487,6 +487,7 @@ if("serviceWorker" in navigator){
     <select id="fWard" onchange="loadPosts()" style="display:none"><option value="">Xã/Phường</option></select>
     <button class="loc-clear" id="locClear" onclick="clearLocFilter()" style="display:none"><i class="fas fa-times"></i> Xóa</button>
   </div>
+  <div id="ss-story-bar"></div>
   <div id="feed" style="background:#f0f2f5"><div class="empty"><i class="fas fa-spinner spin"></i><p>Đang tải...</p></div></div>
   <button class="load-more" id="loadMoreBtn" onclick="loadMore()" style="display:none">⬇ Tải thêm bài viết</button>
 </main>
@@ -1387,6 +1388,7 @@ function doFeedCheckin(){
 <script src="/js/components/emoji-picker.js"></script>
 <script src="/js/components/post-create.js"></script>
 <script src="/js/components/user-card.js"></script>
+<script src="/js/components/stories.js"></script>
 <script src="/js/pages/feed.js"></script>
 <script>
 // Init SS v2 components
@@ -1424,6 +1426,8 @@ function doFeedCheckin(){
   }
   // FAB quick actions menu
   if(SS.FABMenu) SS.FABMenu.init();
+  // Stories bar
+  if(SS.Stories&&document.getElementById('ss-story-bar')) SS.Stories.renderBar('ss-story-bar');
   // Trending hashtags sidebar
   if(SS.Hashtags&&document.getElementById('ss-trending')) SS.Hashtags.renderTrending('ss-trending');
   // Online users sidebar
