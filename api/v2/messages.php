@@ -544,6 +544,18 @@ if($method==='POST'){
         ok($newPin?'Đã ghim hội thoại':'Đã bỏ ghim',['pinned'=>$newPin]);
     }
 
+    // === ARCHIVE CONVERSATION ===
+    if($action==='archive'){
+        $cid=intval($input['conversation_id']??0);
+        if(!$cid) fail('Missing conversation_id');
+        $conv=$d->fetchOne("SELECT `status` FROM conversations WHERE id=? AND (user1_id=? OR user2_id=?)",[$cid,$uid,$uid]);
+        if(!$conv){$conv=$d->fetchOne("SELECT c.`status` FROM conversations c JOIN conversation_members cm ON c.id=cm.conversation_id WHERE c.id=? AND cm.user_id=?",[$cid,$uid]);}
+        if(!$conv) fail('No access',403);
+        $newStatus=$conv['status']==='archived'?'active':'archived';
+        $d->query("UPDATE conversations SET `status`=? WHERE id=?",[$newStatus,$cid]);
+        ok($newStatus==='archived'?'Đã lưu trữ hội thoại':'Đã khôi phục hội thoại',['status'=>$newStatus]);
+    }
+
     // === FORWARD MESSAGE ===
     if($action==='forward'){
         $mid=intval($input['message_id']??0);
