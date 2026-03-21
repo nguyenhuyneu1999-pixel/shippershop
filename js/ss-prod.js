@@ -15,7 +15,11 @@
     'post-detail': '/js/pages/post-detail.js',
     'groups': '/js/pages/groups.js',
     'people': '/js/pages/people.js',
-    'wallet': '/js/pages/wallet.js'
+    'wallet': '/js/pages/wallet.js',
+    'traffic': '/js/pages/traffic.js',
+    'marketplace': '/js/pages/marketplace.js',
+    'leaderboard': '/js/pages/leaderboard.js',
+    'activity-log': '/js/pages/activity-log.js'
   };
 
   // Init common components after bundle loads

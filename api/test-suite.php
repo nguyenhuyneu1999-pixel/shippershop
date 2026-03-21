@@ -86,7 +86,7 @@ foreach($pages as $pg){
 }
 
 // ============ JS/CSS FILES ============
-$staticFiles=['css/design-system.css','css/design-system.min.css','js/core/api.js','js/core/store.js','js/core/ui.js','js/core/utils.js','js/components/post-card.js','js/components/comment-sheet.js','js/components/image-viewer.js','js/components/notification-bell.js','js/components/search-overlay.js','js/components/upload.js','js/components/video-player.js','js/components/location-picker.js','js/components/gamification.js','js/components/emoji-picker.js','js/components/post-create.js','js/components/user-card.js','js/pages/feed.js','js/pages/user-profile.js','js/pages/messages.js','js/pages/post-detail.js','js/pages/groups.js','js/pages/people.js','js/pages/wallet.js','js/ss-bundle.min.js','js/ss-prod.js'];
+$staticFiles=['css/design-system.css','css/design-system.min.css','js/core/api.js','js/core/store.js','js/core/ui.js','js/core/utils.js','js/components/post-card.js','js/components/comment-sheet.js','js/components/image-viewer.js','js/components/notification-bell.js','js/components/search-overlay.js','js/components/upload.js','js/components/video-player.js','js/components/location-picker.js','js/components/gamification.js','js/components/emoji-picker.js','js/components/post-create.js','js/components/user-card.js','js/pages/feed.js','js/pages/user-profile.js','js/pages/messages.js','js/pages/post-detail.js','js/pages/groups.js','js/pages/people.js','js/pages/wallet.js','js/pages/traffic.js','js/pages/marketplace.js','js/pages/leaderboard.js','js/pages/activity-log.js','js/ss-bundle.min.js','js/ss-prod.js'];
 foreach($staticFiles as $sf){t("Static: $sf",file_exists(__DIR__.'/../'.$sf));}
 
 // ============ SVG ASSETS ============
