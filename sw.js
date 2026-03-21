@@ -1,136 +1,158 @@
-const CACHE_NAME = 'shippershop-v10';
-const STATIC_ASSETS = [
+// ShipperShop Service Worker v11
+// Cache strategies: Cache First (static), Network First (API), Stale While Revalidate (images)
+var CACHE = 'shippershop-v11';
+var STATIC_ASSETS = [
   '/',
   '/index.html',
-  '/profile.html',
-  '/groups.html',
-  '/group.html',
-  '/messages.html',
-  '/people.html',
-  '/user.html',
-  '/post-detail.html',
-  '/marketplace.html',
-  '/login.html',
-  '/register.html',
-  '/css/style.css',
+  '/css/design-system.css',
+  '/css/style-v2.css',
   '/mobile.css',
-  '/js/reddit-mkpost-1773927135.js',
-  '/js/mobile.js',
-  'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css',
+  '/js/core/api.js',
+  '/js/core/store.js',
+  '/js/core/ui.js',
+  '/js/core/utils.js',
+  '/js/components/post-card.js',
+  '/js/components/comment-sheet.js',
+  '/js/components/image-viewer.js',
+  '/js/components/notification-bell.js',
+  '/js/components/search-overlay.js',
+  '/js/components/upload.js',
+  '/js/components/video-player.js',
+  '/js/components/location-picker.js',
+  '/assets/img/defaults/avatar.svg',
+  '/assets/img/defaults/no-posts.svg',
+  '/assets/img/defaults/no-messages.svg',
+  '/offline.html',
+  '/manifest.json'
 ];
 
 // Install: cache static assets
-self.addEventListener('install', e => {
-  e.waitUntil(
-    caches.open(CACHE_NAME).then(cache => {
-      return cache.addAll(STATIC_ASSETS).catch(err => {
-        console.log('Cache addAll partial fail:', err);
-        // Cache what we can
-        return Promise.allSettled(STATIC_ASSETS.map(url => cache.add(url).catch(() => {})));
-      });
+self.addEventListener('install', function(event) {
+  event.waitUntil(
+    caches.open(CACHE).then(function(cache) {
+      return cache.addAll(STATIC_ASSETS);
+    }).then(function() {
+      return self.skipWaiting();
     })
   );
-  self.skipWaiting();
 });
 
 // Activate: clean old caches
-self.addEventListener('activate', e => {
-  e.waitUntil(
-    caches.keys().then(keys => Promise.all(
-      keys.filter(k => k !== CACHE_NAME).map(k => caches.delete(k))
-    ))
+self.addEventListener('activate', function(event) {
+  event.waitUntil(
+    caches.keys().then(function(names) {
+      return Promise.all(
+        names.filter(function(n) { return n !== CACHE; })
+             .map(function(n) { return caches.delete(n); })
+      );
+    }).then(function() {
+      return self.clients.claim();
+    })
   );
-  self.clients.claim();
 });
 
-// Fetch: network-first for API, cache-first for static
-self.addEventListener('fetch', e => {
-  const url = new URL(e.request.url);
-  
+// Fetch strategies
+self.addEventListener('fetch', function(event) {
+  var url = new URL(event.request.url);
+
   // Skip non-GET
-  if (e.request.method !== 'GET') return;
-  
-  // API calls: network only (fresh data)
-  if (url.pathname.startsWith('/api/')) {
-    e.respondWith(fetch(e.request).catch(() => new Response(JSON.stringify({success:false,message:'Offline'}), {headers:{'Content-Type':'application/json'}})));
+  if (event.request.method !== 'GET') return;
+
+  // API: Network First (always fresh data)
+  if (url.pathname.indexOf('/api/') === 0) {
+    event.respondWith(
+      fetch(event.request).catch(function() {
+        return new Response(JSON.stringify({success: false, message: 'Ngoại tuyến'}), {
+          headers: {'Content-Type': 'application/json'}
+        });
+      })
+    );
     return;
   }
-  
-  // Static assets: cache-first, fallback network
-  e.respondWith(
-    caches.match(e.request).then(cached => {
-      if (cached) {
-        // Return cache, update in background
-        fetch(e.request).then(res => {
-          if (res.ok) caches.open(CACHE_NAME).then(c => c.put(e.request, res));
-        }).catch(() => {});
-        return cached;
-      }
-      return fetch(e.request).then(res => {
-        if (res.ok && url.origin === location.origin) {
-          const clone = res.clone();
-          caches.open(CACHE_NAME).then(c => c.put(e.request, clone));
+
+  // Static assets (CSS, JS, fonts): Cache First
+  if (url.pathname.match(/\.(css|js|woff|woff2|ttf|eot)$/) || STATIC_ASSETS.indexOf(url.pathname) > -1) {
+    event.respondWith(
+      caches.match(event.request).then(function(cached) {
+        if (cached) return cached;
+        return fetch(event.request).then(function(response) {
+          if (response.ok) {
+            var clone = response.clone();
+            caches.open(CACHE).then(function(cache) { cache.put(event.request, clone); });
+          }
+          return response;
+        });
+      }).catch(function() {
+        // Offline fallback for HTML pages
+        if (event.request.headers.get('accept').indexOf('text/html') > -1) {
+          return caches.match('/offline.html');
         }
-        return res;
-      }).catch(() => caches.match('/index.html'));
+      })
+    );
+    return;
+  }
+
+  // Images: Stale While Revalidate (serve cached, update in background)
+  if (url.pathname.match(/\.(png|jpg|jpeg|gif|webp|svg|ico)$/)) {
+    event.respondWith(
+      caches.match(event.request).then(function(cached) {
+        var fetchPromise = fetch(event.request).then(function(response) {
+          if (response.ok) {
+            var clone = response.clone();
+            caches.open(CACHE).then(function(cache) { cache.put(event.request, clone); });
+          }
+          return response;
+        }).catch(function() { return cached; });
+        return cached || fetchPromise;
+      })
+    );
+    return;
+  }
+
+  // HTML pages: Network First with offline fallback
+  if (event.request.headers.get('accept').indexOf('text/html') > -1) {
+    event.respondWith(
+      fetch(event.request).then(function(response) {
+        if (response.ok) {
+          var clone = response.clone();
+          caches.open(CACHE).then(function(cache) { cache.put(event.request, clone); });
+        }
+        return response;
+      }).catch(function() {
+        return caches.match(event.request).then(function(cached) {
+          return cached || caches.match('/offline.html');
+        });
+      })
+    );
+    return;
+  }
+
+  // Default: Network First
+  event.respondWith(
+    fetch(event.request).catch(function() {
+      return caches.match(event.request);
     })
   );
 });
 
 // Push notifications
-self.addEventListener('push', function(e) {
-  var data = {title:'ShipperShop', body:'Bạn có thông báo mới', category:'general', url:'/', icon:'/icons/icon-192.png', badge:'/icons/icon-72.png'};
-  if (e.data) {
-    try { data = Object.assign(data, e.data.json()); } catch(x) { data.body = e.data.text(); }
-  }
-  
-  // Category-based tag (groups same-type notifications)
-  var tag = data.category || 'general';
-  if (data.category === 'message') tag = 'msg-' + (data.conversationId || 'chat');
-  else if (data.category === 'group') tag = 'grp-' + (data.groupId || 'community');
-  else if (data.category === 'post') tag = 'post-' + (data.postId || 'feed');
-  
-  var options = {
-    body: data.body,
-    icon: data.icon || '/icons/icon-192.png',
-    badge: data.badge || '/icons/icon-72.png',
-    tag: tag,
-    renotify: true,
-    data: { url: data.url || '/', category: data.category },
-    vibrate: [200, 100, 200],
-    actions: []
-  };
-  
-  // Category-specific actions
-  if (data.category === 'message') {
-    options.actions = [{action:'reply',title:'Trả lời'},{action:'open',title:'Mở'}];
-  } else if (data.category === 'post') {
-    options.actions = [{action:'open',title:'Xem bài viết'}];
-  } else if (data.category === 'group') {
-    options.actions = [{action:'open',title:'Xem cộng đồng'}];
-  }
-  
-  e.waitUntil(self.registration.showNotification(data.title, options));
-});
-
-self.addEventListener('notificationclick', function(e) {
-  e.notification.close();
-  var url = '/';
-  if (e.notification.data && e.notification.data.url) url = e.notification.data.url;
-  
-  e.waitUntil(
-    clients.matchAll({type:'window', includeUncontrolled:true}).then(function(windowClients) {
-      // Try to focus existing window
-      for (var i = 0; i < windowClients.length; i++) {
-        var client = windowClients[i];
-        if (client.url.indexOf(self.location.origin) !== -1 && 'focus' in client) {
-          client.focus();
-          client.navigate(url);
-          return;
-        }
-      }
-      // Open new window
-      if (clients.openWindow) return clients.openWindow(url);
+self.addEventListener('push', function(event) {
+  var data = {};
+  try { data = event.data.json(); } catch(e) { data = {title: 'ShipperShop', body: event.data ? event.data.text() : 'Thông báo mới'}; }
+  event.waitUntil(
+    self.registration.showNotification(data.title || 'ShipperShop', {
+      body: data.body || '',
+      icon: '/icons/icon-192.png',
+      badge: '/icons/icon-96.png',
+      data: {url: data.url || '/'},
+      vibrate: [100, 50, 100]
     })
   );
+});
+
+// Notification click
+self.addEventListener('notificationclick', function(event) {
+  event.notification.close();
+  var url = event.notification.data && event.notification.data.url ? event.notification.data.url : '/';
+  event.waitUntil(clients.openWindow(url));
 });
