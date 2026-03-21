@@ -19,7 +19,11 @@
     'traffic': '/js/pages/traffic.js',
     'marketplace': '/js/pages/marketplace.js',
     'leaderboard': '/js/pages/leaderboard.js',
-    'activity-log': '/js/pages/activity-log.js'
+    'activity-log': '/js/pages/activity-log.js',
+    'group-detail': '/js/pages/group-detail.js',
+    'profile-settings': '/js/pages/profile-settings.js',
+    'listing-detail': '/js/pages/listing-detail.js',
+    'map': '/js/pages/map-page.js'
   };
 
   // Init common components after bundle loads

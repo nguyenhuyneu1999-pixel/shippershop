@@ -380,7 +380,8 @@ function esc(t){return t?String(t).replace(/&/g,"&amp;").replace(/</g,"&lt;").re
 function catName(c){var m={"xe_co":"Xe cộ","dien_thoai":"Điện thoại","do_dien_tu":"Đồ điện tử","thoi_trang":"Thời trang","do_gia_dung":"Đồ gia dụng","khac":"Khác"};return m[c]||c||"Khác";}
 function formatDate(dt){if(!dt)return"";try{var d=new Date(dt.replace(" ","T"));return d.toLocaleDateString("vi-VN");}catch(e){return dt;}}
 </script>
-<script src="/js/analytics.js"></script><!-- SS v2 Core + Components -->
+<script src="/js/analytics.js"></script><script src="/js/pages/listing-detail.js"></script>
+<!-- SS v2 Core + Components -->
 <script src="/js/core/utils.js"></script>
 <script src="/js/core/store.js"></script>
 <script src="/js/core/ui.js"></script>
