@@ -28,6 +28,8 @@
     'scheduled': '/js/pages/scheduled.js',
     'bookmarks': '/js/pages/bookmarks.js',
     'auth': '/js/pages/auth.js',
+    'admin-logs': '/js/pages/admin-logs.js',
+    'admin-mod': '/js/pages/admin-mod.js',
     'settings': '/js/pages/settings.js',
     'account-settings': '/js/pages/account-settings.js'
   };

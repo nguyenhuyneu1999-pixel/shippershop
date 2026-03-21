@@ -39,16 +39,16 @@ SS.SettingsPage = {
   exportData: function() {
     SS.ui.confirm('Tải toàn bộ dữ liệu của bạn dưới dạng JSON?', function() {
       SS.ui.loading(true);
-      SS.api.get('/export.php?action=overview').then(function(d) {
+      SS.api.get('/export.php?action=summary').then(function(d) {
         SS.ui.loading(false);
         var data = d.data || {};
+        var stats = data.stats || {};
         var html = '<div class="card"><div class="card-body">'
-          + '<div class="list-item"><div class="flex-1">Bài viết</div><div class="font-bold">' + (data.posts || 0) + '</div></div>'
-          + '<div class="list-item"><div class="flex-1">Bình luận</div><div class="font-bold">' + (data.comments || 0) + '</div></div>'
-          + '<div class="list-item"><div class="flex-1">Lượt thích</div><div class="font-bold">' + (data.likes || 0) + '</div></div>'
-          + '<div class="list-item"><div class="flex-1">Tin nhắn</div><div class="font-bold">' + (data.messages || 0) + '</div></div>'
-          + '<div class="list-item"><div class="flex-1">Người theo dõi</div><div class="font-bold">' + (data.followers || 0) + '</div></div>'
-          + '<div class="list-item"><div class="flex-1">Đang theo dõi</div><div class="font-bold">' + (data.following || 0) + '</div></div>'
+          + '<div class="list-item"><div class="flex-1">Bài viết</div><div class="font-bold">' + (stats.posts || 0) + '</div></div>'
+          + '<div class="list-item"><div class="flex-1">Bình luận</div><div class="font-bold">' + (stats.comments || 0) + '</div></div>'
+          + '<div class="list-item"><div class="flex-1">Lượt thích</div><div class="font-bold">' + (stats.likes || 0) + '</div></div>'
+          + '<div class="list-item"><div class="flex-1">Tin nhắn</div><div class="font-bold">' + (stats.messages || 0) + '</div></div>'
+          + '<div class="list-item"><div class="flex-1">Nhóm</div><div class="font-bold">' + (stats.groups || 0) + '</div></div>'
           + '</div></div>'
           + '<button class="btn btn-primary btn-block mt-3" onclick="SS.SettingsPage._downloadExport()"><i class="fa-solid fa-download"></i> Tải file JSON</button>';
         SS.ui.sheet({title: 'Dữ liệu của bạn', html: html});
@@ -58,7 +58,7 @@ SS.SettingsPage = {
 
   _downloadExport: function() {
     SS.ui.loading(true);
-    SS.api.get('/export.php?action=full').then(function(d) {
+    SS.api.get('/export.php').then(function(d) {
       SS.ui.loading(false);
       var json = JSON.stringify(d.data, null, 2);
       var blob = new Blob([json], {type: 'application/json'});
