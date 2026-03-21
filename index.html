@@ -1400,6 +1400,21 @@ function doFeedCheckin(){
   if(typeof window.toast==='undefined' && SS.ui){
     window.toast=function(m,dur){SS.ui.toast(m,'info',dur||3000);};
   }
+  // Bridge: wire old image clicks to SS.ImageViewer
+  if(SS.ImageViewer){
+    window.openLightbox=function(src,gallery){SS.ImageViewer.open(src,gallery);};
+  }
+  // Bridge: wire FAB "create post" to SS.PostCreate
+  if(SS.PostCreate && SS.store.isLoggedIn()){
+    var oldFab=document.querySelector('.fab-btn,[onclick*="openPostModal"]');
+    if(oldFab){
+      oldFab.onclick=function(e){e.preventDefault();SS.PostCreate.open();};
+    }
+  }
+  // Bridge: enhance old comment sheet with SS.CommentSheet
+  if(SS.CommentSheet){
+    window.openPostSheetV2=function(pid){SS.CommentSheet.open(pid);};
+  }
 })();
 </script>
 </body>
