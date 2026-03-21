@@ -40,7 +40,7 @@ foreach($comments as $c){
 }
 
 // Group joins
-$joins=$d->fetchAll("SELECT gm.group_id,g.name,gm.created_at FROM group_members gm JOIN `groups` g ON gm.group_id=g.id WHERE gm.user_id=? ORDER BY gm.created_at DESC LIMIT 10",[$userId]);
+$joins=$d->fetchAll("SELECT gm.group_id,g.name,gm.joined_at as created_at FROM group_members gm JOIN `groups` g ON gm.group_id=g.id WHERE gm.user_id=? ORDER BY gm.joined_at DESC LIMIT 10",[$userId]);
 foreach($joins as $j){
     $events[]=['type'=>'group_join','group_id'=>intval($j['group_id']),'text'=>'Tham gia nhóm '.$j['name'],'icon'=>'👥','label'=>'Tham gia nhóm','time'=>$j['created_at']];
 }

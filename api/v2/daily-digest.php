@@ -24,8 +24,12 @@ $uid=optional_auth();
 $data=cache_remember('daily_digest_'.($uid?:0), function() use($d,$uid) {
     $digest=[];
 
-    // Trending posts today
-    $digest['trending']=$d->fetchAll("SELECT p.id,p.content,p.likes_count,p.comments_count,u.fullname,u.avatar FROM posts p JOIN users u ON p.user_id=u.id WHERE p.`status`='active' AND p.created_at >= CURDATE() ORDER BY (p.likes_count+p.comments_count) DESC LIMIT 5");
+    // Trending posts (last 24h, fallback to last 7d if empty today)
+    $trending=$d->fetchAll("SELECT p.id,p.content,p.likes_count,p.comments_count,u.fullname,u.avatar FROM posts p JOIN users u ON p.user_id=u.id WHERE p.`status`='active' AND p.created_at >= DATE_SUB(NOW(), INTERVAL 1 DAY) ORDER BY (p.likes_count+p.comments_count) DESC LIMIT 5");
+    if(!$trending){
+        $trending=$d->fetchAll("SELECT p.id,p.content,p.likes_count,p.comments_count,u.fullname,u.avatar FROM posts p JOIN users u ON p.user_id=u.id WHERE p.`status`='active' ORDER BY (p.likes_count+p.comments_count) DESC LIMIT 5");
+    }
+    $digest['trending']=$trending;
 
     // Platform stats today
     $digest['today']=[
@@ -37,19 +41,18 @@ $data=cache_remember('daily_digest_'.($uid?:0), function() use($d,$uid) {
 
     // User-specific stats
     if($uid){
-        $digest['my_stats']=[
-            'posts_today'=>intval($d->fetchOne("SELECT COUNT(*) as c FROM posts WHERE user_id=? AND created_at >= CURDATE()",[$uid])['c']),
-            'likes_received_today'=>intval($d->fetchOne("SELECT COUNT(*) as c FROM likes WHERE post_id IN (SELECT id FROM posts WHERE user_id=?) AND created_at >= CURDATE()",[$uid])['c']),
-            'new_followers'=>intval($d->fetchOne("SELECT COUNT(*) as c FROM follows WHERE following_id=? AND created_at >= CURDATE()",[$uid])['c']),
-            'unread_messages'=>intval($d->fetchOne("SELECT COUNT(*) as c FROM messages WHERE conversation_id IN (SELECT conversation_id FROM conversation_members WHERE user_id=?) AND sender_id!=? AND is_read=0",[$uid,$uid])['c']),
-        ];
+        $myPosts=intval($d->fetchOne("SELECT COUNT(*) as c FROM posts WHERE user_id=? AND created_at >= CURDATE()",[$uid])['c']);
+        $myLikes=intval($d->fetchOne("SELECT COUNT(*) as c FROM post_likes WHERE post_id IN (SELECT id FROM posts WHERE user_id=?) AND created_at >= CURDATE()",[$uid])['c']);
+        $newFollowers=intval($d->fetchOne("SELECT COUNT(*) as c FROM follows WHERE following_id=? AND created_at >= CURDATE()",[$uid])['c']);
+        $unread=intval($d->fetchOne("SELECT COUNT(*) as c FROM messages WHERE conversation_id IN (SELECT conversation_id FROM conversation_members WHERE user_id=?) AND sender_id!=? AND is_read=0",[$uid,$uid])['c']);
+        $digest['my_stats']=['posts_today'=>$myPosts,'likes_received_today'=>$myLikes,'new_followers'=>$newFollowers,'unread_messages'=>$unread];
     }
 
-    // Active groups today
-    $digest['active_groups']=$d->fetchAll("SELECT g.id,g.name,g.avatar,COUNT(gp.id) as posts_today FROM `groups` g JOIN group_posts gp ON g.id=gp.group_id WHERE gp.created_at >= CURDATE() GROUP BY g.id ORDER BY posts_today DESC LIMIT 5");
+    // Active groups
+    $digest['active_groups']=$d->fetchAll("SELECT g.id,g.name,g.avatar,COUNT(gp.id) as posts_today FROM `groups` g JOIN group_posts gp ON g.id=gp.group_id WHERE gp.created_at >= DATE_SUB(NOW(), INTERVAL 1 DAY) GROUP BY g.id ORDER BY posts_today DESC LIMIT 5");
 
-    // Tip of the day (from posts with type=tip)
-    $tip=$d->fetchOne("SELECT p.id,p.content,u.fullname FROM posts p JOIN users u ON p.user_id=u.id WHERE p.type='tip' AND p.`status`='active' ORDER BY RAND() LIMIT 1");
+    // Tip of the day (random recent post)
+    $tip=$d->fetchOne("SELECT p.id,p.content,u.fullname FROM posts p JOIN users u ON p.user_id=u.id WHERE p.`status`='active' ORDER BY p.likes_count DESC LIMIT 1");
     $digest['tip_of_day']=$tip;
 
     $digest['date']=date('Y-m-d');
