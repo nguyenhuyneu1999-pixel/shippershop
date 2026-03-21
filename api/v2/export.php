@@ -25,8 +25,10 @@ $uid=require_auth();
 if(!$action||$action==='full'){
     // Rate limit: 1 full export per hour
     rate_enforce('data_export',1,3600);
-    $user=$d->fetchOne("SELECT id,fullname,email,phone,avatar,cover_photo,bio,shipping_company,is_verified,verified_at,role,total_posts,total_success,total_followers,total_following,is_online,created_at FROM users WHERE id=?",[$uid]);
+    $user=$d->fetchOne("SELECT * FROM users WHERE id=?",[$uid]);
     if(!$user) ex_fail('User not found',404);
+    // Remove sensitive fields
+    unset($user['password'],$user['pin_hash'],$user['two_factor_secret']);
 
     // Posts
     $posts=$d->fetchAll("SELECT id,content,type,images,video_url,province,district,ward,likes_count,comments_count,shares_count,is_pinned,scheduled_at,is_draft,created_at,edited_at FROM posts WHERE user_id=? AND `status`!='deleted' ORDER BY created_at DESC",[$uid]);
@@ -103,7 +105,7 @@ if(!$action||$action==='full'){
 
 // Summary only (lighter)
 if($action==='summary'){
-    $user=$d->fetchOne("SELECT id,fullname,email,total_posts,total_followers,total_following,created_at FROM users WHERE id=?",[$uid]);
+    $user=$d->fetchOne("SELECT id,fullname,email,created_at FROM users WHERE id=?",[$uid]);
     $postCount=intval($d->fetchOne("SELECT COUNT(*) as c FROM posts WHERE user_id=? AND `status`='active'",[$uid])['c']);
     $commentCount=intval($d->fetchOne("SELECT COUNT(*) as c FROM comments WHERE user_id=? AND `status`='active'",[$uid])['c']);
     $likeCount=intval($d->fetchOne("SELECT COUNT(*) as c FROM likes WHERE user_id=?",[$uid])['c']);
