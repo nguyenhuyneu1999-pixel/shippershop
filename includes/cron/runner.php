@@ -16,10 +16,15 @@ if ($isWeb) {
     }
 }
 
+try {
+
 // Find includes path
-$basePath = $isWeb ? __DIR__ . '/../../includes' : __DIR__ . '/../';
-require_once $basePath . '/config.php';
-require_once $basePath . '/db.php';
+$basePath = __DIR__ . '/../';
+if (!file_exists($basePath . 'config.php')) {
+    $basePath = __DIR__ . '/../../includes/';
+}
+require_once $basePath . 'config.php';
+require_once $basePath . 'db.php';
 
 $d = db();
 $results = [];
@@ -121,4 +126,8 @@ if ($isWeb) {
     echo json_encode(['cron' => 'OK', 'timestamp' => date('Y-m-d H:i:s'), 'jobs' => $results], JSON_PRETTY_PRINT);
 } else {
     echo "[" . date('Y-m-d H:i:s') . "] Cron complete: " . json_encode($results) . "\n";
+}
+
+} catch (\Throwable $e) {
+    echo json_encode(['cron' => 'ERROR', 'message' => $e->getMessage(), 'file' => basename($e->getFile()), 'line' => $e->getLine()]);
 }
