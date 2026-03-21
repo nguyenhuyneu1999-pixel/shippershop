@@ -12,28 +12,25 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') { http_response_code(204); exit; }
 $endpoint = $_GET['endpoint'] ?? '';
 if (!$endpoint) {
     // API index — list available endpoints
+    // Auto-detect all API files
+    $files = glob(__DIR__ . '/*.php');
+    $endpoints = [];
+    foreach ($files as $f) {
+        $name = basename($f, '.php');
+        if ($name === 'index') continue;
+        $endpoints[$name] = '/api/v2/' . $name . '.php';
+    }
+    ksort($endpoints);
+
     echo json_encode([
         'api' => 'ShipperShop API v2',
-        'version' => '2.0.0',
-        'endpoints' => [
-            'posts' => '/api/v2/posts.php',
-            'messages' => '/api/v2/messages.php',
-            'users' => '/api/v2/users.php',
-            'groups' => '/api/v2/groups.php',
-            'notifications' => '/api/v2/notifications.php',
-            'search' => '/api/v2/search.php',
-            'admin' => '/api/v2/admin.php',
-            'wallet' => '/api/v2/wallet.php',
-            'traffic' => '/api/v2/traffic.php',
-            'marketplace' => '/api/v2/marketplace.php',
-            'social' => '/api/v2/social.php',
-            'gamification' => '/api/v2/gamification.php',
-            'content' => '/api/v2/content.php',
-            'push' => '/api/v2/push.php',
-            'analytics' => '/api/v2/analytics.php',
-            'health' => '/api/v2/health.php'
-        ],
-        'docs' => 'https://shippershop.vn/docs/API.md'
+        'version' => '2.1.0',
+        'endpoint_count' => count($endpoints),
+        'endpoints' => $endpoints,
+        'docs' => 'https://shippershop.vn/docs/API.md',
+        'health' => '/api/v2/health.php',
+        'status' => '/api/v2/status.php',
+        'test_suite' => '/api/test-suite.php?key=...',
     ], JSON_PRETTY_PRINT);
     exit;
 }

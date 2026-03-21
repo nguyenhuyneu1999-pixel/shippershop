@@ -119,6 +119,41 @@ if($_SERVER['REQUEST_METHOD']==='POST'){
 
     fail('Action không hợp lệ');
 }
+
+// Block/Unblock
+if($method==='POST'&&$action==='block'){
+    $uid=require_auth();
+    $tid=intval($input['user_id']??0);
+    if(!$tid||$tid===$uid) fail('Invalid user');
+    $exists=$d->fetchOne("SELECT id FROM user_blocks WHERE user_id=? AND blocked_id=?",[$uid,$tid]);
+    if($exists){
+        $d->query("DELETE FROM user_blocks WHERE user_id=? AND blocked_id=?",[$uid,$tid]);
+        ok('Đã bỏ chặn',['blocked'=>false]);
+    }else{
+        $pdo->prepare("INSERT IGNORE INTO user_blocks (user_id,blocked_id,created_at) VALUES (?,?,NOW())")->execute([$uid,$tid]);
+        // Also unfollow both ways
+        $d->query("DELETE FROM follows WHERE (follower_id=? AND following_id=?) OR (follower_id=? AND following_id=?)",[$uid,$tid,$tid,$uid]);
+        ok('Đã chặn user',['blocked'=>true]);
+    }
+}
+
+// Block list
+if($method==='GET'&&$action==='blocked'){
+    $uid=require_auth();
+    $blocked=$d->fetchAll("SELECT u.id,u.fullname,u.avatar,ub.created_at as blocked_at FROM user_blocks ub JOIN users u ON ub.blocked_id=u.id WHERE ub.user_id=? ORDER BY ub.created_at DESC",[$uid]);
+    ok('OK',$blocked);
+}
+
+// Check if blocked
+if($method==='GET'&&$action==='is_blocked'){
+    $uid=optional_auth();
+    $tid=intval($_GET['user_id']??0);
+    if(!$uid||!$tid){ok('OK',['blocked'=>false,'blocked_by'=>false]);}
+    $blocked=!!$d->fetchOne("SELECT id FROM user_blocks WHERE user_id=? AND blocked_id=?",[$uid,$tid]);
+    $blockedBy=!!$d->fetchOne("SELECT id FROM user_blocks WHERE user_id=? AND blocked_id=?",[$tid,$uid]);
+    ok('OK',['blocked'=>$blocked,'blocked_by'=>$blockedBy]);
+}
+
 fail('Method không hỗ trợ',405);
 
 function getUserName($uid){

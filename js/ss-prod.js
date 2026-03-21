@@ -26,7 +26,8 @@
     'map': '/js/pages/map-page.js',
     'admin': '/js/pages/admin.js',
     'scheduled': '/js/pages/scheduled.js',
-    'bookmarks': '/js/pages/bookmarks.js'
+    'bookmarks': '/js/pages/bookmarks.js',
+    'auth': '/js/pages/auth.js'
   };
 
   // Init common components after bundle loads
