@@ -31,4 +31,25 @@ if($_SERVER['REQUEST_METHOD']==='POST'&&($action==='pageview'||!$action)){
     echo json_encode(['success'=>true]);exit;
 }
 
+// Frontend error logging
+if($_SERVER['REQUEST_METHOD']==='POST'&&$action==='error'){
+    $input=json_decode(file_get_contents('php://input'),true);
+    if(!$input){echo json_encode(['success'=>false]);exit;}
+    try{
+        $pdo=$d->getConnection();
+        $pdo->prepare("INSERT INTO error_logs (type,message,source,line_number,stack_trace,page,user_id,ip,user_agent,created_at) VALUES (?,?,?,?,?,?,?,?,?,NOW())")->execute([
+            mb_substr($input['type']??'error',0,20),
+            mb_substr($input['message']??'',0,500),
+            mb_substr($input['source']??'',0,255),
+            intval($input['line']??0),
+            mb_substr($input['stack']??'',0,1000),
+            mb_substr($input['page']??'',0,100),
+            intval($input['userId']??0)?:null,
+            $_SERVER['REMOTE_ADDR']??'',
+            mb_substr($input['ua']??'',0,255),
+        ]);
+    }catch(\Throwable $e){}
+    echo json_encode(['success'=>true]);exit;
+}
+
 echo json_encode(['success'=>false,'message'=>'Invalid']);
