@@ -11,7 +11,7 @@ echo json_encode([
         'site' => [
             'name' => 'ShipperShop',
             'url' => 'https://shippershop.vn',
-            'version' => '4.3.0',
+            'version' => '4.4.0',
             'tagline' => 'Cộng đồng shipper Việt Nam',
             'logo_text' => 'ShipperShop',
             'primary_color' => '#7C3AED',
