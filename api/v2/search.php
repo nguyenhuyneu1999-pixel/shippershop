@@ -82,6 +82,53 @@ if($action==='clear_history'){
     ok('OK');
 }
 
+// Advanced search with filters
+if($action==='advanced'){
+    $type=$_GET['type']??'posts'; // posts, users, groups
+    $sort=$_GET['sort']??'relevant'; // relevant, newest, popular
+    $province=$_GET['province']??'';
+    $company=$_GET['company']??'';
+    $dateFrom=$_GET['date_from']??'';
+    $dateTo=$_GET['date_to']??'';
+    $hasImage=isset($_GET['has_image']);
+    $hasVideo=isset($_GET['has_video']);
+    $page=max(1,intval($_GET['page']??1));
+    $offset=($page-1)*$limit;
+
+    if($type==='posts'){
+        $w="p.`status`='active' AND p.is_draft=0";$params=[];
+        if($q){$w.=" AND p.content LIKE ?";$params[]='%'.$q.'%';}
+        if($province){$w.=" AND p.province=?";$params[]=$province;}
+        if($company){$w.=" AND u.shipping_company=?";$params[]=$company;}
+        if($dateFrom){$w.=" AND p.created_at>=?";$params[]=$dateFrom;}
+        if($dateTo){$w.=" AND p.created_at<=?";$params[]=$dateTo.' 23:59:59';}
+        if($hasImage) $w.=" AND p.images IS NOT NULL AND p.images!='[]' AND p.images!=''";
+        if($hasVideo) $w.=" AND p.video_url IS NOT NULL AND p.video_url!=''";
+        $orderBy=['relevant'=>'(p.likes_count*3+p.comments_count*5) DESC','newest'=>'p.created_at DESC','popular'=>'p.likes_count DESC'][$sort]??'p.created_at DESC';
+        $posts=$d->fetchAll("SELECT p.*,u.fullname as user_name,u.avatar as user_avatar,u.shipping_company,u.is_verified FROM posts p LEFT JOIN users u ON p.user_id=u.id WHERE $w ORDER BY $orderBy LIMIT $limit OFFSET $offset",$params);
+        $total=intval($d->fetchOne("SELECT COUNT(*) as c FROM posts p LEFT JOIN users u ON p.user_id=u.id WHERE $w",$params)['c']);
+        ok('OK',['posts'=>$posts,'total'=>$total,'page'=>$page]);
+    }
+
+    if($type==='users'){
+        $w="u.`status`='active'";$params=[];
+        if($q){$w.=" AND (u.fullname LIKE ? OR u.email LIKE ?)";$params[]='%'.$q.'%';$params[]='%'.$q.'%';}
+        if($company){$w.=" AND u.shipping_company=?";$params[]=$company;}
+        $orderBy=['newest'=>'u.created_at DESC','popular'=>'(SELECT COUNT(*) FROM follows WHERE following_id=u.id) DESC'][$sort]??'u.fullname ASC';
+        $users=$d->fetchAll("SELECT u.id,u.fullname,u.avatar,u.bio,u.shipping_company,u.is_verified FROM users u WHERE $w ORDER BY $orderBy LIMIT $limit OFFSET $offset",$params);
+        ok('OK',['users'=>$users,'page'=>$page]);
+    }
+
+    if($type==='groups'){
+        $w="1=1";$params=[];
+        if($q){$w.=" AND (g.name LIKE ? OR g.description LIKE ?)";$params[]='%'.$q.'%';$params[]='%'.$q.'%';}
+        $groups=$d->fetchAll("SELECT g.*,(SELECT COUNT(*) FROM group_members WHERE group_id=g.id) as member_count FROM `groups` g WHERE $w ORDER BY member_count DESC LIMIT $limit OFFSET $offset",$params);
+        ok('OK',['groups'=>$groups,'page'=>$page]);
+    }
+
+    ok('OK',[]);
+}
+
 ok('OK',[]);
 
 } catch(Throwable $e) {

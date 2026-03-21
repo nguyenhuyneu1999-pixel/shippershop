@@ -544,6 +544,29 @@ if($method==='POST'){
         ok($newPin?'Đã ghim hội thoại':'Đã bỏ ghim',['pinned'=>$newPin]);
     }
 
+    // === UPLOAD FILE IN MESSAGE ===
+    if($action==='upload_file'){
+        $cid=intval($_POST['conversation_id']??0);
+        if(!$cid) fail('Missing conversation_id');
+        if(empty($_FILES['file'])) fail('No file');
+        $file=$_FILES['file'];
+        if($file['size']>10*1024*1024) fail('Max 10MB');
+        $allowed=['image/jpeg','image/png','image/gif','image/webp','application/pdf','video/mp4','audio/mpeg','audio/mp4'];
+        $mime=mime_content_type($file['tmp_name']);
+        if(!in_array($mime,$allowed)) fail('File type not allowed');
+        $ext=pathinfo($file['name'],PATHINFO_EXTENSION)?:'bin';
+        $fn='msg_'.$uid.'_'.time().'_'.random_int(1000,9999).'.'.$ext;
+        $dir=__DIR__.'/../../uploads/messages/';
+        if(!is_dir($dir)) mkdir($dir,0755,true);
+        if(!move_uploaded_file($file['tmp_name'],$dir.$fn)) fail('Upload failed');
+        $fileUrl='/uploads/messages/'.$fn;
+        $msgType=strpos($mime,'image')===0?'image':(strpos($mime,'video')===0?'video':(strpos($mime,'audio')===0?'audio':'file'));
+        $content=$_POST['content']??$file['name'];
+        $pdo->prepare("INSERT INTO messages (conversation_id,sender_id,content,`type`,file_url,file_name,created_at) VALUES (?,?,?,?,?,?,NOW())")->execute([$cid,$uid,$content,$msgType,$fileUrl,$file['name']]);
+        $d->query("UPDATE conversations SET last_message=?,last_message_at=NOW() WHERE id=?",['['.$msgType.'] '.$file['name'],$cid]);
+        ok('Đã gửi file!',['file_url'=>$fileUrl,'type'=>$msgType]);
+    }
+
     // === ARCHIVE CONVERSATION ===
     if($action==='archive'){
         $cid=intval($input['conversation_id']??0);
