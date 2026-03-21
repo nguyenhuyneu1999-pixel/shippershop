@@ -11,7 +11,11 @@
   var pageMap = {
     'feed': '/js/pages/feed.js',
     'user-profile': '/js/pages/user-profile.js',
-    'messages': '/js/pages/messages.js'
+    'messages': '/js/pages/messages.js',
+    'post-detail': '/js/pages/post-detail.js',
+    'groups': '/js/pages/groups.js',
+    'people': '/js/pages/people.js',
+    'wallet': '/js/pages/wallet.js'
   };
 
   // Init common components after bundle loads
