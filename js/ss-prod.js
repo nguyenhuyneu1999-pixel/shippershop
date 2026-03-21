@@ -28,6 +28,7 @@
     'scheduled': '/js/pages/scheduled.js',
     'bookmarks': '/js/pages/bookmarks.js',
     'auth': '/js/pages/auth.js',
+    'settings': '/js/pages/settings.js',
     'account-settings': '/js/pages/account-settings.js'
   };
 
