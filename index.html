@@ -28,6 +28,7 @@
 <meta name="twitter:title" content="ShipperShop - Cộng đồng Shipper Việt Nam #1">
 <meta name="twitter:description" content="Mạng xã hội dành riêng cho shipper Việt Nam. Chia sẻ, kết nối, kiếm tiền.">
 <meta name="twitter:image" content="https://shippershop.vn/icons/og-image.png">
+<link rel="stylesheet" href="css/design-system.css">
 <link rel="stylesheet" href="css/style-v2.css">
 <link rel="stylesheet" href="mobile.css?v=1773579668">
 <link rel="preload" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
@@ -351,11 +352,11 @@ if("serviceWorker" in navigator){
 <body>
 <nav class="top-nav">
   <a href="index.html" class="nav-logo"><span class="no-wrap">ShipperShop</span></a>
-  <div class="nav-search">
+  <div class="nav-search" onclick="SS.Search&&SS.Search.open()">
     <i class="fas fa-search"></i>
-    <input id="q" type="text" placeholder="Tìm kiếm bài viết, #hashtag..." onkeydown="if(event.key==='Enter')search()" onfocus="openSearch()" readonly>
+    <input id="q" type="text" placeholder="Tìm kiếm bài viết, #hashtag..." onkeydown="if(event.key==='Enter')search()" onfocus="if(SS.Search)SS.Search.open()" readonly>
   </div>
-  <div class="nav-actions" id="navArea"></div>
+  <div class="nav-actions" id="navArea"><div id="ss-notif-bell" style="display:inline-block"></div></div>
 </nav>
 
 <div id="searchOverlay" style="display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.4);z-index:500" onclick="closeSearch()">
@@ -1362,4 +1363,39 @@ function doFeedCheckin(){
   }).catch(function(){b.style.display="none";});
 }
 </script>
+<!-- SS v2 Core + Components -->
+<script src="/js/core/utils.js"></script>
+<script src="/js/core/store.js"></script>
+<script src="/js/core/ui.js"></script>
+<script src="/js/core/api.js"></script>
+<script src="/js/components/post-card.js"></script>
+<script src="/js/components/comment-sheet.js"></script>
+<script src="/js/components/image-viewer.js"></script>
+<script src="/js/components/notification-bell.js"></script>
+<script src="/js/components/search-overlay.js"></script>
+<script src="/js/components/video-player.js"></script>
+<script src="/js/components/upload.js"></script>
+<script src="/js/components/location-picker.js"></script>
+<script>
+// Init SS v2 components
+(function(){
+  // Notification bell
+  if(SS.NotifBell && SS.store.isLoggedIn()){
+    SS.NotifBell.init('ss-notif-bell');
+  }
+  // Video autoplay
+  if(SS.VideoPlayer) SS.VideoPlayer.init();
+  // Toast container (used by old + new code)
+  if(!document.getElementById('ssToast')){
+    var t=document.createElement('div');t.id='ssToast';
+    t.style.cssText='position:fixed;top:20px;left:50%;transform:translateX(-50%);z-index:9999;pointer-events:none';
+    document.body.appendChild(t);
+  }
+  // Bridge: make old toast() work with new SS.ui.toast
+  if(typeof window.toast==='undefined' && SS.ui){
+    window.toast=function(m,dur){SS.ui.toast(m,'info',dur||3000);};
+  }
+})();
+</script>
 </body>
+</html>
