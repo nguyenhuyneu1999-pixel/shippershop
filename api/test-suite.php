@@ -260,7 +260,10 @@ $badgeResp2=json_decode(@file_get_contents('https://shippershop.vn/api/v2/badge-
 t('Func: badge earned count',$badgeResp2&&$badgeResp2['success']===true&&$badgeResp2['data']['total_earned']>=1);
 
 // Schedule calendar (requires auth, just check endpoint exists)
-$calResp=json_decode(@file_get_contents('https://shippershop.vn/api/v2/schedule-calendar.php'),true);
+// Schedule calendar requires auth - check endpoint responds
+$calCtx=stream_context_create(['http'=>['ignore_errors'=>true]]);
+$calRaw=@file_get_contents('https://shippershop.vn/api/v2/schedule-calendar.php',false,$calCtx);
+$calResp=json_decode($calRaw,true);
 t('Func: schedule calendar',$calResp!==null);
 
 // Checkin nearby
