@@ -493,6 +493,8 @@ if("serviceWorker" in navigator){
 </main>
 
 <aside class="right-sidebar">
+  <!-- Profile completeness -->
+  <div id="ss-profile-score"></div>
   <!-- Community banner -->
   <div class="community-banner">
     <h3><i class="fas fa-users"></i> Cộng đồng ShipperShop</h3>
@@ -537,10 +539,11 @@ if("serviceWorker" in navigator){
       <div style="text-align:center;padding:8px;color:#999;width:100%"><i class="fas fa-spinner fa-spin"></i></div>
     </div>
   </div>
-</aside>
-</div>
-
-<!-- MODAL TẠO BÀI -->
+  <!-- Trending hashtags widget -->
+  <div id="ss-trending" style="margin-top:16px"></div>
+  <!-- Online users widget -->
+  <div id="ss-online" style="margin-top:16px"></div>
+</aside><!-- MODAL TẠO BÀI -->
 <div class="modal-overlay" id="modal">
 <div class="modal">
   <div class="modal-head"><h2 id="mTitle"><i class="fas fa-pen"></i> Tạo bài viết</h2><button class="modal-x" onclick="closeModal()">×</button></div>
@@ -1394,6 +1397,9 @@ function doFeedCheckin(){
 <script src="/js/components/post-create.js"></script>
 <script src="/js/components/user-card.js"></script>
 <script src="/js/components/stories.js"></script>
+<script src="/js/components/a11y.js"></script>
+<script src="/js/components/profile-complete.js"></script>
+<script src="/js/components/reactions.js"></script>
 <script src="/js/pages/feed.js"></script>
 <script>
 // Init SS v2 components
@@ -1437,6 +1443,10 @@ function doFeedCheckin(){
   if(SS.Hashtags&&document.getElementById('ss-trending')) SS.Hashtags.renderTrending('ss-trending');
   // Online users sidebar
   if(SS.OnlineWidget&&document.getElementById('ss-online')) SS.OnlineWidget.render('ss-online');
+  // Profile completeness
+  if(SS.ProfileComplete&&SS.store.isLoggedIn()) SS.ProfileComplete.render('ss-profile-score');
+  // Announce page load
+  if(SS.A11y) SS.A11y.announce('Trang chủ đã tải xong');
 })();
 </script>
 </body>
