@@ -87,6 +87,30 @@ if($_SERVER['REQUEST_METHOD']==='GET'){
 
 if($_SERVER['REQUEST_METHOD']==='POST'){
     $uid=require_auth();
+
+    // Upload story image (multipart form)
+    if($action==='upload'){
+        rate_enforce('story_create',10,3600);
+        if(empty($_FILES['image'])) st_fail('No image');
+        $file=$_FILES['image'];
+        if($file['size']>5*1024*1024) st_fail('Max 5MB');
+        $allowed=['image/jpeg','image/png','image/gif','image/webp'];
+        if(!in_array(mime_content_type($file['tmp_name']),$allowed)) st_fail('JPEG/PNG/GIF/WebP only');
+        $ext=pathinfo($file['name'],PATHINFO_EXTENSION)?:'jpg';
+        $fn='story_'.$uid.'_'.time().'.'.$ext;
+        $dir=__DIR__.'/../../uploads/stories/';
+        if(!is_dir($dir)) mkdir($dir,0755,true);
+        if(!move_uploaded_file($file['tmp_name'],$dir.$fn)) st_fail('Upload failed');
+        $imageUrl='/uploads/stories/'.$fn;
+        $bg=$_POST['background']??'#000000';
+        $hours=min(intval($_POST['hours']??24),48);
+        $exp=date('Y-m-d H:i:s',time()+$hours*3600);
+        $pdo->prepare("INSERT INTO stories (user_id,content,image_url,background,expires_at,created_at) VALUES (?,?,?,?,?,NOW())")->execute([$uid,trim($_POST['content']??'')?:null,$imageUrl,$bg,$exp]);
+        $id=intval($pdo->lastInsertId());if(!$id){$r=$pdo->query("SELECT MAX(id) as m FROM stories");$id=intval($r->fetch(PDO::FETCH_ASSOC)['m']);}
+        try{$pdo->prepare("INSERT INTO user_xp (user_id,action,xp,detail,created_at) VALUES (?,'story',5,'Story image',NOW())")->execute([$uid]);}catch(\Throwable $e){}
+        st_ok('Đã đăng story!',['id'=>$id,'image_url'=>$imageUrl,'expires_at'=>$exp]);
+    }
+
     $input=json_decode(file_get_contents('php://input'),true);
 
     // Create story

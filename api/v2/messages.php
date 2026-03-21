@@ -170,8 +170,10 @@ if($method==='GET'){
         }
         // Mark read
         try{$d->query("UPDATE messages SET is_read=1 WHERE conversation_id=? AND sender_id!=?",[$cid,$uid]);}catch(\Throwable $e){}
-        // Fetch
-        $msgs=$d->fetchAll("SELECT m.id,m.conversation_id,m.sender_id,m.content,m.is_read,m.created_at,m.`type`,m.file_url,m.file_name,m.is_pinned,m.reply_to_id,u.fullname as sender_name,u.avatar as sender_avatar FROM messages m LEFT JOIN users u ON m.sender_id=u.id WHERE m.conversation_id=? ORDER BY m.created_at ASC",[$cid]);
+        // Fetch (support after_id for polling)
+        $afterId=intval($_GET['after_id']??0);
+        $afterFilter=$afterId?" AND m.id > $afterId":'';
+        $msgs=$d->fetchAll("SELECT m.id,m.conversation_id,m.sender_id,m.content,m.is_read,m.read_at,m.reactions,m.created_at,m.`type`,m.file_url,m.file_name,m.is_pinned,m.reply_to_id,u.fullname as sender_name,u.avatar as sender_avatar FROM messages m LEFT JOIN users u ON m.sender_id=u.id WHERE m.conversation_id=?$afterFilter ORDER BY m.created_at ASC",[$cid]);
         ok('OK',$msgs);
     }
 
