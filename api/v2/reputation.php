@@ -28,8 +28,8 @@ $action=$_GET['action']??'';
 // Calculate reputation
 if(!$action||$action==='score'){
     $data=cache_remember('reputation_'.$userId, function() use($d,$userId) {
-        $u=$d->fetchOne("SELECT total_posts,total_success,total_comments,is_verified,created_at FROM users WHERE id=?",[$userId]);
-        if(!$u) return ['score'=>0,'level'=>'Mới','tier'=>0];
+        $u=$d->fetchOne("SELECT total_posts,total_success,is_verified,created_at FROM users WHERE id=?",[$userId]);
+        if(!$u) return ['score'=>0,'level'=>'Mới','icon'=>'🌱','tier'=>0,'progress'=>0,'factors'=>[],'next_level'=>null];
 
         $score=0;
         $factors=[];
