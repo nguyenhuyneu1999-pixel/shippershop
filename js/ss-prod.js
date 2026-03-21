@@ -28,6 +28,7 @@
     'scheduled': '/js/pages/scheduled.js',
     'bookmarks': '/js/pages/bookmarks.js',
     'auth': '/js/pages/auth.js',
+    'admin-users': '/js/pages/admin-users.js',
     'system-config': '/js/pages/system-config.js',
     'content-stats': '/js/pages/content-stats.js',
     'preferences': '/js/pages/preferences.js',
