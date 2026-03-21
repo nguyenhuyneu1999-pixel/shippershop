@@ -119,6 +119,34 @@ try {
     $results['mark_offline'] = ['status' => 'FAIL'];
 }
 
+// ===== JOB 5: Publish scheduled posts =====
+$start = microtime(true);
+try {
+    $scheduled = $d->fetchAll("SELECT id FROM posts WHERE scheduled_at IS NOT NULL AND scheduled_at <= NOW() AND is_draft=0 AND `status`='active'");
+    $pubCount = 0;
+    foreach ($scheduled as $sp) {
+        $d->query("UPDATE posts SET scheduled_at=NULL, created_at=NOW() WHERE id=?", [$sp['id']]);
+        $pubCount++;
+    }
+    $ms = round((microtime(true) - $start) * 1000);
+    $d->query("INSERT INTO cron_logs (job_name, `status`, duration_ms, message, created_at) VALUES ('publish_scheduled', 'success', ?, ?, NOW())", [$ms, 'Published: ' . $pubCount]);
+    $results['publish_scheduled'] = ['status' => 'OK', 'ms' => $ms, 'published' => $pubCount];
+} catch (\Throwable $e) {
+    $results['publish_scheduled'] = ['status' => 'FAIL', 'error' => $e->getMessage()];
+}
+
+// ===== JOB 6: Clean expired stories =====
+$start = microtime(true);
+try {
+    $expired = $d->fetchOne("SELECT COUNT(*) as c FROM stories WHERE expires_at < NOW()");
+    $d->query("DELETE FROM story_views WHERE story_id IN (SELECT id FROM stories WHERE expires_at < NOW())");
+    $d->query("DELETE FROM stories WHERE expires_at < NOW()");
+    $ms = round((microtime(true) - $start) * 1000);
+    $results['clean_stories'] = ['status' => 'OK', 'ms' => $ms, 'removed' => intval($expired['c'] ?? 0)];
+} catch (\Throwable $e) {
+    $results['clean_stories'] = ['status' => 'FAIL'];
+}
+
 // Output
 if ($isWeb) {
     echo json_encode(['cron' => 'OK', 'timestamp' => date('Y-m-d H:i:s'), 'jobs' => $results], JSON_PRETTY_PRINT);

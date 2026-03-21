@@ -24,7 +24,9 @@
     'profile-settings': '/js/pages/profile-settings.js',
     'listing-detail': '/js/pages/listing-detail.js',
     'map': '/js/pages/map-page.js',
-    'admin': '/js/pages/admin.js'
+    'admin': '/js/pages/admin.js',
+    'scheduled': '/js/pages/scheduled.js',
+    'bookmarks': '/js/pages/bookmarks.js'
   };
 
   // Init common components after bundle loads
