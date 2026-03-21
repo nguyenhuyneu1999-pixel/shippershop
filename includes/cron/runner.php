@@ -1,0 +1,124 @@
+<?php
+/**
+ * ShipperShop Cron Runner
+ * Setup: cPanel → Cron Jobs → */5 * * * * php /home/nhshiw2j/public_html/includes/cron/runner.php
+ * Or: curl https://shippershop.vn/api/cron-run.php?key=CRON_SECRET
+ */
+define('CRON_SECRET', 'ss_cron_8f3a2b1c');
+$isWeb = php_sapi_name() !== 'cli';
+
+if ($isWeb) {
+    header('Content-Type: application/json');
+    if (($_GET['key'] ?? '') !== CRON_SECRET) {
+        http_response_code(403);
+        echo json_encode(['error' => 'Invalid key']);
+        exit;
+    }
+}
+
+// Find includes path
+$basePath = $isWeb ? __DIR__ . '/../../includes' : __DIR__ . '/../';
+require_once $basePath . '/config.php';
+require_once $basePath . '/db.php';
+
+$d = db();
+$results = [];
+
+// ===== JOB 1: Cleanup =====
+$start = microtime(true);
+try {
+    // Delete old rate limits (> 1 hour)
+    $d->query("DELETE FROM rate_limits WHERE window_start < DATE_SUB(NOW(), INTERVAL 1 HOUR)");
+    // Delete old login attempts (> 24 hours)
+    $d->query("DELETE FROM login_attempts WHERE created_at < DATE_SUB(NOW(), INTERVAL 24 HOUR)");
+    // Delete old error logs (> 30 days)
+    $d->query("DELETE FROM error_logs WHERE created_at < DATE_SUB(NOW(), INTERVAL 30 DAY)");
+    // Delete old page views (> 90 days)
+    $d->query("DELETE FROM page_views WHERE created_at < DATE_SUB(NOW(), INTERVAL 90 DAY)");
+    // Delete old search history (> 30 days)
+    $d->query("DELETE FROM search_history WHERE created_at < DATE_SUB(NOW(), INTERVAL 30 DAY)");
+    // Delete old cron logs (> 7 days)
+    $d->query("DELETE FROM cron_logs WHERE created_at < DATE_SUB(NOW(), INTERVAL 7 DAY)");
+    // Clean file cache
+    $cacheDir = '/tmp/ss_cache';
+    if (is_dir($cacheDir)) {
+        $files = glob($cacheDir . '/*.cache');
+        $cleaned = 0;
+        foreach ($files as $f) {
+            if (filemtime($f) < time() - 3600) { @unlink($f); $cleaned++; }
+        }
+    }
+    $ms = round((microtime(true) - $start) * 1000);
+    $d->query("INSERT INTO cron_logs (job_name, `status`, duration_ms, message, created_at) VALUES ('cleanup', 'success', ?, 'OK', NOW())", [$ms]);
+    $results['cleanup'] = ['status' => 'OK', 'ms' => $ms];
+} catch (\Throwable $e) {
+    $d->query("INSERT INTO cron_logs (job_name, `status`, duration_ms, message, created_at) VALUES ('cleanup', 'failed', 0, ?, NOW())", [$e->getMessage()]);
+    $results['cleanup'] = ['status' => 'FAIL', 'error' => $e->getMessage()];
+}
+
+// ===== JOB 2: Sync denormalized counts =====
+$start = microtime(true);
+try {
+    // Sync users.total_success + total_posts (only users active in last 24h)
+    $d->query("UPDATE users u SET
+        total_success = (
+            COALESCE((SELECT SUM(likes_count) FROM posts WHERE user_id=u.id AND `status`='active'),0) +
+            COALESCE((SELECT SUM(likes_count) FROM group_posts WHERE user_id=u.id AND `status`='active'),0)
+        ),
+        total_posts = (
+            COALESCE((SELECT COUNT(*) FROM posts WHERE user_id=u.id AND `status`='active'),0) +
+            COALESCE((SELECT COUNT(*) FROM group_posts WHERE user_id=u.id AND `status`='active'),0)
+        )
+        WHERE u.last_active > DATE_SUB(NOW(), INTERVAL 24 HOUR) OR u.last_login > DATE_SUB(NOW(), INTERVAL 24 HOUR)
+    ");
+    // Sync posts.comments_count
+    $d->query("UPDATE posts p SET comments_count = (SELECT COUNT(*) FROM comments WHERE post_id=p.id AND `status`='active') WHERE p.created_at > DATE_SUB(NOW(), INTERVAL 7 DAY)");
+    $ms = round((microtime(true) - $start) * 1000);
+    $d->query("INSERT INTO cron_logs (job_name, `status`, duration_ms, message, created_at) VALUES ('sync_counts', 'success', ?, 'OK', NOW())", [$ms]);
+    $results['sync_counts'] = ['status' => 'OK', 'ms' => $ms];
+} catch (\Throwable $e) {
+    $results['sync_counts'] = ['status' => 'FAIL', 'error' => $e->getMessage()];
+}
+
+// ===== JOB 3: Auto-publish content queue =====
+$start = microtime(true);
+try {
+    $items = $d->fetchAll("SELECT * FROM content_queue WHERE `status`='pending' AND scheduled_at <= NOW() ORDER BY scheduled_at ASC LIMIT 10");
+    $published = 0;
+    $pdo = $d->getConnection();
+    foreach ($items as $item) {
+        try {
+            $ins = $pdo->prepare("INSERT INTO posts (user_id, content, type, province, district, ward, `status`, created_at) VALUES (?, ?, ?, ?, ?, ?, 'active', NOW())");
+            $ins->execute([
+                $item['user_id'], $item['content'], $item['type'] ?? 'post',
+                $item['province'] ?? '', $item['district'] ?? '', $item['ward'] ?? ''
+            ]);
+            $d->query("UPDATE content_queue SET `status`='published' WHERE id=?", [$item['id']]);
+            $published++;
+        } catch (\Throwable $e) {
+            $d->query("UPDATE content_queue SET `status`='failed' WHERE id=?", [$item['id']]);
+        }
+    }
+    $ms = round((microtime(true) - $start) * 1000);
+    $d->query("INSERT INTO cron_logs (job_name, `status`, duration_ms, message, created_at) VALUES ('auto_publish', 'success', ?, ?, NOW())", [$ms, 'Published: ' . $published]);
+    $results['auto_publish'] = ['status' => 'OK', 'ms' => $ms, 'published' => $published];
+} catch (\Throwable $e) {
+    $results['auto_publish'] = ['status' => 'FAIL', 'error' => $e->getMessage()];
+}
+
+// ===== JOB 4: Mark offline users =====
+$start = microtime(true);
+try {
+    $d->query("UPDATE users SET is_online=0 WHERE is_online=1 AND last_active < DATE_SUB(NOW(), INTERVAL 5 MINUTE)");
+    $ms = round((microtime(true) - $start) * 1000);
+    $results['mark_offline'] = ['status' => 'OK', 'ms' => $ms];
+} catch (\Throwable $e) {
+    $results['mark_offline'] = ['status' => 'FAIL'];
+}
+
+// Output
+if ($isWeb) {
+    echo json_encode(['cron' => 'OK', 'timestamp' => date('Y-m-d H:i:s'), 'jobs' => $results], JSON_PRETTY_PRINT);
+} else {
+    echo "[" . date('Y-m-d H:i:s') . "] Cron complete: " . json_encode($results) . "\n";
+}
