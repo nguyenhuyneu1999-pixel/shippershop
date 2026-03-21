@@ -77,7 +77,7 @@ foreach($apiFiles as $af){
 }
 
 // ============ HTML PAGES ============
-$pages=['index.html','messages.html','user.html','profile.html','groups.html','group.html','marketplace.html','listing.html','wallet.html','traffic.html','map.html','people.html','post-detail.html','activity-log.html','login.html','register.html','create-group.html','leaderboard.html','admin-v2.html','404.html','offline.html'];
+$pages=['index.html','messages.html','user.html','profile.html','groups.html','group.html','marketplace.html','listing.html','wallet.html','traffic.html','map.html','people.html','post-detail.html','activity-log.html','login.html','register.html','create-group.html','leaderboard.html','admin-v2.html','404.html','offline.html','landing.html'];
 foreach($pages as $pg){
     $exists=file_exists(__DIR__.'/../'.$pg);
     $hasDSCSS=$exists&&strpos(file_get_contents(__DIR__.'/../'.$pg),'design-system.css')!==false;
@@ -86,7 +86,7 @@ foreach($pages as $pg){
 }
 
 // ============ JS/CSS FILES ============
-$staticFiles=['css/design-system.css','js/core/api.js','js/core/store.js','js/core/ui.js','js/core/utils.js','js/components/post-card.js','js/components/comment-sheet.js','js/components/image-viewer.js','js/components/notification-bell.js','js/components/search-overlay.js','js/components/upload.js','js/components/video-player.js','js/components/location-picker.js','js/components/gamification.js','js/pages/feed.js'];
+$staticFiles=['css/design-system.css','js/core/api.js','js/core/store.js','js/core/ui.js','js/core/utils.js','js/components/post-card.js','js/components/comment-sheet.js','js/components/image-viewer.js','js/components/notification-bell.js','js/components/search-overlay.js','js/components/upload.js','js/components/video-player.js','js/components/location-picker.js','js/components/gamification.js','js/components/emoji-picker.js','js/components/post-create.js','js/components/user-card.js','js/pages/feed.js'];
 foreach($staticFiles as $sf){t("Static: $sf",file_exists(__DIR__.'/../'.$sf));}
 
 // ============ SVG ASSETS ============
