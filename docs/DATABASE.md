@@ -1,178 +1,130 @@
-# ShipperShop Database Schema
-## MySQL 8.x | 69 Tables | ~7 MB
+# ShipperShop Database Schema (v2.2 — 79 tables)
 
----
+## Core
+| Table | Description |
+|---|---|
+| users | User accounts (719+), auth, profile, verification |
+| posts | Feed posts (786+), content, images, location, pinned, scheduled |
+| comments | Nested comments (3047+), likes |
+| likes | Post likes (backward compat) |
+| post_likes | Post like records |
+| post_reactions | Emoji reactions (like/love/fire/wow/sad/angry) |
+| comment_likes | Comment likes |
+| saved_posts | Bookmarked posts |
+| follows | Follow relationships |
+| friends | Friend connections |
+| user_blocks | Blocked users |
 
-## Core Tables
+## Content
+| Table | Description |
+|---|---|
+| stories | 24h expiring stories with text/image/video |
+| story_views | Story view tracking |
+| post_edits | Post edit history |
+| bookmark_collections | User bookmark collections |
+| bookmark_items | Posts in collections |
+| hashtags | Hashtag index |
+| mentions | @mention tracking |
+| content_queue | Scheduled auto-publish content |
+| post_reports | Content reports with 8 reasons |
+| activity_feed | Social activity stream |
 
-### users (719 rows)
-Primary user accounts table.
-| Column | Type | Notes |
-|--------|------|-------|
-| id | INT PK | Auto-increment, first user = id=2 |
-| fullname | VARCHAR | Display name |
-| username | VARCHAR | Unique login name |
-| email | VARCHAR | Unique email |
-| password | VARCHAR | bcrypt hash |
-| phone | VARCHAR | Phone number |
-| avatar | VARCHAR | Avatar image path |
-| cover_image | VARCHAR | Cover image path |
-| bio | TEXT | User bio |
-| shipping_company | VARCHAR | GHTK, GHN, J&T, etc |
-| role | ENUM | user, admin, moderator |
-| status | ENUM | active, deleted, banned |
-| is_online | TINYINT | 0/1 |
-| last_active | DATETIME | Last activity timestamp |
-| last_login | DATETIME | |
-| total_success | INT | Denormalized: SUM(likes) from posts+group_posts |
-| total_posts | INT | Denormalized: COUNT posts+group_posts |
-| settings | JSON | Notification preferences etc |
-| banned_until | DATETIME | Null if not banned |
-| ban_reason | VARCHAR(500) | |
-| email_verified_at | DATETIME | |
-| created_at | DATETIME | |
+## Groups
+| Table | Description |
+|---|---|
+| groups | Shipper groups (14+) |
+| group_members | Memberships + roles |
+| group_posts | Group feed posts (666+) |
+| group_post_comments | Group comments |
+| group_post_likes | Group likes |
+| group_post_comment_likes | Group comment likes |
+| group_categories | Group categories (19) |
+| group_rules | Group rules |
 
-### posts (786 rows)
-Main feed posts.
-| Column | Type | Notes |
-|--------|------|-------|
-| id | INT PK | |
-| user_id | INT FK | |
-| content | TEXT | Post body |
-| type | VARCHAR | post, question, review, news, tip |
-| images | JSON | Array of image URLs |
-| video_url | VARCHAR | |
-| province, district, ward | VARCHAR | Location |
-| likes_count | INT | Denormalized from likes table |
-| comments_count | INT | Denormalized from comments table |
-| shares_count | INT | |
-| view_count | INT | Incremented on view |
-| report_count | INT | Auto-hide at 5+ |
-| is_pinned | TINYINT | Admin can pin |
-| edited_at | DATETIME | Null if never edited |
-| status | ENUM | active, hidden, deleted |
-| created_at | DATETIME | |
-
-### comments (3047 rows)
-Nested comments on posts.
-| Column | Type | Notes |
-|--------|------|-------|
-| id | INT PK | |
-| post_id | INT FK | |
-| user_id | INT FK | |
-| parent_id | INT | Null for root, id for reply |
-| content | TEXT | |
-| likes_count | INT | |
-| edited_at | DATETIME | |
-| status | ENUM | active, deleted |
-| created_at | DATETIME | |
-
----
-
-## Interaction Tables
-
-### likes — Post likes (real votes, synced with posts.likes_count)
-### post_likes — Legacy seeded likes (do NOT use for new logic)
-### comment_likes — Comment likes
-### saved_posts — Bookmarked posts
-### follows (2512 rows) — follower_id follows following_id
-### post_reports — Report queue with reason ENUM + auto-hide
-### user_blocks — Block relationships (auto-unfollows both)
-
----
-
-## Messages (12 conversations, 42 messages)
-
-### conversations
-| Column | Notes |
-|--------|-------|
-| type | 'private' or 'group' |
-| user1_id, user2_id | For private chats |
-| name, avatar, description | For group chats |
-| creator_id | Group creator |
-| invite_link | 12-char hash |
-| last_message, last_message_at | Denormalized |
-| status | active, pending |
-| is_muted, is_pinned | Per-conversation flags |
-
-### conversation_members — Group chat membership with role (admin/member)
-### messages — Content, type (text/image/video/file/location), file_url, reply_to_id, is_pinned, is_read
-
----
-
-## Groups (14 groups, 666 posts)
-
-### groups — name, description, avatar, cover, category, member_count, rules
-### group_members — group_id, user_id, role
-### group_posts — Same structure as posts but for groups
-### group_post_comments — Comments on group posts
-### group_post_likes, group_post_comment_likes
-### group_categories (19), group_rules (18)
-
----
+## Messaging
+| Table | Description |
+|---|---|
+| conversations | Chat threads (private + group) |
+| conversation_members | Group chat members |
+| messages | Chat messages with reactions, read receipts |
+| pinned_messages | Pinned messages |
+| chat_categories | User-organized chat folders |
+| chat_category_items | Chats in folders |
 
 ## Commerce
+| Table | Description |
+|---|---|
+| products | Shop products |
+| orders | Orders |
+| order_items | Order line items |
+| cart | Shopping cart |
+| marketplace_listings | Marketplace listings (8+) |
+| reviews | Product reviews |
+| addresses | Shipping addresses |
+| coupons | Discount coupons (3) |
+| wishlists | Product wishlists |
 
-### marketplace_listings (8) — Products for sale
-### products, orders, order_items, cart — E-commerce (unused)
-### wallets (11) — balance, pin_hash, locked_until
-### wallet_transactions — type (deposit/transfer_in/transfer_out), status, amount
-### subscription_plans (5) — Free/Pro/VIP/Premium plans
-### user_subscriptions — Active subscriptions
-### coupons (3), wishlists, reviews, addresses, payment_methods
+## Finance
+| Table | Description |
+|---|---|
+| wallets | User wallets with PIN |
+| wallet_transactions | Transaction log |
+| subscription_plans | 5 plans (Free/Pro/VIP/Premium) |
+| user_subscriptions | Active subscriptions |
+| payment_methods | Saved payment methods |
+| payos_payments | PayOS payment records |
 
----
+## Gamification
+| Table | Description |
+|---|---|
+| user_badges | Earned badges |
+| user_streaks | Login streaks |
+| user_xp | XP history |
+| referral_codes | Referral codes |
+| referral_logs | Referral tracking |
+| referrals | Referral relationships |
 
-## Traffic & Location
+## System
+| Table | Description |
+|---|---|
+| notifications | Push notifications |
+| notification_reads | Read tracking |
+| push_subscriptions | Web push subscriptions |
+| settings | Key-value settings + webhook configs + notif prefs |
+| map_pins | Map markers |
+| traffic_alerts | Traffic alerts |
+| traffic_confirms | Alert votes |
+| traffic_comments | Alert comments |
+| analytics_views | Page view tracking |
+| marketing_analytics | Marketing data |
+| social_accounts | Linked social accounts |
 
-### traffic_alerts (6) — Category, severity, lat/lng, expires_at
-### traffic_confirms — Confirm/deny votes
-### traffic_comments
-### map_pins (10) — Shared map markers
+## Security & Logging
+| Table | Description |
+|---|---|
+| rate_limits | API rate limiting |
+| login_attempts | Login attempt tracking |
+| csrf_tokens | CSRF tokens |
+| audit_log | All sensitive action audit trail |
+| cron_logs | Cron job execution history |
+| error_logs | Application error tracking |
+| page_views | Page analytics |
 
----
-
-## System Tables (new in v2)
-
-### post_reports — Content moderation queue
-### user_blocks — User block relationships
-### search_history — Search query history per user
-### user_sessions — Active login sessions
-### email_queue — Outgoing email queue
-### error_logs — Application error tracking
-### page_views — Analytics page view tracking
-### cron_logs — Cron job execution history
-### rate_limits — Per-IP per-endpoint rate limiting
-### login_attempts — Brute force protection
-### audit_log — Financial operation audit trail
-### csrf_tokens — CSRF token storage
-
----
-
-## Indexes (21 custom indexes added)
-
-| Table | Index | Columns |
-|-------|-------|---------|
-| posts | idx_user_status | user_id, status, created_at |
-| posts | idx_province | province, district |
-| posts | idx_sort | likes_count DESC, comments_count DESC, created_at DESC |
-| comments | idx_post_status | post_id, status, created_at |
-| likes | idx_post_user | post_id, user_id |
-| follows | idx_pair | follower_id, following_id |
-| follows | idx_rev | following_id, follower_id |
-| messages | idx_conv_created | conversation_id, created_at |
-| conversations | idx_u1_status | user1_id, status, last_message_at DESC |
-| conversations | idx_u2_status | user2_id, status, last_message_at DESC |
-| group_posts | idx_group_status | group_id, status, created_at DESC |
-| notifications | idx_notif_user | user_id, created_at DESC |
-| users | idx_company | shipping_company |
-| users | idx_online | status, is_online, last_active DESC |
-| wallet_transactions | idx_wallet_user | user_id, created_at DESC |
-
----
+## Database Class (includes/db.php)
+```php
+$d = db();                        // Singleton
+$d->fetchOne($sql, $params);     // Single row
+$d->fetchAll($sql, $params);     // All rows
+$d->query($sql, $params);        // INSERT/UPDATE/DELETE
+$d->getConnection();              // PDO object (NOT getPdo())
+$d->beginTransaction();           // Transaction start
+$d->commit();                     // Commit
+$d->rollback();                   // Rollback
+$d->getLastInsertId();            // Last ID (use fallback SELECT MAX)
+```
 
 ## Key Rules
 - User id=1 does NOT exist. First user = id=2
-- `status` is MySQL reserved word — always use backticks
-- getLastInsertId() unreliable on shared hosting — use PDO direct + fallback
-- likes table = real votes (synced). post_likes = seeded data (legacy)
+- `status` is MySQL reserved word → always use backticks
+- JWT payload key: `user_id`
+- All financial ops use DB transactions (SELECT FOR UPDATE)

@@ -1,5 +1,30 @@
 # ShipperShop Changelog
 
+## v2.3.0 (March 21, 2026) — Session 30 Milestone
+
+### New Features
+- **Post Reactions** — 6 emoji types (👍❤️🔥😮😢😠), long-press picker, reactor list
+- **Post Analytics** — Per-post views/engagement + creator dashboard (best hour, top posts)
+- **Two-Factor Auth** — TOTP setup with QR code, verify, enable/disable (pure PHP, no lib)
+- **Activity Feed** — Friends' activity stream, author stats widget
+- **Webhook Events** — Register webhooks for 9 event types (post/user/payment/message/etc.)
+- **Account Management** — Deactivate, delete (30-day grace), reactivate, change email
+- **Message Forwarding** — Forward messages between conversations
+- **Conversation Search** — Search conversations by name, search messages within chat
+- **Admin Logs Viewer** — Audit, cron, errors, login attempts, rate limits with pagination
+- **Admin Moderation Page** — Report queue UI with resolve actions
+- **Link Previews** — OG metadata fetcher + rich preview cards in posts
+- **Trending Algorithm** — Hot score (likes*3 + comments*5 + shares*2 / age^1.5), rising, top users
+
+### Stats
+- 228+ automated tests (100% pass)
+- 49 PHP API files, ~7,000 lines
+- 44 JS components + 23 page modules, ~7,400 lines
+- 79 DB tables
+- 137 KB minified JS bundle
+- 46 API v2 endpoints (auto-detected)
+- 48+ features across 10 categories
+
 ## v2.2.0 (March 21, 2026) — Sessions 23-27, Final Production Release
 
 ### New Features
