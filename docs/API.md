@@ -1,367 +1,163 @@
 # ShipperShop API v2 Documentation
 
-Base URL: `https://shippershop.vn/api/v2/`
-Auth: Bearer JWT token in Authorization header
-Index: `GET /api/v2/` — auto-lists all endpoints
+**Base URL:** `https://shippershop.vn/api/v2/`  
+**Auth:** Bearer token in `Authorization` header  
+**Format:** JSON request/response  
 
-## Posts (posts.php)
-- `GET /` — List posts (sort, search, limit, page, province, district, type)
-- `GET /?id=X` — Single post
-- `GET /?action=comments&post_id=X` — Comments (nested)
-- `GET /?action=edit_history&post_id=X` — Edit history
-- `POST /` — Create post
-- `POST /?action=edit` — Edit post (saves history)
-- `POST /?action=vote` — Like/unlike
-- `POST /?action=save` — Save/unsave
-- `POST /?action=comment` — Add comment
-- `POST /?action=vote_comment` — Like comment
-- `POST /?action=delete` — Delete post
-- `POST /?action=share` — Share count++
-- `POST /?action=pin` — Pin/unpin (max 1/user)
+## Endpoints (83 files, 246+ routes)
 
-## Reactions (reactions.php)
-- `GET /?post_id=X` — Reaction counts + my reaction
-- `GET /?action=reactors&post_id=X` — Who reacted
-- `POST /?action=react` — Toggle reaction (like/love/fire/wow/sad/angry)
+### Content
 
-## Messages (messages.php)
-- `GET /?action=conversations` — Chat list
-- `GET /?action=messages&conversation_id=X` — Messages (supports after_id)
-- `GET /?action=search_conversations&q=X` — Search conversations
-- `GET /?action=search_messages&conversation_id=X&q=X` — Search messages
-- `GET /?action=typing_status&conversation_id=X` — Who's typing
-- `POST /?action=send` — Send message
-- `POST /?action=typing` — Send typing signal
-- `POST /?action=mark_read` — Mark conversation read
-- `POST /?action=react` — Message reaction
-- `POST /?action=forward` — Forward message
-- `POST /?action=create_group` — Create group chat
-- `POST /?action=delete_conversation` — Delete conversation
+| Endpoint | File | Description |
+|---|---|---|
+| `posts` | posts.php | |
+| `stories` | stories.php | |
+| `hashtags` | hashtags.php | |
+| `scheduled` | scheduled.php | |
+| `post-views` | post-views.php | |
+| `content` | content.php | |
 
-## Users (users.php)
-- `GET /?action=me` — Current user profile
-- `GET /?action=profile&id=X` — User profile
-- `POST /?action=update_profile` — Update profile
-- `POST /?action=upload_avatar` — Upload avatar
-- `POST /?action=change_password` — Change password
+### Social
 
-## Account (account.php)
-- `GET /` — Account status (verified, 2FA, deletion pending)
-- `POST /?action=deactivate` — Deactivate account
-- `POST /?action=reactivate` — Reactivate
-- `POST /?action=delete` — Schedule deletion (30 days)
-- `POST /?action=cancel_delete` — Cancel deletion
-- `POST /?action=change_email` — Change email
+| Endpoint | File | Description |
+|---|---|---|
+| `social` | social.php | |
+| `friends` | friends.php | |
+| `mentions` | mentions.php | |
+| `reactions` | reactions.php | |
+| `pins` | pins.php | |
 
-## Auth (auth.php — v1)
-- `POST /?action=login` — Login (returns JWT)
-- `POST /?action=register` — Register
-- `POST /?action=forgot_password` — Reset email
-- `POST /?action=refresh_token` — Refresh JWT
+### Users
 
-## Two-Factor (two-factor.php)
-- `GET /` — 2FA status
-- `POST /?action=setup` — Generate TOTP secret + QR
-- `POST /?action=verify` — Verify code + enable
-- `POST /?action=disable` — Disable (requires password + code)
+| Endpoint | File | Description |
+|---|---|---|
+| `users` | users.php | |
+| `verification` | verification.php | |
+| `profile-score` | profile-score.php | |
+| `user-activity` | user-activity.php | |
+| `export` | export.php | |
 
-## Stories (stories.php)
-- `GET /?action=feed` — Stories feed (grouped by user)
-- `GET /?action=detail&id=X` — Single story + viewers
-- `GET /?action=user&user_id=X` — User's stories
-- `POST /?action=create` — Create text story
-- `POST /?action=upload` — Create image story (multipart)
-- `POST /?action=view` — Mark story viewed
-- `POST /?action=delete` — Delete story
+### Communication
 
-## Social (social.php)
-- `GET /?action=followers` — My followers
-- `GET /?action=following` — My following
-- `GET /?action=friends` — Mutual follows
-- `GET /?action=suggestions` — Suggested users
-- `GET /?action=online` — Online users
-- `GET /?action=blocked` — Blocked list
-- `GET /?action=is_blocked&user_id=X` — Check block status
-- `POST /?action=follow` — Follow/unfollow toggle
-- `POST /?action=block` — Block/unblock toggle
+| Endpoint | File | Description |
+|---|---|---|
+| `messages` | messages.php | |
+| `msg-poll` | msg-poll.php | |
+| `chat-extras` | chat-extras.php | |
+| `conv-search` | conv-search.php | |
+| `group-chat` | group-chat.php | |
+| `notifications` | notifications.php | |
+| `notif-prefs` | notif-prefs.php | |
+| `push` | push.php | |
 
-## Friends (friends.php)
-- `GET /` — Mutual friends
-- `GET /?action=count` — Friend count
-- `GET /?action=common&user_id=X` — Common friends
-- `GET /?action=pending` — Pending (follow me but I don't follow back)
-- `POST /?action=accept` — Follow back
+### Commerce
 
-## Groups (groups.php)
-- `GET /?action=discover` — Discover groups
-- `GET /?action=categories` — Categories
-- `GET /?action=detail&id=X` — Group detail
-- `GET /?action=posts&group_id=X` — Group posts
-- `GET /?action=members&group_id=X` — Members
-- `GET /?action=leaderboard&group_id=X` — Group leaderboard
-- `POST /?action=create` — Create group
-- `POST /?action=join` — Join/leave
-- `POST /?action=post` — Create group post
-- `POST /?action=like_post` — Like group post
-- `POST /?action=comment` — Group comment
-- `POST /?action=edit_group` — Edit group (admin)
-- `POST /?action=delete_group` — Delete group (admin)
+| Endpoint | File | Description |
+|---|---|---|
+| `wallet` | wallet.php | |
+| `payment` | payment.php | |
+| `marketplace` | marketplace.php | |
 
-## Wallet (wallet.php)
-- `GET /?action=plans` — Subscription plans
-- `GET /?action=info` — Wallet info + subscription
-- `GET /?action=transactions` — Transaction history
-- `POST /?action=set_pin` — Set/change PIN
-- `POST /?action=subscribe` — Subscribe to plan
-- `POST /?action=deposit` — Deposit request
+### Community
 
-## Payment (payment.php)
-- `GET /?action=check&order_code=X` — Payment status
-- `GET /?action=history` — Payment history
-- `POST /?action=create` — Create PayOS payment / manual transfer
-- `POST /?action=webhook` — PayOS callback
-- `POST /?action=admin_approve` — Admin approve manual payment
+| Endpoint | File | Description |
+|---|---|---|
+| `groups` | groups.php | |
+| `gamification` | gamification.php | |
+| `traffic` | traffic.php | |
+| `referrals` | referrals.php | |
 
-## Marketplace (marketplace.php)
-- `GET /` — Listings
-- `POST /` — Create listing
+### Admin
 
-## Traffic (traffic.php)
-- `GET /` — Active alerts
-- `POST /` — Create alert
-- `POST /?action=vote` — Confirm/deny
-- `POST /?action=comment` — Comment
+| Endpoint | File | Description |
+|---|---|---|
+| `admin` | admin.php | |
+| `admin-batch` | admin-batch.php | |
+| `moderation` | moderation.php | |
+| `rate-monitor` | rate-monitor.php | |
 
-## Search (search.php)
-- `GET /?q=X` — Global search (posts, users, groups)
+### Media
 
-## Hashtags (hashtags.php)
-- `GET /` — Trending hashtags
-- `GET /?action=posts&tag=X` — Posts by hashtag
-- `GET /?action=suggest&q=X` — Autocomplete
+| Endpoint | File | Description |
+|---|---|---|
+| `media` | media.php | |
+| `upload-media` | upload-media.php | |
+| `qr` | qr.php | |
 
-## Mentions (mentions.php)
-- `GET /?action=suggest&q=X` — User autocomplete for @mention
-- `GET /?action=my_mentions` — My mentions feed
-- `POST /?action=extract` — Extract + save mentions from text
+### Platform
 
-## Bookmarks (bookmarks.php)
-- `GET /?action=collections` — My collections
-- `GET /?action=posts` — Saved posts (all or by collection)
-- `POST /?action=create_collection` — Create collection
-- `POST /?action=delete_collection` — Delete collection
-- `POST /?action=add_to_collection` — Add post
-- `POST /?action=remove_from_collection` — Remove post
+| Endpoint | File | Description |
+|---|---|---|
+| `search` | search.php | |
+| `analytics` | analytics.php | |
+| `bookmarks` | bookmarks.php | |
+| `stats` | stats.php | |
+| `status` | status.php | |
+| `health` | health.php | |
 
-## Scheduled (scheduled.php)
-- `GET /?action=list` — Drafts + scheduled posts
-- `POST /?action=create` — Create draft/scheduled
-- `POST /?action=edit` — Edit
-- `POST /?action=publish_now` — Publish immediately
-- `POST /?action=delete` — Delete
+### Other
 
-## Gamification (gamification.php)
-- `GET /?action=profile` — XP, level, streak
-- `GET /?action=leaderboard` — Top users by XP
-- `GET /?action=badges` — Badge list
-- `GET /?action=achievements` — Achievements
-- `POST /?action=checkin` — Daily check-in
+| Endpoint | File |
+|---|---|
+| `account` | account.php |
+| `activity-feed` | activity-feed.php |
+| `admin-export` | admin-export.php |
+| `admin-notes` | admin-notes.php |
+| `admin-users` | admin-users.php |
+| `announcements` | announcements.php |
+| `badges` | badges.php |
+| `batch` | batch.php |
+| `calendar` | calendar.php |
+| `content-queue` | content-queue.php |
+| `conv-labels` | conv-labels.php |
+| `dashboard-summary` | dashboard-summary.php |
+| `follow-suggest` | follow-suggest.php |
+| `group-admin` | group-admin.php |
+| `group-settings` | group-settings.php |
+| `heatmap` | heatmap.php |
+| `insights` | insights.php |
+| `link-preview` | link-preview.php |
+| `logs` | logs.php |
+| `mute` | mute.php |
+| `notif-grouped` | notif-grouped.php |
+| `og-tags` | og-tags.php |
+| `polls` | polls.php |
+| `post-analytics` | post-analytics.php |
+| `preferences` | preferences.php |
+| `presence` | presence.php |
+| `profile-card` | profile-card.php |
+| `profile-theme` | profile-theme.php |
+| `recommend` | recommend.php |
+| `report-analytics` | report-analytics.php |
+| `reputation` | reputation.php |
+| `sitemap` | sitemap.php |
+| `sse` | sse.php |
+| `system-config` | system-config.php |
+| `templates` | templates.php |
+| `trending` | trending.php |
+| `two-factor` | two-factor.php |
+| `webhooks` | webhooks.php |
 
-## Notifications (notifications.php)
-- `GET /` — Recent notifications
-- `GET /?action=unread_count` — Unread count
-- `POST /?action=mark_read` — Mark all read
+## Authentication
 
-## Notification Prefs (notif-prefs.php)
-- `GET /` — Current preferences
-- `POST /` — Update (per-type toggles + quiet hours)
+```
+POST /api/v2/users.php?action=login
+Body: {"email": "...", "password": "..."}
+Response: {"token": "JWT...", "user": {...}}
+```
 
-## Trending (trending.php)
-- `GET /?action=hot` — Hot posts (score-ranked)
-- `GET /?action=rising` — Rising posts
-- `GET /?action=top_users` — Top users by engagement
-- `GET /?action=topics` — Trending topics
+Use token in all subsequent requests:
+```
+Authorization: Bearer <token>
+```
 
-## Post Analytics (post-analytics.php)
-- `GET /?post_id=X` — Single post stats
-- `GET /?action=overview` — Creator dashboard
+## Monitoring
 
-## Activity Feed (activity-feed.php)
-- `GET /?action=friends` — Friends' activity
-- `GET /?action=me` — My activity
-- `GET /?action=author_stats&user_id=X` — Author stats
-
-## Verification (verification.php)
-- `GET /?action=status` — Verification status
-- `GET /?action=verified` — Verified users list
-- `POST /?action=request` — Request verification
-- `POST /?action=approve` — Admin approve
-- `POST /?action=reject` — Admin reject
-
-## Export (export.php)
-- `GET /` — Full data export (GDPR)
-- `GET /?action=summary` — Lightweight summary
-
-## Media (media.php)
-- `GET /?action=gallery&user_id=X` — User media gallery
-- `GET /?action=stats&user_id=X` — Media stats
-
-## Moderation (moderation.php)
-- `GET /?action=queue` — Report queue (admin)
-- `GET /?action=reasons` — Report reasons
-- `POST /?action=report` — Report post
-- `POST /?action=resolve` — Resolve report (admin)
-
-## Referrals (referrals.php)
-- `GET /` — My referral code
-- `GET /?action=leaderboard` — Top referrers
-- `POST /?action=redeem` — Redeem code
-
-## Webhooks (webhooks.php)
-- `GET /?action=events` — Available events
-- `GET /` — List registered webhooks (admin)
-- `POST /?action=register` — Register webhook
-- `POST /?action=delete` — Delete webhook
-- `POST /?action=test` — Send test ping
-
-## Admin (admin.php)
-- `GET /?action=dashboard` — Stats overview
-- `GET /?action=analytics&days=X` — Time-series data
-- `GET /?action=system` — System health
-- `GET /?action=users` — User list
-- `GET /?action=reports` — Report queue
-- `GET /?action=deposits` — Pending deposits
-- `POST /?action=ban_user` — Ban user
-- `POST /?action=unban_user` — Unban
-- `POST /?action=approve_deposit` — Approve deposit
-- `POST /?action=reject_deposit` — Reject deposit
-
-## Logs (logs.php) — Admin
-- `GET /?action=audit` — Audit logs
-- `GET /?action=cron` — Cron logs
-- `GET /?action=errors` — Error logs
-- `GET /?action=rate_limits` — Rate limit stats
-- `GET /?action=login_attempts` — Login attempts
-
-## System
-- `GET /health.php` — Quick health check
-- `GET /status.php` — Comprehensive health dashboard
-- `GET /stats.php` — Public cached stats
-- `GET /link-preview.php?url=X` — OG metadata fetcher
-- `GET /analytics.php` — Page view tracking
-- `GET /index.php` — API index (auto-detect all endpoints)
-
-## Reactions (reactions.php)
-- `GET /?post_id=X` — Reaction counts + user's reaction
-- `GET /?action=reactors&post_id=X` — Who reacted (with avatars)
-- `POST /?action=react` — Toggle reaction (like/love/fire/wow/sad/angry)
-
-## Polls (polls.php)
-- `GET /?post_id=X` — Get poll for a post
-- `POST /?action=create` — Create poll (2-10 options, single/multi, time limit)
-- `POST /?action=vote` — Vote/unvote
-- `POST /?action=delete` — Delete poll (owner only)
-
-## Reputation (reputation.php)
-- `GET /?user_id=X` — Reputation score + 9-factor breakdown
-- `GET /?action=leaderboard` — Top users by engagement
-
-## Badges (badges.php)
-- `GET /?user_id=X` — User's badges (sub/verified/streak/earned)
-- `GET /?action=all` — All 12 badge definitions
-- `GET /?action=leaderboard` — Badge leaderboard
-
-## Announcements (announcements.php)
-- `GET /` — Active announcements (public)
-- `GET /?action=all` — All announcements (admin)
-- `POST /?action=create` — Create announcement (admin)
-- `POST /?action=delete` — Delete (admin)
-- `POST /?action=toggle` — Toggle active (admin)
-
-## Recommendations (recommend.php)
-- `GET /?action=for_you` — Personalized feed
-- `GET /?action=similar&post_id=X` — Similar posts
-- `GET /?action=suggested_follows` — Suggested users to follow
-
-## Mute (mute.php)
-- `GET /` — List muted users
-- `GET /?action=check&user_id=X` — Check if muted
-- `GET /?action=ids` — Muted user IDs (for feed filter)
-- `POST /?action=toggle` — Toggle mute
-
-## Templates (templates.php)
-- `GET /` — List all 8 templates
-- `GET /?action=get&id=X` — Single template + fields
-- `GET /?action=categories` — Template categories
-- `POST /?action=fill` — Fill template with data
-
-## Preferences (preferences.php)
-- `GET /` — User preferences (10 settings)
-- `POST /` — Update preferences
-
-## Batch (batch.php)
-- `POST /` — Execute up to 10 API calls in 1 request
-
-## Presence (presence.php)
-- `GET /?action=check&user_id=X` — Single user online status
-- `GET /?action=batch&ids=X,Y` — Batch check multiple users
-- `GET /?action=conversation&conversation_id=X` — Members presence
-- `POST /?action=heartbeat` — Update online status
-
-## Account (account.php)
-- `GET /` — Account status
-- `POST /?action=deactivate` — Deactivate account
-- `POST /?action=reactivate` — Reactivate
-- `POST /?action=delete` — Schedule deletion (30 days)
-- `POST /?action=cancel_delete` — Cancel deletion
-- `POST /?action=change_email` — Change email
-
-## Two-Factor (two-factor.php)
-- `GET /` — 2FA status
-- `POST /?action=setup` — Generate TOTP secret + QR
-- `POST /?action=verify` — Verify code + enable
-- `POST /?action=disable` — Disable (requires password + code)
-
-## Post Analytics (post-analytics.php)
-- `GET /?post_id=X` — Single post stats (views, engagement, saves)
-- `GET /?action=overview` — Creator dashboard (daily, top posts, best hour)
-
-## Activity Feed (activity-feed.php)
-- `GET /?action=friends` — Friends' activity stream
-- `GET /?action=me` — My activity
-- `GET /?action=author_stats&user_id=X` — Author stats
-
-## OG Tags (og-tags.php)
-- `GET /?type=post&id=X` — OG meta for social sharing
-- `GET /?type=user&id=X` — User OG meta
-- `GET /?type=group&id=X` — Group OG meta
-
-## Report Analytics (report-analytics.php) — Admin
-- `GET /?days=X` — Report breakdown by reason, resolution, top reported
-
-## Admin Export (admin-export.php) — Admin
-- `GET /?action=users` — Export users (JSON/CSV)
-- `GET /?action=posts` — Export posts
-- `GET /?action=transactions` — Export transactions
-- `GET /?action=audit` — Export audit log
-
-## Admin Notes (admin-notes.php) — Admin
-- `GET /?user_id=X` — Notes for a user
-- `POST /?action=add` — Add note
-- `POST /?action=delete` — Delete note
-
-## Group Settings (group-settings.php)
-- `GET /?action=get&group_id=X` — Group notification prefs
-- `GET /?action=muted` — List muted groups
-- `POST /?action=toggle_mute` — Toggle mute
-- `POST /?action=update` — Update per-type prefs
-
-## Webhooks (webhooks.php)
-- `GET /?action=events` — Available webhook events (public)
-- `GET /` — Registered webhooks (admin)
-- `POST /?action=register` — Register webhook
-- `POST /?action=delete` — Delete webhook
-- `POST /?action=test` — Send test ping
-
-## Dynamic Sitemap (sitemap.php)
-- `GET /` — XML sitemap (posts + groups + users + listings, 1h cache)
+| URL | Purpose |
+|---|---|
+| `/api/v2/` | API index (auto-detected endpoints) |
+| `/api/v2/status.php` | Health dashboard (8 checks) |
+| `/api/v2/health.php` | Quick health check |
+| `/api/v2/stats.php` | Public cached stats |
+| `/api/test-suite.php?key=ss_test_secret` | Automated test suite |
+| `/api/cron-run.php?key=ss_cron_8f3a2b1c` | Cron jobs (8 jobs) |

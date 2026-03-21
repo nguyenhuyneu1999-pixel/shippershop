@@ -73,6 +73,16 @@
 
 ## v2.2.0 (March 21, 2026) — Sessions 23-27, Final Production Release
 
+### Session 30 (v2.5.0) — Final Production Release
+- Rate limit monitor API (admin: view limits, top consumers, audit log, clear)
+- Conversation search API (search messages, find conversations by name)
+- User activity heatmap API (GitHub-style contribution graph, activity summary)
+- Auto-generated API documentation (82 endpoints)
+- Database documentation (78 tables)
+- 8 cron jobs, 324+ automated tests
+- Bundle: 218.4 KB (85 components, 33% savings)
+- Total: 21,252+ lines new code across ~200 files
+
 ### New Features
 - **Post Reactions** — 6 emoji types (like/love/haha/wow/sad/angry) with picker popup
 - **@Mentions** — Autocomplete dropdown, notifications, linkify in text
