@@ -139,6 +139,35 @@ if($method==='GET'){
         ok('OK',$members);
     }
 
+    // --- Search conversations ---
+    if($action==='search_conversations'){
+        $q=trim($_GET['q']??'');
+        if(mb_strlen($q)<1) ok('OK',[]);
+        $convs=$d->fetchAll("SELECT c.*,
+            CASE WHEN c.type='private' THEN (SELECT fullname FROM users WHERE id=IF(c.user1_id=?,c.user2_id,c.user1_id)) ELSE c.group_name END as display_name,
+            CASE WHEN c.type='private' THEN (SELECT avatar FROM users WHERE id=IF(c.user1_id=?,c.user2_id,c.user1_id)) ELSE c.group_avatar END as display_avatar
+            FROM conversations c
+            LEFT JOIN conversation_members cm ON c.id=cm.conversation_id
+            WHERE (cm.user_id=? OR c.user1_id=? OR c.user2_id=?)
+            AND (
+                (c.type='private' AND (SELECT fullname FROM users WHERE id=IF(c.user1_id=?,c.user2_id,c.user1_id)) LIKE ?)
+                OR (c.type='group' AND c.group_name LIKE ?)
+            )
+            GROUP BY c.id
+            ORDER BY c.updated_at DESC LIMIT 20",
+            [$uid,$uid,$uid,$uid,$uid,$uid,'%'.$q.'%','%'.$q.'%']);
+        ok('OK',$convs);
+    }
+
+    // --- Search messages within conversation ---
+    if($action==='search_messages'){
+        $cid=intval($_GET['conversation_id']??0);
+        $q=trim($_GET['q']??'');
+        if(!$cid||mb_strlen($q)<1) ok('OK',[]);
+        $msgs=$d->fetchAll("SELECT m.*,u.fullname as sender_name,u.avatar as sender_avatar FROM messages m LEFT JOIN users u ON m.sender_id=u.id WHERE m.conversation_id=? AND m.content LIKE ? ORDER BY m.created_at DESC LIMIT 30",[$cid,'%'.$q.'%']);
+        ok('OK',$msgs);
+    }
+
     // --- Typing indicator check ---
     if($action==='typing_status'){
         $cid=intval($_GET['conversation_id']??0);
