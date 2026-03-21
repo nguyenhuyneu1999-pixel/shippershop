@@ -64,5 +64,5 @@ $data=cache_remember('daily_digest_'.($uid?:0), function() use($d,$uid) {
 dd_ok('OK',$data);
 
 } catch (\Throwable $e) {
-    echo json_encode(['success'=>false,'message'=>'Error: '.$e->getMessage()]);
+    echo json_encode(["success"=>false,"message"=>"Debug: ".$e->getFile().":".$e->getLine()." '.$e->getMessage()]);
 }

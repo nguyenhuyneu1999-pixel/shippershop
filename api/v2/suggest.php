@@ -30,5 +30,5 @@ try {
 
     echo json_encode(['success'=>true,'data'=>$data],JSON_UNESCAPED_UNICODE);
 } catch (\Throwable $e) {
-    echo json_encode(['success'=>false,'message'=>'Error: '.$e->getMessage()]);
+    echo json_encode(["success"=>false,"message"=>"Debug: ".$e->getFile().":".$e->getLine()." '.$e->getMessage()]);
 }
