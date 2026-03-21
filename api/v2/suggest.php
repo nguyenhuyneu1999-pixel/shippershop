@@ -12,23 +12,16 @@ if($_SERVER['REQUEST_METHOD']==='OPTIONS'){http_response_code(204);exit;}
 $q=trim($_GET['q']??'');
 if(mb_strlen($q)<1){echo json_encode(['success'=>true,'data'=>[]]);exit;}
 
-$d=db();$data=[];$errors=[];
+$d=db();$data=[];
 
 try{
     $users=$d->fetchAll("SELECT id,fullname,avatar,shipping_company FROM users WHERE `status`='active' AND fullname LIKE ? ORDER BY total_posts DESC LIMIT 5",['%'.$q.'%']);
     foreach($users as $u){$u['type']='user';$data[]=$u;}
-}catch(\Throwable $e){$errors[]='users:'.$e->getMessage();}
+}catch(\Throwable $e){}
 
 try{
-    $pdo=$d->getConnection();
-    $stmt=$pdo->prepare("SELECT id,name as fullname,avatar FROM `groups` WHERE name LIKE ? LIMIT 3");
-    $stmt->execute(['%'.$q.'%']);
-    $groups=$stmt->fetchAll(\PDO::FETCH_ASSOC);
-    foreach($groups as $g){$g['type']='group';$g['shipping_company']='';$data[]=$g;}
-}catch(\Throwable $e){$errors[]='groups:'.$e->getMessage();}
+    $groups=$d->fetchAll("SELECT id,name as fullname FROM `groups` WHERE name LIKE ? LIMIT 3",['%'.$q.'%']);
+    foreach($groups as $g){$g['type']='group';$g['avatar']='';$g['shipping_company']='';$data[]=$g;}
+}catch(\Throwable $e){}
 
-if($errors){
-    echo json_encode(['success'=>true,'data'=>$data,'_debug'=>$errors],JSON_UNESCAPED_UNICODE);
-}else{
-    echo json_encode(['success'=>true,'data'=>$data],JSON_UNESCAPED_UNICODE);
-}
+echo json_encode(['success'=>true,'data'=>$data],JSON_UNESCAPED_UNICODE);
