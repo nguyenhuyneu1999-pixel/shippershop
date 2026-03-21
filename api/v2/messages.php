@@ -139,6 +139,23 @@ if($method==='GET'){
         ok('OK',$members);
     }
 
+    // --- Typing indicator check ---
+    if($action==='typing_status'){
+        $cid=intval($_GET['conversation_id']??0);
+        if(!$cid) ok('OK',['typing'=>[]]);
+        // Get members who are typing (cached, TTL 5s)
+        $members=$d->fetchAll("SELECT user_id FROM conversation_members WHERE conversation_id=? AND user_id!=?",[$cid,$uid]);
+        $typing=[];
+        foreach($members as $m){
+            $ts=cache_get('typing_'.$cid.'_'.$m['user_id']);
+            if($ts&&(time()-intval($ts))<6){
+                $u=$d->fetchOne("SELECT id,fullname,avatar FROM users WHERE id=?",[$m['user_id']]);
+                if($u) $typing[]=$u;
+            }
+        }
+        ok('OK',['typing'=>$typing]);
+    }
+
     // --- Messages ---
     if($action==='messages'){
         $cid=intval($_GET['conversation_id']??0);

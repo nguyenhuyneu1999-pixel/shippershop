@@ -45,6 +45,14 @@ if($method==='GET'){
     ok('OK',$post);
   }
 
+  // Edit history
+  if($action==='edit_history'){
+    $pid=intval($_GET['post_id']??0);
+    if(!$pid) fail('Missing post_id');
+    $edits=$d->fetchAll("SELECT pe.*,u.fullname as editor_name FROM post_edits pe LEFT JOIN users u ON pe.edited_by=u.id WHERE pe.post_id=? ORDER BY pe.created_at DESC LIMIT 20",[$pid]);
+    ok('OK',$edits);
+  }
+
   // Comments
   if($action==='comments'){
     $pid=intval($_GET['post_id']??0);
@@ -194,14 +202,32 @@ if($method==='POST'){
   if($action==='edit'){
     $pid=intval($input['post_id']??0);
     if(!$pid) fail('Missing post_id');
-    $post=$d->fetchOne("SELECT user_id FROM posts WHERE id=? AND `status`='active'",[$pid]);
+    $post=$d->fetchOne("SELECT user_id,content FROM posts WHERE id=? AND `status`='active'",[$pid]);
     if(!$post) fail('Không tìm thấy',404);
     if(intval($post['user_id'])!==$uid) fail('Không có quyền',403);
     $content=trim($input['content']??'');
     if(mb_strlen($content)<3) fail('Nội dung tối thiểu 3 ký tự');
+    // Save edit history
+    try{$pdo->prepare("INSERT INTO post_edits (post_id,old_content,new_content,edited_by,created_at) VALUES (?,?,?,?,NOW())")->execute([$pid,$post['content'],$content,$uid]);}catch(\Throwable $e){}
     $d->query("UPDATE posts SET content=?,edited_at=NOW() WHERE id=?",[$content,$pid]);
     if(!empty($input['type'])) $d->query("UPDATE posts SET type=? WHERE id=?",[sanitize($input['type']),$pid]);
     ok('Đã sửa bài!');
+  }
+
+  // === PIN/UNPIN POST ===
+  if($action==='pin'){
+    $pid=intval($input['post_id']??0);
+    $post=$d->fetchOne("SELECT user_id,is_pinned FROM posts WHERE id=?",[$pid]);
+    if(!$post) fail('Không tìm thấy',404);
+    $user=$d->fetchOne("SELECT role FROM users WHERE id=?",[$uid]);
+    if(intval($post['user_id'])!==$uid && ($user['role']??'')!=='admin') fail('Không có quyền',403);
+    $pinned=intval($post['is_pinned'])?0:1;
+    if($pinned){
+      // Unpin others first (max 1 pinned per user)
+      $d->query("UPDATE posts SET is_pinned=0 WHERE user_id=? AND is_pinned=1",[intval($post['user_id'])]);
+    }
+    $d->query("UPDATE posts SET is_pinned=? WHERE id=?",[$pinned,$pid]);
+    ok($pinned?'Đã ghim bài':'Đã bỏ ghim',['pinned'=>(bool)$pinned]);
   }
 
   // === DELETE POST ===
