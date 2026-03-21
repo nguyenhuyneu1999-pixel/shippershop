@@ -467,6 +467,44 @@ if($method==='POST'){
         ok('OK');
     }
 
+    // === TYPING INDICATOR ===
+    if($action==='typing'){
+        $cid=intval($input['conversation_id']??0);
+        if(!$cid) fail('Missing conversation_id');
+        // Store in cache (TTL 5s)
+        try{cache_set('typing_'.$cid.'_'.$uid, time(), 5);}catch(\Throwable $e){}
+        ok('OK');
+    }
+
+    // === READ RECEIPTS ===
+    if($action==='mark_read'){
+        $cid=intval($input['conversation_id']??0);
+        if(!$cid) fail('Missing conversation_id');
+        $d->query("UPDATE messages SET is_read=1, read_at=NOW() WHERE conversation_id=? AND sender_id!=? AND is_read=0",[$cid,$uid]);
+        ok('Đã đọc');
+    }
+
+    // === MESSAGE REACTIONS ===
+    if($action==='react'){
+        $mid=intval($input['message_id']??0);
+        $emoji=trim($input['emoji']??'');
+        if(!$mid||!$emoji) fail('Missing data');
+        // Store reaction as JSON in messages.reactions column (or separate table)
+        $msg=$d->fetchOne("SELECT id,reactions FROM messages WHERE id=?",[$mid]);
+        if(!$msg) fail('Message not found',404);
+        $reactions=json_decode($msg['reactions']??'{}',true)?:[];
+        $key=$emoji;
+        if(!isset($reactions[$key])) $reactions[$key]=[];
+        if(in_array($uid,$reactions[$key])){
+            $reactions[$key]=array_values(array_diff($reactions[$key],[$uid]));
+            if(empty($reactions[$key])) unset($reactions[$key]);
+        }else{
+            $reactions[$key][]=$uid;
+        }
+        $d->query("UPDATE messages SET reactions=? WHERE id=?",[json_encode($reactions),$mid]);
+        ok('OK',['reactions'=>$reactions]);
+    }
+
     fail('Action không hợp lệ');
 }
 
