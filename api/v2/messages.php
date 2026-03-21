@@ -532,6 +532,18 @@ if($method==='POST'){
         ok('Đã đọc');
     }
 
+    // === PIN CONVERSATION ===
+    if($action==='pin_conversation'){
+        $cid=intval($input['conversation_id']??0);
+        if(!$cid) fail('Missing conversation_id');
+        $conv=$d->fetchOne("SELECT is_pinned FROM conversations WHERE id=? AND (user1_id=? OR user2_id=?)",[$cid,$uid,$uid]);
+        if(!$conv){$conv=$d->fetchOne("SELECT c.is_pinned FROM conversations c JOIN conversation_members cm ON c.id=cm.conversation_id WHERE c.id=? AND cm.user_id=?",[$cid,$uid]);}
+        if(!$conv) fail('No access',403);
+        $newPin=intval($conv['is_pinned'])?0:1;
+        $d->query("UPDATE conversations SET is_pinned=? WHERE id=?",[$newPin,$cid]);
+        ok($newPin?'Đã ghim hội thoại':'Đã bỏ ghim',['pinned'=>$newPin]);
+    }
+
     // === FORWARD MESSAGE ===
     if($action==='forward'){
         $mid=intval($input['message_id']??0);
