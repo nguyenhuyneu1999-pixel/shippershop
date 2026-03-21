@@ -1,6 +1,6 @@
 <?php
 // ShipperShop API v2 — User Reputation Score
-// Composite score: posts, likes received, comments, streak, verification, age
+// Calculated from posts, likes, comments, deliveries, verification, streaks
 session_start();
 require_once __DIR__.'/../../includes/config.php';
 require_once __DIR__.'/../../includes/db.php';
@@ -13,81 +13,98 @@ header('Access-Control-Allow-Origin: *');
 header('Access-Control-Allow-Headers: Content-Type, Authorization');
 if($_SERVER['REQUEST_METHOD']==='OPTIONS'){http_response_code(204);exit;}
 
-$d=db();$action=$_GET['action']??'';
+$d=db();
 
 function rp_ok($msg,$data=null){echo json_encode(['success'=>true,'message'=>$msg,'data'=>$data],JSON_UNESCAPED_UNICODE);exit;}
 
 try {
 
-// Get reputation for a user
+$userId=intval($_GET['user_id']??0);
+if(!$userId){$uid=optional_auth();$userId=$uid;}
+if(!$userId) rp_ok('OK',['score'=>0]);
+
+$action=$_GET['action']??'';
+
+// Calculate reputation
 if(!$action||$action==='score'){
-    $tid=intval($_GET['user_id']??0);
-    if(!$tid){$uid=optional_auth();$tid=$uid;}
-    if(!$tid) rp_ok('OK',null);
+    $data=cache_remember('reputation_'.$userId, function() use($d,$userId) {
+        $u=$d->fetchOne("SELECT total_posts,total_success,total_comments,is_verified,created_at FROM users WHERE id=?",[$userId]);
+        if(!$u) return ['score'=>0,'level'=>'Mới','tier'=>0];
 
-    $data=cache_remember('reputation_'.$tid, function() use($d,$tid) {
-        $user=$d->fetchOne("SELECT created_at,is_verified FROM users WHERE id=?",[$tid]);
-        if(!$user) return null;
-
-        $posts=intval($d->fetchOne("SELECT COUNT(*) as c FROM posts WHERE user_id=? AND `status`='active'",[$tid])['c']);
-        $likesReceived=intval($d->fetchOne("SELECT SUM(likes_count) as s FROM posts WHERE user_id=? AND `status`='active'",[$tid])['s']);
-        $commentsReceived=intval($d->fetchOne("SELECT SUM(comments_count) as s FROM posts WHERE user_id=? AND `status`='active'",[$tid])['s']);
-        $commentsGiven=intval($d->fetchOne("SELECT COUNT(*) as c FROM comments WHERE user_id=? AND `status`='active'",[$tid])['c']);
-        $followers=intval($d->fetchOne("SELECT COUNT(*) as c FROM follows WHERE following_id=?",[$tid])['c']);
-        $streak=intval($d->fetchOne("SELECT current_streak FROM user_streaks WHERE user_id=?",[$tid])['current_streak']??0);
-        $xp=intval($d->fetchOne("SELECT SUM(xp) as s FROM user_xp WHERE user_id=?",[$tid])['s']);
-        $ageDays=max(1,round((time()-strtotime($user['created_at']))/86400));
-        $verified=intval($user['is_verified']);
-
-        // Score formula
         $score=0;
-        $score+=min($posts*5, 500);              // Max 500 from posts
-        $score+=min($likesReceived*2, 1000);      // Max 1000 from likes
-        $score+=min($commentsReceived, 300);      // Max 300 from comments received
-        $score+=min($commentsGiven*2, 200);       // Max 200 from engagement
-        $score+=min($followers*3, 600);           // Max 600 from followers
-        $score+=min($streak*10, 300);             // Max 300 from streak
-        $score+=min(floor($xp/10), 200);          // Max 200 from XP
-        $score+=min(floor($ageDays/30)*20, 200);  // Max 200 from age
-        $score+=$verified?300:0;                  // 300 for verified
+        $factors=[];
 
-        $maxScore=3600;
-        $pct=round($score/$maxScore*100);
+        // Posts (max 200 points)
+        $posts=min(intval($u['total_posts']),200);
+        $score+=$posts;
+        $factors[]=['name'=>'Bài viết','value'=>$posts,'max'=>200];
 
-        // Level based on score
-        $levels=[0=>'Tân binh',200=>'Shipper',500=>'Shipper tích cực',1000=>'Shipper uy tín',2000=>'Shipper chuyên nghiệp',3000=>'Shipper huyền thoại'];
-        $level='Tân binh';
-        foreach($levels as $threshold=>$name){if($score>=$threshold) $level=$name;}
+        // Deliveries (max 300 points)
+        $deliveries=min(intval($u['total_success'])*2,300);
+        $score+=$deliveries;
+        $factors[]=['name'=>'Đơn giao','value'=>$deliveries,'max'=>300];
+
+        // Likes received (max 150 points)
+        $likesReceived=intval($d->fetchOne("SELECT COALESCE(SUM(likes_count),0) as s FROM posts WHERE user_id=?",[$userId])['s']);
+        $likePoints=min($likesReceived,150);
+        $score+=$likePoints;
+        $factors[]=['name'=>'Lượt thích nhận','value'=>$likePoints,'max'=>150];
+
+        // Followers (max 100 points)
+        $followers=intval($d->fetchOne("SELECT COUNT(*) as c FROM follows WHERE following_id=?",[$userId])['c']);
+        $followerPoints=min($followers,100);
+        $score+=$followerPoints;
+        $factors[]=['name'=>'Người theo dõi','value'=>$followerPoints,'max'=>100];
+
+        // Verification bonus
+        if(intval($u['is_verified'])){$score+=50;$factors[]=['name'=>'Đã xác minh','value'=>50,'max'=>50];}
+
+        // Account age bonus (max 100)
+        $days=max(1,floor((time()-strtotime($u['created_at']))/86400));
+        $agePoints=min(intval($days/3),100);
+        $score+=$agePoints;
+        $factors[]=['name'=>'Thâm niên','value'=>$agePoints,'max'=>100];
+
+        // Streak bonus
+        $streak=$d->fetchOne("SELECT current_streak FROM user_streaks WHERE user_id=?",[$userId]);
+        $streakPoints=min(intval($streak['current_streak']??0)*2,50);
+        $score+=$streakPoints;
+        $factors[]=['name'=>'Streak','value'=>$streakPoints,'max'=>50];
+
+        // Level calculation
+        $levels=[
+            ['min'=>0,'name'=>'Mới bắt đầu','icon'=>'🌱','tier'=>1],
+            ['min'=>50,'name'=>'Shipper tập sự','icon'=>'📦','tier'=>2],
+            ['min'=>150,'name'=>'Shipper chuyên nghiệp','icon'=>'🚚','tier'=>3],
+            ['min'=>300,'name'=>'Shipper kỳ cựu','icon'=>'⭐','tier'=>4],
+            ['min'=>500,'name'=>'Shipper huyền thoại','icon'=>'🏆','tier'=>5],
+            ['min'=>800,'name'=>'Shipper đại sư','icon'=>'👑','tier'=>6],
+        ];
+        $level=$levels[0];
+        foreach($levels as $l){if($score>=$l['min'])$level=$l;}
+        $nextLevel=null;
+        foreach($levels as $l){if($l['min']>$score){$nextLevel=$l;break;}}
 
         return [
-            'score'=>$score,'max'=>$maxScore,'pct'=>$pct,'level'=>$level,
-            'breakdown'=>[
-                'posts'=>['value'=>$posts,'points'=>min($posts*5,500),'max'=>500],
-                'likes_received'=>['value'=>$likesReceived,'points'=>min($likesReceived*2,1000),'max'=>1000],
-                'comments_received'=>['value'=>$commentsReceived,'points'=>min($commentsReceived,300),'max'=>300],
-                'engagement'=>['value'=>$commentsGiven,'points'=>min($commentsGiven*2,200),'max'=>200],
-                'followers'=>['value'=>$followers,'points'=>min($followers*3,600),'max'=>600],
-                'streak'=>['value'=>$streak,'points'=>min($streak*10,300),'max'=>300],
-                'xp'=>['value'=>$xp,'points'=>min(floor($xp/10),200),'max'=>200],
-                'age_days'=>['value'=>$ageDays,'points'=>min(floor($ageDays/30)*20,200),'max'=>200],
-                'verified'=>['value'=>$verified,'points'=>$verified?300:0,'max'=>300],
-            ],
+            'score'=>$score,
+            'level'=>$level['name'],
+            'icon'=>$level['icon'],
+            'tier'=>$level['tier'],
+            'next_level'=>$nextLevel,
+            'progress'=>$nextLevel?round(($score-$level['min'])/($nextLevel['min']-$level['min'])*100):100,
+            'factors'=>$factors,
         ];
-    }, 600);
+    }, 300);
 
     rp_ok('OK',$data);
 }
 
-// Reputation leaderboard
+// Leaderboard by reputation
 if($action==='leaderboard'){
     $limit=min(intval($_GET['limit']??20),50);
-    // Simple leaderboard based on total engagement
-    $leaders=$d->fetchAll("SELECT u.id,u.fullname,u.avatar,u.shipping_company,u.is_verified,
-        (SELECT SUM(likes_count)+SUM(comments_count) FROM posts WHERE user_id=u.id AND `status`='active') as engagement,
-        (SELECT COUNT(*) FROM follows WHERE following_id=u.id) as followers
-        FROM users u WHERE u.`status`='active'
-        ORDER BY engagement DESC LIMIT $limit");
-    rp_ok('OK',$leaders);
+    // Approximate: sort by total_posts + total_success
+    $users=$d->fetchAll("SELECT id,fullname,avatar,shipping_company,is_verified,total_posts,total_success,(total_posts + total_success*2) as rep_score FROM users WHERE `status`='active' ORDER BY rep_score DESC LIMIT $limit");
+    rp_ok('OK',$users);
 }
 
 rp_ok('OK',[]);
