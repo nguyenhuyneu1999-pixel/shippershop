@@ -15,8 +15,10 @@ if($_SERVER['REQUEST_METHOD']==='OPTIONS'){http_response_code(204);exit;}
 
 $d=db();$action=$_GET['action']??'';
 
-function ok($msg,$data=null){echo json_encode(['success'=>true,'message'=>$msg,'data'=>$data],JSON_UNESCAPED_UNICODE);exit;}
-function fail($msg,$code=400){http_response_code($code);echo json_encode(['success'=>false,'message'=>$msg]);exit;}
+function ht_ok($msg,$data=null){echo json_encode(['success'=>true,'message'=>$msg,'data'=>$data],JSON_UNESCAPED_UNICODE);exit;}
+function ht_fail($msg,$code=400){http_response_code($code);echo json_encode(['success'=>false,'message'=>$msg]);exit;}
+
+try {
 
 // Trending hashtags (cached 5min)
 if(!$action||$action==='trending'){
@@ -47,13 +49,13 @@ if(!$action||$action==='trending'){
         }
         return $result;
     }, 300);
-    ok('OK',$tags);
+    ht_ok('OK',$tags);
 }
 
 // Posts by hashtag
 if($action==='posts'){
     $tag=trim($_GET['tag']??'');
-    if(!$tag) fail('Missing tag');
+    if(!$tag) ht_fail('Missing tag');
     $page=max(1,intval($_GET['page']??1));$limit=min(intval($_GET['limit']??15),50);$offset=($page-1)*$limit;
     $uid=optional_auth();
 
@@ -76,7 +78,7 @@ if($action==='posts'){
 // Suggest hashtags (autocomplete)
 if($action==='suggest'){
     $q=trim($_GET['q']??'');
-    if(mb_strlen($q)<1) ok('OK',[]);
+    if(mb_strlen($q)<1) ht_ok('OK',[]);
     $tags=cache_remember('tag_suggest_'.md5($q), function() use($d,$q) {
         $posts=$d->fetchAll("SELECT content FROM posts WHERE `status`='active' AND content LIKE ? ORDER BY created_at DESC LIMIT 200",['%#'.$q.'%']);
         $seen=[];$result=[];
@@ -93,7 +95,11 @@ if($action==='suggest'){
         }
         return $result;
     }, 120);
-    ok('OK',$tags);
+    ht_ok('OK',$tags);
 }
 
-ok('OK',[]);
+ht_ok('OK',[]);
+
+} catch (\Throwable $e) {
+    echo json_encode(['success'=>false,'message'=>'Error: '.$e->getMessage()]);
+}
