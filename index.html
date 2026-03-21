@@ -1373,6 +1373,10 @@ function doFeedCheckin(){
 <script src="/js/components/image-viewer.js"></script>
 <script src="/js/components/notification-bell.js"></script>
 <script src="/js/components/scroll-heartbeat.js"></script>
+<script src="/js/components/fab-menu.js"></script>
+<script src="/js/components/online-widget.js"></script>
+<script src="/js/components/hashtags.js"></script>
+<script src="/js/components/share-sheet.js"></script>
 <script src="/js/components/pwa-install.js"></script>
 <script src="/js/components/dark-mode.js"></script>
 <script src="/js/components/search-overlay.js"></script>
@@ -1418,6 +1422,12 @@ function doFeedCheckin(){
   if(SS.CommentSheet){
     window.openPostSheetV2=function(pid){SS.CommentSheet.open(pid);};
   }
+  // FAB quick actions menu
+  if(SS.FABMenu) SS.FABMenu.init();
+  // Trending hashtags sidebar
+  if(SS.Hashtags&&document.getElementById('ss-trending')) SS.Hashtags.renderTrending('ss-trending');
+  // Online users sidebar
+  if(SS.OnlineWidget&&document.getElementById('ss-online')) SS.OnlineWidget.render('ss-online');
 })();
 </script>
 </body>
