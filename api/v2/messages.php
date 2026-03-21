@@ -532,6 +532,23 @@ if($method==='POST'){
         ok('Đã đọc');
     }
 
+    // === FORWARD MESSAGE ===
+    if($action==='forward'){
+        $mid=intval($input['message_id']??0);
+        $toCid=intval($input['to_conversation_id']??0);
+        if(!$mid||!$toCid) fail('Missing data');
+        $msg=$d->fetchOne("SELECT content,`type`,file_url,file_name FROM messages WHERE id=?",[$mid]);
+        if(!$msg) fail('Message not found',404);
+        // Verify access to target conversation
+        $access=$d->fetchOne("SELECT id FROM conversation_members WHERE conversation_id=? AND user_id=?",[$toCid,$uid]);
+        if(!$access){$access=$d->fetchOne("SELECT id FROM conversations WHERE id=? AND (user1_id=? OR user2_id=?)",[$toCid,$uid,$uid]);}
+        if(!$access) fail('No access to target',403);
+        $fwdContent=$msg['content']?'[Chuyển tiếp] '.$msg['content']:'[Chuyển tiếp]';
+        $pdo->prepare("INSERT INTO messages (conversation_id,sender_id,content,`type`,file_url,file_name,created_at) VALUES (?,?,?,?,?,?,NOW())")->execute([$toCid,$uid,$fwdContent,$msg['type']??'text',$msg['file_url'],$msg['file_name']]);
+        $d->query("UPDATE conversations SET last_message=?,last_message_at=NOW() WHERE id=?",[$fwdContent,$toCid]);
+        ok('Đã chuyển tiếp!');
+    }
+
     // === MESSAGE REACTIONS ===
     if($action==='react'){
         $mid=intval($input['message_id']??0);
