@@ -99,7 +99,7 @@ if($action==='bulk'&&$_SERVER['REQUEST_METHOD']==='POST'){
         elseif($bulkAction==='delete'){$d->query("UPDATE users SET `status`='deleted' WHERE id=? AND role!='admin'",[$tid]);$count++;}
     }
 
-    try{$pdo->prepare("INSERT INTO audit_log (user_id,action,detail,ip,created_at) VALUES (?,'bulk_'.$bulkAction,?,?,NOW())")->execute([$uid,'Bulk '.$bulkAction.' on '.$count.' users: '.implode(',',array_slice($ids,0,10)),$_SERVER['REMOTE_ADDR']??'']);}catch(\Throwable $e){}
+    try{$pdo->prepare("INSERT INTO audit_log (user_id,action,details,ip,created_at) VALUES (?,'bulk_'.$bulkAction,?,?,NOW())")->execute([$uid,'Bulk '.$bulkAction.' on '.$count.' users: '.implode(',',array_slice($ids,0,10)),$_SERVER['REMOTE_ADDR']??'']);}catch(\Throwable $e){}
 
     au_ok('Đã xử lý '.$count.' users',['affected'=>$count]);
 }

@@ -85,7 +85,7 @@ if($_SERVER['REQUEST_METHOD']==='POST'){
         if(!$user||!$user['two_factor_secret']) tf_fail('Chưa thiết lập 2FA');
         if(!verifyTOTP($user['two_factor_secret'],$code)) tf_fail('Mã không đúng hoặc hết hạn');
         $d->query("UPDATE users SET two_factor_enabled=1 WHERE id=?",[$uid]);
-        try{$pdo->prepare("INSERT INTO audit_log (user_id,action,detail,ip,created_at) VALUES (?,'2fa_enable','2FA enabled',?,NOW())")->execute([$uid,$_SERVER['REMOTE_ADDR']??'']);}catch(\Throwable $e){}
+        try{$pdo->prepare("INSERT INTO audit_log (user_id,action,details,ip,created_at) VALUES (?,'2fa_enable','2FA enabled',?,NOW())")->execute([$uid,$_SERVER['REMOTE_ADDR']??'']);}catch(\Throwable $e){}
         tf_ok('Đã bật xác thực 2 bước!');
     }
 
@@ -101,7 +101,7 @@ if($_SERVER['REQUEST_METHOD']==='POST'){
             if(!verifyTOTP($user['two_factor_secret'],$code)) tf_fail('Mã 2FA không đúng');
         }
         $d->query("UPDATE users SET two_factor_enabled=0,two_factor_secret=NULL WHERE id=?",[$uid]);
-        try{$pdo->prepare("INSERT INTO audit_log (user_id,action,detail,ip,created_at) VALUES (?,'2fa_disable','2FA disabled',?,NOW())")->execute([$uid,$_SERVER['REMOTE_ADDR']??'']);}catch(\Throwable $e){}
+        try{$pdo->prepare("INSERT INTO audit_log (user_id,action,details,ip,created_at) VALUES (?,'2fa_disable','2FA disabled',?,NOW())")->execute([$uid,$_SERVER['REMOTE_ADDR']??'']);}catch(\Throwable $e){}
         tf_ok('Đã tắt xác thực 2 bước');
     }
 

@@ -31,14 +31,14 @@ if($action==='deactivate'&&$_SERVER['REQUEST_METHOD']==='POST'){
     if(!$user||!password_verify($password,$user['password'])) ac_fail('Sai mật khẩu');
 
     $d->query("UPDATE users SET `status`='deactivated',is_online=0 WHERE id=?",[$uid]);
-    try{$pdo->prepare("INSERT INTO audit_log (user_id,action,detail,ip,created_at) VALUES (?,'deactivate','Account deactivated',?,NOW())")->execute([$uid,$_SERVER['REMOTE_ADDR']??'']);}catch(\Throwable $e){}
+    try{$pdo->prepare("INSERT INTO audit_log (user_id,action,details,ip,created_at) VALUES (?,'deactivate','Account deactivated',?,NOW())")->execute([$uid,$_SERVER['REMOTE_ADDR']??'']);}catch(\Throwable $e){}
     ac_ok('Tài khoản đã tạm khóa. Đăng nhập lại để kích hoạt.');
 }
 
 // Reactivate (happens on login if status=deactivated)
 if($action==='reactivate'&&$_SERVER['REQUEST_METHOD']==='POST'){
     $d->query("UPDATE users SET `status`='active' WHERE id=? AND `status`='deactivated'",[$uid]);
-    try{$pdo->prepare("INSERT INTO audit_log (user_id,action,detail,ip,created_at) VALUES (?,'reactivate','Account reactivated',?,NOW())")->execute([$uid,$_SERVER['REMOTE_ADDR']??'']);}catch(\Throwable $e){}
+    try{$pdo->prepare("INSERT INTO audit_log (user_id,action,details,ip,created_at) VALUES (?,'reactivate','Account reactivated',?,NOW())")->execute([$uid,$_SERVER['REMOTE_ADDR']??'']);}catch(\Throwable $e){}
     ac_ok('Tài khoản đã được kích hoạt lại!');
 }
 
@@ -53,14 +53,14 @@ if($action==='delete'&&$_SERVER['REQUEST_METHOD']==='POST'){
     // Schedule deletion (30 days)
     $deleteAt=date('Y-m-d H:i:s',time()+30*86400);
     $d->query("UPDATE users SET `status`='pending_deletion',verification_note=? WHERE id=?",['DELETE_AT:'.$deleteAt.' REASON:'.$reason,$uid]);
-    try{$pdo->prepare("INSERT INTO audit_log (user_id,action,detail,ip,created_at) VALUES (?,'delete_request',?,?,NOW())")->execute([$uid,'Scheduled deletion: '.$deleteAt.' Reason: '.$reason,$_SERVER['REMOTE_ADDR']??'']);}catch(\Throwable $e){}
+    try{$pdo->prepare("INSERT INTO audit_log (user_id,action,details,ip,created_at) VALUES (?,'delete_request',?,?,NOW())")->execute([$uid,'Scheduled deletion: '.$deleteAt.' Reason: '.$reason,$_SERVER['REMOTE_ADDR']??'']);}catch(\Throwable $e){}
     ac_ok('Tài khoản sẽ bị xóa vĩnh viễn sau 30 ngày. Đăng nhập trước đó để hủy.',['delete_at'=>$deleteAt]);
 }
 
 // Cancel deletion
 if($action==='cancel_delete'&&$_SERVER['REQUEST_METHOD']==='POST'){
     $d->query("UPDATE users SET `status`='active',verification_note=NULL WHERE id=? AND `status`='pending_deletion'",[$uid]);
-    try{$pdo->prepare("INSERT INTO audit_log (user_id,action,detail,ip,created_at) VALUES (?,'cancel_delete','Deletion cancelled',?,NOW())")->execute([$uid,$_SERVER['REMOTE_ADDR']??'']);}catch(\Throwable $e){}
+    try{$pdo->prepare("INSERT INTO audit_log (user_id,action,details,ip,created_at) VALUES (?,'cancel_delete','Deletion cancelled',?,NOW())")->execute([$uid,$_SERVER['REMOTE_ADDR']??'']);}catch(\Throwable $e){}
     ac_ok('Đã hủy yêu cầu xóa tài khoản');
 }
 
@@ -75,7 +75,7 @@ if($action==='change_email'&&$_SERVER['REQUEST_METHOD']==='POST'){
     $exists=$d->fetchOne("SELECT id FROM users WHERE email=? AND id!=?",[$newEmail,$uid]);
     if($exists) ac_fail('Email đã được sử dụng');
     $d->query("UPDATE users SET email=? WHERE id=?",[$newEmail,$uid]);
-    try{$pdo->prepare("INSERT INTO audit_log (user_id,action,detail,ip,created_at) VALUES (?,'change_email',?,?,NOW())")->execute([$uid,'Email changed to: '.$newEmail,$_SERVER['REMOTE_ADDR']??'']);}catch(\Throwable $e){}
+    try{$pdo->prepare("INSERT INTO audit_log (user_id,action,details,ip,created_at) VALUES (?,'change_email',?,?,NOW())")->execute([$uid,'Email changed to: '.$newEmail,$_SERVER['REMOTE_ADDR']??'']);}catch(\Throwable $e){}
     ac_ok('Đã đổi email');
 }
 

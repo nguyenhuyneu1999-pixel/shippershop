@@ -89,7 +89,7 @@ if($_SERVER['REQUEST_METHOD']==='POST'){
     cache_delete('system_config');
 
     // Audit
-    try{$pdo=db()->getConnection();$pdo->prepare("INSERT INTO audit_log (user_id,action,detail,ip,created_at) VALUES (?,'system_config',?,?,NOW())")->execute([$uid,'Config updated: '.implode(', ',array_keys($input)),$_SERVER['REMOTE_ADDR']??'']);}catch(\Throwable $e){}
+    try{$pdo=db()->getConnection();$pdo->prepare("INSERT INTO audit_log (user_id,action,details,ip,created_at) VALUES (?,'system_config',?,?,NOW())")->execute([$uid,'Config updated: '.implode(', ',array_keys($input)),$_SERVER['REMOTE_ADDR']??'']);}catch(\Throwable $e){}
 
     sc_ok('Đã lưu cấu hình',array_merge($DEFAULTS,$current));
 }

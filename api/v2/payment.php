@@ -111,7 +111,7 @@ if($_SERVER['REQUEST_METHOD']==='POST'){
             $d->query("UPDATE payos_payments SET checkout_url=?,qr_code=? WHERE order_code=?",[$checkoutUrl,$qrCode,$orderCode]);
 
             // Audit log
-            try{$pdo->prepare("INSERT INTO audit_log (user_id,action,detail,ip,created_at) VALUES (?,'payment_create',?,?,NOW())")->execute([$uid,'Amount: '.$amount.' Order: '.$orderCode,$_SERVER['REMOTE_ADDR']??'']);}catch(\Throwable $e){}
+            try{$pdo->prepare("INSERT INTO audit_log (user_id,action,details,ip,created_at) VALUES (?,'payment_create',?,?,NOW())")->execute([$uid,'Amount: '.$amount.' Order: '.$orderCode,$_SERVER['REMOTE_ADDR']??'']);}catch(\Throwable $e){}
 
             pay_ok('Đã tạo link thanh toán',['order_code'=>$orderCode,'checkout_url'=>$checkoutUrl,'qr_code'=>$qrCode,'amount'=>$amount]);
         }else{
@@ -164,7 +164,7 @@ if($_SERVER['REQUEST_METHOD']==='POST'){
             // Notify user
             try{$pdo->prepare("INSERT INTO notifications (user_id,type,title,message,data,created_at) VALUES (?,'wallet','Nạp tiền thành công',?,?,NOW())")->execute([$userId,'+'.$amount.'đ đã được cộng vào ví',json_encode(['amount'=>$amount,'order_code'=>$orderCode])]);}catch(\Throwable $e){}
             // Audit
-            try{$pdo->prepare("INSERT INTO audit_log (user_id,action,detail,ip,created_at) VALUES (?,'payment_completed',?,?,NOW())")->execute([$userId,'PayOS #'.$orderCode.' Amount: '.$amount,$_SERVER['REMOTE_ADDR']??'']);}catch(\Throwable $e){}
+            try{$pdo->prepare("INSERT INTO audit_log (user_id,action,details,ip,created_at) VALUES (?,'payment_completed',?,?,NOW())")->execute([$userId,'PayOS #'.$orderCode.' Amount: '.$amount,$_SERVER['REMOTE_ADDR']??'']);}catch(\Throwable $e){}
         }elseif($paymentStatus==='CANCELLED'){
             $d->query("UPDATE payos_payments SET `status`='cancelled' WHERE order_code=?",[$orderCode]);
         }

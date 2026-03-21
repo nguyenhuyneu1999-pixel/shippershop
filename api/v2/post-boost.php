@@ -99,7 +99,7 @@ if($_SERVER['REQUEST_METHOD']==='POST'){
         else $d->query("INSERT INTO settings (`key`,value) VALUES (?,?)",[$key,json_encode($boostData)]);
 
         // Audit
-        try{$pdo->prepare("INSERT INTO audit_log (user_id,action,detail,ip,created_at) VALUES (?,'post_boost',?,?,NOW())")->execute([$uid,'Post #'.$postId.' boosted: '.$pkg['name'],$_SERVER['REMOTE_ADDR']??'']);}catch(\Throwable $e){}
+        try{$pdo->prepare("INSERT INTO audit_log (user_id,action,details,ip,created_at) VALUES (?,'post_boost',?,?,NOW())")->execute([$uid,'Post #'.$postId.' boosted: '.$pkg['name'],$_SERVER['REMOTE_ADDR']??'']);}catch(\Throwable $e){}
 
         pb_ok('Đã boost bài viết!',['expires_at'=>$expiresAt,'package'=>$pkg['name']]);
     }

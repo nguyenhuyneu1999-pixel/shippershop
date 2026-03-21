@@ -128,7 +128,7 @@ if($_SERVER['REQUEST_METHOD']==='POST'){
         $d->query("UPDATE post_reports SET `status`=?,resolved_by=?,resolved_at=NOW() WHERE post_id=? AND `status`='pending' AND id!=?",[$resolution,$uid,$postId,$reportId]);
 
         // Audit
-        try{$pdo->prepare("INSERT INTO audit_log (user_id,action,detail,ip,created_at) VALUES (?,'moderation',?,?,NOW())")->execute([$uid,'Report #'.$reportId.' → '.$resolution,$_SERVER['REMOTE_ADDR']??'']);}catch(\Throwable $e){}
+        try{$pdo->prepare("INSERT INTO audit_log (user_id,action,details,ip,created_at) VALUES (?,'moderation',?,?,NOW())")->execute([$uid,'Report #'.$reportId.' → '.$resolution,$_SERVER['REMOTE_ADDR']??'']);}catch(\Throwable $e){}
 
         mod_ok('Đã xử lý: '.$resolution);
     }

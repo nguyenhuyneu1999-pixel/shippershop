@@ -30,7 +30,7 @@ if($_SERVER['REQUEST_METHOD']==='POST'&&(!$action||$action==='submit')){
     if(!$message||mb_strlen($message)<5) fb_fail('Noi dung toi thieu 5 ky tu');
 
     // Store in audit_log
-    $pdo->prepare("INSERT INTO audit_log (user_id,action,detail,ip,created_at) VALUES (?,'feedback',?,?,NOW())")->execute([$uid??0,json_encode(['type'=>$type,'message'=>$message,'rating'=>$rating,'ua'=>mb_substr($_SERVER['HTTP_USER_AGENT']??'',0,200)],JSON_UNESCAPED_UNICODE),$_SERVER['REMOTE_ADDR']??'']);
+    $pdo->prepare("INSERT INTO audit_log (user_id,action,details,ip,created_at) VALUES (?,'feedback',?,?,NOW())")->execute([$uid??0,json_encode(['type'=>$type,'message'=>$message,'rating'=>$rating,'ua'=>mb_substr($_SERVER['HTTP_USER_AGENT']??'',0,200)],JSON_UNESCAPED_UNICODE),$_SERVER['REMOTE_ADDR']??'']);
 
     fb_ok('Cam on ban da gop y! Chung toi se xem xet.');
 }

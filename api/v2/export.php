@@ -74,7 +74,7 @@ if(!$action||$action==='full'){
     $logins=$d->fetchAll("SELECT ip,success,created_at FROM login_attempts WHERE email=? ORDER BY created_at DESC LIMIT 20",[$user['email']]);
 
     // Audit log
-    $audit=$d->fetchAll("SELECT action,detail,ip,created_at FROM audit_log WHERE user_id=? ORDER BY created_at DESC LIMIT 50",[$uid]);
+    $audit=$d->fetchAll("SELECT action,details,ip,created_at FROM audit_log WHERE user_id=? ORDER BY created_at DESC LIMIT 50",[$uid]);
 
     $export=[
         'export_date'=>date('Y-m-d H:i:s'),
@@ -98,7 +98,7 @@ if(!$action||$action==='full'){
     ];
 
     // Audit this export
-    try{db()->query("INSERT INTO audit_log (user_id,action,detail,ip,created_at) VALUES (?,'data_export','Full data export',?,NOW())",[$uid,$_SERVER['REMOTE_ADDR']??'']);}catch(\Throwable $e){}
+    try{db()->query("INSERT INTO audit_log (user_id,action,details,ip,created_at) VALUES (?,'data_export','Full data export',?,NOW())",[$uid,$_SERVER['REMOTE_ADDR']??'']);}catch(\Throwable $e){}
 
     ex_ok('Data export complete',$export);
 }

@@ -76,7 +76,7 @@ for($i=0;$i<count($fileArray['name']);$i++){
 }
 
 // Audit
-try{db()->query("INSERT INTO audit_log (user_id,action,detail,ip,created_at) VALUES (?,'upload',?,?,NOW())",[$uid,$type.': '.count($uploaded).' files',$_SERVER['REMOTE_ADDR']??'']);}catch(\Throwable $e){}
+try{db()->query("INSERT INTO audit_log (user_id,action,details,ip,created_at) VALUES (?,'upload',?,?,NOW())",[$uid,$type.': '.count($uploaded).' files',$_SERVER['REMOTE_ADDR']??'']);}catch(\Throwable $e){}
 
 header('Content-Type: application/json');
 echo json_encode(['success'=>true,'data'=>['files'=>$uploaded,'count'=>count($uploaded)]],JSON_UNESCAPED_UNICODE);

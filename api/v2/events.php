@@ -27,7 +27,7 @@ if($_SERVER['REQUEST_METHOD']==='POST'&&$action==='log'){
     if(!$type) ev_fail('Missing type');
     // Store in audit_log with type prefix
     $pdo=db()->getConnection();
-    $pdo->prepare("INSERT INTO audit_log (user_id,action,detail,ip,created_at) VALUES (?,?,?,?,NOW())")->execute([
+    $pdo->prepare("INSERT INTO audit_log (user_id,action,details,ip,created_at) VALUES (?,?,?,?,NOW())")->execute([
         intval($input['user_id']??0),
         'event:'.$type,
         json_encode($payload,JSON_UNESCAPED_UNICODE),

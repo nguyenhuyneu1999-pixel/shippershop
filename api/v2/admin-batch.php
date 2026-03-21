@@ -37,7 +37,7 @@ if($action==='delete_posts'){
         $d->query("UPDATE posts SET `status`='deleted' WHERE id=?",[$id]);
         $count++;
     }
-    try{$pdo->prepare("INSERT INTO audit_log (user_id,action,detail,ip,created_at) VALUES (?,'batch_delete_posts',?,?,NOW())")->execute([$uid,'Deleted '.$count.' posts',$_SERVER['REMOTE_ADDR']??'']);}catch(\Throwable $e){}
+    try{$pdo->prepare("INSERT INTO audit_log (user_id,action,details,ip,created_at) VALUES (?,'batch_delete_posts',?,?,NOW())")->execute([$uid,'Deleted '.$count.' posts',$_SERVER['REMOTE_ADDR']??'']);}catch(\Throwable $e){}
     ab_ok('Đã xóa '.$count.' bài viết',['deleted'=>$count]);
 }
 
@@ -53,7 +53,7 @@ if($action==='ban_users'){
         $d->query("UPDATE users SET `status`='banned' WHERE id=? AND role!='admin'",[$id]);
         $count++;
     }
-    try{$pdo->prepare("INSERT INTO audit_log (user_id,action,detail,ip,created_at) VALUES (?,'batch_ban',?,?,NOW())")->execute([$uid,'Banned '.$count.' users: '.$reason,$_SERVER['REMOTE_ADDR']??'']);}catch(\Throwable $e){}
+    try{$pdo->prepare("INSERT INTO audit_log (user_id,action,details,ip,created_at) VALUES (?,'batch_ban',?,?,NOW())")->execute([$uid,'Banned '.$count.' users: '.$reason,$_SERVER['REMOTE_ADDR']??'']);}catch(\Throwable $e){}
     ab_ok('Đã khóa '.$count.' tài khoản',['banned'=>$count]);
 }
 
@@ -68,7 +68,7 @@ if($action==='resolve_reports'){
         $d->query("UPDATE post_reports SET `status`=?,resolved_by=?,resolved_at=NOW() WHERE id=? AND `status`='pending'",[$resolution,$uid,$id]);
         $count++;
     }
-    try{$pdo->prepare("INSERT INTO audit_log (user_id,action,detail,ip,created_at) VALUES (?,'batch_resolve',?,?,NOW())")->execute([$uid,'Resolved '.$count.' reports: '.$resolution,$_SERVER['REMOTE_ADDR']??'']);}catch(\Throwable $e){}
+    try{$pdo->prepare("INSERT INTO audit_log (user_id,action,details,ip,created_at) VALUES (?,'batch_resolve',?,?,NOW())")->execute([$uid,'Resolved '.$count.' reports: '.$resolution,$_SERVER['REMOTE_ADDR']??'']);}catch(\Throwable $e){}
     ab_ok('Đã xử lý '.$count.' báo cáo',['resolved'=>$count]);
 }
 
@@ -89,7 +89,7 @@ if($action==='approve_deposits'){
         $pdo->prepare("INSERT INTO wallet_transactions (user_id,type,amount,description,created_at) VALUES (?,'deposit',?,?,NOW())")->execute([$userId,$amount,'Batch approve #'.$oc]);
         $count++;$totalAmount+=$amount;
     }
-    try{$pdo->prepare("INSERT INTO audit_log (user_id,action,detail,ip,created_at) VALUES (?,'batch_approve_deposits',?,?,NOW())")->execute([$uid,'Approved '.$count.' deposits, total: '.$totalAmount,$_SERVER['REMOTE_ADDR']??'']);}catch(\Throwable $e){}
+    try{$pdo->prepare("INSERT INTO audit_log (user_id,action,details,ip,created_at) VALUES (?,'batch_approve_deposits',?,?,NOW())")->execute([$uid,'Approved '.$count.' deposits, total: '.$totalAmount,$_SERVER['REMOTE_ADDR']??'']);}catch(\Throwable $e){}
     ab_ok('Đã duyệt '.$count.' khoản nạp ('.number_format($totalAmount).'đ)',['approved'=>$count,'total_amount'=>$totalAmount]);
 }
 
@@ -112,7 +112,7 @@ if($action==='send_notification'){
         $tid=intval($tid);if(!$tid)continue;
         try{$pdo->prepare("INSERT INTO notifications (user_id,type,title,message,data,created_at) VALUES (?,'system',?,?,'{}',NOW())")->execute([$tid,$title,$message]);$count++;}catch(\Throwable $e){}
     }
-    try{$pdo->prepare("INSERT INTO audit_log (user_id,action,detail,ip,created_at) VALUES (?,'batch_notify',?,?,NOW())")->execute([$uid,'Sent to '.$count.' users: '.$title,$_SERVER['REMOTE_ADDR']??'']);}catch(\Throwable $e){}
+    try{$pdo->prepare("INSERT INTO audit_log (user_id,action,details,ip,created_at) VALUES (?,'batch_notify',?,?,NOW())")->execute([$uid,'Sent to '.$count.' users: '.$title,$_SERVER['REMOTE_ADDR']??'']);}catch(\Throwable $e){}
     ab_ok('Đã gửi thông báo cho '.$count.' người',['sent'=>$count]);
 }
 
