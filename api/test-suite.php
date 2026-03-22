@@ -26,6 +26,16 @@ stream_context_set_default(['http'=>['timeout'=>8,'ignore_errors'=>true]]);
 
 function t($n,$ok,$det=''){global $R,$P,$F,$_tIdx,$_startIdx,$_endIdx;$_tIdx++;if($_tIdx<$_startIdx||$_tIdx>=$_endIdx)return;if($ok){$P++;$R[]=['n'=>$n,'s'=>'PASS'];}else{$F++;$R[]=['n'=>$n,'s'=>'FAIL','d'=>$det];}}
 
+function http_get($url){
+    $ctx=stream_context_create(['http'=>['timeout'=>10,'ignore_errors'=>true]]);
+    return @file_get_contents($url,false,$ctx);
+}
+
+function http_get_ctx($url,$ctx){
+    return @file_get_contents($url,false,$ctx);
+}
+
+
 // ============ DATABASE ============
 $tc=$d->fetchOne("SELECT COUNT(*) as c FROM information_schema.tables WHERE table_schema=DATABASE()");
 t('DB: tables >= 69', intval($tc['c'])>=69, 'has '.$tc['c']);
