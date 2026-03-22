@@ -7,6 +7,7 @@ var STATIC_ASSETS = [
   '/css/design-system.min.css',
   '/css/design-system.css',
   '/css/style-v2.css',
+  '/js/lightbox.js',
   '/css/index-page.css',
   '/css/profile-page.css',
   '/css/activity-log-page.css',
