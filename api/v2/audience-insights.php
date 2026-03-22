@@ -1,7 +1,7 @@
 <?php
 // ShipperShop API v2 — Post Audience Insights
 // Who engages with your posts: follower/non-follower, top engagers, demographics
-session_start();
+// session removed: JWT auth only
 require_once __DIR__.'/../../includes/config.php';
 require_once __DIR__.'/../../includes/db.php';
 require_once __DIR__.'/../../includes/functions.php';

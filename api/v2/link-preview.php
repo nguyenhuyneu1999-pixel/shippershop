@@ -1,7 +1,7 @@
 <?php
 // ShipperShop API v2 — Link Preview (OG metadata)
 // Fetches Open Graph tags from URLs for rich link previews in posts
-session_start();
+// session removed: JWT auth only
 require_once __DIR__.'/../../includes/config.php';
 require_once __DIR__.'/../../includes/db.php';
 require_once __DIR__.'/../../includes/cache.php';

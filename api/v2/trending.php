@@ -1,7 +1,7 @@
 <?php
 // ShipperShop API v2 — Trending / Hot Feed Algorithm
 // Rank posts by engagement score: likes*3 + comments*5 + shares*2, decay by age
-session_start();
+// session removed: JWT auth only
 require_once __DIR__.'/../../includes/config.php';
 require_once __DIR__.'/../../includes/db.php';
 require_once __DIR__.'/../../includes/functions.php';

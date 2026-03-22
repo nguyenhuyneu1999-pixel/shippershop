@@ -1,7 +1,7 @@
 <?php
 // ShipperShop API v2 — Admin Database Health
 // Monitor table sizes, index usage, slow queries, fragmentation
-session_start();
+// session removed: JWT auth only
 require_once __DIR__.'/../../includes/config.php';
 require_once __DIR__.'/../../includes/db.php';
 require_once __DIR__.'/../../includes/functions.php';

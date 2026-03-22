@@ -1,7 +1,7 @@
 <?php
 // ShipperShop API v2 — Admin Data Export
 // Export users, posts, transactions as CSV/JSON for admin
-session_start();
+// session removed: JWT auth only
 require_once __DIR__.'/../../includes/config.php';
 require_once __DIR__.'/../../includes/db.php';
 require_once __DIR__.'/../../includes/functions.php';

@@ -1,7 +1,7 @@
 <?php
 // ShipperShop API v2 — Post Reach Estimator
 // Estimate how many users a post will reach based on follower network
-session_start();
+// session removed: JWT auth only
 require_once __DIR__.'/../../includes/config.php';
 require_once __DIR__.'/../../includes/db.php';
 require_once __DIR__.'/../../includes/functions.php';

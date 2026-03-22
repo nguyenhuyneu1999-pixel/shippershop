@@ -2,7 +2,7 @@
 // ShipperShop API v2 — Conversation Delivery ETA
 // Tinh nang: Chia se thoi gian giao du kien
 // Share and update estimated delivery times in conversations
-session_start();
+// session removed: JWT auth only
 require_once __DIR__.'/../../includes/config.php';
 require_once __DIR__.'/../../includes/db.php';
 require_once __DIR__.'/../../includes/functions.php';

@@ -1,7 +1,7 @@
 <?php
 // ShipperShop API v2 — User Theme Settings
 // Dark/light/auto theme + custom accent color per user
-session_start();
+// session removed: JWT auth only
 require_once __DIR__.'/../../includes/config.php';
 require_once __DIR__.'/../../includes/db.php';
 require_once __DIR__.'/../../includes/functions.php';

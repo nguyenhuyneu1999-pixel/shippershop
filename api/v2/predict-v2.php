@@ -1,7 +1,7 @@
 <?php
 // ShipperShop API v2 — Engagement Predictor V2
 // Advanced prediction using post characteristics + historical patterns
-session_start();
+// session removed: JWT auth only
 require_once __DIR__.'/../../includes/config.php';
 require_once __DIR__.'/../../includes/db.php';
 require_once __DIR__.'/../../includes/functions.php';

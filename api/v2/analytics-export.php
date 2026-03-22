@@ -1,7 +1,7 @@
 <?php
 // ShipperShop API v2 — Analytics Export
 // Export post/user analytics as JSON for charts and reports
-session_start();
+// session removed: JWT auth only
 require_once __DIR__.'/../../includes/config.php';
 require_once __DIR__.'/../../includes/db.php';
 require_once __DIR__.'/../../includes/functions.php';

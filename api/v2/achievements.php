@@ -1,7 +1,7 @@
 <?php
 // ShipperShop API v2 — User Achievements & Milestones
 // Track and celebrate user milestones (first post, 100 likes, etc.)
-session_start();
+// session removed: JWT auth only
 require_once __DIR__.'/../../includes/config.php';
 require_once __DIR__.'/../../includes/db.php';
 require_once __DIR__.'/../../includes/functions.php';

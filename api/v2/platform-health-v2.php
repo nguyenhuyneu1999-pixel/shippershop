@@ -1,7 +1,7 @@
 <?php
 // ShipperShop API v2 — Admin Platform Health V2
 // Comprehensive health: API latency, error rates, DB performance, uptime
-session_start();
+// session removed: JWT auth only
 require_once __DIR__.'/../../includes/config.php';
 require_once __DIR__.'/../../includes/db.php';
 require_once __DIR__.'/../../includes/functions.php';

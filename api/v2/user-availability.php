@@ -1,7 +1,7 @@
 <?php
 // ShipperShop API v2 — User Availability
 // Set and check shipper availability schedule for the week
-session_start();
+// session removed: JWT auth only
 require_once __DIR__.'/../../includes/config.php';
 require_once __DIR__.'/../../includes/db.php';
 require_once __DIR__.'/../../includes/functions.php';

@@ -1,7 +1,7 @@
 <?php
 // ShipperShop API v2 — User Mute
 // Hide posts from a user without blocking (they can still see your content)
-session_start();
+// session removed: JWT auth only
 require_once __DIR__.'/../../includes/config.php';
 require_once __DIR__.'/../../includes/db.php';
 require_once __DIR__.'/../../includes/functions.php';

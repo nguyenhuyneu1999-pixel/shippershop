@@ -1,7 +1,7 @@
 <?php
 // ShipperShop API v2 — Conversation Notes
 // Private notes on conversations (visible only to note creator)
-session_start();
+// session removed: JWT auth only
 require_once __DIR__.'/../../includes/config.php';
 require_once __DIR__.'/../../includes/db.php';
 require_once __DIR__.'/../../includes/functions.php';

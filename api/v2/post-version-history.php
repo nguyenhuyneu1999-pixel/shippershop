@@ -2,7 +2,7 @@
 // ShipperShop API v2 — Post Version History
 // Tinh nang: Theo doi lich su chinh sua bai viet
 // Track post edit history with diff comparison
-session_start();
+// session removed: JWT auth only
 require_once __DIR__.'/../../includes/config.php';
 require_once __DIR__.'/../../includes/db.php';
 require_once __DIR__.'/../../includes/functions.php';

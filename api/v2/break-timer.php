@@ -1,7 +1,7 @@
 <?php
 // ShipperShop API v2 — Break Timer
 // Tinh nang: Nhac nghi ngoi theo quy dinh lao dong, theo doi thoi gian lam viec
-session_start();
+// session removed: JWT auth only
 require_once __DIR__.'/../../includes/config.php';
 require_once __DIR__.'/../../includes/db.php';
 require_once __DIR__.'/../../includes/functions.php';

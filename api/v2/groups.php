@@ -3,7 +3,7 @@
  * ShipperShop API v2 — Groups
  * Wraps existing + adds: edit, delete, ban_member, set_role, pin_post, invite
  */
-session_start();
+// session removed: JWT auth only
 require_once __DIR__.'/../../includes/config.php';
 require_once __DIR__.'/../../includes/db.php';
 require_once __DIR__.'/../../includes/functions.php';

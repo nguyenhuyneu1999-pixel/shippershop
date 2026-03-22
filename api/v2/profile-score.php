@@ -1,7 +1,7 @@
 <?php
 // ShipperShop API v2 — Profile Completeness Score
 // Calculate and return profile completion percentage + suggestions
-session_start();
+// session removed: JWT auth only
 require_once __DIR__.'/../../includes/config.php';
 require_once __DIR__.'/../../includes/db.php';
 require_once __DIR__.'/../../includes/functions.php';

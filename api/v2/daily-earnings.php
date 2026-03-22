@@ -1,7 +1,7 @@
 <?php
 // ShipperShop API v2 — Daily Earnings Report
 // Detailed daily earnings breakdown: by hour, by company, COD vs shipping fee, tips
-session_start();
+// session removed: JWT auth only
 require_once __DIR__.'/../../includes/config.php';
 require_once __DIR__.'/../../includes/db.php';
 require_once __DIR__.'/../../includes/functions.php';

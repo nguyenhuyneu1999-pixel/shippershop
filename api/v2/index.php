@@ -2,7 +2,7 @@
 // ShipperShop API v2 Router — /api/v2/index.php
 // Single entry point: /api/v2/?endpoint=posts&action=feed
 // Also supports direct file access: /api/v2/posts.php
-session_start();
+// session removed: JWT auth only
 header('Content-Type: application/json; charset=utf-8');
 header('Access-Control-Allow-Origin: *');
 header('Access-Control-Allow-Headers: Content-Type, Authorization');

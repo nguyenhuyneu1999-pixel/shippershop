@@ -1,7 +1,7 @@
 <?php
 // ShipperShop API v2 — Event Log (Webhook-ready)
 // Logs platform events for future webhook/integration use
-session_start();
+// session removed: JWT auth only
 require_once __DIR__.'/../../includes/config.php';
 require_once __DIR__.'/../../includes/db.php';
 require_once __DIR__.'/../../includes/functions.php';

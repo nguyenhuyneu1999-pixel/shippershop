@@ -2,7 +2,7 @@
 // ShipperShop API v2 — Server-Sent Events (SSE)
 // Real-time stream: new notifications, messages, typing indicators
 // Client: new EventSource('/api/v2/sse.php?token=JWT')
-session_start();
+// session removed: JWT auth only
 require_once __DIR__.'/../../includes/config.php';
 require_once __DIR__.'/../../includes/db.php';
 require_once __DIR__.'/../../includes/functions.php';

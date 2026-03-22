@@ -1,7 +1,7 @@
 <?php
 // ShipperShop API v2 — Conversation Incident Report
 // Tinh nang: Bao cao su co giao hang trong cuoc hoi thoai
-session_start();
+// session removed: JWT auth only
 require_once __DIR__.'/../../includes/config.php';
 require_once __DIR__.'/../../includes/db.php';
 require_once __DIR__.'/../../includes/functions.php';

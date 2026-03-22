@@ -1,7 +1,7 @@
 <?php
 // ShipperShop API v2 — System Configuration (Admin)
 // Site-wide settings: maintenance mode, registration, post limits, etc.
-session_start();
+// session removed: JWT auth only
 require_once __DIR__.'/../../includes/config.php';
 require_once __DIR__.'/../../includes/db.php';
 require_once __DIR__.'/../../includes/functions.php';

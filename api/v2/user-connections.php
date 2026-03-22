@@ -1,7 +1,7 @@
 <?php
 // ShipperShop API v2 — User Connections Map
 // Shows mutual friends, connection strength, network graph data
-session_start();
+// session removed: JWT auth only
 require_once __DIR__.'/../../includes/config.php';
 require_once __DIR__.'/../../includes/db.php';
 require_once __DIR__.'/../../includes/functions.php';

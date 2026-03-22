@@ -1,7 +1,7 @@
 <?php
 // ShipperShop API v2 — Post Performance Dashboard
 // Comprehensive post analytics: best/worst posts, peak times, content type analysis
-session_start();
+// session removed: JWT auth only
 require_once __DIR__.'/../../includes/config.php';
 require_once __DIR__.'/../../includes/db.php';
 require_once __DIR__.'/../../includes/functions.php';

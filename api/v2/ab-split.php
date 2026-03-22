@@ -1,7 +1,7 @@
 <?php
 // ShipperShop API v2 — Content A/B Split Test
 // Test two versions of post content to see which performs better
-session_start();
+// session removed: JWT auth only
 require_once __DIR__.'/../../includes/config.php';
 require_once __DIR__.'/../../includes/db.php';
 require_once __DIR__.'/../../includes/functions.php';

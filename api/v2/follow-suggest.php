@@ -1,7 +1,7 @@
 <?php
 // ShipperShop API v2 — Smart Follow Suggestions
 // Friends-of-friends, same company, most active, recently joined
-session_start();
+// session removed: JWT auth only
 require_once __DIR__.'/../../includes/config.php';
 require_once __DIR__.'/../../includes/db.php';
 require_once __DIR__.'/../../includes/functions.php';

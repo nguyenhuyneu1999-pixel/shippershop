@@ -1,7 +1,7 @@
 <?php
 // ShipperShop API v2 — Content Calendar V2
 // Visual content calendar: daily post counts, scheduled, gaps, best days
-session_start();
+// session removed: JWT auth only
 require_once __DIR__.'/../../includes/config.php';
 require_once __DIR__.'/../../includes/db.php';
 require_once __DIR__.'/../../includes/functions.php';

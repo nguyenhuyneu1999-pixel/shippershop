@@ -1,7 +1,7 @@
 <?php
 // ShipperShop API v2 — Location Check-in
 // Shippers check in at locations to show activity, earn XP
-session_start();
+// session removed: JWT auth only
 require_once __DIR__.'/../../includes/config.php';
 require_once __DIR__.'/../../includes/db.php';
 require_once __DIR__.'/../../includes/functions.php';

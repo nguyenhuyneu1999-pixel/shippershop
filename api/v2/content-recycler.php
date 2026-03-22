@@ -2,7 +2,7 @@
 // ShipperShop API v2 — Content Recycler
 // Tinh nang: Goi y bai cu hieu suat cao de dang lai
 // Find and suggest old high-performing posts to repost/update
-session_start();
+// session removed: JWT auth only
 require_once __DIR__.'/../../includes/config.php';
 require_once __DIR__.'/../../includes/db.php';
 require_once __DIR__.'/../../includes/functions.php';

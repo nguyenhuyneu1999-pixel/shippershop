@@ -2,7 +2,7 @@
 // ShipperShop API v2 — Batch API
 // Execute multiple API calls in a single request to reduce roundtrips
 // POST {requests: [{path:"/posts.php?limit=3"}, {path:"/notifications.php?action=unread_count"}]}
-session_start();
+// session removed: JWT auth only
 require_once __DIR__.'/../../includes/config.php';
 require_once __DIR__.'/../../includes/db.php';
 require_once __DIR__.'/../../includes/functions.php';

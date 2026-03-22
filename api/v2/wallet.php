@@ -3,7 +3,7 @@
  * ShipperShop API v2 — Wallet (thin wrapper fixing getPdo bug + transfer)
  * Delegates to wallet-api.php for existing endpoints, adds new ones
  */
-session_start();
+// session removed: JWT auth only
 require_once __DIR__.'/../../includes/config.php';
 require_once __DIR__.'/../../includes/db.php';
 require_once __DIR__.'/../../includes/functions.php';

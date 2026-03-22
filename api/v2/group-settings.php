@@ -1,7 +1,7 @@
 <?php
 // ShipperShop API v2 — Group Notification Settings
 // Per-group notification preferences, mute groups
-session_start();
+// session removed: JWT auth only
 require_once __DIR__.'/../../includes/config.php';
 require_once __DIR__.'/../../includes/db.php';
 require_once __DIR__.'/../../includes/functions.php';

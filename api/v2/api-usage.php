@@ -1,7 +1,7 @@
 <?php
 // ShipperShop API v2 — Admin API Usage Monitor
 // Track API call frequency, response times, error rates
-session_start();
+// session removed: JWT auth only
 require_once __DIR__.'/../../includes/config.php';
 require_once __DIR__.'/../../includes/db.php';
 require_once __DIR__.'/../../includes/functions.php';

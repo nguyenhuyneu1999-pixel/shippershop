@@ -1,7 +1,7 @@
 <?php
 // ShipperShop API v2 — Admin Cron Monitor
 // Monitor cron job health: last run, duration, success/fail, schedule
-session_start();
+// session removed: JWT auth only
 require_once __DIR__.'/../../includes/config.php';
 require_once __DIR__.'/../../includes/db.php';
 require_once __DIR__.'/../../includes/functions.php';

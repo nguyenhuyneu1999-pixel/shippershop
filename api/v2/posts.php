@@ -3,7 +3,7 @@
  * ShipperShop API v2 — Posts
  * Rewrite with: cache, rate-limit, validation, block filter, edit/report/pin
  */
-session_start();
+// session removed: JWT auth only
 require_once __DIR__.'/../../includes/config.php';
 require_once __DIR__.'/../../includes/db.php';
 require_once __DIR__.'/../../includes/functions.php';

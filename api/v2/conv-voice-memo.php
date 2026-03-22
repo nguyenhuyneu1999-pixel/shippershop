@@ -1,7 +1,7 @@
 <?php
 // ShipperShop API v2 — Conversation Voice Memo
 // Save text-based voice memo descriptions with duration and priority
-session_start();
+// session removed: JWT auth only
 require_once __DIR__.'/../../includes/config.php';
 require_once __DIR__.'/../../includes/db.php';
 require_once __DIR__.'/../../includes/functions.php';

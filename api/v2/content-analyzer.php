@@ -1,7 +1,7 @@
 <?php
 // ShipperShop API v2 — Content Analyzer
 // Deep analysis: readability, sentiment, keyword density, engagement prediction
-session_start();
+// session removed: JWT auth only
 require_once __DIR__.'/../../includes/config.php';
 require_once __DIR__.'/../../includes/db.php';
 require_once __DIR__.'/../../includes/functions.php';

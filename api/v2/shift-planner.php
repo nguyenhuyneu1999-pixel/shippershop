@@ -1,7 +1,7 @@
 <?php
 // ShipperShop API v2 — Shift Planner
 // Shippers plan weekly work shifts: morning/afternoon/evening per day
-session_start();
+// session removed: JWT auth only
 require_once __DIR__.'/../../includes/config.php';
 require_once __DIR__.'/../../includes/db.php';
 require_once __DIR__.'/../../includes/functions.php';

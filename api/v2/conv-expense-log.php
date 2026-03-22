@@ -1,7 +1,7 @@
 <?php
 // ShipperShop API v2 — Conversation Expense Log
 // Track shared expenses (fuel, meals, repairs) in delivery team conversations
-session_start();
+// session removed: JWT auth only
 require_once __DIR__.'/../../includes/config.php';
 require_once __DIR__.'/../../includes/db.php';
 require_once __DIR__.'/../../includes/functions.php';

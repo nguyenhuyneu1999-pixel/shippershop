@@ -1,7 +1,7 @@
 <?php
 // ShipperShop API v2 — Platform Century Stats
 // SESSION 100 COMMEMORATIVE — v10.3.0 — Complete platform statistics snapshot
-session_start();
+// session removed: JWT auth only
 require_once __DIR__.'/../../includes/config.php';
 require_once __DIR__.'/../../includes/db.php';
 require_once __DIR__.'/../../includes/functions.php';

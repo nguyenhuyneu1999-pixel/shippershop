@@ -1,7 +1,7 @@
 <?php
 // ShipperShop API v2 — Content Filter (Auto-moderation)
 // Keyword blacklist, spam detection, auto-hide/flag
-session_start();
+// session removed: JWT auth only
 require_once __DIR__.'/../../includes/config.php';
 require_once __DIR__.'/../../includes/db.php';
 require_once __DIR__.'/../../includes/functions.php';

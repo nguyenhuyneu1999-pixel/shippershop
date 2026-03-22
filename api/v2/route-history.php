@@ -2,7 +2,7 @@
 // ShipperShop API v2 — Route History
 // Tinh nang: Luu va phat lai cac tuyen giao hang
 // Save and replay past delivery routes with stats comparison
-session_start();
+// session removed: JWT auth only
 require_once __DIR__.'/../../includes/config.php';
 require_once __DIR__.'/../../includes/db.php';
 require_once __DIR__.'/../../includes/functions.php';

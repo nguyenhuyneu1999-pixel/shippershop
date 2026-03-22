@@ -1,7 +1,7 @@
 <?php
 // ShipperShop API v2 — Weather Radar
 // Tinh nang: Canh bao thoi tiet theo khu vuc cho shipper
-session_start();
+// session removed: JWT auth only
 require_once __DIR__.'/../../includes/config.php';
 require_once __DIR__.'/../../includes/db.php';
 require_once __DIR__.'/../../includes/functions.php';

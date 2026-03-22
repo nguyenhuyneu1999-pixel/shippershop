@@ -1,7 +1,7 @@
 <?php
 // ShipperShop API v2 — Grouped Notifications
 // Collapse similar notifications: "A, B và 3 người khác đã thành công bài viết của bạn"
-session_start();
+// session removed: JWT auth only
 require_once __DIR__.'/../../includes/config.php';
 require_once __DIR__.'/../../includes/db.php';
 require_once __DIR__.'/../../includes/functions.php';

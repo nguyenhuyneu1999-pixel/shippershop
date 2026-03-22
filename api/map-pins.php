@@ -4,6 +4,7 @@ define('APP_ACCESS', true);
 require_once __DIR__ . '/../includes/config.php';
 require_once __DIR__ . '/../includes/db.php';
 require_once __DIR__ . '/../includes/functions.php';
+require_once __DIR__ . '/../includes/api-cache.php';
 
 header('Content-Type: application/json; charset=utf-8');
 header('Access-Control-Allow-Origin: *');
@@ -25,6 +26,7 @@ $method = $_SERVER['REQUEST_METHOD'];
 
 // GET - List pins
 if ($method === 'GET') {
+    api_try_cache('map_pins_' . md5(json_encode(\$_GET)), 120);
     $type = $_GET['type'] ?? '';
     $where = "1=1"; $params = [];
     if ($type) { $where .= " AND p.pin_type = ?"; $params[] = $type; }

@@ -3,6 +3,7 @@ define('APP_ACCESS', true);
 require_once __DIR__ . '/../includes/config.php';
 require_once __DIR__ . '/../includes/db.php';
 require_once __DIR__ . '/../includes/functions.php';
+require_once __DIR__ . '/../includes/api-cache.php';
 
 header('Content-Type: application/json; charset=utf-8');
 header('X-Content-Type-Options: nosniff');
@@ -179,6 +180,7 @@ function wErr($msg, $code = 400) { http_response_code($code); echo json_encode([
 if ($method === 'GET') {
 
     if ($action === 'plans') {
+    api_try_cache('wallet_plans', 3600);
         rateLimit('plans', 30, 60);
         $plans = $db->fetchAll("SELECT * FROM subscription_plans WHERE is_active=1 ORDER BY sort_order ASC", []);
         foreach ($plans as &$p) {

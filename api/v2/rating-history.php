@@ -1,7 +1,7 @@
 <?php
 // ShipperShop API v2 — Rating History
 // Track user's delivery rating over time with trend analysis
-session_start();
+// session removed: JWT auth only
 require_once __DIR__.'/../../includes/config.php';
 require_once __DIR__.'/../../includes/db.php';
 require_once __DIR__.'/../../includes/functions.php';

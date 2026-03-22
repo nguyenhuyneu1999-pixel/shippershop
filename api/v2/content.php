@@ -3,7 +3,7 @@
  * ShipperShop API v2 — Content Management
  * Content queue, scheduled posts, auto-publish management
  */
-session_start();
+// session removed: JWT auth only
 require_once __DIR__.'/../../includes/config.php';
 require_once __DIR__.'/../../includes/db.php';
 require_once __DIR__.'/../../includes/functions.php';

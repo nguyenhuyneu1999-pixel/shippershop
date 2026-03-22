@@ -1,7 +1,7 @@
 <?php
 // ShipperShop API v2 — Post Expiry
 // Set auto-delete timer on posts (temporary posts)
-session_start();
+// session removed: JWT auth only
 require_once __DIR__.'/../../includes/config.php';
 require_once __DIR__.'/../../includes/db.php';
 require_once __DIR__.'/../../includes/functions.php';

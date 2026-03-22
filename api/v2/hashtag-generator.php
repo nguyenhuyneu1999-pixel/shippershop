@@ -1,7 +1,7 @@
 <?php
 // ShipperShop API v2 — Hashtag Generator
 // Tinh nang: Tu dong tao hashtag phu hop tu noi dung bai viet
-session_start();
+// session removed: JWT auth only
 require_once __DIR__.'/../../includes/config.php';
 require_once __DIR__.'/../../includes/db.php';
 require_once __DIR__.'/../../includes/functions.php';

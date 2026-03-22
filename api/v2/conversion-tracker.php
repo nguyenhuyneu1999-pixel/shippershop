@@ -1,7 +1,7 @@
 <?php
 // ShipperShop API v2 — Admin Conversion Tracker
 // Tinh nang: Theo doi ty le chuyen doi: visit→register→post→subscribe→revenue
-session_start();
+// session removed: JWT auth only
 require_once __DIR__.'/../../includes/config.php';
 require_once __DIR__.'/../../includes/db.php';
 require_once __DIR__.'/../../includes/functions.php';

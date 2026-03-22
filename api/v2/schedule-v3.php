@@ -1,7 +1,7 @@
 <?php
 // ShipperShop API v2 — Post Schedule V3
 // Advanced scheduling: recurring posts, optimal time auto-pick, draft queue
-session_start();
+// session removed: JWT auth only
 require_once __DIR__.'/../../includes/config.php';
 require_once __DIR__.'/../../includes/db.php';
 require_once __DIR__.'/../../includes/functions.php';

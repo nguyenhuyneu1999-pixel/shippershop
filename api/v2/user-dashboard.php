@@ -1,7 +1,7 @@
 <?php
 // ShipperShop API v2 — User Personal Dashboard
 // Aggregated personal stats: today, week, goals, challenges, rank
-session_start();
+// session removed: JWT auth only
 require_once __DIR__.'/../../includes/config.php';
 require_once __DIR__.'/../../includes/db.php';
 require_once __DIR__.'/../../includes/functions.php';
