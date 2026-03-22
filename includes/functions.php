@@ -276,7 +276,12 @@ function deleteFile($path) {
 function jsonResponse($data, $statusCode = 200) {
     http_response_code($statusCode);
     header('Content-Type: application/json; charset=utf-8');
-    echo json_encode($data, JSON_UNESCAPED_UNICODE);
+    $json = json_encode($data, JSON_UNESCAPED_UNICODE);
+    // Auto-save to Redis/file cache if pending
+    if (isset($GLOBALS['_ssCacheKey']) && function_exists('_ssCacheSave')) {
+        _ssCacheSave($json);
+    }
+    echo $json;
     exit;
 }
 
