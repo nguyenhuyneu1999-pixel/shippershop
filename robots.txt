@@ -2,17 +2,6 @@ User-agent: *
 Allow: /
 Disallow: /api/
 Disallow: /includes/
-Disallow: /uploads/messages/
 Disallow: /admin.html
-Disallow: /admin-v2.html
-Disallow: /admin-wallet.html
-Disallow: /admin-orders.html
-Disallow: /auto-post.html
-Disallow: /marketing-setup.html
-Disallow: /cron-setup.html
-Disallow: /tiktok-scripts.html
-Disallow: /fb-groups.html
-Disallow: /marketing-dashboard.html
-
+Disallow: /admin-*.html
 Sitemap: https://shippershop.vn/sitemap.xml
-Sitemap: https://shippershop.vn/api/v2/sitemap.php

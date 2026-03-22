@@ -50,7 +50,7 @@ async function loadPosts(append=false){
       totalPg=d.data.total_pages||1;
       document.getElementById('stP').textContent=d.data.total||0;
       document.getElementById('stT').textContent=Math.floor((d.data.total||0)*0.15+Math.random()*20);
-      document.getElementById('loadMoreBtn').style.display=page<totalPg?'block':'none'; _feedLoading=false;
+      document.getElementById('loadMoreBtn').style.display=page<totalPg?'block':'none'; _feedLoading=false; var sk=document.getElementById('feedSkeleton'); if(sk)sk.style.display='none';
       if(append) d.data.posts.forEach(p=>document.getElementById('feed').insertAdjacentHTML('beforeend',mkPost(p)));
       else{
         if(!d.data.posts.length) document.getElementById('feed').innerHTML='<div class="empty"><i class="fas fa-ghost"></i><p>Chưa có bài viết nào!</p><p style="font-size:13px;margin-top:6px">Hãy là người đầu tiên đăng bài 🎉</p></div>';

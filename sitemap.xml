@@ -1,13 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+<urlset xmlns="http://www.sitemapschema.org/schemas/sitemap/0.9">
   <url><loc>https://shippershop.vn/</loc><changefreq>hourly</changefreq><priority>1.0</priority></url>
-  <url><loc>https://shippershop.vn/login.html</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
-  <url><loc>https://shippershop.vn/register.html</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
-  <url><loc>https://shippershop.vn/groups.html</loc><changefreq>daily</changefreq><priority>0.7</priority></url>
-  <url><loc>https://shippershop.vn/marketplace.html</loc><changefreq>daily</changefreq><priority>0.7</priority></url>
+  <url><loc>https://shippershop.vn/groups.html</loc><changefreq>daily</changefreq><priority>0.8</priority></url>
+  <url><loc>https://shippershop.vn/marketplace.html</loc><changefreq>daily</changefreq><priority>0.8</priority></url>
   <url><loc>https://shippershop.vn/traffic.html</loc><changefreq>hourly</changefreq><priority>0.7</priority></url>
-  <url><loc>https://shippershop.vn/people.html</loc><changefreq>daily</changefreq><priority>0.6</priority></url>
   <url><loc>https://shippershop.vn/map.html</loc><changefreq>daily</changefreq><priority>0.6</priority></url>
-  <url><loc>https://shippershop.vn/leaderboard.html</loc><changefreq>daily</changefreq><priority>0.5</priority></url>
-  <url><loc>https://shippershop.vn/wallet.html</loc><changefreq>monthly</changefreq><priority>0.5</priority></url>
+  <url><loc>https://shippershop.vn/people.html</loc><changefreq>daily</changefreq><priority>0.6</priority></url>
+  <url><loc>https://shippershop.vn/login.html</loc><changefreq>monthly</changefreq><priority>0.5</priority></url>
+  <url><loc>https://shippershop.vn/register.html</loc><changefreq>monthly</changefreq><priority>0.5</priority></url>
 </urlset>
