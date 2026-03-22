@@ -48,6 +48,7 @@ function mkPost(p){
   var anonBadge=anon?'<span class="anon-badge">🎭</span>':'';
   var shipColors={'GHTK':'#00b14f','J&T':'#d32f2f','GHN':'#ff6600','Viettel Post':'#e21a1a','BEST':'#ffc107','Ninja Van':'#c41230','SPX':'#EE4D2D','Ahamove':'#f5a623','Lalamove':'#f5a623','Grab':'#00b14f','Be':'#5bc500','Gojek':'#00aa13'};
   var shipBadge='';
+  var subBadge=p.sub_badge?'<span style="font-size:10px;padding:1px 5px;border-radius:3px;background:'+(p.sub_badge_color||'#7C3AED')+';color:#fff;margin-left:4px;font-weight:600">'+esc(p.sub_badge)+'</span>':'';
   if(!anon&&p.shipping_company){
     var sc=p.shipping_company;
     var sColor=shipColors[sc]||'#666';
@@ -64,7 +65,7 @@ function mkPost(p){
   var vidH='';
   if(p.video_url){
     if(p.video_url.indexOf('/uploads/')!==-1){
-      vidH='<video controls playsinline preload="metadata" style="width:100%;max-height:500px;border-radius:8px;margin:8px 0"><source src="'+p.video_url+'">Video không hỗ trợ</video>';
+      vidH='<video controls playsinline preload="metadata" style="width:100%;max-height:500px;display:block"><source src="'+p.video_url+'">Video không hỗ trợ</video>';
     }else{
       vidH='<div style="margin-top:8px;position:relative;padding-bottom:56%;height:0;overflow:hidden;border-radius:4px"><iframe src="'+ytEmbed(p.video_url)+'" style="position:absolute;top:0;left:0;width:100%;height:100%;border:0" allowfullscreen></iframe></div>';
     }
@@ -79,8 +80,8 @@ function mkPost(p){
   var canDel=CU&&parseInt(p.user_id)===parseInt(CU.id);
   return '<div class="post-card" id="P'+p.id+'">'
   +'<div class="post-body">'
-  +'<div class="post-meta">'+av+'<div style="flex:1;min-width:0"><div style="display:flex;align-items:center;justify-content:space-between">'+authorLink+'<button class="post-dots" onclick="event.stopPropagation();togMenu('+p.id+')"><i class="fas fa-ellipsis"></i></button></div><div style="font-size:12px;color:#999;display:flex;align-items:center;gap:4px">'+shipBadge+'<span>·</span><span>'+ago(p.created_at)+'</span>'+badge+pvBadge+anonBadge+'</div></div></div>'
-  +title+'<div class="post-menu" id="pm'+p.id+'" style="display:none"><div id="sv'+p.id+'" onclick="togSave('+p.id+')"><i class="'+(isSaved?'fas':'far')+' fa-bookmark" style="color:'+(isSaved?'#7C3AED':'inherit')+'"></i> '+(isSaved?'Bỏ lưu':'Lưu bài viết')+'</div>'+(canDel?'<div onclick="delP('+p.id+')"><i class="far fa-trash-can"></i> Xóa bài</div>':'')+'<div onclick="reportP('+p.id+')"><i class="fas fa-flag"></i> Báo cáo</div><div onclick="togMenu('+p.id+')"><i class="fas fa-times"></i> Đóng</div></div>'+contentH+imgH+vidH
+  +'<div class="post-meta">'+av+'<div style="flex:1;min-width:0"><div style="display:flex;align-items:center;justify-content:space-between">'+authorLink+'<button class="post-dots" onclick="event.stopPropagation();togMenu('+p.id+')"><i class="fas fa-ellipsis"></i></button></div><div style="font-size:12px;color:#999;display:flex;align-items:center;gap:4px">'+shipBadge+'<span>·</span><span>'+ago(p.created_at)+'</span>'+badge+pvBadge+anonBadge+subBadge+'</div></div></div>'
+  +title+'<div class="post-menu" id="pm'+p.id+'" style="display:none"><div id="sv'+p.id+'" onclick="togSave('+p.id+')"><i class="'+(isSaved?'fas':'far')+' fa-bookmark" style="color:'+(isSaved?'#7C3AED':'inherit')+'"></i> '+(isSaved?'Bỏ lưu':'Lưu bài viết')+'</div>'+(canDel?'<div onclick="editP('+p.id+')"><i class="fas fa-pen"></i> Sửa bài</div><div onclick="delP('+p.id+')"><i class="far fa-trash-can"></i> Xóa bài</div>':'')+'<div onclick="reportP('+p.id+')"><i class="fas fa-flag"></i> Báo cáo</div><div onclick="togMenu('+p.id+')"><i class="fas fa-times"></i> Đóng</div></div>'+contentH+imgH+vidH
   +'</div>'
   +'<div class="pa3-stats"><span>'+(likes>0?fN(likes)+' đơn giao thành công':'')+'</span><span>'+(parseInt(p.comments_count||0)>0?fN(p.comments_count||0)+' ghi chú':'')+'</span><span></span></div>'
   +'<div class="post-actions-3">'
@@ -152,6 +153,53 @@ async function togSave(pid){
 }
 
 /* Toggle 3-dot menu */
+
+function editP(pid){
+  togMenu(pid);
+  var card=document.getElementById('post-'+pid);
+  if(!card)return;
+  var contentEl=card.querySelector('.post-content');
+  if(!contentEl)return;
+  var oldText=contentEl.textContent||'';
+  var ta=document.createElement('textarea');
+  ta.value=oldText;
+  ta.style.cssText='width:100%;min-height:80px;padding:8px;border:1px solid #7C3AED;border-radius:8px;font-size:14px;resize:vertical;margin:4px 12px;box-sizing:border-box';
+  var btnWrap=document.createElement('div');
+  btnWrap.style.cssText='display:flex;gap:8px;padding:4px 12px 8px;justify-content:flex-end';
+  btnWrap.innerHTML='<button onclick="cancelEdit('+pid+')" style="padding:6px 16px;border:1px solid #ddd;border-radius:6px;background:#fff;cursor:pointer">Hủy</button><button onclick="saveEdit('+pid+')" style="padding:6px 16px;border:none;border-radius:6px;background:#7C3AED;color:#fff;cursor:pointer;font-weight:600">Lưu</button>';
+  contentEl.style.display='none';
+  contentEl.parentNode.insertBefore(ta,contentEl.nextSibling);
+  contentEl.parentNode.insertBefore(btnWrap,ta.nextSibling);
+  ta.focus();
+}
+function cancelEdit(pid){
+  var card=document.getElementById('post-'+pid);
+  if(!card)return;
+  var ta=card.querySelector('textarea');
+  var btnWrap=ta?ta.nextElementSibling:null;
+  if(ta)ta.remove();
+  if(btnWrap)btnWrap.remove();
+  var contentEl=card.querySelector('.post-content');
+  if(contentEl)contentEl.style.display='';
+}
+function saveEdit(pid){
+  var card=document.getElementById('post-'+pid);
+  if(!card)return;
+  var ta=card.querySelector('textarea');
+  if(!ta||!ta.value.trim())return;
+  var token=localStorage.getItem('token');
+  fetch('/api/posts.php?action=edit',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+token},body:JSON.stringify({post_id:pid,content:ta.value.trim()})}).then(function(r){return r.json()}).then(function(d){
+    if(d.success){
+      var contentEl=card.querySelector('.post-content');
+      contentEl.textContent=ta.value.trim();
+      cancelEdit(pid);
+      toast('Đã cập nhật bài viết');
+    }else{
+      alert(d.message||'Lỗi');
+    }
+  });
+}
+
 function togMenu(pid){
   var m=document.getElementById('pm'+pid);
   if(!m)return;
