@@ -5,6 +5,7 @@ require_once __DIR__ . '/../includes/config.php';
 require_once __DIR__ . '/../includes/db.php';
 require_once __DIR__ . '/../includes/functions.php';
 require_once __DIR__ . '/../includes/api-cache.php';
+require_once __DIR__ . '/../includes/async-notify.php';
 require_once __DIR__ . '/../includes/api-error-handler.php';
 try { require_once __DIR__ . '/../includes/redis-rate-limiter.php'; apiRateLimit('groups.php', 120); } catch (Throwable $e) {}
 setupApiErrorHandler();
