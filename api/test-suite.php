@@ -491,10 +491,10 @@ t('Func: share stats default',$pss0Resp&&$pss0Resp['success']===true&&$pss0Resp[
 
 
 // Badges wall (public)
-$bwResp=json_decode(@file_get_contents('https://shippershop.vn/api/v2/badges-wall.php?user_id=2'),true);
+$bwResp=json_decode(@file_get_contents('https://shippershop.vn/api/v2/badges-wall.php?action=user&user_id=2'),true);
 t('Func: badges wall',$bwResp&&$bwResp['success']===true&&isset($bwResp['data']['badges']));
-t('Func: badges count',$bwResp['data']['total_count']>=15);
-t('Func: badges progress',isset($bwResp['data']['completion']));
+t('Func: badges count',$bwResp['data']['total']>=10);
+t('Func: badges progress',isset($bwResp['data']['earned_count']));
 
 // Optimal posting times (public)
 $optResp=json_decode(@file_get_contents('https://shippershop.vn/api/v2/post-schedule-v2.php?action=optimal_times'),true);

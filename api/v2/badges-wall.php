@@ -48,13 +48,13 @@ if($action==='leaderboard'){
 if($action==='user'){
     $userId=intval($_GET['user_id']??0);
     if(!$userId) bw_ok('OK',['badges'=>[]]);
-    $earned=$d->fetchAll("SELECT badge_id,created_at FROM user_badges WHERE user_id=? ORDER BY created_at DESC",[$userId]);
+    $earned=$d->fetchAll("SELECT badge_id,earned_at FROM user_badges WHERE user_id=? ORDER BY earned_at DESC",[$userId]);
     $earnedIds=array_column($earned,'badge_id');
     $result=[];
     foreach($BADGES as $b){
         $b['earned']=in_array($b['id'],$earnedIds);
         if($b['earned']){
-            foreach($earned as $e){if($e['badge_id']===$b['id']){$b['earned_at']=$e['created_at'];break;}}
+            foreach($earned as $e){if($e['badge_id']===$b['id']){$b['earned_at']=$e['earned_at'];break;}}
         }
         $result[]=$b;
     }
