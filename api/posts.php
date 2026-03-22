@@ -444,7 +444,7 @@ if ($method === 'POST') {
             'user_id' => $userId,
             'content' => $content,
             'images' => $imagesJson,
-            'type' => $type,
+            'type' => $type, 'scheduled_at' => !empty($input['scheduled_at']) ? $input['scheduled_at'] : null, 'is_draft' => !empty($input['scheduled_at']) ? 1 : 0,
             'status' => 'active',
             'video_url' => $videoUrl,
             'province' => $province,

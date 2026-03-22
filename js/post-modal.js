@@ -12,6 +12,9 @@ css.textContent=".spm-overlay{position:fixed;inset:0;background:#fff;z-index:999
 +".spm-head h3{flex:1;font-size:17px;font-weight:700;margin:0;}"
 +".spm-post-btn{background:#7C3AED;color:#fff;border:none;border-radius:8px;padding:8px 20px;font-size:14px;font-weight:700;cursor:pointer;}"
 +".spm-post-btn:disabled{opacity:.4;}"
++".spm-schedule{display:flex;align-items:center;gap:8px;padding:8px 16px;font-size:13px;color:#65676B}"
++".spm-schedule input{border:1px solid #ddd;border-radius:6px;padding:4px 8px;font-size:13px}"
+
 +".spm-user-row{display:flex;align-items:center;gap:12px;padding:16px 16px 8px;}"
 +".spm-av{width:44px;height:44px;border-radius:50%;object-fit:cover;flex-shrink:0;}"
 +".spm-av-ph{width:44px;height:44px;border-radius:50%;background:#7C3AED;color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:16px;flex-shrink:0;}"

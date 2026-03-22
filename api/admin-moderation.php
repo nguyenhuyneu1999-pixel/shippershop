@@ -145,3 +145,65 @@ if ($method === 'POST' && $action === 'ban_user') {
 }
 
 echo json_encode(['success' => false, 'message' => 'Invalid action']);
+
+// === POST: Approve/reject deposit ===
+if ($method === 'POST' && $action === 'approve_deposit') {
+    $uid = adminAuth();
+    $input = json_decode(file_get_contents('php://input'), true);
+    $txnId = intval($input['transaction_id'] ?? 0);
+    $approve = intval($input['approve'] ?? 0);
+    
+    if (!$txnId) { echo json_encode(['success' => false, 'message' => 'Invalid']); exit; }
+    
+    $txn = $d->fetchOne("SELECT * FROM wallet_transactions WHERE id = ? AND type = 'deposit' AND `status` = 'pending'", [$txnId]);
+    if (!$txn) { echo json_encode(['success' => false, 'message' => 'Transaction not found']); exit; }
+    
+    $targetUid = intval($txn['user_id']);
+    $amount = floatval($txn['amount']);
+    
+    if ($approve) {
+        $pdo = $d->getConnection();
+        $pdo->beginTransaction();
+        try {
+            $stmt = $pdo->prepare("SELECT balance FROM wallets WHERE user_id = ? FOR UPDATE");
+            $stmt->execute([$targetUid]);
+            $wallet = $stmt->fetch(PDO::FETCH_ASSOC);
+            $before = floatval($wallet['balance'] ?? 0);
+            $after = $before + $amount;
+            
+            $pdo->prepare("UPDATE wallets SET balance = ?, updated_at = NOW() WHERE user_id = ?")->execute([$after, $targetUid]);
+            $pdo->prepare("UPDATE wallet_transactions SET `status` = 'completed', balance_before = ?, balance_after = ? WHERE id = ?")->execute([$before, $after, $txnId]);
+            $pdo->commit();
+            
+            // Notify user
+            try {
+                require_once __DIR__ . '/../includes/async-notify.php';
+                asyncNotify($targetUid, 'Nạp tiền thành công', number_format($amount) . 'đ đã được duyệt. Số dư: ' . number_format($after) . 'đ', 'wallet', '/wallet.html');
+            } catch (Throwable $e) {}
+            
+            echo json_encode(['success' => true, 'message' => 'Đã duyệt ' . number_format($amount) . 'đ']);
+        } catch (Throwable $e) {
+            if ($pdo->inTransaction()) $pdo->rollBack();
+            echo json_encode(['success' => false, 'message' => 'Error: ' . $e->getMessage()]);
+        }
+    } else {
+        $d->query("UPDATE wallet_transactions SET `status` = 'rejected' WHERE id = ?", [$txnId]);
+        try {
+            require_once __DIR__ . '/../includes/async-notify.php';
+            asyncNotify($targetUid, 'Yêu cầu nạp tiền bị từ chối', 'Liên hệ admin để biết thêm.', 'wallet', '/wallet.html');
+        } catch (Throwable $e) {}
+        echo json_encode(['success' => true, 'message' => 'Đã từ chối']);
+    }
+    exit;
+}
+
+// === GET: Pending deposits ===
+if ($method === 'GET' && $action === 'pending_deposits') {
+    $uid = adminAuth();
+    $deposits = $d->fetchAll(
+        "SELECT wt.*, u.fullname, u.avatar FROM wallet_transactions wt JOIN users u ON wt.user_id = u.id WHERE wt.type = 'deposit' AND wt.`status` = 'pending' ORDER BY wt.created_at DESC LIMIT 50", []);
+    echo json_encode(['success' => true, 'data' => $deposits ?: []]);
+    exit;
+}
+
+echo json_encode(['success' => false, 'message' => 'Invalid action']);

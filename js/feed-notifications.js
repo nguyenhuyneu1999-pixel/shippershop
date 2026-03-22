@@ -144,3 +144,25 @@ function markAllRead(){
     pollNotifCount();
   }).catch(function(){});
 }
+
+// Message unread count polling
+function pollMsgCount(){
+  var token=localStorage.getItem('token');
+  if(!token)return;
+  fetch('/api/messages-api.php?action=unread_total',{headers:{'Authorization':'Bearer '+token}})
+    .then(function(r){return r.json()})
+    .then(function(d){
+      var count=d.data?d.data.count:0;
+      // Update any message badges on page
+      var badges=document.querySelectorAll('.msg-unread-badge');
+      badges.forEach(function(b){
+        if(count>0){b.textContent=count>99?'99+':count;b.style.display='inline-block';}
+        else{b.style.display='none';}
+      });
+    }).catch(function(){});
+}
+// Add to existing poll cycle
+if(localStorage.getItem('token')){
+  setTimeout(pollMsgCount,4000);
+  setInterval(pollMsgCount,60000); // Every 60s for messages
+}
