@@ -1,0 +1,17 @@
+[Unit]
+Description=ShipperShop Queue Worker
+After=network.target redis-server.service mysql.service
+Requires=redis-server.service
+
+[Service]
+Type=simple
+User=www-data
+WorkingDirectory=/var/www/shippershop/public_html
+ExecStart=/usr/bin/php scripts/queue-worker.php
+Restart=always
+RestartSec=5
+StandardOutput=append:/var/log/shippershop/queue.log
+StandardError=append:/var/log/shippershop/queue-error.log
+
+[Install]
+WantedBy=multi-user.target

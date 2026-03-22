@@ -1,0 +1,17 @@
+[Unit]
+Description=ShipperShop WebSocket Server
+After=network.target redis-server.service mysql.service
+Requires=redis-server.service
+
+[Service]
+Type=simple
+User=www-data
+WorkingDirectory=/var/www/shippershop/public_html
+ExecStart=/usr/bin/php scripts/websocket-server.php
+Restart=always
+RestartSec=5
+StandardOutput=append:/var/log/shippershop/ws.log
+StandardError=append:/var/log/shippershop/ws-error.log
+
+[Install]
+WantedBy=multi-user.target
