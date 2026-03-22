@@ -205,4 +205,36 @@ if ($method === 'GET' && $action === 'pending_deposits') {
     exit;
 }
 
+
+
+// === GET: User list ===
+if ($method === 'GET' && $action === 'users') {
+    $uid = adminAuth();
+    $page = max(1, intval($_GET['page'] ?? 1));
+    $limit = 20;
+    $offset = ($page - 1) * $limit;
+    $search = trim($_GET['q'] ?? '');
+    $status = $_GET['status'] ?? '';
+    
+    $where = ['1=1'];
+    $params = [];
+    if ($search) {
+        $where[] = "(u.fullname LIKE ? OR u.username LIKE ? OR u.email LIKE ?)";
+        $params[] = "%$search%"; $params[] = "%$search%"; $params[] = "%$search%";
+    }
+    if ($status) { $where[] = "u.`status` = ?"; $params[] = $status; }
+    
+    $whereStr = implode(' AND ', $where);
+    $total = intval($d->fetchOne("SELECT COUNT(*) as c FROM users u WHERE $whereStr", $params)['c']);
+    $users = $d->fetchAll(
+        "SELECT u.id, u.fullname, u.username, u.email, u.avatar, u.shipping_company, u.`status`, u.created_at, u.is_online, u.last_active,
+                (SELECT COUNT(*) FROM posts WHERE user_id=u.id AND `status`='active') as post_count,
+                (SELECT COUNT(*) FROM follows WHERE following_id=u.id) as follower_count
+         FROM users u WHERE $whereStr ORDER BY u.id DESC LIMIT $limit OFFSET $offset", $params
+    );
+    
+    echo json_encode(['success' => true, 'data' => ['users' => $users ?: [], 'total' => $total, 'page' => $page]]);
+    exit;
+}
+
 echo json_encode(['success' => false, 'message' => 'Invalid action']);

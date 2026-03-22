@@ -274,6 +274,22 @@ if ($method === 'POST') {
         gOk('Deleted', ['post_id' => $postId]);
     }
 
+
+    // Pin/unpin group post
+    if ($action === 'pin_post') {
+        $uid = getAuthUserId(); if (!$uid) gErr('Auth required', 401);
+        $input = json_decode(file_get_contents('php://input'), true);
+        $postId = intval($input['post_id'] ?? 0);
+        if (!$postId) gErr('Missing post_id');
+        $post = $d->fetchOne("SELECT gp.group_id, gp.is_pinned, gm.role FROM group_posts gp JOIN group_members gm ON gm.group_id=gp.group_id AND gm.user_id=? WHERE gp.id=?", [$uid, $postId]);
+        if (!$post || $post['role'] !== 'admin') gErr('Admin only');
+        $newPin = $post['is_pinned'] ? 0 : 1;
+        if ($newPin) { $d->query("UPDATE group_posts SET is_pinned=0 WHERE group_id=? AND is_pinned=1", [$post['group_id']]); }
+        $d->query("UPDATE group_posts SET is_pinned=? WHERE id=?", [$newPin, $postId]);
+        api_cache_flush('grp_');
+        gOk($newPin ? 'Đã ghim' : 'Đã bỏ ghim', ['pinned' => (bool)$newPin]);
+    }
+
 echo json_encode(['success'=>false,'message'=>'Missing comment_id']); exit; }
         $exists = $d->fetchOne("SELECT id FROM group_post_comment_likes WHERE comment_id = ? AND user_id = ?", [$cid, $uid]);
         if ($exists) {
