@@ -63,7 +63,9 @@ ini_set('session.use_only_cookies', 1);
 ini_set('session.gc_maxlifetime', SESSION_LIFETIME);
 if (session_status() === PHP_SESSION_NONE) {
     session_name(SESSION_NAME);
-    session_start();
+    // Redis sessions (auto-detect)
+if (file_exists(__DIR__ . '/redis-session.php')) require_once __DIR__ . '/redis-session.php';
+session_start();
 }
 
 // CORS

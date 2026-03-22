@@ -1,4 +1,6 @@
 <?php
+// Async notification wrapper
+require_once __DIR__ . '/queue-adapter.php';
 // Push Notification Helper for ShipperShop
 // Uses VAPID + Web Push API (no composer, no cURL needed)
 
@@ -186,6 +188,22 @@ function base64url_decode($data) {
 
 // High-level: Send notification to a user
 function notifyUser($userId, $title, $body, $category = 'general', $url = '/') {
+    // Try async queue first (VPS with Redis)
+    try {
+        $q = queue();
+        if ($q->stats()['mode'] === 'async') {
+            $q->dispatch('notification', [
+                'user_id' => $userId,
+                'title' => $title,
+                'message' => $message ?? '',
+                'type' => $type ?? 'general',
+                'link' => $link ?? ''
+            ]);
+            return true; // Queued, don't block
+        }
+    } catch (Throwable $e) {} 
+    // Fallback: sync (shared hosting)
+
     $d = db();
     $subs = $d->fetchAll("SELECT * FROM push_subscriptions WHERE user_id = ?", [$userId]);
     $sent = 0;

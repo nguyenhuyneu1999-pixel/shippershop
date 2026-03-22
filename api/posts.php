@@ -20,6 +20,8 @@ require_once __DIR__ . '/../includes/db.php';
 require_once __DIR__ . '/../includes/functions.php';
 require_once __DIR__ . '/../includes/api-cache.php';
 require_once __DIR__ . '/../includes/api-error-handler.php';
+require_once __DIR__ . '/../includes/redis-rate-limiter.php';
+apiRateLimit('posts.php', 120);
 require_once __DIR__ . '/../includes/image-optimizer.php';
 setupApiErrorHandler();
 require_once __DIR__ . '/auth-check.php';
@@ -181,7 +183,8 @@ if ($method === 'GET') {
     
     // === CACHE: Feed response (30s TTL, 0 DB queries on hit) ===
     $sort = $_GET['sort'] ?? 'new';
-    $_cacheKey = 'feed_' . md5($whereClause . $sort . $page . $limit . json_encode($params));
+    $_authForCache = getOptionalAuthUserId() ?: 0;
+    $_cacheKey = 'feed_' . md5($_authForCache . '_' . $whereClause . $sort . $page . $limit . json_encode($params));
     if ($method === 'GET' && !isset($_GET['id']) && !isset($_GET['action'])) {
         api_try_cache($_cacheKey, 30);
     }

@@ -1,85 +1,99 @@
 <?php
 /**
- * ShipperShop API Cache Layer — High-performance response caching
- * Giảm DB queries từ 35-65 xuống 0-1 cho cached responses
+ * ShipperShop API Cache Layer
+ * AUTO-DETECT: Redis (fast) → File (fallback)
  * 
- * Usage:
- *   $cached = api_cache_get('feed_hot_1');
- *   if ($cached) { echo $cached; exit; }
- *   // ... process ...
- *   api_cache_set('feed_hot_1', $response, 30);
+ * Usage: api_try_cache('feed_page1', 30);
+ * If cache HIT → echo JSON + exit (0 DB queries)
+ * If cache MISS → continue, then api_cache_save() at response
  */
 
-define('API_CACHE_DIR', '/tmp/ss_api_cache');
+$_apiCacheRedis = null;
+$_apiCacheKey = null;
 
-function api_cache_get($key) {
-    $path = API_CACHE_DIR . '/' . md5($key) . '.json';
-    if (!file_exists($path)) return null;
-    $raw = @file_get_contents($path);
-    if ($raw === false) return null;
-    $data = @json_decode($raw, true);
-    if (!$data || !isset($data['exp']) || $data['exp'] < time()) {
-        @unlink($path);
-        return null;
-    }
-    return $data['body'];
-}
-
-function api_cache_set($key, $body, $ttl = 30) {
-    if (!is_dir(API_CACHE_DIR)) @mkdir(API_CACHE_DIR, 0755, true);
-    $path = API_CACHE_DIR . '/' . md5($key) . '.json';
-    $data = json_encode(['exp' => time() + $ttl, 'body' => $body, 'key' => $key]);
-    @file_put_contents($path, $data, LOCK_EX);
-}
-
-function api_cache_del($key) {
-    $path = API_CACHE_DIR . '/' . md5($key) . '.json';
-    @unlink($path);
-}
-
-function api_cache_flush($prefix = '') {
-    if (!is_dir(API_CACHE_DIR)) return;
-    // If prefix, need to check stored keys
-    $files = glob(API_CACHE_DIR . '/*.json');
-    $count = 0;
-    foreach ($files as $f) {
-        if ($prefix) {
-            $data = @json_decode(@file_get_contents($f), true);
-            if ($data && isset($data['key']) && strpos($data['key'], $prefix) === 0) {
-                @unlink($f);
-                $count++;
-            }
-        } else {
-            @unlink($f);
-            $count++;
+function _getRedis() {
+    global $_apiCacheRedis;
+    if ($_apiCacheRedis !== null) return $_apiCacheRedis;
+    if (class_exists('Redis')) {
+        try {
+            $r = new Redis();
+            $r->connect('127.0.0.1', 6379, 1);
+            $r->select(1); // DB 1 for API cache
+            $_apiCacheRedis = $r;
+            return $r;
+        } catch (Exception $e) {
+            $_apiCacheRedis = false;
         }
     }
-    return $count;
-}
-
-/**
- * Cache an entire API response with automatic JSON output
- * If cache hit: echo cached JSON + exit (0 DB queries!)
- * If cache miss: return false, caller processes normally
- */
-function api_try_cache($key, $ttl = 30) {
-    $cached = api_cache_get($key);
-    if ($cached !== null) {
-        header('Content-Type: application/json; charset=utf-8');
-        header('X-Cache: HIT');
-        header('X-Cache-Key: ' . substr(md5($key), 0, 8));
-        echo $cached;
-        exit;
-    }
-    header('X-Cache: MISS');
+    $_apiCacheRedis = false;
     return false;
 }
 
-/**
- * Save response to cache (call after generating response)
- */
-function api_save_cache($key, $responseArray, $ttl = 30) {
-    $json = json_encode($responseArray, JSON_UNESCAPED_UNICODE);
-    api_cache_set($key, $json, $ttl);
-    return $json;
+function api_try_cache($key, $ttl = 30) {
+    global $_apiCacheKey;
+    $_apiCacheKey = 'ss:api:' . $key;
+    
+    $r = _getRedis();
+    if ($r) {
+        // Redis cache
+        $cached = $r->get($_apiCacheKey);
+        if ($cached !== false) {
+            header('Content-Type: application/json; charset=utf-8');
+            header('X-Cache: HIT-Redis');
+            echo $cached;
+            exit;
+        }
+        // Register shutdown to save response
+        ob_start();
+        register_shutdown_function(function() use ($r, $key, $ttl) {
+            $output = ob_get_clean();
+            if ($output && strpos($output, '"success":true') !== false) {
+                $r->setex('ss:api:' . $key, $ttl, $output);
+            }
+            echo $output;
+        });
+        return;
+    }
+    
+    // File cache fallback
+    $dir = sys_get_temp_dir() . '/ss_api_cache';
+    if (!is_dir($dir)) @mkdir($dir, 0777, true);
+    $file = $dir . '/' . md5($key) . '.json';
+    
+    if (file_exists($file) && (time() - filemtime($file)) < $ttl) {
+        header('Content-Type: application/json; charset=utf-8');
+        header('X-Cache: HIT-File');
+        readfile($file);
+        exit;
+    }
+    
+    ob_start();
+    register_shutdown_function(function() use ($file, $ttl) {
+        $output = ob_get_clean();
+        if ($output && strpos($output, '"success":true') !== false) {
+            @file_put_contents($file, $output);
+        }
+        echo $output;
+    });
+}
+
+function api_cache_flush($prefix = '') {
+    $r = _getRedis();
+    if ($r) {
+        if ($prefix) {
+            $keys = $r->keys('ss:api:' . $prefix . '*');
+            if ($keys) $r->del($keys);
+        } else {
+            // Flush all API cache
+            $keys = $r->keys('ss:api:*');
+            if ($keys) $r->del($keys);
+        }
+        return;
+    }
+    
+    // File fallback
+    $dir = sys_get_temp_dir() . '/ss_api_cache';
+    if (is_dir($dir)) {
+        foreach (glob($dir . '/*.json') as $f) @unlink($f);
+    }
 }

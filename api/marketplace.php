@@ -6,6 +6,8 @@ require_once __DIR__ . '/../includes/db.php';
 require_once __DIR__ . '/../includes/functions.php';
 require_once __DIR__ . '/../includes/api-cache.php';
 require_once __DIR__ . '/../includes/api-error-handler.php';
+require_once __DIR__ . '/../includes/redis-rate-limiter.php';
+apiRateLimit('marketplace.php', 120);
 require_once __DIR__ . '/../includes/image-optimizer.php';
 setupApiErrorHandler();
 
