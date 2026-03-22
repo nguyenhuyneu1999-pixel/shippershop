@@ -1,5 +1,7 @@
 <?php
 // ShipperShop Test Suite v2 — Direct PHP testing (no self-curl)
+set_time_limit(600);
+ini_set('max_execution_time', 600);
 session_start();
 header('Content-Type: application/json; charset=utf-8');
 if(($_GET['key']??'')!=='ss_test_secret'){http_response_code(403);echo '{"error":"key"}';exit;}
