@@ -39,7 +39,7 @@ if ($method === 'GET') {
     $pins = $db->fetchAll(
         "SELECT p.*, u.fullname as user_name, u.avatar as user_avatar, u.username
          FROM map_pins p JOIN users u ON p.user_id = u.id
-         WHERE $where ORDER BY p.created_at DESC LIMIT 200", $params
+         WHERE $where ORDER BY p.created_at DESC LIMIT 100", $params
     );
     ok('OK', $pins);
 }

@@ -297,7 +297,7 @@ if($action==='messages'){
     $hasAccess=(bool)$d->fetchOne("SELECT id FROM conversations WHERE id=? AND (user1_id=? OR user2_id=?)",[$cid,$userId,$userId]);
   }
   if(!$hasAccess){echo json_encode(['success'=>false,'message'=>'No access']);exit;}
-  $d->query("UPDATE messages SET is_read=1 WHERE conversation_id=? AND sender_id!=?",[$cid,$userId]);
+  $d->query("UPDATE messages SET is_read=1, read_at=NOW() WHERE conversation_id=? AND sender_id!=? AND is_read=0",[$cid,$userId]);
   $msgs=$d->fetchAll("SELECT m.id,m.conversation_id,m.sender_id,m.content,m.is_read,m.created_at,m.`type`,m.file_url,m.file_name,m.is_pinned,u.fullname as sender_name,u.avatar as sender_avatar FROM messages m JOIN users u ON m.sender_id=u.id WHERE m.conversation_id=? ORDER BY m.created_at ASC",[$cid]);
   echo json_encode(['success'=>true,'data'=>$msgs]);exit;
 }
@@ -392,6 +392,7 @@ if($action==='send'){
   }
   try{require_once __DIR__.'/../includes/push-helper.php';$sn=$d->fetchOne("SELECT fullname,avatar FROM users WHERE id=?",[$userId]);notifyUser($oid,'Tin nhắn: '.($sn?$sn['fullname']:'Ai đó'),mb_substr($ct,0,60),'message','/messages.html?user='.$userId);}catch(Throwable $e){}
 require_once __DIR__ . '/../includes/api-cache.php';
+function flushMsgCache(\$uid){ api_cache_flush('msg_convos_' . \$uid); }
   echo json_encode(['success'=>true,'data'=>['id'=>$mid,'conversation_id'=>$cid]]);exit;
 }
 if($action==='accept'){
@@ -401,7 +402,7 @@ if($action==='accept'){
 }
 if($action==='read'){
   $cid=intval($input['conversation_id']??0);
-  $d->query("UPDATE messages SET is_read=1 WHERE conversation_id=? AND sender_id!=?",[$cid,$userId]);
+  $d->query("UPDATE messages SET is_read=1, read_at=NOW() WHERE conversation_id=? AND sender_id!=? AND is_read=0",[$cid,$userId]);
   echo json_encode(['success'=>true]);exit;
 }
 
