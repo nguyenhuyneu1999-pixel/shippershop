@@ -48,7 +48,9 @@ echo json_encode([
             ['POST /messages-api.php?action=read', 'Mark read', '{conversation_id}'],
         ],
         'Wallet' => [
-            ['GET /wallet-api.php?action=plans', 'Subscription plans', ''],
+            ['GET /wallet-api.php?action=plans', 'Subscription plans', '',
+            ['GET /wallet-api.php?action=export_csv', 'Export transactions CSV', 'Download UTF-8 CSV']
+        ],
             ['GET /wallet-api.php?action=info', 'Wallet info', 'balance, subscription, csrf_token'],
             ['GET /wallet-api.php?action=transactions', 'Transaction history', '?page=1'],
             ['POST /wallet-api.php?action=set_pin', 'Set PIN', '{pin} (4-6 digits)'],

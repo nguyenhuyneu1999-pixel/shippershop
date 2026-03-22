@@ -41,6 +41,17 @@ function hashtagify(text){
 }
 
 
+
+function markdownLite(text){
+  // Bold: **text** or __text__
+  text=text.replace(/\*\*([^*]+)\*\*/g,'<b>$1</b>');
+  text=text.replace(/__([^_]+)__/g,'<b>$1</b>');
+  // Italic: *text* or _text_
+  text=text.replace(/\*([^*]+)\*/g,'<i>$1</i>');
+  text=text.replace(/_([^_]+)_/g,'<i>$1</i>');
+  return text;
+}
+
 function detectLinks(text){
   var urlRegex=/(https?:\/\/[^\s<]+)/g;
   return text.replace(urlRegex, function(url){
