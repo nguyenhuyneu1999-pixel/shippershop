@@ -29,6 +29,11 @@ require_once __DIR__ . '/../includes/xp-helper.php';
 
 // Set CORS headers
 setCorsHeaders();
+// Override session cache headers for API
+header('Cache-Control: public, max-age=5');
+header_remove('Pragma');
+header_remove('Expires');
+
 
 // Get database
 $db = db();
