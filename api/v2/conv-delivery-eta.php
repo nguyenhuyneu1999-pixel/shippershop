@@ -1,5 +1,6 @@
 <?php
 // ShipperShop API v2 — Conversation Delivery ETA
+// Tinh nang: Chia se thoi gian giao du kien
 // Share and update estimated delivery times in conversations
 session_start();
 require_once __DIR__.'/../../includes/config.php';
