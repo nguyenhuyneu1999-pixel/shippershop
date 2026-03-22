@@ -1,0 +1,9 @@
+window.SS = window.SS || {};
+SS.DatePicker = {
+  render: function(containerId, options) {
+    var el = document.getElementById(containerId);
+    if (!el) return;
+    var opts = options || {};
+    el.innerHTML = '<div class="text-center text-muted text-xs">DatePicker component</div>';
+  }
+};
