@@ -14,6 +14,10 @@ require_once __DIR__.'/../includes/rate-limiter.php';
 require_once __DIR__.'/../includes/validator.php';
 require_once __DIR__.'/../includes/auth-v2.php';
 
+// Override global error handler for test suite
+restore_error_handler();
+restore_exception_handler();
+
 $d=db();$pdo=$d->getConnection();
 $R=[];$P=0;$F=0;$_tIdx=0;
 $_page=intval($_GET['page']??0);
