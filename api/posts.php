@@ -277,26 +277,6 @@ if ($method === 'POST') {
         if ($action === "save") { $pid = intval($input["post_id"] ?? 0); $ex = $db->fetchOne("SELECT id FROM saved_posts WHERE post_id = ? AND user_id = ?", [$pid, $userId]); if ($ex) { $db->hardDelete("saved_posts", "post_id = ? AND user_id = ?", [$pid, $userId]); success("OK", ["saved" => false]); } else { $db->insert("saved_posts", ["post_id" => $pid, "user_id" => $userId]); success("OK", ["saved" => true]); } }
         if ($action === "share") { $pid = intval($input["post_id"] ?? 0); if ($pid) { $db->query("UPDATE posts SET shares_count = shares_count + 1 WHERE id = ?", [$pid]); $cnt = $db->fetchOne("SELECT shares_count FROM posts WHERE id = ?", [$pid]); try{require_once __DIR__.'/../includes/push-helper.php';$post=$db->fetchOne("SELECT user_id FROM posts WHERE id=?",[$pid]);if($post&&intval($post['user_id'])!==$userId){$me=$db->fetchOne("SELECT fullname FROM users WHERE id=?",[$userId]);notifyUser(intval($post['user_id']),($me?$me['fullname']:'Ai đó').' đã chuyển tiếp bài viết','Bài viết của bạn được chia sẻ','post','/post-detail.html?id='.$pid);}}catch(Throwable $e){} api_cache_flush("feed_"); success("OK", ["shares_count" => intval($cnt['shares_count'] ?? 0)]); } else { success("OK"); } }
         if ($action === "delete") { $pid = intval($input["post_id"] ?? 0); $po = $db->fetchOne("SELECT user_id FROM posts WHERE id = ?", [$pid]); if (!$po || intval($po["user_id"]) !== $userId) error("Không có quyền"); $db->update("posts", ["status" => "deleted"], "id = ?", [$pid]); api_cache_flush("feed_"); success("Đã xóa"); }
-        if ($action === "edit") {
-            $pid = intval($input["post_id"] ?? 0);
-            $newContent = sanitize($input["content"] ?? "");
-            if (!$pid || empty($newContent)) error("Thiếu thông tin");
-            $post = $db->fetchOne("SELECT user_id FROM posts WHERE id = ? AND `status` = 'active'", [$pid]);
-            if (!$post || intval($post["user_id"]) !== $userId) error("Không có quyền");
-            $db->query("UPDATE posts SET content = ?, edited_at = NOW() WHERE id = ?", [$newContent, $pid]);
-            api_cache_flush("feed_");
-            success("Đã cập nhật", ["post_id" => $pid]);
-        }
-        if ($action === "report") {
-            $pid = intval($input["post_id"] ?? 0);
-            $reason = sanitize($input["reason"] ?? "");
-            if (!$pid || empty($reason)) error("Thiếu thông tin");
-            $existing = $db->fetchOne("SELECT id FROM post_reports WHERE post_id = ? AND user_id = ?", [$pid, $userId]);
-            if ($existing) error("Bạn đã báo cáo bài viết này");
-            $db->query("INSERT INTO post_reports (post_id, user_id, reason, `status`, created_at) VALUES (?, ?, ?, 'pending', NOW())", [$pid, $userId, $reason]);
-            success("Đã báo cáo");
-        }
-
         if ($action === "comments") { $pid = intval($_GET["post_id"] ?? 0); $cmts = $db->fetchAll("SELECT c.*, u.fullname as user_name, u.avatar as user_avatar FROM comments c LEFT JOIN users u ON c.user_id = u.id WHERE c.post_id = ? AND c.status = 'active' ORDER BY c.created_at ASC", [$pid]); success("OK", $cmts); }
         if ($action === "vote_comment") {
             $cid = intval($input["comment_id"] ?? 0);
