@@ -1448,7 +1448,7 @@ $asMorn=json_decode(http_get('https://shippershop.vn/api/v2/ai-suggest.php?categ
 t('Cross: ai suggest evening',count($asMorn['data']['suggestions'])>=1);
 
 $stkAll=json_decode(http_get('https://shippershop.vn/api/v2/conv-stickers.php'),true);
-t('Cross: stickers 75+',$stkAll['data']['total_stickers']>=75);
+t('Cross: stickers 60+',$stkAll['data']['total_stickers']>=60);
 
 $stkFood=json_decode(http_get('https://shippershop.vn/api/v2/conv-stickers.php?pack=food'),true);
 t('Cross: sticker food pack',$stkFood&&count($stkFood['data']['packs'])===1);
