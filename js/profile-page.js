@@ -421,3 +421,24 @@ navigator.serviceWorker.ready.then(function(reg){reg.pushManager.getSubscription
 function sb(r){r.pushManager.subscribe({userVisibleOnly:true,applicationServerKey:u2a(VP)}).then(function(s){ss(s);}).catch(function(){});}
 function ss(s){var k=s.getKey("p256dh"),a=s.getKey("auth");var d={endpoint:s.endpoint,keys:{p256dh:btoa(String.fromCharCode.apply(null,new Uint8Array(k))).replace(/\+/g,"-").replace(/\//g,"_").replace(/=+$/,""),auth:btoa(String.fromCharCode.apply(null,new Uint8Array(a))).replace(/\+/g,"-").replace(/\//g,"_").replace(/=+$/,"")}};var t=localStorage.getItem("token"),h={"Content-Type":"application/json"};if(t)h["Authorization"]="Bearer "+t;fetch("/api/push.php?action=subscribe",{method:"POST",headers:h,credentials:"include",body:JSON.stringify(d)}).catch(function(){});}
 })();
+
+function openChangePassword(){
+  var modal=document.createElement('div');
+  modal.id='pwdModal';
+  modal.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:2000;display:flex;align-items:center;justify-content:center';
+  modal.innerHTML='<div style="background:#fff;border-radius:12px;padding:24px;max-width:340px;width:90%"><h3 style="margin:0 0 16px;font-size:17px">Đổi mật khẩu</h3><input id="pwdCurrent" type="password" placeholder="Mật khẩu hiện tại" style="width:100%;padding:10px;border:1px solid #ddd;border-radius:8px;font-size:14px;margin-bottom:10px;box-sizing:border-box"><input id="pwdNew" type="password" placeholder="Mật khẩu mới (tối thiểu 6 ký tự)" style="width:100%;padding:10px;border:1px solid #ddd;border-radius:8px;font-size:14px;margin-bottom:10px;box-sizing:border-box"><input id="pwdConfirm" type="password" placeholder="Xác nhận mật khẩu mới" style="width:100%;padding:10px;border:1px solid #ddd;border-radius:8px;font-size:14px;margin-bottom:16px;box-sizing:border-box"><div style="display:flex;gap:8px;justify-content:flex-end"><button onclick="document.getElementById(\'pwdModal\').remove()" style="padding:10px 20px;border:1px solid #ddd;border-radius:8px;background:#fff;cursor:pointer">Hủy</button><button onclick="submitChangePassword()" style="padding:10px 20px;border:none;border-radius:8px;background:#7C3AED;color:#fff;cursor:pointer;font-weight:600">Đổi</button></div></div>';
+  modal.onclick=function(e){if(e.target===modal)modal.remove();};
+  document.body.appendChild(modal);
+}
+function submitChangePassword(){
+  var cur=document.getElementById('pwdCurrent').value;
+  var nw=document.getElementById('pwdNew').value;
+  var cf=document.getElementById('pwdConfirm').value;
+  if(nw.length<6){toast('Tối thiểu 6 ký tự','error');return;}
+  if(nw!==cf){toast('Mật khẩu xác nhận không khớp','error');return;}
+  var token=localStorage.getItem('token');
+  fetch('/api/auth.php?action=change_password',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+(token||'')},body:JSON.stringify({current_password:cur,new_password:nw})}).then(function(r){return r.json()}).then(function(d){
+    if(d.success){document.getElementById('pwdModal').remove();toast('Đã đổi mật khẩu!','success');}
+    else{toast(d.message||'Lỗi','error');}
+  }).catch(function(){toast('Lỗi kết nối','error');});
+}
