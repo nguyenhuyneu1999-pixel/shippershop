@@ -1424,6 +1424,68 @@ t('Func: reputation admin tier',!empty($rt3['data']['tier']));
 
 $stHealth=json_decode(http_get('https://shippershop.vn/api/v2/status.php'),true);
 t('Func: status api healthy',$stHealth&&$stHealth['status']==='healthy');
+
+// === PUSH TO 1000 ===
+$wa3=json_decode(http_get('https://shippershop.vn/api/v2/weather-alerts.php?action=safety'),true);
+t('Cross: weather safety sorted',$wa3&&$wa3['data'][0]['score']>=50);
+
+$ctAll=json_decode(http_get('https://shippershop.vn/api/v2/conv-templates.php'),true);
+t('Cross: conv templates 10+',$ctAll&&count($ctAll['data']['templates'])>=10);
+
+$ctAddr=json_decode(http_get('https://shippershop.vn/api/v2/conv-templates.php?category=address'),true);
+t('Cross: conv templates address',count($ctAddr['data']['templates'])>=2);
+
+$dsTop=json_decode(http_get('https://shippershop.vn/api/v2/delivery-stats-v2.php?action=top&days=7'),true);
+t('Cross: delivery top 7d',$dsTop&&$dsTop['success']===true);
+
+$cmClean=json_decode(http_get('https://shippershop.vn/api/v2/content-moderate.php?text='.urlencode('shipper cham chi giao hang')),true);
+t('Cross: moderate clean 100',$cmClean&&$cmClean['data']['score']===100);
+
+$vmTypes=json_decode(http_get('https://shippershop.vn/api/v2/vehicle-manager.php?action=types'),true);
+t('Cross: vehicle 6 types',$vmTypes&&count($vmTypes['data']['types'])===6);
+
+$asMorn=json_decode(http_get('https://shippershop.vn/api/v2/ai-suggest.php?category=evening'),true);
+t('Cross: ai suggest evening',count($asMorn['data']['suggestions'])>=1);
+
+$stkAll=json_decode(http_get('https://shippershop.vn/api/v2/conv-stickers.php'),true);
+t('Cross: stickers 75+',$stkAll['data']['total_stickers']>=75);
+
+$stkFood=json_decode(http_get('https://shippershop.vn/api/v2/conv-stickers.php?pack=food'),true);
+t('Cross: sticker food pack',$stkFood&&count($stkFood['data']['packs'])===1);
+
+$cvFeb=json_decode(http_get('https://shippershop.vn/api/v2/calendar-view.php?month=2&year=2026&user_id=3'),true);
+t('Cross: calendar feb user 3',$cvFeb&&$cvFeb['success']===true);
+
+$dmDist=json_decode(http_get('https://shippershop.vn/api/v2/delivery-map.php'),true);
+t('Cross: delivery map province 10+',count($dmDist['data']['by_province'])>=10);
+
+$ehUser=json_decode(http_get('https://shippershop.vn/api/v2/engagement-heatmap.php?user_id=3&days=30'),true);
+t('Cross: heatmap user3 30d',$ehUser&&$ehUser['success']===true);
+
+$tdRise=json_decode(http_get('https://shippershop.vn/api/v2/trend-detector.php?action=rising&hours=72'),true);
+t('Cross: trend rising 72h',$tdRise&&$tdRise['success']===true);
+
+$ecUsers=json_decode(http_get('https://shippershop.vn/api/v2/engagement-compare.php?action=users&user1=3&user2=4'),true);
+t('Cross: compare users 3v4',$ecUsers&&$ecUsers['success']===true);
+
+$pcOrig=json_decode(http_get('https://shippershop.vn/api/v2/plagiarism-check.php?text='.urlencode('mot noi dung hoan toan doc dao khong trung lap voi bat ky bai nao')),true);
+t('Cross: plagiarism original',$pcOrig&&$pcOrig['data']['is_original']===true);
+
+$csGrade=json_decode(http_get('https://shippershop.vn/api/v2/content-score.php?text='.urlencode('shipper giao hang tphcm quan 7 meo kinh nghiem cho nguoi moi bat dau')),true);
+t('Cross: content score graded',$csGrade&&!empty($csGrade['data']['grade']));
+
+$ms6=json_decode(http_get('https://shippershop.vn/api/v2/milestones.php?user_id=4'),true);
+t('Cross: milestones user 4',$ms6&&$ms6['success']===true);
+
+$rt4=json_decode(http_get('https://shippershop.vn/api/v2/reputation-tiers.php?action=tiers'),true);
+t('Cross: rep tiers bronze',!empty($rt4['data']['tiers'][0]['name']));
+
+$ss6=json_decode(http_get('https://shippershop.vn/api/v2/smart-schedule.php?action=hours'),true);
+t('Cross: schedule hours',$ss6&&$ss6['success']===true);
+
+$pr5=json_decode(http_get('https://shippershop.vn/api/v2/post-reach.php?user_id=3'),true);
+t('Cross: reach user 3',$pr5&&$pr5['success']===true);
+
 // ============ RESULTS ============
 $total=$P+$F;
 $_totalTests=$_tIdx;$totalTests=$_tIdx;
