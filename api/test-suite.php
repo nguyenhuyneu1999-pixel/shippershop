@@ -1838,7 +1838,7 @@ $dnResp2=json_decode(http_get_ctx('https://shippershop.vn/api/v2/delivery-notes.
 t('Func: delivery notes endpoint',$dnResp2!==null);
 
 // Content compare posts
-$ccPosts=json_decode(http_get('https://shippershop.vn/api/v2/content-compare.php?type=posts&id1=125&id2=130'),true);
+$ccPosts=json_decode(http_get('https://shippershop.vn/api/v2/content-compare.php?type=posts&id1=1038&id2=1039'),true);
 t('Func: content compare posts',$ccPosts&&$ccPosts['success']===true&&isset($ccPosts['data']['winner']));
 t('Func: compare 5 metrics',count($ccPosts['data']['comparison']??[])===5);
 
