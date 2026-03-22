@@ -1,55 +1,57 @@
 <?php
-// ShipperShop API v2 — Activity Heatmap Data
-// GitHub-style contribution heatmap for user profiles
+// ShipperShop API v2 — Admin Activity Heatmap
+// User activity heatmap: hour x day grid showing post/engagement intensity
 session_start();
 require_once __DIR__.'/../../includes/config.php';
 require_once __DIR__.'/../../includes/db.php';
 require_once __DIR__.'/../../includes/functions.php';
+require_once __DIR__.'/../../includes/auth-v2.php';
 require_once __DIR__.'/../../includes/cache.php';
 
 header('Content-Type: application/json; charset=utf-8');
 header('Access-Control-Allow-Origin: *');
+header('Access-Control-Allow-Headers: Content-Type, Authorization');
+if($_SERVER['REQUEST_METHOD']==='OPTIONS'){http_response_code(204);exit;}
 
 $d=db();
 
+function ah2_ok($msg,$data=null){echo json_encode(['success'=>true,'message'=>$msg,'data'=>$data],JSON_UNESCAPED_UNICODE);exit;}
+function ah2_fail($msg,$code=400){http_response_code($code);echo json_encode(['success'=>false,'message'=>$msg]);exit;}
+
 try {
 
-$userId=intval($_GET['user_id']??0);
-$days=min(intval($_GET['days']??365),365);
-if(!$userId){echo json_encode(['success'=>true,'data'=>['days'=>[]]]);exit;}
+$uid=require_auth();
+$admin=$d->fetchOne("SELECT role FROM users WHERE id=?",[$uid]);
+if(!$admin||$admin['role']!=='admin') ah2_fail('Admin only',403);
 
-$data=cache_remember('heatmap_'.$userId.'_'.$days, function() use($d,$userId,$days) {
-    // Posts per day
-    $posts=$d->fetchAll("SELECT DATE(created_at) as day,COUNT(*) as count FROM posts WHERE user_id=? AND `status`='active' AND created_at >= DATE_SUB(NOW(), INTERVAL $days DAY) GROUP BY DATE(created_at)",[$userId]);
-    // Comments per day
-    $comments=$d->fetchAll("SELECT DATE(created_at) as day,COUNT(*) as count FROM comments WHERE user_id=? AND created_at >= DATE_SUB(NOW(), INTERVAL $days DAY) GROUP BY DATE(created_at)",[$userId]);
+$days=min(intval($_GET['days']??30),90);
 
-    // Merge into day map
-    $dayMap=[];
-    foreach($posts as $p){$dayMap[$p['day']]=intval($p['count']);}
-    foreach($comments as $c){$dayMap[$c['day']]=(isset($dayMap[$c['day']])?$dayMap[$c['day']]:0)+intval($c['count']);}
+$data=cache_remember('activity_heatmap_'.$days, function() use($d,$days) {
+    $raw=$d->fetchAll("SELECT HOUR(created_at) as h, DAYOFWEEK(created_at) as dow, COUNT(*) as posts, SUM(likes_count+comments_count) as engagement FROM posts WHERE `status`='active' AND created_at >= DATE_SUB(NOW(), INTERVAL $days DAY) GROUP BY HOUR(created_at), DAYOFWEEK(created_at)");
 
-    // Fill all days
-    $result=[];$maxVal=0;$totalContrib=0;$activeDays=0;
-    for($i=$days-1;$i>=0;$i--){
-        $date=date('Y-m-d',strtotime("-$i days"));
-        $val=$dayMap[$date]??0;
-        $result[]=['date'=>$date,'count'=>$val,'level'=>$val>=10?4:($val>=5?3:($val>=2?2:($val>=1?1:0)))];
-        if($val>$maxVal) $maxVal=$val;
-        $totalContrib+=$val;
-        if($val>0) $activeDays++;
+    // Build 7x24 grid
+    $grid=[];$maxVal=0;
+    $dayNames=['','CN','T2','T3','T4','T5','T6','T7'];
+    for($dow=1;$dow<=7;$dow++){
+        $row=['day'=>$dayNames[$dow],'hours'=>[]];
+        for($h=0;$h<24;$h++){
+            $val=0;
+            foreach($raw as $r){if(intval($r['dow'])===$dow&&intval($r['h'])===$h) $val=intval($r['posts']);}
+            $row['hours'][]=$val;
+            if($val>$maxVal) $maxVal=$val;
+        }
+        $grid[]=$row;
     }
 
-    return [
-        'days'=>$result,
-        'total_contributions'=>$totalContrib,
-        'active_days'=>$activeDays,
-        'max_day_count'=>$maxVal,
-        'streak'=>$activeDays>0?min($activeDays,intval($d->fetchOne("SELECT current_streak FROM user_streaks WHERE user_id=?",[$userId])['current_streak']??0)):0,
-    ];
-}, 600);
+    // Peak times
+    $peaks=[];
+    foreach($raw as $r){$peaks[]=['hour'=>intval($r['h']),'day'=>$dayNames[intval($r['dow'])],'posts'=>intval($r['posts']),'engagement'=>intval($r['engagement'])];}
+    usort($peaks,function($a,$b){return $b['posts']-$a['posts'];});
 
-echo json_encode(['success'=>true,'data'=>$data],JSON_UNESCAPED_UNICODE);
+    return ['grid'=>$grid,'max_value'=>$maxVal,'peak_times'=>array_slice($peaks,0,5),'period_days'=>$days];
+}, 1800);
+
+ah2_ok('OK',$data);
 
 } catch (\Throwable $e) {
     echo json_encode(['success'=>false,'message'=>$e->getMessage()]);

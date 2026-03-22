@@ -1,48 +1,36 @@
-/**
- * ShipperShop Component — Activity Heatmap
- * GitHub-style contribution heatmap for user profiles
- */
 window.SS = window.SS || {};
-
 SS.ActivityHeatmap = {
-  render: function(userId, containerId, days) {
-    days = days || 180;
-    var el = document.getElementById(containerId);
-    if (!el) return;
-    el.innerHTML = '<div class="text-center p-2"><div class="spin" style="width:20px;height:20px;border:2px solid var(--border);border-top-color:var(--primary);border-radius:50%;display:inline-block"></div></div>';
-
-    SS.api.get('/activity-heatmap.php?user_id=' + userId + '&days=' + days).then(function(d) {
+  show: function(days) {
+    days = days || 30;
+    SS.api.get('/activity-heatmap.php?days=' + days).then(function(d) {
       var data = d.data || {};
-      var daysList = data.days || [];
-      if (!daysList.length) { el.innerHTML = ''; return; }
-
-      var colors = ['var(--border-light)', '#c8e6c9', '#81c784', '#4caf50', '#2e7d32'];
-      var cellSize = 10, gap = 2;
-      var weeks = Math.ceil(daysList.length / 7);
-      var svgW = weeks * (cellSize + gap) + 20;
-      var svgH = 7 * (cellSize + gap) + 30;
-
-      var svg = '<svg width="100%" viewBox="0 0 ' + svgW + ' ' + svgH + '" style="max-width:' + svgW + 'px">';
-      for (var i = 0; i < daysList.length; i++) {
-        var dd = daysList[i];
-        var week = Math.floor(i / 7);
-        var dow = i % 7;
-        var x = week * (cellSize + gap);
-        var y = dow * (cellSize + gap);
-        var color = colors[dd.level || 0];
-        svg += '<rect x="' + x + '" y="' + y + '" width="' + cellSize + '" height="' + cellSize + '" rx="2" fill="' + color + '"><title>' + dd.date + ': ' + dd.count + '</title></rect>';
+      var grid = data.grid || [];
+      var maxVal = data.max_value || 1;
+      var html = '<div class="flex gap-2 mb-3">';
+      [7, 30, 90].forEach(function(dd) { html += '<div class="chip ' + (dd === days ? 'chip-active' : '') + '" onclick="SS.ActivityHeatmap.show(' + dd + ')" style="cursor:pointer">' + dd + 'd</div>'; });
+      html += '</div>';
+      // Heatmap grid
+      html += '<div style="overflow-x:auto"><table style="width:100%;border-spacing:2px;font-size:9px"><tr><td></td>';
+      for (var h = 0; h < 24; h += 2) html += '<td style="text-align:center;color:var(--text-muted)">' + h + '</td>';
+      html += '</tr>';
+      for (var i = 0; i < grid.length; i++) {
+        html += '<tr><td style="font-weight:600;padding-right:4px;white-space:nowrap">' + grid[i].day + '</td>';
+        for (var j = 0; j < 24; j += 2) {
+          var val = (grid[i].hours[j] || 0) + (grid[i].hours[j + 1] || 0);
+          var intensity = maxVal > 0 ? Math.min(1, val / maxVal) : 0;
+          var bg = intensity === 0 ? 'var(--border-light)' : 'rgba(124,58,237,' + (0.15 + intensity * 0.85) + ')';
+          html += '<td style="width:20px;height:18px;background:' + bg + ';border-radius:3px" title="' + grid[i].day + ' ' + j + '-' + (j + 2) + 'h: ' + val + '"></td>';
+        }
+        html += '</tr>';
       }
-      svg += '</svg>';
-
-      var html = '<div class="mb-1" style="overflow-x:auto">' + svg + '</div>'
-        + '<div class="flex justify-between text-xs text-muted">'
-        + '<span>' + (data.total_contributions || 0) + ' hoat dong · ' + (data.active_days || 0) + ' ngay</span>'
-        + '<span>It <span style="display:inline-flex;gap:2px">';
-      for (var j = 0; j < colors.length; j++) {
-        html += '<span style="display:inline-block;width:10px;height:10px;border-radius:2px;background:' + colors[j] + '"></span>';
+      html += '</table></div>';
+      // Peak times
+      var peaks = data.peak_times || [];
+      if (peaks.length) {
+        html += '<div class="text-sm font-bold mb-1 mt-3">Peak</div>';
+        for (var p = 0; p < Math.min(peaks.length, 3); p++) html += '<div class="text-xs p-1">' + peaks[p].day + ' ' + peaks[p].hour + 'h — ' + peaks[p].posts + ' bai</div>';
       }
-      html += '</span> Nhieu</span></div>';
-      el.innerHTML = html;
-    }).catch(function() { el.innerHTML = ''; });
+      SS.ui.sheet({title: '🗓️ Activity Heatmap', html: html});
+    });
   }
 };
