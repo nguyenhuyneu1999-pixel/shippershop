@@ -1,7 +1,7 @@
 <?php
 /**
  * ShipperShop Cleanup Cron
- * Cron: 0 */6 * * * (every 6 hours)
+ * Cron: every 6 hours
  * URL: /api/cron-cleanup.php?key=ss_cleanup_cron
  */
 if (($_GET['key'] ?? '') !== 'ss_cleanup_cron') { http_response_code(403); exit; }
