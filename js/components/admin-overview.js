@@ -1,7 +1,7 @@
 window.SS = window.SS || {};
-SS.IncomeTracker = {
+SS.AdminOverview = {
   show: function(arg) {
-    var url = '/income-tracker.php' + (arg ? (typeof arg === 'number' ? '?conversation_id=' + arg : '?days=' + arg) : '');
+    var url = '/admin-overview.php' + (arg ? (typeof arg === 'number' ? '?conversation_id=' + arg : '?days=' + arg) : '');
     SS.api.get(url).then(function(d) {
       var data = d.data || {};
       var keys = Object.keys(data);
@@ -12,7 +12,7 @@ SS.IncomeTracker = {
         html += '<div class="card" style="padding:8px"><div class="font-bold">' + val + '</div><div class="text-xs text-muted">' + SS.utils.esc(keys[i]) + '</div></div>';
       }
       html += '</div>';
-      SS.ui.sheet({title: 'IncomeTracker', html: html});
+      SS.ui.sheet({title: 'AdminOverview', html: html});
     });
   }
 };
