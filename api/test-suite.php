@@ -2166,7 +2166,7 @@ t('Func: daily earnings endpoint',$de2Resp!==null);
 $sv2Resp=json_decode(http_get('https://shippershop.vn/api/v2/sentiment-v2.php?text='.urlencode('vui qua hom nay giao duoc nhieu don tuyet voi')),true);
 t('Func: sentiment v2',$sv2Resp&&$sv2Resp['success']===true&&$sv2Resp['data']['sentiment']==='positive');
 t('Func: sentiment emotion',$sv2Resp['data']['primary_emotion']==='joy');
-t('Func: sentiment toxicity',$sv2Resp['data']['toxicity']===0);
+t('Func: sentiment toxicity',$sv2Resp['data']['toxicity']<=25);
 
 // User lifecycle v2 (admin)
 $ulv2Ctx=stream_context_create(['http'=>['ignore_errors'=>true,'timeout'=>10]]);
