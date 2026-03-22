@@ -81,14 +81,18 @@ if ($method === 'GET') {
 
     if ($getAction === "comments") {
         $pid = intval($_GET["post_id"] ?? 0);
-        api_try_cache("comments_" . $pid, 15);
+        $cPage = max(1, intval($_GET["cpage"] ?? 1));
+        $cLimit = min(intval($_GET["climit"] ?? 50), 100);
+        $cOffset = ($cPage - 1) * $cLimit;
+        api_try_cache("comments_" . $pid . "_" . $cPage, 15);
+        $cTotal = intval($db->fetchOne("SELECT COUNT(*) as c FROM comments WHERE post_id = ? AND `status` = 'active'", [$pid])['c']);
         $cmts = $db->fetchAll(
             "SELECT c.*, u.fullname as user_name, u.avatar as user_avatar 
              FROM comments c 
              LEFT JOIN users u ON c.user_id = u.id 
-             WHERE c.post_id = ? AND c.status = 'active' 
-             ORDER BY c.created_at ASC", [$pid]);
-        success("OK", $cmts);
+             WHERE c.post_id = ? AND c.`status` = 'active' 
+             ORDER BY c.created_at ASC LIMIT $cLimit OFFSET $cOffset", [$pid]);
+        success("OK", ['comments' => $cmts ?: [], 'total' => $cTotal, 'page' => $cPage, 'has_more' => ($cPage * $cLimit) < $cTotal]);
     }
 
 
