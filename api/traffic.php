@@ -16,7 +16,7 @@ header('Access-Control-Allow-Methods: GET, POST, OPTIONS');
 header('Access-Control-Allow-Headers: Content-Type, Authorization');
 if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') { http_response_code(200); exit; }
 
-function tSuccess($msg, $data = []) { $j=json_encode(['success'=>true,'message'=>$msg,'data'=>$data], JSON_UNESCAPED_UNICODE); if(isset($GLOBALS['_ssCacheKey'])&&function_exists('_ssCacheSave'))_ssCacheSave($j); $et='"'.' md5($j) .'"'; header("ETag: ".$et); if(isset($_SERVER["HTTP_IF_NONE_MATCH"])&&trim($_SERVER["HTTP_IF_NONE_MATCH"])===$et){http_response_code(304);exit;} echo $j; exit; }
+function tSuccess($msg, $data = []) { $j=json_encode(['success'=>true,'message'=>$msg,'data'=>$data], JSON_UNESCAPED_UNICODE); if(isset($GLOBALS['_ssCacheKey'])&&function_exists('_ssCacheSave'))_ssCacheSave($j); echo $j; exit; }
 function tError($msg, $code = 400) { http_response_code($code); echo json_encode(['success'=>false,'message'=>$msg], JSON_UNESCAPED_UNICODE); exit; }
 
 function tAuth() {
