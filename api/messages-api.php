@@ -393,8 +393,7 @@ if($action==='send'){
   try{require_once __DIR__.'/../includes/push-helper.php';$sn=$d->fetchOne("SELECT fullname,avatar FROM users WHERE id=?",[$userId]);notifyUser($oid,'Tin nhắn: '.($sn?$sn['fullname']:'Ai đó'),mb_substr($ct,0,60),'message','/messages.html?user='.$userId);}catch(Throwable $e){}
 require_once __DIR__ . '/../includes/api-cache.php';
 require_once __DIR__ . '/../includes/api-error-handler.php';
-require_once __DIR__ . '/../includes/redis-rate-limiter.php';
-apiRateLimit('messages-api.php', 120);
+try { require_once __DIR__ . '/../includes/redis-rate-limiter.php'; apiRateLimit('messages-api.php', 120); } catch (Throwable $e) {}
 setupApiErrorHandler();
 function flushMsgCache($uid){ api_cache_flush('msg_convos_' . $uid); }
   echo json_encode(['success'=>true,'data'=>['id'=>$mid,'conversation_id'=>$cid]]);exit;

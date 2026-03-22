@@ -6,8 +6,7 @@ require_once __DIR__ . '/../includes/db.php';
 require_once __DIR__ . '/../includes/functions.php';
 require_once __DIR__ . '/../includes/api-cache.php';
 require_once __DIR__ . '/../includes/api-error-handler.php';
-require_once __DIR__ . '/../includes/redis-rate-limiter.php';
-apiRateLimit('groups.php', 120);
+try { require_once __DIR__ . '/../includes/redis-rate-limiter.php'; apiRateLimit('groups.php', 120); } catch (Throwable $e) {}
 setupApiErrorHandler();
 require_once __DIR__ . '/auth-check.php';
 header('Content-Type: application/json; charset=utf-8');

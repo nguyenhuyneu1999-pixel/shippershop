@@ -1,6 +1,4 @@
 <?php
-error_reporting(E_ALL); ini_set('display_errors', 1);
-// session_start moved to config.php
 /**
  * ============================================
  * POSTS API
@@ -21,11 +19,9 @@ require_once __DIR__ . '/../includes/db.php';
 require_once __DIR__ . '/../includes/functions.php';
 require_once __DIR__ . '/../includes/api-cache.php';
 require_once __DIR__ . '/../includes/api-error-handler.php';
-require_once __DIR__ . '/../includes/redis-rate-limiter.php';
-apiRateLimit('posts.php', 120);
+try { require_once __DIR__ . '/../includes/redis-rate-limiter.php'; apiRateLimit('posts.php', 120); } catch (Throwable $e) { /* rate limit skip */ }
 require_once __DIR__ . '/../includes/image-optimizer.php';
-define('DEBUG_MODE', true);
-// setupApiErrorHandler(); // TEMP DISABLED
+setupApiErrorHandler();
 require_once __DIR__ . '/auth-check.php';
 require_once __DIR__ . '/../includes/xp-helper.php';
 
