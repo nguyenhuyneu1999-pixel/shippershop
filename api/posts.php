@@ -197,6 +197,17 @@ if ($method === 'GET') {
         if ($fUid) { $where[] = "p.user_id IN (SELECT following_id FROM follows WHERE follower_id = ?)"; $params[] = $fUid; }
     }
     
+
+    // Hide blocked users' posts
+    $blockUid = getOptionalAuthUserId();
+    if ($blockUid) {
+        $blocked = $db->fetchAll("SELECT blocked_id FROM user_blocks WHERE user_id = ?", [$blockUid]);
+        if ($blocked) {
+            $bids = array_column($blocked, 'blocked_id');
+            $where[] = "p.user_id NOT IN (" . implode(',', array_map('intval', $bids)) . ")";
+        }
+    }
+    
 $whereClause = implode(' AND ', $where);
     
     // === CACHE: Feed response (30s TTL, 0 DB queries on hit) ===

@@ -127,3 +127,20 @@ if(localStorage.getItem('token')){
     else if(!_notifTimer){pollNotifCount();_notifTimer=setInterval(pollNotifCount,30000);}
   });
 }
+
+// Mark single notification as read
+function markNotifRead(key){
+  var token=localStorage.getItem('token');
+  if(!token||!key)return;
+  fetch('/api/notifications.php',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+token},body:JSON.stringify({notif_key:key})}).catch(function(){});
+}
+// Mark all read (for header button)
+function markAllRead(){
+  var token=localStorage.getItem('token');
+  if(!token)return;
+  fetch('/api/notifications.php?action=mark_all_read',{method:'POST',headers:{'Authorization':'Bearer '+token}}).then(function(){
+    var badge=document.getElementById('tabNotifBadge');
+    if(badge)badge.style.display='none';
+    pollNotifCount();
+  }).catch(function(){});
+}
