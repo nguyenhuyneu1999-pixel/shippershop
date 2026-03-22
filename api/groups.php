@@ -179,6 +179,34 @@ if ($method === 'GET') {
         foreach ($groups as &$g) { $g['is_member'] = in_array($g['id'], $myGroupIds); }
         gOk('OK', $groups);
     }
+
+    // User's joined groups
+    if ($action === 'my_groups') {
+        $uid = getOptionalAuthUserId();
+        if (!$uid) { gOk('OK', ['groups' => []]); }
+        $groups = $d->fetchAll("SELECT g.id, g.name, g.icon_image, g.member_count FROM `groups` g JOIN group_members gm ON gm.group_id = g.id WHERE gm.user_id = ? AND g.`status` = 'active' ORDER BY g.name", [$uid]);
+        gOk('OK', ['groups' => $groups ?: []]);
+    }
+
+    // Group rules
+    if ($action === 'rules') {
+        $gid = intval($_GET['group_id'] ?? 0);
+        if (!$gid) gErr('Missing group_id');
+        api_try_cache('grp_rules_' . $gid, 300);
+        $rules = $d->fetchAll("SELECT * FROM group_rules WHERE group_id = ? ORDER BY sort_order", [$gid]);
+        gOk('OK', ['rules' => $rules ?: []]);
+    }
+
+    // Search posts in group
+    if ($action === 'search_posts') {
+        $gid = intval($_GET['group_id'] ?? 0);
+        $q = trim($_GET['q'] ?? '');
+        if (!$gid || strlen($q) < 2) gErr('Missing params');
+        api_try_cache('grp_search_' . $gid . '_' . md5($q), 30);
+        $posts = $d->fetchAll("SELECT gp.*, u.fullname as user_name, u.avatar as user_avatar FROM group_posts gp JOIN users u ON gp.user_id = u.id WHERE gp.group_id = ? AND gp.`status` = 'active' AND gp.content LIKE ? ORDER BY gp.created_at DESC LIMIT 20", [$gid, '%' . $q . '%']);
+        gOk('OK', ['posts' => $posts ?: [], 'query' => $q]);
+    }
+
     gErr('Invalid action');
 }
 
