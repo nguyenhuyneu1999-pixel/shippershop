@@ -118,7 +118,7 @@ function mkPost(p){
   return '<div class="post-card" id="P'+p.id+'">'
   +'<div class="post-body">'
   +'<div class="post-meta">'+av+'<div style="flex:1;min-width:0"><div style="display:flex;align-items:center;justify-content:space-between">'+authorLink+'<button class="post-dots" onclick="event.stopPropagation();togMenu('+p.id+')"><i class="fas fa-ellipsis"></i></button></div><div style="font-size:12px;color:#999;display:flex;align-items:center;gap:4px">'+shipBadge+lvlBadge+'<span>·</span><span>'+ago(p.created_at)+'</span>'+badge+pvBadge+anonBadge+subBadge+'</div></div></div>'
-  +title+'<div class="post-menu" id="pm'+p.id+'" style="display:none"><div id="sv'+p.id+'" onclick="togSave('+p.id+')"><i class="'+(isSaved?'fas':'far')+' fa-bookmark" style="color:'+(isSaved?'#7C3AED':'inherit')+'"></i> '+(isSaved?'Bỏ lưu':'Lưu bài viết')+'</div>'+(canDel?'<div onclick="editP('+p.id+')"><i class="fas fa-pen"></i> Sửa bài</div><div onclick="delP('+p.id+')"><i class="far fa-trash-can"></i> Xóa bài</div>':'')+'<div onclick="reportP('+p.id+')"><i class="fas fa-flag"></i> Báo cáo</div>'+(canDel?'':'<div onclick="muteUser('+p.user_id+')"><i class="fas fa-volume-mute"></i> Tắt tiếng</div><div onclick="blockUser('+p.user_id+')"><i class="fas fa-ban"></i> Chặn</div>')+'<div onclick="togMenu('+p.id+')"><i class="fas fa-times"></i> Đóng</div></div>'+contentH+addSpoilerBlur(imgH+vidH,p)
+  +title+'<div class="post-menu" id="pm'+p.id+'" style="display:none"><div id="sv'+p.id+'" onclick="togSave('+p.id+')"><i class="'+(isSaved?'fas':'far')+' fa-bookmark" style="color:'+(isSaved?'#7C3AED':'inherit')+'"></i> '+(isSaved?'Bỏ lưu':'Lưu bài viết')+'</div>'+(canDel?'<div onclick="editP('+p.id+')"><i class="fas fa-pen"></i> Sửa bài</div><div onclick="delP('+p.id+')"><i class="far fa-trash-can"></i> Xóa bài</div>':'')+'<div onclick="reportP('+p.id+')"><i class="fas fa-flag"></i> Báo cáo</div>'+(canDel?'':'<div onclick="muteUser('+p.user_id+')"><i class="fas fa-volume-mute"></i> Tắt tiếng</div><div onclick="blockUser('+p.user_id+')"><i class="fas fa-ban"></i> Chặn</div>')+'<div onclick="shareToGroup('+p.id+')"><i class="fas fa-share-from-square"></i> Chia sẻ vào nhóm</div><div onclick="togMenu('+p.id+')"><i class="fas fa-times"></i> Đóng</div></div>'+contentH+addSpoilerBlur(imgH+vidH,p)
   +'</div>'
   +'<div class="pa3-stats"><span>'+(likes>0?fN(likes)+' đơn giao thành công':'')+'</span><span>'+(parseInt(p.comments_count||0)>0?fN(p.comments_count||0)+' ghi chú':'')+'</span><span>'+(parseInt(p.views_count||0)>0?fN(p.views_count)+' lượt xem':'')+'</span></div>'
   +'<div class="post-actions-3">'
@@ -255,6 +255,39 @@ function blockUser(uid){
     if(d.success){toast(d.message,'success');if(d.data&&d.data.blocked)location.reload();}
     else{toast(d.message||'Lỗi','error');}
   }).catch(function(){toast('Lỗi kết nối','error');});
+}
+
+
+function shareToGroup(pid){
+  var token=localStorage.getItem('token');
+  if(!token){toast('Đăng nhập!');return;}
+  // Fetch user's groups
+  fetch('/api/groups.php?action=my_groups',{headers:{'Authorization':'Bearer '+token}})
+    .then(function(r){return r.json()})
+    .then(function(d){
+      var groups=(d.data&&d.data.groups)?d.data.groups:(d.data||[]);
+      if(!groups.length){toast('Bạn chưa tham gia nhóm nào');return;}
+      var ov=document.createElement('div');
+      ov.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:2000;display:flex;align-items:center;justify-content:center';
+      var html='<div style="background:#fff;border-radius:12px;max-width:340px;width:90%;max-height:60vh;overflow-y:auto"><div style="padding:14px 16px;font-weight:700;font-size:16px;border-bottom:1px solid #f0f0f0">Chia sẻ vào nhóm</div>';
+      groups.forEach(function(g){
+        var icon=g.icon_image?'<img src="'+g.icon_image+'" style="width:36px;height:36px;border-radius:8px;object-fit:cover">':'<div style="width:36px;height:36px;border-radius:8px;background:#7C3AED;color:#fff;display:flex;align-items:center;justify-content:center">👥</div>';
+        html+='<div onclick="doShareToGroup('+pid+','+g.id+',this.parentNode.parentNode)" style="display:flex;align-items:center;gap:10px;padding:10px 16px;cursor:pointer;border-bottom:1px solid #f8f8f8">'+icon+'<div style="flex:1"><div style="font-weight:600;font-size:14px">'+esc(g.name)+'</div><div style="font-size:12px;color:#999">'+(g.member_count||0)+' thành viên</div></div></div>';
+      });
+      html+='<div onclick="this.parentNode.parentNode.remove()" style="padding:12px;text-align:center;color:#999;cursor:pointer;font-size:14px">Hủy</div></div>';
+      ov.innerHTML=html;
+      ov.onclick=function(e){if(e.target===ov)ov.remove();};
+      document.body.appendChild(ov);
+    });
+}
+function doShareToGroup(pid,gid,overlay){
+  var token=localStorage.getItem('token');
+  fetch('/api/groups.php?action=share_post',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+(token||'')},body:JSON.stringify({post_id:pid,group_id:gid})})
+    .then(function(r){return r.json()})
+    .then(function(d){
+      if(overlay)overlay.remove();
+      toast(d.success?'Đã chia sẻ!':'Lỗi: '+(d.message||''),'success');
+    });
 }
 
 function togMenu(pid){

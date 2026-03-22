@@ -183,6 +183,23 @@ function wErr($msg, $code = 400) { http_response_code($code); echo json_encode([
 // ============================================
 if ($method === 'GET') {
 
+    // VietQR code for bank transfer
+    if ($action === 'qr_code') {
+        $uid = getAuthUserId();
+        if (!$uid) wErr('Auth required', 401);
+        $amount = intval($_GET['amount'] ?? 0);
+        $bank = $_GET['bank'] ?? 'Vietcombank';
+        $banks = [
+            'Vietcombank' => ['bin' => '970436', 'acc' => '1234567890'],
+            'Techcombank' => ['bin' => '970407', 'acc' => '0987654321'],
+            'MBBank' => ['bin' => '970422', 'acc' => '1122334455'],
+        ];
+        $b = $banks[$bank] ?? $banks['Vietcombank'];
+        $desc = 'SS' . $uid . 'NAP' . ($amount ?: '');
+        $qr = 'https://img.vietqr.io/image/' . $b['bin'] . '-' . $b['acc'] . '-compact2.jpg?amount=' . $amount . '&addInfo=' . urlencode($desc) . '&accountName=SHIPPERSHOP';
+        wOk('OK', ['qr_url' => $qr, 'bank' => $bank, 'account' => $b['acc'], 'amount' => $amount, 'description' => $desc]);
+    }
+
     if ($action === 'plans') {
     api_try_cache('wallet_plans', 3600);
         rateLimit('plans', 30, 60);

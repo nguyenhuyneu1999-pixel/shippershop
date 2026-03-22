@@ -17,7 +17,41 @@ header('Access-Control-Allow-Headers: Content-Type, Authorization');
 if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') { http_response_code(200); exit; }
 
 function mSuccess($msg, $data = []) { $j=json_encode(['success'=>true,'message'=>$msg,'data'=>$data], JSON_UNESCAPED_UNICODE); if(isset($GLOBALS['_ssCacheKey'])&&function_exists('_ssCacheSave'))_ssCacheSave($j); echo $j; exit; }
-function mError($msg, $code = 400) { http_response_code($code); echo json_encode(['success'=>false,'message'=>$msg], JSON_UNESCAPED_UNICODE); exit; }
+function mError($msg, $code = 400) { http_response_code($code); 
+
+// Wishlist toggle
+if ($method === 'POST' && $action === 'wishlist') {
+    $userId = getAuthUserId();
+    if (!$userId) { mErr('Auth required', 401); }
+    $input = json_decode(file_get_contents('php://input'), true);
+    $listingId = intval($input['listing_id'] ?? 0);
+    if (!$listingId) mErr('Missing listing_id');
+    
+    $existing = $db->fetchOne("SELECT id FROM wishlists WHERE user_id = ? AND listing_id = ?", [$userId, $listingId]);
+    if ($existing) {
+        $db->query("DELETE FROM wishlists WHERE id = ?", [$existing['id']]);
+        mSuccess('OK', ['wishlisted' => false]);
+    } else {
+        $db->query("INSERT INTO wishlists (user_id, listing_id, created_at) VALUES (?, ?, NOW())", [$userId, $listingId]);
+        mSuccess('OK', ['wishlisted' => true]);
+    }
+}
+
+// Get user wishlist
+if ($method === 'GET' && $action === 'wishlist') {
+    $userId = getOptionalAuthUserId();
+    if (!$userId) { mSuccess('OK', ['items' => []]); }
+    $items = $db->fetchAll(
+        "SELECT l.*, u.fullname as seller_name, u.avatar as seller_avatar
+         FROM wishlists w JOIN marketplace_listings l ON w.listing_id = l.id
+         LEFT JOIN users u ON l.user_id = u.id
+         WHERE w.user_id = ? AND l.`status` = 'active'
+         ORDER BY w.created_at DESC", [$userId]
+    );
+    mSuccess('OK', ['items' => $items ?: []]);
+}
+
+echo json_encode(['success'=>false,'message'=>$msg], JSON_UNESCAPED_UNICODE); exit; }
 function mAuth() {
     if (isset($_SESSION['user_id'])) return intval($_SESSION['user_id']);
     $headers = getallheaders();

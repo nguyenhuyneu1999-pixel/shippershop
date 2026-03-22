@@ -274,4 +274,53 @@ if ($method === 'POST' && $action === 'review_content') {
     exit;
 }
 
+
+
+// === GET: Analytics ===
+if ($method === 'GET' && $action === 'analytics') {
+    $uid = adminAuth();
+    $days = intval($_GET['days'] ?? 7);
+    $days = min($days, 30);
+    
+    // User growth
+    $userGrowth = $d->fetchAll(
+        "SELECT DATE(created_at) as date, COUNT(*) as count FROM users WHERE created_at >= DATE_SUB(NOW(), INTERVAL ? DAY) GROUP BY DATE(created_at) ORDER BY date",
+        [$days]
+    );
+    
+    // Post activity
+    $postActivity = $d->fetchAll(
+        "SELECT DATE(created_at) as date, COUNT(*) as count FROM posts WHERE `status` = 'active' AND created_at >= DATE_SUB(NOW(), INTERVAL ? DAY) GROUP BY DATE(created_at) ORDER BY date",
+        [$days]
+    );
+    
+    // Engagement (likes + comments per day)
+    $engagement = $d->fetchAll(
+        "SELECT DATE(created_at) as date, COUNT(*) as count FROM likes WHERE created_at >= DATE_SUB(NOW(), INTERVAL ? DAY) GROUP BY DATE(created_at) ORDER BY date",
+        [$days]
+    );
+    
+    // Top posts this week
+    $topPosts = $d->fetchAll(
+        "SELECT p.id, p.content, p.likes_count, p.comments_count, p.views_count, u.fullname
+         FROM posts p JOIN users u ON p.user_id = u.id
+         WHERE p.`status` = 'active' AND p.created_at >= DATE_SUB(NOW(), INTERVAL ? DAY)
+         ORDER BY (p.likes_count * 3 + p.comments_count * 5) DESC LIMIT 5",
+        [$days]
+    );
+    
+    // Active users
+    $activeUsers = intval($d->fetchOne("SELECT COUNT(DISTINCT user_id) as c FROM posts WHERE created_at >= DATE_SUB(NOW(), INTERVAL ? DAY)", [$days])['c']);
+    
+    echo json_encode(['success' => true, 'data' => [
+        'user_growth' => $userGrowth ?: [],
+        'post_activity' => $postActivity ?: [],
+        'engagement' => $engagement ?: [],
+        'top_posts' => $topPosts ?: [],
+        'active_users' => $activeUsers,
+        'days' => $days
+    ]]);
+    exit;
+}
+
 echo json_encode(['success' => false, 'message' => 'Invalid action']);

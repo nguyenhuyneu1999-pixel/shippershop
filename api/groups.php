@@ -378,6 +378,42 @@ if ($method === 'POST') {
         gOk('OK', ['posts' => $posts ?: [], 'query' => $q]);
     }
 
+
+    // Share feed post to group
+    if ($action === 'share_post') {
+        $uid = getAuthUserId(); if (!$uid) gErr('Auth required', 401);
+        $input = json_decode(file_get_contents('php://input'), true);
+        $groupId = intval($input['group_id'] ?? 0);
+        $postId = intval($input['post_id'] ?? 0);
+        $comment = trim($input['comment'] ?? '');
+        
+        if (!$groupId || !$postId) gErr('Missing params');
+        
+        // Check membership
+        $member = $d->fetchOne("SELECT id FROM group_members WHERE group_id = ? AND user_id = ?", [$groupId, $uid]);
+        if (!$member) gErr('Chưa tham gia nhóm');
+        
+        // Get original post
+        $post = $d->fetchOne("SELECT content, images, user_id FROM posts WHERE id = ? AND `status` = 'active'", [$postId]);
+        if (!$post) gErr('Bài viết không tồn tại');
+        
+        $origUser = $d->fetchOne("SELECT fullname FROM users WHERE id = ?", [intval($post['user_id'])]);
+        $content = ($comment ? $comment . "
+
+" : '') . '📎 Chia sẻ từ ' . ($origUser['fullname'] ?? 'người dùng') . ":
+" . mb_substr($post['content'], 0, 200);
+        
+        $d->query("INSERT INTO group_posts (group_id, user_id, content, images, `status`, created_at) VALUES (?, ?, ?, ?, 'active', NOW())",
+            [$groupId, $uid, $content, $post['images']]);
+        $d->query("UPDATE `groups` SET post_count = post_count + 1 WHERE id = ?", [$groupId]);
+        
+        // Increment share count on original post
+        $d->query("UPDATE posts SET shares_count = shares_count + 1 WHERE id = ?", [$postId]);
+        
+        api_cache_flush('grp_');
+        gOk('Đã chia sẻ vào nhóm');
+    }
+
 echo json_encode(['success'=>false,'message'=>'Missing comment_id']); exit; }
         $exists = $d->fetchOne("SELECT id FROM group_post_comment_likes WHERE comment_id = ? AND user_id = ?", [$cid, $uid]);
         if ($exists) {
