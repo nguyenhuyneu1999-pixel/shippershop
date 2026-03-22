@@ -70,13 +70,21 @@ if ($method === 'GET' && empty($action)) {
     if ($cat) { $where[] = "l.category = ?"; $params[] = $cat; }
     if ($search) { $where[] = "MATCH(l.title, l.description) AGAINST(? IN BOOLEAN MODE)"; $params[] = $search . "*"; }
     if ($userId) { $where[] = "l.user_id = ?"; $params[] = $userId; }
+    if (!empty($_GET['price_min'])) { $where[] = "l.price >= ?"; $params[] = floatval($_GET['price_min']); }
+    if (!empty($_GET['price_max'])) { $where[] = "l.price <= ?"; $params[] = floatval($_GET['price_max']); }
+    if (!empty($_GET['condition'])) { $where[] = "l.`condition` = ?"; $params[] = $_GET['condition']; }
 
     $whereStr = implode(' AND ', $where);
+    $sortField = 'l.created_at DESC';
+    $s = $_GET['sort'] ?? '';
+    if ($s === 'price_asc') $sortField = 'l.price ASC';
+    elseif ($s === 'price_desc') $sortField = 'l.price DESC';
+    
     $total = $db->fetchOne("SELECT COUNT(*) as cnt FROM marketplace_listings l WHERE $whereStr", $params)['cnt'];
     $items = $db->fetchAll(
         "SELECT l.*, u.fullname as seller_name, u.avatar as seller_avatar, u.username as seller_username
          FROM marketplace_listings l JOIN users u ON l.user_id = u.id
-         WHERE $whereStr ORDER BY l.created_at DESC LIMIT $limit OFFSET $offset", $params
+         WHERE $whereStr ORDER BY $sortField LIMIT $limit OFFSET $offset", $params
     );
     mSuccess('OK', ['items' => $items, 'total' => $total, 'page' => $page, 'pages' => ceil($total / $limit)]);
 }
