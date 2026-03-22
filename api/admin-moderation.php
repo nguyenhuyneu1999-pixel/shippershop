@@ -144,7 +144,6 @@ if ($method === 'POST' && $action === 'ban_user') {
     exit;
 }
 
-echo json_encode(['success' => false, 'message' => 'Invalid action']);
 
 // === POST: Approve/reject deposit ===
 if ($method === 'POST' && $action === 'approve_deposit') {
