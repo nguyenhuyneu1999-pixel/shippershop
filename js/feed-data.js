@@ -5,7 +5,7 @@ let CU=null,sort='hot',type='all',prov=null,company='',page=1,totalPg=1,imgs=[],
 
 document.addEventListener('DOMContentLoaded',()=>{
   CU=JSON.parse(localStorage.getItem('user')||'null');
-  renderNav(); renderProvinces(); loadPosts(); loadTrend(); loadHashtags();
+  renderNav(); renderProvinces(); loadPosts(); loadTrend(); loadHashtags(); loadSuggestions();
   // mProv populated by async province API fetch below
   document.getElementById('stM').textContent=Math.floor(Math.random()*3000+1000).toLocaleString();
   document.getElementById('stO').textContent=Math.floor(Math.random()*500+100);
@@ -274,6 +274,33 @@ async function loadTrend(){
 }
 
 // Load trending hashtags
+
+// Load follow suggestions
+async function loadSuggestions(){
+  var token=localStorage.getItem('token');
+  if(!token)return;
+  try{
+    var r=await fetch('/api/friends.php?action=suggestions&limit=5',{headers:{'Authorization':'Bearer '+token}});
+    var d=await r.json();
+    if(d.success&&d.data&&d.data.length){
+      var box=document.getElementById('suggestBox');
+      if(!box)return;
+      var html='<div class="sidebar-title" style="padding:10px 12px">👥 Gợi ý theo dõi</div>';
+      d.data.forEach(function(u){
+        var av=u.avatar?'<img src="'+u.avatar+'" style="width:36px;height:36px;border-radius:50%;object-fit:cover">':'<div style="width:36px;height:36px;border-radius:50%;background:#7C3AED;color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:14px">'+(u.fullname||'U')[0]+'</div>';
+        html+='<div style="display:flex;align-items:center;gap:10px;padding:8px 12px"><a href="user.html?id='+u.id+'" style="text-decoration:none">'+av+'</a><div style="flex:1;min-width:0"><a href="user.html?id='+u.id+'" style="font-weight:600;font-size:13px;color:#333;text-decoration:none">'+esc(u.fullname)+'</a><div style="font-size:11px;color:#999">'+(u.shipping_company||'Shipper')+'</div></div><button onclick="quickFollow('+u.id+',this)" style="padding:4px 12px;border:1px solid #7C3AED;border-radius:6px;background:#fff;color:#7C3AED;font-size:12px;font-weight:600;cursor:pointer">Theo dõi</button></div>';
+      });
+      box.innerHTML=html;
+    }
+  }catch(e){}
+}
+function quickFollow(uid,btn){
+  var token=localStorage.getItem('token');
+  fetch('/api/social.php?action=follow',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+(token||'')},body:JSON.stringify({user_id:uid})}).then(function(r){return r.json()}).then(function(d){
+    if(d.success){btn.textContent='Đã theo dõi';btn.style.background='#7C3AED';btn.style.color='#fff';btn.disabled=true;}
+  });
+}
+
 async function loadHashtags(){
   try{
     var r=await fetch('/api/trending.php?action=hashtags');

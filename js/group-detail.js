@@ -24,6 +24,13 @@ function loadGroup(){
   apiFetch("/api/groups.php?action=detail&"+q).then(function(d){
     if(!d.success||!d.data){document.getElementById("gBanner").innerHTML="<p style='text-align:center;padding:40px;color:#999'>Kh\u00f4ng t\u00ecm th\u1ea5y nh\u00f3m</p>";return;}
     GROUP=d.data;
+    // Dynamic SEO
+    document.title=GROUP.name+' - ShipperShop';
+    var _gm=function(p,v){var m=document.querySelector('meta[property="'+p+'"]');if(m)m.content=v;else{m=document.createElement('meta');m.setAttribute('property',p);m.content=v;document.head.appendChild(m);}};
+    _gm('og:title',GROUP.name+' - ShipperShop');
+    _gm('og:description',(GROUP.description||'').substring(0,160));
+    if(GROUP.icon_image)_gm('og:image','https://shippershop.vn'+GROUP.icon_image);
+
     renderHeader();
     loadPosts();
     renderAbout();
