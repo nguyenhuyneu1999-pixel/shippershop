@@ -226,7 +226,7 @@ if ($method === 'GET') {
             LEFT JOIN user_subscriptions us2 ON us2.user_id = p.user_id AND us2.`status` = 'active' AND us2.expires_at > NOW()
             LEFT JOIN subscription_plans sp ON sp.id = us2.plan_id AND sp.price > 0
             WHERE $whereClause
-            ORDER BY p.created_at DESC
+            ORDER BY " . ($sort === 'hot' ? '(p.likes_count*3+p.comments_count*5+p.shares_count*2) DESC,p.created_at DESC' : ($sort === 'trending' ? '(p.likes_count*3+p.comments_count*5)/POW(TIMESTAMPDIFF(HOUR,p.created_at,NOW())+2,1.5) DESC' : ($sort === 'top' ? 'p.likes_count DESC,p.created_at DESC' : 'p.created_at DESC'))) . "
             LIMIT {$pagination['per_page']} OFFSET {$pagination['offset']}";
     
     $posts = $db->fetchAll($sql, $params);
