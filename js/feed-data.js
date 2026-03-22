@@ -14,10 +14,10 @@ document.addEventListener('DOMContentLoaded',()=>{
 function renderNav(){
   const a=document.getElementById('navArea');
   if(CU){
-    const av=CU.avatar?`<img src="${CU.avatar}" style="width:32px;height:32px;border-radius:50%;object-fit:cover" loading="lazy">`:`<div class="avatar-sm" style="width:32px;height:32px;font-size:14px">${CU.fullname[0].toUpperCase()}</div>`;
+    const av=CU.avatar?`<img src="${CU.avatar}" style="width:32px;height:32px;border-radius:50%;object-fit:cover" loading=lazy>`:`<div class="avatar-sm" style="width:32px;height:32px;font-size:14px">${CU.fullname[0].toUpperCase()}</div>`;
     a.innerHTML=`<a href="messages.html" style="width:40px;height:40px;border-radius:50%;background:#f0f2f5;display:flex;align-items:center;justify-content:center;color:#333;text-decoration:none"><i class="fas fa-comment-dots" style="font-size:18px"></i></a>`;
     const ca=document.getElementById('cAvatar');if(!ca)return;
-    if(CU.avatar) ca.outerHTML=`<img src="${CU.avatar}" style="width:32px;height:32px;border-radius:50%;object-fit:cover;flex-shrink:0" loading="lazy">`;
+    if(CU.avatar) ca.outerHTML=`<img src="${CU.avatar}" style="width:32px;height:32px;border-radius:50%;object-fit:cover;flex-shrink:0" loading=lazy>`;
     else ca.textContent=CU.fullname[0].toUpperCase();
   } else {
     a.innerHTML=`<button class="nav-btn" onclick="location='login.html'">Đăng nhập</button><button class="nav-btn filled" onclick="location='register.html'">Đăng ký</button>`;
@@ -196,7 +196,7 @@ function mkCmt(c,pid,depth,replyTo){
   depth=depth||0;
   var sz=depth>0?22:32;
   var indent=depth>0?'padding:3px 0 3px 20px;border-left:2px solid #e4e6eb;margin-left:16px':'padding:4px 0';
-  var av=c.user_avatar?'<img src="'+c.user_avatar+'" style="width:'+sz+'px;height:'+sz+'px;border-radius:50%;object-fit:cover;flex-shrink:0" onerror="this.style.display=\'none\'" loading="lazy">':'<div style="width:'+sz+'px;height:'+sz+'px;border-radius:50%;background:#e4e6eb;display:flex;align-items:center;justify-content:center;font-size:'+(depth>0?10:12)+'px;font-weight:700;flex-shrink:0">'+((c.user_name||'?')[0].toUpperCase())+'</div>';
+  var av=c.user_avatar?'<img src="'+c.user_avatar+'" style="width:'+sz+'px;height:'+sz+'px;border-radius:50%;object-fit:cover;flex-shrink:0" onerror="this.style.display=\'none\'" loading=lazy>':'<div style="width:'+sz+'px;height:'+sz+'px;border-radius:50%;background:#e4e6eb;display:flex;align-items:center;justify-content:center;font-size:'+(depth>0?10:12)+'px;font-weight:700;flex-shrink:0">'+((c.user_name||'?')[0].toUpperCase())+'</div>';
   var liked=c.user_vote==='up'||c.user_liked;
   var lkCnt=c.likes_count||0;
   var rplTag=replyTo?'<span style="color:#7C3AED;font-size:11px">↩ '+esc(replyTo)+'</span> ':'';
