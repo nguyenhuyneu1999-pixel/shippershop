@@ -1404,6 +1404,8 @@ $rt3=json_decode(@file_get_contents('https://shippershop.vn/api/v2/reputation-ti
 t('Func: reputation admin tier',!empty($rt3['data']['tier']));
 
 $st3=json_decode(@file_get_contents('https://shippershop.vn/api/v2/status.php'),true);
-t('Func: status api healthy',$st3&&// ============ RESULTS ============
+t('Func: status api healthy',$st3&&$stHealth=json_decode(@file_get_contents('https://shippershop.vn/api/v2/status.php'),true);
+t('Func: status api healthy',$stHealth&&$stHealth['status']==='healthy');
+// ============ RESULTS ============
 $total=$P+$F;
 echo json_encode(['timestamp'=>date('Y-m-d H:i:s'),'passed'=>$P,'failed'=>$F,'total'=>$total,'score'=>$total>0?round($P/$total*100,1).'%':'0%','results'=>$R],JSON_PRETTY_PRINT|JSON_UNESCAPED_UNICODE);
