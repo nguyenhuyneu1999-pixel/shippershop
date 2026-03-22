@@ -36,6 +36,7 @@ echo json_encode([
             ['POST /groups.php?action=post', 'Create group post', '{group_id, content}'],
             ['POST /groups.php?action=edit_post', 'Edit group post', '{post_id, content}'],
             ['POST /groups.php?action=like_post', 'Like group post', '{post_id}'],
+            ['POST /groups.php?action=pin_post', 'Pin post', '{post_id} (admin only)'],
             ['POST /groups.php?action=comment', 'Comment', '{post_id, content}'],
         ],
         'Messages' => [
@@ -86,7 +87,12 @@ echo json_encode([
             ['GET /admin-moderation.php?action=stats', 'Dashboard stats', 'Admin only'],
             ['GET /admin-moderation.php?action=reports', 'Reports list', '?status=pending'],
             ['POST /admin-moderation.php?action=review_report', 'Review report', '{report_id, decision}'],
+            ['GET /admin-moderation.php?action=users', 'User list', '?q=search&status=active&page=1'],
             ['POST /admin-moderation.php?action=ban_user', 'Ban user', '{user_id, ban, reason}'],
+        ],
+        
+        'Batch' => [
+            ['POST /batch.php', 'Batch requests', '{requests: [{url: ...}]} — max 5 parallel'],
         ],
         'Cron' => [
             ['GET /cron-master.php?key=ss_master_cron', 'Master cron (all tasks)', 'Every 5 min'],
