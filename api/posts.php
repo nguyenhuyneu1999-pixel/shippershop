@@ -207,7 +207,16 @@ if ($method === 'GET') {
             $where[] = "p.user_id NOT IN (" . implode(',', array_map('intval', $bids)) . ")";
         }
     }
-    
+  
+    // Hide muted users' posts
+    if ($blockUid) {
+        $muted = $db->fetchAll("SELECT muted_id FROM user_mutes WHERE user_id = ?", [$blockUid]);
+        if ($muted) {
+            $mids = array_column($muted, 'muted_id');
+            $where[] = "p.user_id NOT IN (" . implode(',', array_map('intval', $mids)) . ")";
+        }
+    }
+  
 $whereClause = implode(' AND ', $where);
     
     // === CACHE: Feed response (30s TTL, 0 DB queries on hit) ===

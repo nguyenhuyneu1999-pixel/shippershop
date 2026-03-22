@@ -527,3 +527,22 @@ if ($action === 'block') {
     }
     exit;
 }
+
+// Mute/unmute user (hide posts without blocking)
+if ($action === 'mute') {
+    $userId = getAuthUserId();
+    if (!$userId) { echo json_encode(['success'=>false,'message'=>'Auth required']); exit; }
+    $input = json_decode(file_get_contents('php://input'), true);
+    $targetId = intval($input['user_id'] ?? 0);
+    if (!$targetId || $targetId === $userId) { echo json_encode(['success'=>false,'message'=>'Invalid']); exit; }
+    
+    $existing = $d->fetchOne("SELECT id FROM user_mutes WHERE user_id = ? AND muted_id = ?", [$userId, $targetId]);
+    if ($existing) {
+        $d->query("DELETE FROM user_mutes WHERE id = ?", [$existing['id']]);
+        echo json_encode(['success'=>true,'message'=>'Đã bỏ tắt tiếng','data'=>['muted'=>false]]);
+    } else {
+        $d->query("INSERT INTO user_mutes (user_id, muted_id) VALUES (?, ?)", [$userId, $targetId]);
+        echo json_encode(['success'=>true,'message'=>'Đã tắt tiếng','data'=>['muted'=>true]]);
+    }
+    exit;
+}
