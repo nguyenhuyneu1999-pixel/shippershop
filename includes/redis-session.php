@@ -1,30 +1,33 @@
 <?php
 /**
  * ShipperShop Redis Session Handler
- * Shared hosting: native file sessions (default)
- * VPS: Redis sessions (shared across PHP workers)
- * 
- * Include BEFORE session_start() in config.php
+ * ONLY activates if Redis session handler is actually available
  */
-
 function setupRedisSession() {
+    // Only attempt if Redis extension loaded AND session handler registered
     if (!class_exists('Redis')) return false;
-    
-    try {
-        $r = new Redis();
-        $r->connect('127.0.0.1', 6379, 0.5);
-        $r->select(0); // DB 0 for sessions
-        
-        // Set session handler to Redis
-        ini_set('session.save_handler', 'redis');
-        ini_set('session.save_path', 'tcp://127.0.0.1:6379?database=0&prefix=ss_sess:');
-        ini_set('session.gc_maxlifetime', 86400); // 24 hours
-        
-        return true;
-    } catch (Exception $e) {
-        return false; // Fall back to file sessions
+    if (!in_array('redis', array_map('strtolower', explode(' ', ini_get('session.save_handler') . ' redis files')))) {
+        // Check if redis handler is available
+        try {
+            $old = ini_get('session.save_handler');
+            ini_set('session.save_handler', 'redis');
+            // If it didn't actually set, Redis session handler is not available
+            if (ini_get('session.save_handler') !== 'redis') {
+                return false;
+            }
+            // Test connection
+            ini_set('session.save_path', 'tcp://127.0.0.1:6379?database=0&prefix=ss_sess:&timeout=0.5');
+            return true;
+        } catch (Exception $e) {
+            // Revert
+            ini_set('session.save_handler', 'files');
+            return false;
+        }
     }
+    return false;
 }
 
-// Auto-setup
-setupRedisSession();
+// Only run if session not started yet
+if (session_status() === PHP_SESSION_NONE) {
+    setupRedisSession();
+}
