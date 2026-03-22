@@ -389,5 +389,21 @@ if ($method === 'POST') {
 } catch (Throwable $e) {
     error_log("Groups API: " . $e->getMessage());
     gErr('Loi: ' . $e->getMessage(), 500);
+
+
+    // Edit group post
+    if ($action === 'edit_post') {
+        $uid = getAuthUserId(); if (!$uid) gErr('Đăng nhập', 401);
+        $input = json_decode(file_get_contents('php://input'), true);
+        $postId = intval($input['post_id'] ?? 0);
+        $newContent = trim($input['content'] ?? '');
+        if (!$postId || !$newContent) gErr('Thiếu thông tin');
+        $post = $d->fetchOne("SELECT user_id FROM group_posts WHERE id = ? AND `status` = 'active'", [$postId]);
+        if (!$post || intval($post['user_id']) !== $uid) gErr('Không có quyền');
+        $d->query("UPDATE group_posts SET content = ?, updated_at = NOW() WHERE id = ?", [$newContent, $postId]);
+        api_cache_flush('grp_');
+        gOk('Đã cập nhật', ['post_id' => $postId]);
+    }
+
 }
 gErr('Invalid request');
