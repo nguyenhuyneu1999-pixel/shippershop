@@ -43,15 +43,16 @@ if ($method === 'GET') {
     if ($getAction === "user_profile") {
         $uid = intval($_GET["user_id"] ?? 0);
         if (!$uid) error("Missing user_id");
-        $user = $db->fetchOne("SELECT id, fullname, username, avatar, email FROM users WHERE id = ?", [$uid]);
+        // OPTIMIZED: 5 queries → 1 query with subqueries
+        $followCheck = $userId ? ",(SELECT COUNT(*) FROM follows WHERE follower_id = $userId AND following_id = u.id) as is_following" : ",0 as is_following";
+        $user = $db->fetchOne("SELECT u.id, u.fullname, u.username, u.avatar, u.email,
+            (SELECT COUNT(*) FROM posts WHERE user_id = u.id AND `status`='active') as posts_count,
+            (SELECT COUNT(*) FROM post_likes WHERE user_id = u.id) as likes_count,
+            (SELECT COUNT(*) FROM comments WHERE user_id = u.id AND `status`='active') as comments_count
+            $followCheck
+            FROM users u WHERE u.id = ?", [$uid]);
         if (!$user) error("User not found");
-        $user['posts_count'] = $db->fetchOne("SELECT COUNT(*) as c FROM posts WHERE user_id = ? AND status='active'", [$uid])['c'] ?? 0;
-        $user['likes_count'] = $db->fetchOne("SELECT COUNT(*) as c FROM post_likes WHERE user_id = ?", [$uid])['c'] ?? 0;
-        $user['comments_count'] = $db->fetchOne("SELECT COUNT(*) as c FROM comments WHERE user_id = ? AND status='active'", [$uid])['c'] ?? 0;
-        $user['is_following'] = false;
-        if ($userId) {
-            $user['is_following'] = (bool)$db->fetchOne("SELECT id FROM follows WHERE follower_id = ? AND following_id = ?", [$userId, $uid]);
-        }
+        $user['is_following'] = (bool)intval($user['is_following'] ?? 0);
         success("OK", ["user" => $user]);
     }
 
@@ -70,6 +71,7 @@ if ($method === 'GET') {
 
     if ($getAction === "comments") {
         $pid = intval($_GET["post_id"] ?? 0);
+        api_try_cache("comments_" . $pid, 15);
         $cmts = $db->fetchAll(
             "SELECT c.*, u.fullname as user_name, u.avatar as user_avatar 
              FROM comments c 
@@ -250,19 +252,26 @@ if ($method === 'POST') {
         if ($action === "vote") {
             $postId = intval($input["post_id"] ?? 0);
             $voteType = $input["vote_type"] ?? "";
-            if ($voteType === "remove") { $db->hardDelete("likes", "post_id = ? AND user_id = ?", [$postId, $userId]); }
-            else { $ex = $db->fetchOne("SELECT id FROM likes WHERE post_id = ? AND user_id = ?", [$postId, $userId]); if ($ex) { $db->hardDelete("likes", "post_id = ? AND user_id = ?", [$postId, $userId]); } else { $db->insert("likes", ["post_id" => $postId, "user_id" => $userId]); } }
-            $score = $db->fetchOne("SELECT COUNT(*) as c FROM likes WHERE post_id = ?", [$postId])['c'];
-            $db->query("UPDATE posts SET likes_count = ? WHERE id = ?", [intval($score), $postId]);
-            $uv = $db->fetchOne("SELECT id FROM likes WHERE post_id = ? AND user_id = ?", [$postId, $userId]);
+            // OPTIMIZED: toggle like in 1 check + 1 write + 1 update
+            $ex = $db->fetchOne("SELECT id FROM likes WHERE post_id = ? AND user_id = ?", [$postId, $userId]);
+            if ($voteType === "remove" || $ex) {
+                $db->hardDelete("likes", "post_id = ? AND user_id = ?", [$postId, $userId]);
+                $uv = null;
+            } else {
+                $db->insert("likes", ["post_id" => $postId, "user_id" => $userId]);
+                $uv = true;
+            }
+            // Update count with subquery (1 query instead of SELECT + UPDATE)
+            $db->query("UPDATE posts SET likes_count = (SELECT COUNT(*) FROM likes WHERE post_id = ?) WHERE id = ?", [$postId, $postId]);
+            $score = intval($db->fetchOne("SELECT likes_count FROM posts WHERE id = ?", [$postId])['likes_count'] ?? 0);
             // Push: notify post owner on like (not unlike)
             if ($uv) { try { require_once __DIR__.'/../includes/push-helper.php'; $post=$db->fetchOne("SELECT user_id FROM posts WHERE id=?",[$postId]); if($post&&intval($post['user_id'])!==$userId){ $me=$db->fetchOne("SELECT fullname FROM users WHERE id=?",[$userId]); notifyUser(intval($post['user_id']),($me?$me['fullname']:'Ai đó').' đã thành công bài viết','Bài viết của bạn được thành công','post','/post-detail.html?id='.$postId); } } catch(Throwable $e){} }
             api_cache_flush("feed_"); success("OK", ["score" => intval($score), "user_vote" => $uv ? "up" : null]);
         }
-        if ($action === "comment") { $pid = intval($input["post_id"] ?? 0); $ct = sanitize($input["content"] ?? ""); $par = $input["parent_id"] ?? null; if (empty($ct)) error("Nội dung trống"); $db->insert("comments", ["post_id" => $pid, "user_id" => $userId, "parent_id" => $par, "content" => $ct]); $db->query("UPDATE posts SET comments_count = comments_count + 1 WHERE id = ?", [$pid]); try{require_once __DIR__.'/../includes/push-helper.php';$post=$db->fetchOne("SELECT user_id,content FROM posts WHERE id=?",[$pid]);if($post&&intval($post['user_id'])!==$userId){$me=$db->fetchOne("SELECT fullname FROM users WHERE id=?",[$userId]);$mName=$me?$me['fullname']:'Ai đó';$preview=mb_substr($ct,0,50);notifyUser(intval($post['user_id']),'Bài viết: '.$mName.' đã ghi chú',$preview,'post','/post-detail.html?id='.$pid);}}catch(Throwable $e){} try{awardXP($userId,"comment",5,"Ghi chú bài #".$pid);}catch(Throwable$e){} success("Đã ghi chú!"); }
+        if ($action === "comment") { $pid = intval($input["post_id"] ?? 0); $ct = sanitize($input["content"] ?? ""); $par = $input["parent_id"] ?? null; if (empty($ct)) error("Nội dung trống"); $db->insert("comments", ["post_id" => $pid, "user_id" => $userId, "parent_id" => $par, "content" => $ct]); $db->query("UPDATE posts SET comments_count = comments_count + 1 WHERE id = ?", [$pid]); try{require_once __DIR__.'/../includes/push-helper.php';$post=$db->fetchOne("SELECT user_id,content FROM posts WHERE id=?",[$pid]);if($post&&intval($post['user_id'])!==$userId){$me=$db->fetchOne("SELECT fullname FROM users WHERE id=?",[$userId]);$mName=$me?$me['fullname']:'Ai đó';$preview=mb_substr($ct,0,50);notifyUser(intval($post['user_id']),'Bài viết: '.$mName.' đã ghi chú',$preview,'post','/post-detail.html?id='.$pid);}}catch(Throwable $e){} try{awardXP($userId,"comment",5,"Ghi chú bài #".$pid);}catch(Throwable$e){} api_cache_flush("feed_"); success("Đã ghi chú!"); }
         if ($action === "save") { $pid = intval($input["post_id"] ?? 0); $ex = $db->fetchOne("SELECT id FROM saved_posts WHERE post_id = ? AND user_id = ?", [$pid, $userId]); if ($ex) { $db->hardDelete("saved_posts", "post_id = ? AND user_id = ?", [$pid, $userId]); success("OK", ["saved" => false]); } else { $db->insert("saved_posts", ["post_id" => $pid, "user_id" => $userId]); success("OK", ["saved" => true]); } }
-        if ($action === "share") { $pid = intval($input["post_id"] ?? 0); if ($pid) { $db->query("UPDATE posts SET shares_count = shares_count + 1 WHERE id = ?", [$pid]); $cnt = $db->fetchOne("SELECT shares_count FROM posts WHERE id = ?", [$pid]); try{require_once __DIR__.'/../includes/push-helper.php';$post=$db->fetchOne("SELECT user_id FROM posts WHERE id=?",[$pid]);if($post&&intval($post['user_id'])!==$userId){$me=$db->fetchOne("SELECT fullname FROM users WHERE id=?",[$userId]);notifyUser(intval($post['user_id']),($me?$me['fullname']:'Ai đó').' đã chuyển tiếp bài viết','Bài viết của bạn được chia sẻ','post','/post-detail.html?id='.$pid);}}catch(Throwable $e){} success("OK", ["shares_count" => intval($cnt['shares_count'] ?? 0)]); } else { success("OK"); } }
-        if ($action === "delete") { $pid = intval($input["post_id"] ?? 0); $po = $db->fetchOne("SELECT user_id FROM posts WHERE id = ?", [$pid]); if (!$po || intval($po["user_id"]) !== $userId) error("Không có quyền"); $db->update("posts", ["status" => "deleted"], "id = ?", [$pid]); success("Đã xóa"); }
+        if ($action === "share") { $pid = intval($input["post_id"] ?? 0); if ($pid) { $db->query("UPDATE posts SET shares_count = shares_count + 1 WHERE id = ?", [$pid]); $cnt = $db->fetchOne("SELECT shares_count FROM posts WHERE id = ?", [$pid]); try{require_once __DIR__.'/../includes/push-helper.php';$post=$db->fetchOne("SELECT user_id FROM posts WHERE id=?",[$pid]);if($post&&intval($post['user_id'])!==$userId){$me=$db->fetchOne("SELECT fullname FROM users WHERE id=?",[$userId]);notifyUser(intval($post['user_id']),($me?$me['fullname']:'Ai đó').' đã chuyển tiếp bài viết','Bài viết của bạn được chia sẻ','post','/post-detail.html?id='.$pid);}}catch(Throwable $e){} api_cache_flush("feed_"); success("OK", ["shares_count" => intval($cnt['shares_count'] ?? 0)]); } else { success("OK"); } }
+        if ($action === "delete") { $pid = intval($input["post_id"] ?? 0); $po = $db->fetchOne("SELECT user_id FROM posts WHERE id = ?", [$pid]); if (!$po || intval($po["user_id"]) !== $userId) error("Không có quyền"); $db->update("posts", ["status" => "deleted"], "id = ?", [$pid]); api_cache_flush("feed_"); success("Đã xóa"); }
         if ($action === "comments") { $pid = intval($_GET["post_id"] ?? 0); $cmts = $db->fetchAll("SELECT c.*, u.fullname as user_name, u.avatar as user_avatar FROM comments c LEFT JOIN users u ON c.user_id = u.id WHERE c.post_id = ? AND c.status = 'active' ORDER BY c.created_at ASC", [$pid]); success("OK", $cmts); }
         if ($action === "vote_comment") {
             $cid = intval($input["comment_id"] ?? 0);

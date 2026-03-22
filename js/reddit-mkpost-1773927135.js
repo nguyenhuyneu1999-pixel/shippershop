@@ -311,7 +311,7 @@ function _gcLoadPost(pid){
     var av=p.user_avatar?"<img class='gc-av' src='"+esc(p.user_avatar)+"'>":"<div class='gc-av-ph'>"+esc((p.user_name||"U")[0])+"</div>";
     var sh=p.shipping_company?"<span style='font-size:11px;font-weight:700;color:"+(_SC[p.shipping_company]||"#999")+"'>"+esc(p.shipping_company)+"</span>":"";
     var imgs="";
-    if(p.images){try{var a=JSON.parse(p.images);if(a&&a.length){imgs="<div class='gc-imgs'>";for(var i=0;i<a.length;i++){imgs+="<img src='"+a[i]+"' onerror='this.remove()'>";}imgs+="</div>";}}catch(x){}}
+    if(p.images){try{var a=JSON.parse(p.images);if(a&&a.length){imgs="<div class='gc-imgs'>";for(var i=0;i<a.length;i++){imgs+="<img src='"+a[i]+"' loading='lazy' onerror='this.remove()'>";}imgs+="</div>";}}catch(x){}}
     var vid="";
     if(p.video_url){
       if(p.video_url.indexOf("/uploads/")!==-1){vid="<video controls playsinline preload='metadata' style='width:100%;max-height:400px;border-radius:0'><source src='"+p.video_url+"' type='video/mp4'></video>";}
