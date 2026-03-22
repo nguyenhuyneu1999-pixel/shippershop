@@ -365,6 +365,7 @@ if($action==='send'){
     echo json_encode(['success'=>false,'message'=>'DB error: '.$e->getMessage()]);exit;
   }
   try{require_once __DIR__.'/../includes/push-helper.php';$sn=$d->fetchOne("SELECT fullname,avatar FROM users WHERE id=?",[$userId]);notifyUser($oid,'Tin nhắn: '.($sn?$sn['fullname']:'Ai đó'),mb_substr($ct,0,60),'message','/messages.html?user='.$userId);}catch(Throwable $e){}
+require_once __DIR__ . '/../includes/api-cache.php';
   echo json_encode(['success'=>true,'data'=>['id'=>$mid,'conversation_id'=>$cid]]);exit;
 }
 if($action==='accept'){

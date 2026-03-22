@@ -4,6 +4,7 @@ define('APP_ACCESS', true);
 require_once __DIR__ . '/../includes/config.php';
 require_once __DIR__ . '/../includes/db.php';
 require_once __DIR__ . '/../includes/functions.php';
+require_once __DIR__ . '/../includes/api-cache.php';
 require_once __DIR__ . '/auth-check.php';
 header('Content-Type: application/json; charset=utf-8');
 header('Access-Control-Allow-Origin: *');
@@ -21,6 +22,12 @@ $action = $_GET['action'] ?? '';
 try {
 
 if ($method === 'GET') {
+    // Cache group listings 45s
+    $gAction = $_GET['action'] ?? '';
+    if (in_array($gAction, ['discover', 'categories', ''])) {
+        $_grpCacheKey = 'groups_' . md5($gAction . json_encode($_GET));
+        api_try_cache($_grpCacheKey, 45);
+    }
 
     if ($action === 'categories') {
         $cats = $d->fetchAll("SELECT * FROM group_categories WHERE parent_id IS NULL ORDER BY sort_order", []);

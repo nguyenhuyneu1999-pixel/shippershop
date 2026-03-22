@@ -18,6 +18,7 @@ define('APP_ACCESS', true);
 require_once __DIR__ . '/../includes/config.php';
 require_once __DIR__ . '/../includes/db.php';
 require_once __DIR__ . '/../includes/functions.php';
+require_once __DIR__ . '/../includes/api-cache.php';
 require_once __DIR__ . '/auth-check.php';
 require_once __DIR__ . '/../includes/xp-helper.php';
 
@@ -173,6 +174,13 @@ if ($method === 'GET') {
     
     $whereClause = implode(' AND ', $where);
     
+    // === CACHE: Feed response (30s TTL, 0 DB queries on hit) ===
+    $sort = $_GET['sort'] ?? 'new';
+    $_cacheKey = 'feed_' . md5($whereClause . $sort . $page . $limit . json_encode($params));
+    if ($method === 'GET' && !isset($_GET['id']) && !isset($_GET['action'])) {
+        api_try_cache($_cacheKey, 30);
+    }
+    
     // Count total
     $total = $db->fetchOne("SELECT COUNT(*) as c FROM posts p LEFT JOIN users u ON p.user_id = u.id WHERE $whereClause", $params)['c'];
     
@@ -216,13 +224,17 @@ if ($method === 'GET') {
         }
     }
     
-    success('Success', [
+    $feedResponse = ['success' => true, 'message' => 'Success', 'data' => [
         'posts' => $posts,
         'total' => $total,
         'total_pages' => $pagination['total_pages'],
         'page' => $pagination['current_page'],
         'per_page' => $pagination['per_page']
-    ]);
+    ]];
+    // Save to cache
+    api_save_cache($_cacheKey, $feedResponse, 30);
+    echo json_encode($feedResponse, JSON_UNESCAPED_UNICODE);
+    exit;
 }
 
 // ============================================
@@ -245,7 +257,7 @@ if ($method === 'POST') {
             $uv = $db->fetchOne("SELECT id FROM likes WHERE post_id = ? AND user_id = ?", [$postId, $userId]);
             // Push: notify post owner on like (not unlike)
             if ($uv) { try { require_once __DIR__.'/../includes/push-helper.php'; $post=$db->fetchOne("SELECT user_id FROM posts WHERE id=?",[$postId]); if($post&&intval($post['user_id'])!==$userId){ $me=$db->fetchOne("SELECT fullname FROM users WHERE id=?",[$userId]); notifyUser(intval($post['user_id']),($me?$me['fullname']:'Ai đó').' đã thành công bài viết','Bài viết của bạn được thành công','post','/post-detail.html?id='.$postId); } } catch(Throwable $e){} }
-            success("OK", ["score" => intval($score), "user_vote" => $uv ? "up" : null]);
+            api_cache_flush("feed_"); success("OK", ["score" => intval($score), "user_vote" => $uv ? "up" : null]);
         }
         if ($action === "comment") { $pid = intval($input["post_id"] ?? 0); $ct = sanitize($input["content"] ?? ""); $par = $input["parent_id"] ?? null; if (empty($ct)) error("Nội dung trống"); $db->insert("comments", ["post_id" => $pid, "user_id" => $userId, "parent_id" => $par, "content" => $ct]); $db->query("UPDATE posts SET comments_count = comments_count + 1 WHERE id = ?", [$pid]); try{require_once __DIR__.'/../includes/push-helper.php';$post=$db->fetchOne("SELECT user_id,content FROM posts WHERE id=?",[$pid]);if($post&&intval($post['user_id'])!==$userId){$me=$db->fetchOne("SELECT fullname FROM users WHERE id=?",[$userId]);$mName=$me?$me['fullname']:'Ai đó';$preview=mb_substr($ct,0,50);notifyUser(intval($post['user_id']),'Bài viết: '.$mName.' đã ghi chú',$preview,'post','/post-detail.html?id='.$pid);}}catch(Throwable $e){} try{awardXP($userId,"comment",5,"Ghi chú bài #".$pid);}catch(Throwable$e){} success("Đã ghi chú!"); }
         if ($action === "save") { $pid = intval($input["post_id"] ?? 0); $ex = $db->fetchOne("SELECT id FROM saved_posts WHERE post_id = ? AND user_id = ?", [$pid, $userId]); if ($ex) { $db->hardDelete("saved_posts", "post_id = ? AND user_id = ?", [$pid, $userId]); success("OK", ["saved" => false]); } else { $db->insert("saved_posts", ["post_id" => $pid, "user_id" => $userId]); success("OK", ["saved" => true]); } }
