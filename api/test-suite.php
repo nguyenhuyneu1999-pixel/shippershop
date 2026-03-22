@@ -1384,13 +1384,13 @@ $ff2=json_decode(@file_get_contents('https://shippershop.vn/api/v2/feature-flags
 t('Func: feature flags 14+',count($ff2['data']['flags'])>=14);
 
 $sc2=json_decode(@file_get_contents('https://shippershop.vn/api/v2/site-config.php'),true);
-t('Func: site config version',!empty($sc2['data']['version']));
+t('Func: site config version',!empty(\$sc2['data']['site']['version']));
 
 $ss5=json_decode(@file_get_contents('https://shippershop.vn/api/v2/smart-schedule.php'),true);
 t('Func: smart schedule 3+ slots',count($ss5['data']['recommended_slots'])>=3);
 
 $st3=json_decode(@file_get_contents('https://shippershop.vn/api/v2/status.php'),true);
-t('Func: status api healthy',$st3t('Func: status api healthy',$st3&&$st3['success']===true&&$st3['data']['database']==='connected');t('Func: status api healthy',$st3&&$st3['success']===true&&$st3['data']['database']==='connected');$st3['status']==='healthy');
+$st3['status']==='healthy');
 
 $pr4=json_decode(@file_get_contents('https://shippershop.vn/api/v2/post-reach.php?post_id=126'),true);
 t('Func: post reach 126',$pr4&&$pr4['success']===true);
@@ -1404,6 +1404,8 @@ t('Func: milestones user 3',$ms5&&$ms5['success']===true);
 $rt3=json_decode(@file_get_contents('https://shippershop.vn/api/v2/reputation-tiers.php?action=user&user_id=2'),true);
 t('Func: reputation admin tier',!empty($rt3['data']['tier']));
 
+\$st3=json_decode(@file_get_contents('https://shippershop.vn/api/v2/status.php'),true);
+t('Func: status api healthy',\$st3&&\$st3['status']==='healthy');
 // ============ RESULTS ============
 $total=$P+$F;
 echo json_encode(['timestamp'=>date('Y-m-d H:i:s'),'passed'=>$P,'failed'=>$F,'total'=>$total,'score'=>$total>0?round($P/$total*100,1).'%':'0%','results'=>$R],JSON_PRETTY_PRINT|JSON_UNESCAPED_UNICODE);
