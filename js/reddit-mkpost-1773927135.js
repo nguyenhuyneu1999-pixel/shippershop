@@ -42,6 +42,16 @@ function hashtagify(text){
 
 
 
+
+function addSpoilerBlur(html, post){
+  // Check for content warning tags
+  if(post.type==='confession'||(post.content&&(post.content.indexOf('[CW]')>-1||post.content.indexOf('[NSFW]')>-1||post.content.indexOf('[Spoiler]')>-1))){
+    var label=post.content.indexOf('[CW]')>-1?'Cảnh báo nội dung':(post.content.indexOf('[NSFW]')>-1?'Nội dung nhạy cảm':'Spoiler');
+    return '<div class="cw-wrap" onclick="this.classList.add(\'cw-revealed\')"><div class="cw-label"><i class="fas fa-eye-slash"></i> '+label+' · Nhấn để xem</div><div class="cw-content">'+html+'</div></div>';
+  }
+  return html;
+}
+
 function markdownLite(text){
   // Bold: **text** or __text__
   text=text.replace(/\*\*([^*]+)\*\*/g,'<b>$1</b>');
@@ -108,7 +118,7 @@ function mkPost(p){
   return '<div class="post-card" id="P'+p.id+'">'
   +'<div class="post-body">'
   +'<div class="post-meta">'+av+'<div style="flex:1;min-width:0"><div style="display:flex;align-items:center;justify-content:space-between">'+authorLink+'<button class="post-dots" onclick="event.stopPropagation();togMenu('+p.id+')"><i class="fas fa-ellipsis"></i></button></div><div style="font-size:12px;color:#999;display:flex;align-items:center;gap:4px">'+shipBadge+lvlBadge+'<span>·</span><span>'+ago(p.created_at)+'</span>'+badge+pvBadge+anonBadge+subBadge+'</div></div></div>'
-  +title+'<div class="post-menu" id="pm'+p.id+'" style="display:none"><div id="sv'+p.id+'" onclick="togSave('+p.id+')"><i class="'+(isSaved?'fas':'far')+' fa-bookmark" style="color:'+(isSaved?'#7C3AED':'inherit')+'"></i> '+(isSaved?'Bỏ lưu':'Lưu bài viết')+'</div>'+(canDel?'<div onclick="editP('+p.id+')"><i class="fas fa-pen"></i> Sửa bài</div><div onclick="delP('+p.id+')"><i class="far fa-trash-can"></i> Xóa bài</div>':'')+'<div onclick="reportP('+p.id+')"><i class="fas fa-flag"></i> Báo cáo</div>'+(canDel?'':'<div onclick="blockUser('+p.user_id+')"><i class="fas fa-ban"></i> Chặn</div>')+'<div onclick="togMenu('+p.id+')"><i class="fas fa-times"></i> Đóng</div></div>'+contentH+imgH+vidH
+  +title+'<div class="post-menu" id="pm'+p.id+'" style="display:none"><div id="sv'+p.id+'" onclick="togSave('+p.id+')"><i class="'+(isSaved?'fas':'far')+' fa-bookmark" style="color:'+(isSaved?'#7C3AED':'inherit')+'"></i> '+(isSaved?'Bỏ lưu':'Lưu bài viết')+'</div>'+(canDel?'<div onclick="editP('+p.id+')"><i class="fas fa-pen"></i> Sửa bài</div><div onclick="delP('+p.id+')"><i class="far fa-trash-can"></i> Xóa bài</div>':'')+'<div onclick="reportP('+p.id+')"><i class="fas fa-flag"></i> Báo cáo</div>'+(canDel?'':'<div onclick="blockUser('+p.user_id+')"><i class="fas fa-ban"></i> Chặn</div>')+'<div onclick="togMenu('+p.id+')"><i class="fas fa-times"></i> Đóng</div></div>'+contentH+addSpoilerBlur(imgH+vidH,p)
   +'</div>'
   +'<div class="pa3-stats"><span>'+(likes>0?fN(likes)+' đơn giao thành công':'')+'</span><span>'+(parseInt(p.comments_count||0)>0?fN(p.comments_count||0)+' ghi chú':'')+'</span><span>'+(parseInt(p.views_count||0)>0?fN(p.views_count)+' lượt xem':'')+'</span></div>'
   +'<div class="post-actions-3">'

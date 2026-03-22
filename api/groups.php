@@ -360,6 +360,24 @@ if ($method === 'POST') {
         gOk('Updated');
     }
 
+
+    // Search posts in group
+    if ($action === 'search_posts') {
+        $gid = intval($_GET['group_id'] ?? 0);
+        $q = trim($_GET['q'] ?? '');
+        if (!$gid || strlen($q) < 2) gErr('Missing params');
+        
+        api_try_cache('grp_search_' . $gid . '_' . md5($q), 30);
+        $posts = $d->fetchAll(
+            "SELECT gp.*, u.fullname as user_name, u.avatar as user_avatar, u.shipping_company
+             FROM group_posts gp JOIN users u ON gp.user_id = u.id
+             WHERE gp.group_id = ? AND gp.`status` = 'active' AND gp.content LIKE ?
+             ORDER BY gp.created_at DESC LIMIT 20",
+            [$gid, '%' . $q . '%']
+        );
+        gOk('OK', ['posts' => $posts ?: [], 'query' => $q]);
+    }
+
 echo json_encode(['success'=>false,'message'=>'Missing comment_id']); exit; }
         $exists = $d->fetchOne("SELECT id FROM group_post_comment_likes WHERE comment_id = ? AND user_id = ?", [$cid, $uid]);
         if ($exists) {

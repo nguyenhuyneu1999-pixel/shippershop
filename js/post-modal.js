@@ -146,6 +146,7 @@ window.closeSPM=function(){window._spmGroupId=null;
   document.getElementById("spmCount").textContent="0";
   document.getElementById("spmSend").disabled=true;
   spmFiles=[];spmType="post";
+  setTimeout(function(){var ta=document.getElementById('spmText');if(ta)setupMention(ta);},200);
   loadDraft();startDraftSave();
   document.querySelectorAll(".spm-tag").forEach(function(t){t.classList.remove("sel");});
   var first=document.querySelector(".spm-tag[data-t='post']");if(first)first.classList.add("sel");
@@ -260,5 +261,59 @@ function loadDraft(){
     }catch(e){}
 }
 function clearDraft(){localStorage.removeItem('ss_draft');}
+
+
+// @mention autocomplete
+var _mentionQuery='',_mentionEl=null;
+function setupMention(textarea){
+  textarea.addEventListener('input',function(e){
+    var val=textarea.value;
+    var pos=textarea.selectionStart;
+    var before=val.substring(0,pos);
+    var match=before.match(/@([a-zA-ZÀ-ỹ0-9_]{1,20})$/u);
+    if(match){
+      _mentionQuery=match[1];
+      fetchMentions(_mentionQuery,textarea);
+    } else { hideMentionPopup(); }
+  });
+}
+function fetchMentions(q,textarea){
+  fetch('/api/search.php?q='+encodeURIComponent(q)+'&type=mentions&limit=5')
+    .then(function(r){return r.json()})
+    .then(function(d){
+      var users=(d.data&&d.data.users)?d.data.users:(d.data||[]);
+      if(!users.length){hideMentionPopup();return;}
+      showMentionPopup(users,textarea);
+    }).catch(function(){hideMentionPopup();});
+}
+function showMentionPopup(users,textarea){
+  hideMentionPopup();
+  var rect=textarea.getBoundingClientRect();
+  var popup=document.createElement('div');
+  popup.id='mentionPopup';
+  popup.style.cssText='position:fixed;left:'+rect.left+'px;bottom:'+(window.innerHeight-rect.top+4)+'px;background:#fff;border-radius:12px;box-shadow:0 4px 20px rgba(0,0,0,.15);z-index:10000;max-width:280px;overflow:hidden';
+  users.forEach(function(u){
+    var av=u.avatar?'<img src="'+u.avatar+'" style="width:30px;height:30px;border-radius:50%;object-fit:cover">':'<div style="width:30px;height:30px;border-radius:50%;background:#7C3AED;color:#fff;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700">'+(u.fullname||'U')[0]+'</div>';
+    var div=document.createElement('div');
+    div.style.cssText='display:flex;align-items:center;gap:8px;padding:8px 12px;cursor:pointer';
+    div.innerHTML=av+'<div><div style="font-weight:600;font-size:13px">'+u.fullname+'</div><div style="font-size:11px;color:#999">@'+u.username+'</div></div>';
+    div.onclick=function(){insertMention(u,textarea);};
+    popup.appendChild(div);
+  });
+  document.body.appendChild(popup);
+  _mentionEl=popup;
+}
+function hideMentionPopup(){if(_mentionEl){_mentionEl.remove();_mentionEl=null;}}
+function insertMention(user,textarea){
+  var val=textarea.value;
+  var pos=textarea.selectionStart;
+  var before=val.substring(0,pos);
+  var after=val.substring(pos);
+  var newBefore=before.replace(/@[a-zA-ZÀ-ỹ0-9_]*$/u,'@'+user.username+' ');
+  textarea.value=newBefore+after;
+  textarea.selectionStart=textarea.selectionEnd=newBefore.length;
+  textarea.focus();
+  hideMentionPopup();
+}
 
 })();
