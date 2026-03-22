@@ -249,7 +249,8 @@ if ($method === 'GET') {
         'total' => $total,
         'total_pages' => $pagination['total_pages'],
         'page' => $pagination['current_page'],
-        'per_page' => $pagination['per_page']
+        'per_page' => $pagination['per_page'],
+        'next_cursor' => !empty($posts) ? intval($posts[count($posts)-1]['id']) : null
     ]];
     // Save to cache
     api_save_cache($_cacheKey, $feedResponse, 30);
