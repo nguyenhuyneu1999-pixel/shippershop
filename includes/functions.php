@@ -282,6 +282,15 @@ function jsonResponse($data, $statusCode = 200) {
         try { api_cache_set($GLOBALS['_ssPendingCacheKey'], $json, $GLOBALS['_ssPendingCacheTTL'] ?? 30); } catch (Throwable $e) {}
         unset($GLOBALS['_ssPendingCacheKey'], $GLOBALS['_ssPendingCacheTTL']);
     }
+    // ETag: 304 Not Modified if data unchanged (saves bandwidth)
+    if ($statusCode === 200) {
+        $etag = '"' . md5($json) . '"';
+        header('ETag: ' . $etag);
+        if (isset($_SERVER['HTTP_IF_NONE_MATCH']) && trim($_SERVER['HTTP_IF_NONE_MATCH']) === $etag) {
+            http_response_code(304);
+            exit;
+        }
+    }
     echo $json;
     exit;
 }
