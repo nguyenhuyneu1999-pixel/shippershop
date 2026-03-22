@@ -91,3 +91,39 @@ function updateNotifBadge(data){
   var badge=document.getElementById("tabNotifBadge");
   if(badge){if(unread>0){badge.style.display="flex";badge.textContent=unread>99?"99+":unread;}else{badge.style.display="none";}}
 }
+
+
+// === NOTIFICATION BADGE POLLING ===
+var _notifTimer=null;
+function pollNotifCount(){
+  var token=localStorage.getItem('token');
+  if(!token)return;
+  fetch('/api/notifications.php?action=unread_count',{headers:{'Authorization':'Bearer '+token}})
+    .then(function(r){return r.json()})
+    .then(function(d){
+      var count=d.data?d.data.count:0;
+      // Update tab badge
+      var badge=document.getElementById('tabNotifBadge');
+      if(badge){
+        if(count>0){badge.textContent=count>99?'99+':count;badge.style.display='inline-block';}
+        else{badge.style.display='none';}
+      }
+      // Update bell badge
+      var bell=document.getElementById('ss-bell-badge');
+      if(bell){
+        if(count>0){bell.textContent=count>99?'99+':count;bell.style.display='inline-block';}
+        else{bell.style.display='none';}
+      }
+    })
+    .catch(function(){});
+}
+// Poll every 30s, first check after 3s
+if(localStorage.getItem('token')){
+  setTimeout(pollNotifCount,3000);
+  _notifTimer=setInterval(pollNotifCount,30000);
+  // Stop polling when tab hidden
+  document.addEventListener('visibilitychange',function(){
+    if(document.hidden){clearInterval(_notifTimer);_notifTimer=null;}
+    else if(!_notifTimer){pollNotifCount();_notifTimer=setInterval(pollNotifCount,30000);}
+  });
+}

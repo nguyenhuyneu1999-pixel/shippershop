@@ -30,6 +30,11 @@ if($method==='GET'){
     }
     $created=new DateTime($user['created_at']);$now=new DateTime();
     $user['account_age_days']=$now->diff($created)->days;
+    // Subscription badge
+    $sub=$d->fetchOne("SELECT sp.badge, sp.badge_color, sp.name as plan_name FROM user_subscriptions us JOIN subscription_plans sp ON us.plan_id=sp.id WHERE us.user_id=? AND us.`status`='active' AND us.expires_at>NOW() AND sp.price>0 ORDER BY sp.price DESC LIMIT 1",[$targetId]);
+    $user['sub_badge']=$sub?$sub['badge']:null;
+    $user['sub_badge_color']=$sub?$sub['badge_color']:null;
+    $user['sub_plan']=$sub?$sub['plan_name']:null;
     echo json_encode(['success'=>true,'data'=>$user]);exit;
   }
   if($action==='posts'){

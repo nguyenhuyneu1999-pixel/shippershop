@@ -2,10 +2,55 @@
 define('APP_ACCESS', true);
 require_once __DIR__ . '/../includes/config.php';
 require_once __DIR__ . '/../includes/db.php';
+require_once __DIR__ . '/../includes/api-cache.php';
 require_once __DIR__ . '/auth-check.php';
+header('Access-Control-Allow-Origin: *');
+header('Access-Control-Allow-Headers: Content-Type, Authorization');
+if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') { http_response_code(200); exit; }
 
 $db = db();
 $method = $_SERVER['REQUEST_METHOD'];
+
+
+$action = $_GET['action'] ?? '';
+
+// Lightweight unread count (for polling badge)
+if ($method === 'GET' && $action === 'unread_count') {
+    $userId = getOptionalAuthUserId();
+    if ($userId) api_try_cache('notif_count_' . $userId, 5);
+    $userId = getOptionalAuthUserId();
+    if (!$userId) { echo json_encode(['success'=>true,'data'=>['count'=>0]]); exit; }
+    
+    // Count recent unread notifications (last 7 days)
+    $likeCount = intval($db->fetchOne("SELECT COUNT(*) as c FROM likes l JOIN posts p ON l.post_id=p.id LEFT JOIN notification_reads nr ON nr.notif_key=CONCAT('like_',l.user_id,'_',l.post_id) AND nr.user_id=? WHERE p.user_id=? AND l.user_id!=? AND l.created_at > DATE_SUB(NOW(), INTERVAL 7 DAY) AND nr.id IS NULL", [$userId, $userId, $userId])['c'] ?? 0);
+    $cmtCount = intval($db->fetchOne("SELECT COUNT(*) as c FROM comments c JOIN posts p ON c.post_id=p.id LEFT JOIN notification_reads nr ON nr.notif_key=CONCAT('cmt_',c.id) AND nr.user_id=? WHERE p.user_id=? AND c.user_id!=? AND c.created_at > DATE_SUB(NOW(), INTERVAL 7 DAY) AND c.`status`='active' AND nr.id IS NULL", [$userId, $userId, $userId])['c'] ?? 0);
+    $total = $likeCount + $cmtCount;
+    
+    echo json_encode(['success'=>true,'data'=>['count'=>$total,'likes'=>$likeCount,'comments'=>$cmtCount]]);
+    exit;
+}
+
+// Mark all as read
+if ($method === 'POST' && $action === 'mark_all_read') {
+    $userId = getAuthUserId();
+    if (!$userId) { echo json_encode(['success'=>false,'message'=>'Auth required']); exit; }
+    
+    // Get all unread notification keys
+    $likes = $db->fetchAll("SELECT CONCAT('like_',l.user_id,'_',l.post_id) as k FROM likes l JOIN posts p ON l.post_id=p.id WHERE p.user_id=? AND l.user_id!=? ORDER BY l.created_at DESC LIMIT 50", [$userId, $userId]);
+    $cmts = $db->fetchAll("SELECT CONCAT('cmt_',c.id) as k FROM comments c JOIN posts p ON c.post_id=p.id WHERE p.user_id=? AND c.user_id!=? AND c.`status`='active' ORDER BY c.created_at DESC LIMIT 50", [$userId, $userId]);
+    
+    $keys = array_merge(array_column($likes, 'k'), array_column($cmts, 'k'));
+    foreach ($keys as $key) {
+        $exists = $db->fetchOne("SELECT id FROM notification_reads WHERE user_id=? AND notif_key=?", [$userId, $key]);
+        if (!$exists) {
+            $db->query("INSERT IGNORE INTO notification_reads (user_id, notif_key, created_at) VALUES (?, ?, NOW())", [$userId, $key]);
+        }
+    }
+    
+    echo json_encode(['success'=>true,'message'=>'Đã đọc tất cả','data'=>['marked'=>count($keys)]]);
+    exit;
+}
+
 
 if ($method === 'GET') {
     $userId = getOptionalAuthUserId();
