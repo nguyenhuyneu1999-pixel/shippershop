@@ -1,6 +1,16 @@
 <!DOCTYPE html>
 <html lang="vi">
 <head>
+<style id="critical-css">
+/* Critical above-fold CSS — inline for instant render */
+body{margin:0;font-family:'Be Vietnam Pro',sans-serif;background:#f0f2f5;color:#1C1C1C;-webkit-tap-highlight-color:transparent}
+.top-header{position:fixed;top:0;left:0;right:0;z-index:100;background:#fff;border-bottom:1px solid #e4e6eb}
+.tab-bar{display:flex;background:#fff;border-bottom:1px solid #f0f0f0;overflow-x:auto}
+.tab-bar button{flex:1;padding:8px 4px;border:none;background:none;font-size:12px;cursor:pointer}
+.post-card{background:#fff;margin-bottom:8px;overflow:hidden}
+.skeleton{background:linear-gradient(90deg,#f0f0f0 25%,#e0e0e0 50%,#f0f0f0 75%);background-size:200% 100%;animation:shimmer 1.5s infinite;border-radius:4px}
+@keyframes shimmer{0%{background-position:200% 0}100%{background-position:-200% 0}}
+</style>
 <meta charset="UTF-8">
 
 <link rel="icon" type="image/x-icon" href="/favicon.ico">
@@ -357,6 +367,9 @@ if("serviceWorker" in navigator){
 {"@context":"https://schema.org","@type":"WebSite","name":"ShipperShop","alternateName":"Cộng đồng Shipper Việt Nam","url":"https://shippershop.vn","description":"Mạng xã hội dành riêng cho shipper Việt Nam. Chia sẻ kinh nghiệm giao hàng, mẹo tiết kiệm xăng, review hãng vận chuyển.","potentialAction":{"@type":"SearchAction","target":"https://shippershop.vn/?search={search_term_string}","query-input":"required name=search_term_string"}}
 </script>
 <script src="/js/network-handler.js" defer></script>
+<link rel="preload" href="/js/reddit-mkpost-1773927135.js" as="script">
+<link rel="preload" href="/js/feed-data.js?v=20260322" as="script">
+<link rel="preload" href="/api/posts.php?limit=20" as="fetch" crossorigin>
 </head>
 <body>
 <nav class="top-nav">

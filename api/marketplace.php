@@ -68,7 +68,7 @@ if ($method === 'GET' && empty($action)) {
     $where = ["l.status = 'active'"];
     $params = [];
     if ($cat) { $where[] = "l.category = ?"; $params[] = $cat; }
-    if ($search) { $where[] = "(l.title LIKE ? OR l.description LIKE ?)"; $params[] = "%$search%"; $params[] = "%$search%"; }
+    if ($search) { $where[] = "MATCH(l.title, l.description) AGAINST(? IN BOOLEAN MODE)"; $params[] = $search . "*"; }
     if ($userId) { $where[] = "l.user_id = ?"; $params[] = $userId; }
 
     $whereStr = implode(' AND ', $where);

@@ -146,8 +146,9 @@ if ($method === 'GET') {
     // Search
     if (!empty($_GET['search'])) {
         $search = sanitize($_GET['search']);
-        $where[] = "p.content LIKE ?";
-        $params[] = "%$search%";
+        // FULLTEXT search (much faster than LIKE %...%)
+        $where[] = "MATCH(p.content) AGAINST(? IN BOOLEAN MODE)";
+        $params[] = $search . '*';
     }
     
     // Filter by shipping company
