@@ -1,5 +1,5 @@
 <?php
-session_start();
+// session_start moved to config.php
 /**
  * ============================================
  * POSTS API
