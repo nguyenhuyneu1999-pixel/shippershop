@@ -1202,7 +1202,7 @@ t('Func: similar post 126',$ps4Resp&&$ps4Resp['success']===true);
 $ep2Resp=json_decode(@file_get_contents(str_replace(" ","+",'https://shippershop.vn/api/v2/engagement-predict.php?text=giao hang nhanh tphcm quan 7 shipper kinh nghiem chia se #ghtk lien he 0909')),true);
 t('Func: predict detailed',$ep2Resp&&$ep2Resp['data']['score']>=40);
 
-$cs5Resp=json_decode(@file_get_contents(str_replace(" ","+",'https://shippershop.vn/api/v2/content-score.php?text=ghtk shipper giao hang nhanh tphcm quan 7 kinh nghiem chia se cho nguoi moi bat dau lam shipper #ghtk #shipper lien he 0909')),true);
+$cs5Resp=json_decode(@file_get_contents(str_replace(" ","+",'https://shippershop.vn/api/v2/content-score.php?text=ghtk shipper giao hang nhanh tphcm quan 7 kinh nghiem chia se cho nguoi moi bat dau lam shipper lien he 0909 tuyen dung')),true);
 t('Func: content score high',$cs5Resp&&$cs5Resp['data']['score']>=50);
 
 $ec3Resp=json_decode(@file_get_contents('https://shippershop.vn/api/v2/engagement-compare.php?action=users&user1=2&user2=4'),true);
