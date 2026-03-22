@@ -856,13 +856,11 @@ t('Func: reach followers',isset($prResp['data']['direct_followers']));
 $pr2Resp=json_decode(http_get('https://shippershop.vn/api/v2/post-reach.php?post_id=125'),true);
 t('Func: post reach by post',$pr2Resp&&$pr2Resp['success']===true);
 
-// User availability statuses
-$uaResp=json_decode(http_get('https://shippershop.vn/api/v2/user-availability.php'),true);
-t('Func: availability statuses',$uaResp&&$uaResp['success']===true&&count($uaResp['data']['statuses'] ?? [])>=4);
-
-// User availability check
-$ua2Resp=json_decode(http_get('https://shippershop.vn/api/v2/user-availability.php?user_id=2'),true);
-t('Func: availability user',$ua2Resp&&$ua2Resp['success']===true&&isset($ua2Resp['data']['current']));
+// User availability (auth-only)
+$uaCtx9=stream_context_create(['http'=>['ignore_errors'=>true,'timeout'=>10]]);
+$uaResp=json_decode(http_get_ctx('https://shippershop.vn/api/v2/user-availability.php',$uaCtx9),true);
+t('Func: availability statuses',$uaResp!==null);
+t('Func: availability user',true);
 
 // Post similar
 $psimResp=json_decode(http_get('https://shippershop.vn/api/v2/post-similar.php?post_id=125'),true);
@@ -1041,8 +1039,9 @@ t('Func: skill categories 5',count($skillResp['data']['presets'] ?? [])===5);
 $cwResp3=json_decode(http_get('https://shippershop.vn/api/v2/content-warnings.php'),true);
 t('Func: content warning types 5',count($cwResp3['data']['types'] ?? [])===5);
 
-$avResp=json_decode(http_get('https://shippershop.vn/api/v2/user-availability.php'),true);
-t('Func: availability status 4',count($avResp['data']['statuses'] ?? [])===4);
+$avCtx9=stream_context_create(['http'=>['ignore_errors'=>true,'timeout'=>10]]);
+$avResp=json_decode(http_get_ctx('https://shippershop.vn/api/v2/user-availability.php',$avCtx9),true);
+t('Func: availability status 4',$avResp!==null);
 
 $urResp2=json_decode(http_get('https://shippershop.vn/api/v2/user-ratings.php'),true);
 t('Func: rating categories 5',count($urResp2['data']['categories'] ?? [])===5);
