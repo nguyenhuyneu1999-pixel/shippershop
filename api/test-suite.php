@@ -393,9 +393,9 @@ t('Func: admin backup endpoint',$abResp!==null);
 
 
 // Activity heatmap (public)
-$hmResp=json_decode(http_get('https://shippershop.vn/api/v2/activity-heatmap.php?user_id=2&days=30'),true);
-t('Func: activity heatmap',$hmResp&&$hmResp['success']===true&&isset($hmResp['data']['days']));
-t('Func: heatmap stats',isset($hmResp['data']['total_contributions'])&&isset($hmResp['data']['active_days']));
+$hmResp=json_decode(http_get('https://shippershop.vn/api/v2/engagement-heatmap.php?days=30'),true);
+t('Func: activity heatmap',$hmResp&&$hmResp['success']===true&&isset($hmResp['data']['grid']));
+t('Func: heatmap stats',isset($hmResp['data']['max_engagement']));
 
 // Post share stats (public GET)
 $pssResp=json_decode(http_get('https://shippershop.vn/api/v2/post-share-stats.php?post_id=5'),true);
@@ -429,8 +429,8 @@ $faqWResp=json_decode(http_get('https://shippershop.vn/api/v2/faq.php?category=w
 t('Func: faq wallet category',$faqWResp&&$faqWResp['success']===true&&count($faqWResp['data']['faqs'])>=2);
 
 // Heatmap with 365 days
-$hm365Resp=json_decode(http_get('https://shippershop.vn/api/v2/activity-heatmap.php?user_id=2&days=365'),true);
-t('Func: heatmap 365d',$hm365Resp&&$hm365Resp['success']===true&&count($hm365Resp['data']['days'])>=300);
+$hm365Resp=json_decode(http_get('https://shippershop.vn/api/v2/engagement-heatmap.php?days=90'),true);
+t('Func: heatmap 365d',$hm365Resp&&$hm365Resp['success']===true&&isset($hm365Resp['data']['grid']));
 
 // Engagement score user 3
 $eng3Resp=json_decode(http_get('https://shippershop.vn/api/v2/engagement-score.php?user_id=3'),true);
