@@ -23,6 +23,7 @@ require_once __DIR__ . '/../includes/api-error-handler.php';
 require_once __DIR__ . '/../includes/image-optimizer.php';
 setupApiErrorHandler();
 try { require_once __DIR__ . '/../includes/redis-rate-limiter.php'; apiRateLimit('posts.php'); } catch (Throwable $e) {}
+require_once __DIR__ . '/../includes/async-notify.php';
 require_once __DIR__ . '/auth-check.php';
 require_once __DIR__ . '/../includes/xp-helper.php';
 
@@ -271,7 +272,7 @@ if ($method === 'POST') {
             $db->query("UPDATE posts SET likes_count = (SELECT COUNT(*) FROM likes WHERE post_id = ?) WHERE id = ?", [$postId, $postId]);
             $score = intval($db->fetchOne("SELECT likes_count FROM posts WHERE id = ?", [$postId])['likes_count'] ?? 0);
             // Push: notify post owner on like (not unlike)
-            if ($uv) { try { require_once __DIR__.'/../includes/push-helper.php'; $post=$db->fetchOne("SELECT user_id FROM posts WHERE id=?",[$postId]); if($post&&intval($post['user_id'])!==$userId){ $me=$db->fetchOne("SELECT fullname FROM users WHERE id=?",[$userId]); notifyUser(intval($post['user_id']),($me?$me['fullname']:'Ai đó').' đã thành công bài viết','Bài viết của bạn được thành công','post','/post-detail.html?id='.$postId); } } catch(Throwable $e){} }
+            if ($uv) { try { $post=$db->fetchOne("SELECT user_id FROM posts WHERE id=?",[$postId]); if($post&&intval($post['user_id'])!==$userId){ $me=$db->fetchOne("SELECT fullname FROM users WHERE id=?",[$userId]); asyncNotify(intval($post['user_id']),($me?$me['fullname']:'Ai đó').' đã thành công bài viết','Bài viết của bạn được thành công','post','/post-detail.html?id='.$postId); } } catch(Throwable $e){} }
             api_cache_flush("feed_"); success("OK", ["score" => intval($score), "user_vote" => $uv ? "up" : null]);
         }
         if ($action === "comment") { $pid = intval($input["post_id"] ?? 0); $ct = sanitize($input["content"] ?? ""); $par = $input["parent_id"] ?? null; if (empty($ct)) error("Nội dung trống"); $db->insert("comments", ["post_id" => $pid, "user_id" => $userId, "parent_id" => $par, "content" => $ct]); $db->query("UPDATE posts SET comments_count = comments_count + 1 WHERE id = ?", [$pid]); try{require_once __DIR__.'/../includes/push-helper.php';$post=$db->fetchOne("SELECT user_id,content FROM posts WHERE id=?",[$pid]);if($post&&intval($post['user_id'])!==$userId){$me=$db->fetchOne("SELECT fullname FROM users WHERE id=?",[$userId]);$mName=$me?$me['fullname']:'Ai đó';$preview=mb_substr($ct,0,50);notifyUser(intval($post['user_id']),'Bài viết: '.$mName.' đã ghi chú',$preview,'post','/post-detail.html?id='.$pid);}}catch(Throwable $e){} try{awardXP($userId,"comment",5,"Ghi chú bài #".$pid);}catch(Throwable$e){} api_cache_flush("feed_"); success("Đã ghi chú!"); }
