@@ -1,5 +1,4 @@
 <?php
-ini_set('display_errors',1);error_reporting(E_ALL);
 session_start();
 /**
  * ============================================
@@ -22,7 +21,7 @@ require_once __DIR__ . '/../includes/functions.php';
 require_once __DIR__ . '/../includes/api-cache.php';
 require_once __DIR__ . '/../includes/api-error-handler.php';
 require_once __DIR__ . '/../includes/image-optimizer.php';
-// setupApiErrorHandler();
+setupApiErrorHandler();
 require_once __DIR__ . '/auth-check.php';
 require_once __DIR__ . '/../includes/xp-helper.php';
 
