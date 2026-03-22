@@ -73,6 +73,8 @@ if("serviceWorker" in navigator){
 <link rel="preload" href="/js/feed-data.js?v=20260322" as="script">
 <link rel="preload" href="/api/posts.php?limit=20" as="fetch" crossorigin>
 <link rel="stylesheet" href="/css/index-page.css?v=20260323">
+<link rel="stylesheet" href="/css/dark-mode.css">
+<script src="/js/dark-mode.js"></script>
 </head>
 <a href="#feedList" class="skip-nav" style="position:absolute;top:-40px;left:0;background:#7C3AED;color:#fff;padding:8px 16px;z-index:10000;font-size:14px;transition:top .2s" onfocus="this.style.top='0'" onblur="this.style.top='-40px'">Bỏ qua điều hướng</a>
 <body>
@@ -82,7 +84,7 @@ if("serviceWorker" in navigator){
     <i class="fas fa-search"></i>
     <input id="q" type="text" placeholder="Tìm kiếm bài viết, #hashtag..." onkeydown="if(event.key==='Enter')search()" onfocus="if(SS.Search)SS.Search.open()" readonly>
   </div>
-  <div class="nav-actions" id="navArea"><div id="ss-notif-bell" style="display:inline-block"></div></div>
+  <div class="nav-actions" id="navArea"><button onclick="toggleDarkMode()" style="background:none;border:none;font-size:18px;cursor:pointer;padding:4px 8px;color:inherit" aria-label="Dark mode"><i class="fas fa-moon"></i></button><div id="ss-notif-bell" style="display:inline-block"></div></div>
 </nav>
 
 <div id="searchOverlay" style="display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.4);z-index:500" onclick="closeSearch()">

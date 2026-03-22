@@ -1,0 +1,51 @@
+/* ShipperShop Dark Mode */
+.dark {
+    --bg: #121212;
+    --card: #1e1e1e;
+    --border: #333;
+    --text: #e0e0e0;
+    --muted: #999;
+    --primary: #9C5FFF;
+    --primary-dark: #7C3AED;
+    color-scheme: dark;
+}
+.dark body { background: #121212; color: #e0e0e0; }
+.dark .top-header, .dark .tab-bar, .dark .post-card, .dark .sort-bar { background: #1e1e1e; border-color: #333; }
+.dark .post-card { background: #1e1e1e; }
+.dark .pa3-stats span { color: #999; }
+.dark .pa3-btn { color: #bbb; }
+.dark .pa3-btn.pa3-active, .dark .pa3-btn.liked { color: #9C5FFF; background: rgba(156,95,255,.1); }
+.dark .post-actions-3 { border-color: #333; }
+.dark .post-content { color: #ddd; }
+.dark .post-meta .post-dots { color: #999; }
+.dark .post-menu { background: #2a2a2a; border-color: #444; }
+.dark .post-menu div { color: #ddd; }
+.dark .post-menu div:hover { background: #333; }
+.dark .sort-btn { color: #bbb; background: #2a2a2a; }
+.dark .sort-btn.active { color: #9C5FFF; background: rgba(156,95,255,.15); }
+.dark #mobileBottomNav { background: #1e1e1e; border-color: #333; }
+.dark .mnav-item { color: #999; }
+.dark .mnav-item.active { color: #9C5FFF; }
+.dark .mnav-fab { background: #9C5FFF; }
+.dark input, .dark textarea, .dark select { background: #2a2a2a; color: #ddd; border-color: #444; }
+.dark .gc-bubble, .dark .cmt-bubble { background: #2a2a2a; color: #ddd; }
+.dark .gc-cmt-name, .dark .cmt-author { color: #ccc; }
+.dark .gc-cmt-meta a, .dark .cmt-meta a { color: #999; }
+.dark .gc-cmt-meta a.liked, .dark .cmt-meta a.liked { color: #9C5FFF; }
+.dark a { color: #9C5FFF; }
+.dark .skeleton { background: linear-gradient(90deg,#2a2a2a 25%,#333 50%,#2a2a2a 75%); }
+.dark .tab-badge { background: #9C5FFF; }
+/* Sidebar */
+.dark .sidebar, .dark .right-sidebar { background: #1e1e1e; border-color: #333; }
+.dark .sidebar-item { color: #bbb; }
+.dark .sidebar-item.active { color: #9C5FFF; background: rgba(156,95,255,.1); }
+/* Search overlay */
+.dark #searchOverlay { background: #121212; }
+.dark #sInput { background: #2a2a2a; color: #ddd; }
+/* Notification panel */
+.dark #notifPage { background: #121212; }
+/* Lightbox */
+.dark #ssLightbox { background: rgba(0,0,0,.98); }
+/* Group page */
+.dark .gh-header { background: #1e1e1e; }
+.dark .gh-join.joined { background: #2a2a2a; color: #999; }

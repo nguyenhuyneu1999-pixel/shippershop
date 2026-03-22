@@ -158,7 +158,27 @@ window.selType=function(el){
 window.addSPMFiles=function(input){
   if(!input.files)return;
   for(var i=0;i<input.files.length;i++){
-    var f=input.files[i];spmFiles.push(f);var idx=spmFiles.length-1;
+    var f=input.files[i];
+        // Compress image client-side
+        if(f.type.indexOf('image')>-1&&f.size>200000){
+            (function(file,fileIdx){
+                var reader=new FileReader();
+                reader.onload=function(e){
+                    var img=new Image();
+                    img.onload=function(){
+                        var w=img.width,h=img.height,maxW=1200;
+                        if(w>maxW){h=Math.round(h*maxW/w);w=maxW;}
+                        var c=document.createElement('canvas');c.width=w;c.height=h;
+                        c.getContext('2d').drawImage(img,0,0,w,h);
+                        c.toBlob(function(blob){
+                            if(blob&&blob.size<file.size){spmFiles[fileIdx]=new File([blob],file.name,{type:'image/jpeg'});}
+                        },'image/jpeg',0.82);
+                    };
+                    img.src=e.target.result;
+                };
+                reader.readAsDataURL(file);
+            })(f,spmFiles.length-1);
+        }var idx=spmFiles.length-1;
     var el=document.createElement("div");el.className="spm-thumb";
     if(f.type.indexOf("image")>-1){el.innerHTML="<img src='"+URL.createObjectURL(f)+"'><button class='spm-rm' onclick='rmSPMFile("+idx+",this.parentElement)'><i class='fas fa-times'></i></button>";}
     else{el.innerHTML="<video src='"+URL.createObjectURL(f)+"'></video><button class='spm-rm' onclick='rmSPMFile("+idx+",this.parentElement)'><i class='fas fa-times'></i></button>";}
@@ -214,4 +234,5 @@ window.submitSPM=function(){
   .catch(function(){if(typeof toast==="function")toast("L\u1ed7i k\u1ebft n\u1ed1i","error");})
   .finally(function(){btn.disabled=false;btn.textContent="\u0110\u0103ng";});
 };
+
 })();
