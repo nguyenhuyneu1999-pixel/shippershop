@@ -143,1278 +143,1279 @@ t('Template: deposit-approved',file_exists(__DIR__.'/../templates/emails/deposit
 // Test actual API responses (not just file existence)
 
 // Posts API
-$postsResp=json_decode(@file_get_contents('https://shippershop.vn/api/v2/posts.php?limit=1'),true);
+$postsResp=json_decode(http_get('https://shippershop.vn/api/v2/posts.php?limit=1'),true);
 t('Func: posts list',$postsResp&&$postsResp['success']===true);
 
 // Trending API
-$trendResp=json_decode(@file_get_contents('https://shippershop.vn/api/v2/trending.php?action=hot&limit=1'),true);
+$trendResp=json_decode(http_get('https://shippershop.vn/api/v2/trending.php?action=hot&limit=1'),true);
 t('Func: trending hot',$trendResp&&$trendResp['success']===true);
 
 // Hashtags API
-$hashResp=json_decode(@file_get_contents('https://shippershop.vn/api/v2/hashtags.php?action=trending&limit=3'),true);
+$hashResp=json_decode(http_get('https://shippershop.vn/api/v2/hashtags.php?action=trending&limit=3'),true);
 t('Func: hashtags trending',$hashResp&&$hashResp['success']===true);
 
 // Health API
-$healthResp=json_decode(@file_get_contents('https://shippershop.vn/api/v2/health.php'),true);
+$healthResp=json_decode(http_get('https://shippershop.vn/api/v2/health.php'),true);
 t('Func: health check',$healthResp&&isset($healthResp['status']));
 
 // Status API
-$statusResp=json_decode(@file_get_contents('https://shippershop.vn/api/v2/status.php'),true);
+$statusResp=json_decode(http_get('https://shippershop.vn/api/v2/status.php'),true);
 t('Func: status healthy',$statusResp&&$statusResp['status']==='healthy');
 
 // Stats API
-$statsResp=json_decode(@file_get_contents('https://shippershop.vn/api/v2/stats.php'),true);
+$statsResp=json_decode(http_get('https://shippershop.vn/api/v2/stats.php'),true);
 t('Func: public stats',$statsResp&&$statsResp['success']===true);
 
 // OG Tags API
-$ogResp=json_decode(@file_get_contents('https://shippershop.vn/api/v2/og-tags.php?type=post&id=5'),true);
+$ogResp=json_decode(http_get('https://shippershop.vn/api/v2/og-tags.php?type=post&id=5'),true);
 t('Func: OG tags',$ogResp&&$ogResp['success']===true&&!empty($ogResp['data']['title']));
 
 // Moderation reasons
-$modResp=json_decode(@file_get_contents('https://shippershop.vn/api/v2/moderation.php?action=reasons'),true);
+$modResp=json_decode(http_get('https://shippershop.vn/api/v2/moderation.php?action=reasons'),true);
 t('Func: mod reasons',$modResp&&$modResp['success']===true&&count($modResp['data'])>=5);
 
 // Webhook events
-$whResp=json_decode(@file_get_contents('https://shippershop.vn/api/v2/webhooks.php?action=events'),true);
+$whResp=json_decode(http_get('https://shippershop.vn/api/v2/webhooks.php?action=events'),true);
 t('Func: webhook events',$whResp&&is_array($whResp['data']??null)&&count($whResp['data'])>=5);
 
 // Link preview
-$lpResp=json_decode(@file_get_contents('https://shippershop.vn/api/v2/link-preview.php?url=https://github.com'),true);
+$lpResp=json_decode(http_get('https://shippershop.vn/api/v2/link-preview.php?url=https://github.com'),true);
 t('Func: link preview',$lpResp&&$lpResp['success']===true&&!empty($lpResp['data']['title']));
 
 
 // Announcements (public)
-$annResp=json_decode(@file_get_contents('https://shippershop.vn/api/v2/announcements.php'),true);
+$annResp=json_decode(http_get('https://shippershop.vn/api/v2/announcements.php'),true);
 t('Func: announcements',$annResp&&$annResp['success']===true);
 
 // Reputation (public)
-$repResp=json_decode(@file_get_contents('https://shippershop.vn/api/v2/reputation.php?user_id=2'),true);
+$repResp=json_decode(http_get('https://shippershop.vn/api/v2/reputation.php?user_id=2'),true);
 t('Func: reputation',$repResp&&$repResp['success']===true&&isset($repResp['data']['score']));
 
 // Templates (public)
-$tplResp=json_decode(@file_get_contents('https://shippershop.vn/api/v2/templates.php'),true);
+$tplResp=json_decode(http_get('https://shippershop.vn/api/v2/templates.php'),true);
 t('Func: templates',$tplResp&&$tplResp['success']===true&&count($tplResp['data'])>=5);
 
 // Badges (public)
-$bdgResp=json_decode(@file_get_contents('https://shippershop.vn/api/v2/badges.php?action=all'),true);
+$bdgResp=json_decode(http_get('https://shippershop.vn/api/v2/badges.php?action=all'),true);
 t('Func: badges list',$bdgResp&&$bdgResp['success']===true&&count($bdgResp['data'])>=8);
 
 // Polls (get for post without poll)
-$pollResp=json_decode(@file_get_contents('https://shippershop.vn/api/v2/polls.php?post_id=5'),true);
+$pollResp=json_decode(http_get('https://shippershop.vn/api/v2/polls.php?post_id=5'),true);
 t('Func: polls get',$pollResp&&$pollResp['success']===true);
 
 // Daily Digest
-$digestResp=json_decode(@file_get_contents('https://shippershop.vn/api/v2/daily-digest.php'),true);
+$digestResp=json_decode(http_get('https://shippershop.vn/api/v2/daily-digest.php'),true);
 t('Func: daily digest',$digestResp&&$digestResp['success']===true&&isset($digestResp['data']['greeting']));
 t('Func: digest trending',isset($digestResp['data']['trending'])&&is_array($digestResp['data']['trending']));
 t('Func: digest today stats',isset($digestResp['data']['today'])&&isset($digestResp['data']['today']['new_posts']));
 
 // Delivery Stats (platform)
-$delResp=json_decode(@file_get_contents('https://shippershop.vn/api/v2/delivery-stats.php?action=platform'),true);
+$delResp=json_decode(http_get('https://shippershop.vn/api/v2/delivery-stats.php?action=platform'),true);
 t('Func: delivery platform',$delResp&&$delResp['success']===true&&isset($delResp['data']['total_deliveries']));
 t('Func: delivery companies',isset($delResp['data']['top_companies'])&&is_array($delResp['data']['top_companies']));
 
 // Checkin (leaderboard - no auth needed)
-$ciResp=json_decode(@file_get_contents('https://shippershop.vn/api/v2/checkin.php?action=leaderboard'),true);
+$ciResp=json_decode(http_get('https://shippershop.vn/api/v2/checkin.php?action=leaderboard'),true);
 t('Func: checkin leaderboard',$ciResp&&$ciResp['success']===true);
 
 // Profile Themes (presets)
-$ptResp=json_decode(@file_get_contents('https://shippershop.vn/api/v2/profile-themes.php?action=presets'),true);
+$ptResp=json_decode(http_get('https://shippershop.vn/api/v2/profile-themes.php?action=presets'),true);
 t('Func: profile themes',$ptResp&&$ptResp['success']===true&&count($ptResp['data']['presets'])>=8);
 
 // Health Alerts
-$haResp=json_decode(@file_get_contents('https://shippershop.vn/api/v2/health-alerts.php'),true);
+$haResp=json_decode(http_get('https://shippershop.vn/api/v2/health-alerts.php'),true);
 t('Func: health alerts',$haResp&&$haResp['success']===true&&isset($haResp['data']['status']));
 t('Func: health status ok',$haResp['data']['status']==='healthy'||$haResp['data']['status']==='warning');
 
 // Site Config
-$scResp=json_decode(@file_get_contents('https://shippershop.vn/api/v2/site-config.php'),true);
+$scResp=json_decode(http_get('https://shippershop.vn/api/v2/site-config.php'),true);
 t('Func: site config',$scResp&&$scResp['success']===true&&isset($scResp['data']['site']));
 t('Func: site features',count($scResp['data']['features']??[])>=10);
 t('Func: shipping companies',count($scResp['data']['shipping_companies']??[])>=8);
 
 // Suggest (search autocomplete)
-$sugResp=json_decode(@file_get_contents('https://shippershop.vn/api/v2/suggest.php?q=admin'),true);
+$sugResp=json_decode(http_get('https://shippershop.vn/api/v2/suggest.php?q=admin'),true);
 t('Func: suggest search',$sugResp&&$sugResp['success']===true);
 
 // Sitemap
-$smResp=json_decode(@file_get_contents('https://shippershop.vn/api/v2/sitemap-gen.php?format=json'),true);
+$smResp=json_decode(http_get('https://shippershop.vn/api/v2/sitemap-gen.php?format=json'),true);
 t('Func: sitemap gen',$smResp&&$smResp['success']===true&&$smResp['data']['count']>=100);
 
 // Timeline
-$tlResp=json_decode(@file_get_contents('https://shippershop.vn/api/v2/timeline.php?user_id=2&limit=5'),true);
+$tlResp=json_decode(http_get('https://shippershop.vn/api/v2/timeline.php?user_id=2&limit=5'),true);
 t('Func: timeline',$tlResp&&$tlResp['success']===true&&isset($tlResp['data']['events']));
 
 // Referral leaderboard
-$refLbResp=json_decode(@file_get_contents('https://shippershop.vn/api/v2/referral-dashboard.php?action=leaderboard'),true);
+$refLbResp=json_decode(http_get('https://shippershop.vn/api/v2/referral-dashboard.php?action=leaderboard'),true);
 t('Func: referral leaderboard',$refLbResp&&$refLbResp['success']===true);
 
 // Engagement score
-$engResp=json_decode(@file_get_contents('https://shippershop.vn/api/v2/engagement-score.php?user_id=2&days=30'),true);
+$engResp=json_decode(http_get('https://shippershop.vn/api/v2/engagement-score.php?user_id=2&days=30'),true);
 t('Func: engagement score',$engResp&&$engResp['success']===true&&isset($engResp['data']['score']));
 t('Func: engagement rank',isset($engResp['data']['rank'])&&strlen($engResp['data']['rank'])>0);
 t('Func: engagement metrics',isset($engResp['data']['metrics'])&&isset($engResp['data']['platform_avg']));
 
 // Delivery stats user
-$delUserResp=json_decode(@file_get_contents('https://shippershop.vn/api/v2/delivery-stats.php?user_id=2'),true);
+$delUserResp=json_decode(http_get('https://shippershop.vn/api/v2/delivery-stats.php?user_id=2'),true);
 t('Func: delivery user stats',$delUserResp&&$delUserResp['success']===true&&isset($delUserResp['data']['total_deliveries']));
 
 // Achievements
-$achResp=json_decode(@file_get_contents('https://shippershop.vn/api/v2/achievements.php?user_id=2'),true);
+$achResp=json_decode(http_get('https://shippershop.vn/api/v2/achievements.php?user_id=2'),true);
 t('Func: achievements data',$achResp&&$achResp['success']===true&&isset($achResp['data']['total_earned']));
 t('Func: achievements xp',isset($achResp['data']['total_xp'])&&$achResp['data']['total_xp']>=0);
 
 // Badge showcase
-$badgeResp2=json_decode(@file_get_contents('https://shippershop.vn/api/v2/badge-showcase.php?user_id=2'),true);
+$badgeResp2=json_decode(http_get('https://shippershop.vn/api/v2/badge-showcase.php?user_id=2'),true);
 t('Func: badge earned count',$badgeResp2&&$badgeResp2['success']===true&&$badgeResp2['data']['total_earned']>=1);
 
 // Schedule calendar (requires auth, just check endpoint exists)
 // Schedule calendar requires auth - check endpoint responds
 $calCtx=stream_context_create(['http'=>['ignore_errors'=>true]]);
-$calRaw=@file_get_contents('https://shippershop.vn/api/v2/schedule-calendar.php',false,$calCtx);
+$calRaw=http_get_ctx('https://shippershop.vn/api/v2/schedule-calendar.php',false,$calCtx);
 $calResp=json_decode($calRaw,true);
 t('Func: schedule calendar',$calResp!==null);
 
 // Checkin nearby
-$ciNearResp=json_decode(@file_get_contents('https://shippershop.vn/api/v2/checkin.php?action=nearby'),true);
+$ciNearResp=json_decode(http_get('https://shippershop.vn/api/v2/checkin.php?action=nearby'),true);
 t('Func: checkin nearby',$ciNearResp&&$ciNearResp['success']===true);
 
 
 // Trending topics
-$ttResp=json_decode(@file_get_contents('https://shippershop.vn/api/v2/trending-topics.php?hours=24'),true);
+$ttResp=json_decode(http_get('https://shippershop.vn/api/v2/trending-topics.php?hours=24'),true);
 t('Func: trending topics',$ttResp&&$ttResp['success']===true&&isset($ttResp['data']['hot_posts']));
 t('Func: trending provinces',isset($ttResp['data']['active_provinces']));
 t('Func: trending companies',isset($ttResp['data']['active_companies']));
 
 // Ban appeals (list — requires admin, check endpoint exists)
 $baCtx=stream_context_create(['http'=>['ignore_errors'=>true]]);
-$baResp=json_decode(@file_get_contents('https://shippershop.vn/api/v2/ban-appeals.php',false,$baCtx),true);
+$baResp=json_decode(http_get_ctx('https://shippershop.vn/api/v2/ban-appeals.php',$baCtx),true);
 t('Func: ban appeals endpoint',$baResp!==null);
 
 // Msg reactions (GET requires auth, check endpoint)
 $mrCtx=stream_context_create(['http'=>['ignore_errors'=>true]]);
-$mrResp=json_decode(@file_get_contents('https://shippershop.vn/api/v2/msg-reactions.php?message_id=1',false,$mrCtx),true);
+$mrResp=json_decode(http_get_ctx('https://shippershop.vn/api/v2/msg-reactions.php?message_id=1',$mrCtx),true);
 t('Func: msg reactions endpoint',$mrResp!==null);
 
 
 // Follow requests (requires auth, check endpoint)
 $frCtx=stream_context_create(['http'=>['ignore_errors'=>true]]);
-$frResp=json_decode(@file_get_contents('https://shippershop.vn/api/v2/follow-requests.php',false,$frCtx),true);
+$frResp=json_decode(http_get_ctx('https://shippershop.vn/api/v2/follow-requests.php',$frCtx),true);
 t('Func: follow requests endpoint',$frResp!==null);
 
 // Drafts manager (requires auth)
 $dmCtx=stream_context_create(['http'=>['ignore_errors'=>true]]);
-$dmResp=json_decode(@file_get_contents('https://shippershop.vn/api/v2/drafts-manager.php',false,$dmCtx),true);
+$dmResp=json_decode(http_get_ctx('https://shippershop.vn/api/v2/drafts-manager.php',$dmCtx),true);
 t('Func: drafts manager endpoint',$dmResp!==null);
 
 // Admin timeline (requires admin)
 $atCtx=stream_context_create(['http'=>['ignore_errors'=>true]]);
-$atResp=json_decode(@file_get_contents('https://shippershop.vn/api/v2/admin-timeline.php',false,$atCtx),true);
+$atResp=json_decode(http_get_ctx('https://shippershop.vn/api/v2/admin-timeline.php',$atCtx),true);
 t('Func: admin timeline endpoint',$atResp!==null);
 
 // Conv notes (requires auth)
 $cnCtx=stream_context_create(['http'=>['ignore_errors'=>true]]);
-$cnResp=json_decode(@file_get_contents('https://shippershop.vn/api/v2/conv-notes.php?conversation_id=1',false,$cnCtx),true);
+$cnResp=json_decode(http_get_ctx('https://shippershop.vn/api/v2/conv-notes.php?conversation_id=1',$cnCtx),true);
 t('Func: conv notes endpoint',$cnResp!==null);
 
 // Weekly report (requires auth)
 $wrCtx=stream_context_create(['http'=>['ignore_errors'=>true]]);
-$wrResp=json_decode(@file_get_contents('https://shippershop.vn/api/v2/weekly-report.php',false,$wrCtx),true);
+$wrResp=json_decode(http_get_ctx('https://shippershop.vn/api/v2/weekly-report.php',$wrCtx),true);
 t('Func: weekly report endpoint',$wrResp!==null);
 
 
 // FAQ
-$faqResp=json_decode(@file_get_contents('https://shippershop.vn/api/v2/faq.php'),true);
+$faqResp=json_decode(http_get('https://shippershop.vn/api/v2/faq.php'),true);
 t('Func: faq list',$faqResp&&$faqResp['success']===true&&count($faqResp['data']['faqs'])>=10);
 t('Func: faq categories',count($faqResp['data']['categories'])>=5);
 
 // FAQ search
-$faqSResp=json_decode(@file_get_contents('https://shippershop.vn/api/v2/faq.php?q=dang+ky'),true);
+$faqSResp=json_decode(http_get('https://shippershop.vn/api/v2/faq.php?q=dang+ky'),true);
 t('Func: faq search',$faqSResp&&$faqSResp['success']===true);
 
 // Post expiry (GET without post)
-$peResp=json_decode(@file_get_contents('https://shippershop.vn/api/v2/post-expiry.php?post_id=5'),true);
+$peResp=json_decode(http_get('https://shippershop.vn/api/v2/post-expiry.php?post_id=5'),true);
 t('Func: post expiry check',$peResp&&$peResp['success']===true);
 
 // Feedback (POST test via stream)
 $fbCtx=stream_context_create(['http'=>['method'=>'POST','header'=>'Content-Type: application/json','content'=>json_encode(['type'=>'test','message'=>'Test feedback from test suite']),'ignore_errors'=>true]]);
-$fbResp=json_decode(@file_get_contents('https://shippershop.vn/api/v2/feedback.php',false,$fbCtx),true);
+$fbResp=json_decode(http_get_ctx('https://shippershop.vn/api/v2/feedback.php',$fbCtx),true);
 t('Func: feedback submit',$fbResp&&$fbResp['success']===true);
 
 
 // Maintenance mode (public check)
-$mmResp=json_decode(@file_get_contents('https://shippershop.vn/api/v2/maintenance.php'),true);
+$mmResp=json_decode(http_get('https://shippershop.vn/api/v2/maintenance.php'),true);
 t('Func: maintenance check',$mmResp&&$mmResp['success']===true&&isset($mmResp['data']['active']));
 
 // Read later (requires auth)
 $rlCtx=stream_context_create(['http'=>['ignore_errors'=>true]]);
-$rlResp=json_decode(@file_get_contents('https://shippershop.vn/api/v2/read-later.php',false,$rlCtx),true);
+$rlResp=json_decode(http_get_ctx('https://shippershop.vn/api/v2/read-later.php',$rlCtx),true);
 t('Func: read later endpoint',$rlResp!==null);
 
 // Starred msgs (requires auth)
 $smCtx=stream_context_create(['http'=>['ignore_errors'=>true]]);
-$smResp=json_decode(@file_get_contents('https://shippershop.vn/api/v2/starred-msgs.php',false,$smCtx),true);
+$smResp=json_decode(http_get_ctx('https://shippershop.vn/api/v2/starred-msgs.php',$smCtx),true);
 t('Func: starred msgs endpoint',$smResp!==null);
 
 // Admin IP (requires admin)
 $ipCtx=stream_context_create(['http'=>['ignore_errors'=>true]]);
-$ipResp=json_decode(@file_get_contents('https://shippershop.vn/api/v2/admin-ip.php',false,$ipCtx),true);
+$ipResp=json_decode(http_get_ctx('https://shippershop.vn/api/v2/admin-ip.php',$ipCtx),true);
 t('Func: admin ip endpoint',$ipResp!==null);
 
 
 // Short link (resolve)
-$slResp=json_decode(@file_get_contents('https://shippershop.vn/api/v2/short-link.php?code=test'),true);
+$slResp=json_decode(http_get('https://shippershop.vn/api/v2/short-link.php?code=test'),true);
 t('Func: short link resolve',$slResp&&$slResp['success']===true);
 
 // Online privacy (requires auth)
 $opCtx=stream_context_create(['http'=>['ignore_errors'=>true]]);
-$opResp=json_decode(@file_get_contents('https://shippershop.vn/api/v2/online-privacy.php',false,$opCtx),true);
+$opResp=json_decode(http_get_ctx('https://shippershop.vn/api/v2/online-privacy.php',$opCtx),true);
 t('Func: online privacy endpoint',$opResp!==null);
 
 // Search history (requires auth)
 $shCtx=stream_context_create(['http'=>['ignore_errors'=>true]]);
-$shResp=json_decode(@file_get_contents('https://shippershop.vn/api/v2/search-history.php',false,$shCtx),true);
+$shResp=json_decode(http_get_ctx('https://shippershop.vn/api/v2/search-history.php',$shCtx),true);
 t('Func: search history endpoint',$shResp!==null);
 
 // Admin backup (requires admin)
 $abCtx=stream_context_create(['http'=>['ignore_errors'=>true]]);
-$abResp=json_decode(@file_get_contents('https://shippershop.vn/api/v2/admin-backup.php',false,$abCtx),true);
+$abResp=json_decode(http_get_ctx('https://shippershop.vn/api/v2/admin-backup.php',$abCtx),true);
 t('Func: admin backup endpoint',$abResp!==null);
 
 
 // Activity heatmap (public)
-$hmResp=json_decode(@file_get_contents('https://shippershop.vn/api/v2/activity-heatmap.php?user_id=2&days=30'),true);
+$hmResp=json_decode(http_get('https://shippershop.vn/api/v2/activity-heatmap.php?user_id=2&days=30'),true);
 t('Func: activity heatmap',$hmResp&&$hmResp['success']===true&&isset($hmResp['data']['days']));
 t('Func: heatmap stats',isset($hmResp['data']['total_contributions'])&&isset($hmResp['data']['active_days']));
 
 // Post share stats (public GET)
-$pssResp=json_decode(@file_get_contents('https://shippershop.vn/api/v2/post-share-stats.php?post_id=5'),true);
+$pssResp=json_decode(http_get('https://shippershop.vn/api/v2/post-share-stats.php?post_id=5'),true);
 t('Func: post share stats',$pssResp&&$pssResp['success']===true&&isset($pssResp['data']['total']));
 
 // User notes (requires auth)
 $unCtx=stream_context_create(['http'=>['ignore_errors'=>true]]);
-$unResp=json_decode(@file_get_contents('https://shippershop.vn/api/v2/user-notes.php',false,$unCtx),true);
+$unResp=json_decode(http_get_ctx('https://shippershop.vn/api/v2/user-notes.php',$unCtx),true);
 t('Func: user notes endpoint',$unResp!==null);
 
 // User theme (requires auth)
 $utCtx=stream_context_create(['http'=>['ignore_errors'=>true]]);
-$utResp=json_decode(@file_get_contents('https://shippershop.vn/api/v2/user-theme.php',false,$utCtx),true);
+$utResp=json_decode(http_get_ctx('https://shippershop.vn/api/v2/user-theme.php',$utCtx),true);
 t('Func: user theme endpoint',$utResp!==null);
 
 // Content calendar (requires auth)
 $ccCtx=stream_context_create(['http'=>['ignore_errors'=>true]]);
-$ccResp=json_decode(@file_get_contents('https://shippershop.vn/api/v2/content-calendar.php',false,$ccCtx),true);
+$ccResp=json_decode(http_get_ctx('https://shippershop.vn/api/v2/content-calendar.php',$ccCtx),true);
 t('Func: content calendar endpoint',$ccResp!==null);
 
 // Delivery stats user (public)
-$ds2Resp=json_decode(@file_get_contents('https://shippershop.vn/api/v2/delivery-stats.php?user_id=3&action=summary'),true);
+$ds2Resp=json_decode(http_get('https://shippershop.vn/api/v2/delivery-stats.php?user_id=3&action=summary'),true);
 t('Func: delivery stats user 3',$ds2Resp&&$ds2Resp['success']===true);
 
 // Trending 72h
-$tt72Resp=json_decode(@file_get_contents('https://shippershop.vn/api/v2/trending-topics.php?hours=72'),true);
+$tt72Resp=json_decode(http_get('https://shippershop.vn/api/v2/trending-topics.php?hours=72'),true);
 t('Func: trending 72h',$tt72Resp&&$tt72Resp['success']===true&&isset($tt72Resp['data']['rising_users']));
 
 // FAQ category filter
-$faqWResp=json_decode(@file_get_contents('https://shippershop.vn/api/v2/faq.php?category=wallet'),true);
+$faqWResp=json_decode(http_get('https://shippershop.vn/api/v2/faq.php?category=wallet'),true);
 t('Func: faq wallet category',$faqWResp&&$faqWResp['success']===true&&count($faqWResp['data']['faqs'])>=2);
 
 // Heatmap with 365 days
-$hm365Resp=json_decode(@file_get_contents('https://shippershop.vn/api/v2/activity-heatmap.php?user_id=2&days=365'),true);
+$hm365Resp=json_decode(http_get('https://shippershop.vn/api/v2/activity-heatmap.php?user_id=2&days=365'),true);
 t('Func: heatmap 365d',$hm365Resp&&$hm365Resp['success']===true&&count($hm365Resp['data']['days'])>=300);
 
 // Engagement score user 3
-$eng3Resp=json_decode(@file_get_contents('https://shippershop.vn/api/v2/engagement-score.php?user_id=3'),true);
+$eng3Resp=json_decode(http_get('https://shippershop.vn/api/v2/engagement-score.php?user_id=3'),true);
 t('Func: engagement user 3',$eng3Resp&&$eng3Resp['success']===true);
 
 // Timeline user 3
-$tl3Resp=json_decode(@file_get_contents('https://shippershop.vn/api/v2/timeline.php?user_id=3&limit=3'),true);
+$tl3Resp=json_decode(http_get('https://shippershop.vn/api/v2/timeline.php?user_id=3&limit=3'),true);
 t('Func: timeline user 3',$tl3Resp&&$tl3Resp['success']===true);
 
 // Suggest empty
-$sugEResp=json_decode(@file_get_contents('https://shippershop.vn/api/v2/suggest.php?q='),true);
+$sugEResp=json_decode(http_get('https://shippershop.vn/api/v2/suggest.php?q='),true);
 t('Func: suggest empty',$sugEResp&&$sugEResp['success']===true&&count($sugEResp['data'])===0);
 
 // Short link create via POST
 $slCtx=stream_context_create(['http'=>['method'=>'POST','header'=>'Content-Type: application/json','content'=>json_encode(['type'=>'post','id'=>5])]]);
-$slCreateResp=json_decode(@file_get_contents('https://shippershop.vn/api/v2/short-link.php',false,$slCtx),true);
+$slCreateResp=json_decode(http_get_ctx('https://shippershop.vn/api/v2/short-link.php',$slCtx),true);
 t('Func: short link create',$slCreateResp&&$slCreateResp['success']===true&&!empty($slCreateResp['data']['short_url']));
 
 // Feedback categories count
-$faqCatResp=json_decode(@file_get_contents('https://shippershop.vn/api/v2/faq.php?action=categories'),true);
+$faqCatResp=json_decode(http_get('https://shippershop.vn/api/v2/faq.php?action=categories'),true);
 t('Func: faq categories only',$faqCatResp&&$faqCatResp['success']===true&&count($faqCatResp['data'])>=5);
 
 // Platform delivery
-$pdResp=json_decode(@file_get_contents('https://shippershop.vn/api/v2/delivery-stats.php?action=platform'),true);
+$pdResp=json_decode(http_get('https://shippershop.vn/api/v2/delivery-stats.php?action=platform'),true);
 t('Func: platform top provinces',isset($pdResp['data']['top_provinces'])&&count($pdResp['data']['top_provinces'])>=5);
 
 
 // User compare (public)
-$ucResp=json_decode(@file_get_contents('https://shippershop.vn/api/v2/user-compare.php?user1=2&user2=3'),true);
+$ucResp=json_decode(http_get('https://shippershop.vn/api/v2/user-compare.php?user1=2&user2=3'),true);
 t('Func: user compare',$ucResp&&$ucResp['success']===true&&isset($ucResp['data']['comparison']));
 t('Func: compare wins',isset($ucResp['data']['wins'])&&isset($ucResp['data']['wins']['user1']));
 t('Func: compare user1 stats',isset($ucResp['data']['user1']['stats']['posts']));
 
 // Platform stats (public)
-$psResp2=json_decode(@file_get_contents('https://shippershop.vn/api/v2/platform-stats.php'),true);
+$psResp2=json_decode(http_get('https://shippershop.vn/api/v2/platform-stats.php'),true);
 t('Func: platform stats',$psResp2&&$psResp2['success']===true&&isset($psResp2['data']['users']));
 t('Func: platform users total',$psResp2['data']['users']['total']>=100);
 t('Func: platform deliveries',isset($psResp2['data']['deliveries']['total']));
 t('Func: platform provinces',$psResp2['data']['provinces_covered']>=5);
 
 // Content summary (public)
-$csResp=json_decode(@file_get_contents('https://shippershop.vn/api/v2/content-summary.php?hours=168'),true);
+$csResp=json_decode(http_get('https://shippershop.vn/api/v2/content-summary.php?hours=168'),true);
 t('Func: content summary',$csResp&&$csResp['success']===true);
 t('Func: content engagement',isset($csResp['data']['engagement_rate']));
 t('Func: content peak hours',isset($csResp['data']['peak_hours']));
 
 // Shipper map (public)
-$smResp2=json_decode(@file_get_contents('https://shippershop.vn/api/v2/shipper-map.php?action=pins'),true);
+$smResp2=json_decode(http_get('https://shippershop.vn/api/v2/shipper-map.php?action=pins'),true);
 t('Func: shipper map pins',$smResp2&&$smResp2['success']===true);
 
 // Shipper map province heatmap
-$smHeatResp=json_decode(@file_get_contents('https://shippershop.vn/api/v2/shipper-map.php?action=province_heat'),true);
+$smHeatResp=json_decode(http_get('https://shippershop.vn/api/v2/shipper-map.php?action=province_heat'),true);
 t('Func: shipper province heat',$smHeatResp&&$smHeatResp['success']===true&&is_array($smHeatResp['data']));
 
 // Post stats detail (public partial)
-$psdResp=json_decode(@file_get_contents('https://shippershop.vn/api/v2/post-stats-detail.php?post_id=125'),true);
+$psdResp=json_decode(http_get('https://shippershop.vn/api/v2/post-stats-detail.php?post_id=125'),true);
 t('Func: post stats detail',$psdResp&&$psdResp['success']===true&&isset($psdResp['data']['likes']));
 t('Func: post stats views',isset($psdResp['data']['views']));
 
 // User notes (auth required)
 $notesCtx=stream_context_create(['http'=>['ignore_errors'=>true]]);
-$notesResp=json_decode(@file_get_contents('https://shippershop.vn/api/v2/user-notes.php',false,$notesCtx),true);
+$notesResp=json_decode(http_get_ctx('https://shippershop.vn/api/v2/user-notes.php',$notesCtx),true);
 t('Func: user notes endpoint 2',$notesResp!==null);
 
 // Content calendar (auth required)
 $cc2Ctx=stream_context_create(['http'=>['ignore_errors'=>true]]);
-$cc2Resp=json_decode(@file_get_contents('https://shippershop.vn/api/v2/content-calendar.php?month=2026-03',false,$cc2Ctx),true);
+$cc2Resp=json_decode(http_get_ctx('https://shippershop.vn/api/v2/content-calendar.php?month=2026-03',$cc2Ctx),true);
 t('Func: content calendar month',$cc2Resp!==null);
 
 // Checkin nearby with province filter
-$ciProvResp=json_decode(@file_get_contents('https://shippershop.vn/api/v2/checkin.php?action=nearby'),true);
+$ciProvResp=json_decode(http_get('https://shippershop.vn/api/v2/checkin.php?action=nearby'),true);
 t('Func: checkin province filter',$ciProvResp&&$ciProvResp['success']===true);
 
 // Post share stats default
-$pss0Resp=json_decode(@file_get_contents('https://shippershop.vn/api/v2/post-share-stats.php?post_id=999'),true);
+$pss0Resp=json_decode(http_get('https://shippershop.vn/api/v2/post-share-stats.php?post_id=999'),true);
 t('Func: share stats default',$pss0Resp&&$pss0Resp['success']===true&&$pss0Resp['data']['total']===0);
 
 
 // Badges wall (public)
-$bwResp=json_decode(@file_get_contents('https://shippershop.vn/api/v2/badges-wall.php?action=user&user_id=2'),true);
+$bwResp=json_decode(http_get('https://shippershop.vn/api/v2/badges-wall.php?action=user&user_id=2'),true);
 t('Func: badges wall',$bwResp&&$bwResp['success']===true&&isset($bwResp['data']['badges']));
 t('Func: badges count',$bwResp['data']['total']>=10);
 t('Func: badges progress',isset($bwResp['data']['earned_count']));
 
 // Optimal posting times (public)
-$optResp=json_decode(@file_get_contents('https://shippershop.vn/api/v2/post-schedule-v2.php?action=optimal_times'),true);
+$optResp=json_decode(http_get('https://shippershop.vn/api/v2/post-schedule-v2.php?action=optimal_times'),true);
 t('Func: optimal times',$optResp&&$optResp['success']===true&&isset($optResp['data']['hourly']));
 t('Func: optimal best times',isset($optResp['data']['best_times']));
 
 // Conv tags (requires auth)
 $ctCtx=stream_context_create(['http'=>['ignore_errors'=>true]]);
-$ctResp=json_decode(@file_get_contents('https://shippershop.vn/api/v2/conv-tags.php',false,$ctCtx),true);
+$ctResp=json_decode(http_get_ctx('https://shippershop.vn/api/v2/conv-tags.php',$ctCtx),true);
 t('Func: conv tags endpoint',$ctResp!==null);
 
 // Admin revenue (requires admin)
 $arCtx=stream_context_create(['http'=>['ignore_errors'=>true]]);
-$arResp=json_decode(@file_get_contents('https://shippershop.vn/api/v2/admin-revenue.php',false,$arCtx),true);
+$arResp=json_decode(http_get_ctx('https://shippershop.vn/api/v2/admin-revenue.php',$arCtx),true);
 t('Func: admin revenue endpoint',$arResp!==null);
 
 
 // Milestones (public)
-$msResp=json_decode(@file_get_contents('https://shippershop.vn/api/v2/milestones.php?user_id=2'),true);
+$msResp=json_decode(http_get('https://shippershop.vn/api/v2/milestones.php?user_id=2'),true);
 t('Func: milestones',$msResp&&$msResp['success']===true&&isset($msResp['data']['earned']));
 t('Func: milestones progress',count($msResp['data']['progress'])>=10);
 t('Func: milestones earned count',$msResp['data']['total_earned']>=1);
 
 // Schedule templates (public GET)
-$stResp=json_decode(@file_get_contents('https://shippershop.vn/api/v2/schedule-templates.php'),true);
+$stResp=json_decode(http_get('https://shippershop.vn/api/v2/schedule-templates.php'),true);
 t('Func: schedule templates',$stResp&&$stResp['success']===true&&count($stResp['data']['templates'])>=8);
 
 // Conv reminders (requires auth)
 $crCtx=stream_context_create(['http'=>['ignore_errors'=>true]]);
-$crResp=json_decode(@file_get_contents('https://shippershop.vn/api/v2/conv-reminders.php',false,$crCtx),true);
+$crResp=json_decode(http_get_ctx('https://shippershop.vn/api/v2/conv-reminders.php',$crCtx),true);
 t('Func: conv reminders endpoint',$crResp!==null);
 
 // Admin revenue (requires admin)
 $arCtx=stream_context_create(['http'=>['ignore_errors'=>true]]);
-$arResp=json_decode(@file_get_contents('https://shippershop.vn/api/v2/admin-revenue.php',false,$arCtx),true);
+$arResp=json_decode(http_get_ctx('https://shippershop.vn/api/v2/admin-revenue.php',$arCtx),true);
 t('Func: admin revenue endpoint',$arResp!==null);
 
 
 // Badges wall catalog
-$bwResp=json_decode(@file_get_contents('https://shippershop.vn/api/v2/badges-wall.php?action=catalog'),true);
+$bwResp=json_decode(http_get('https://shippershop.vn/api/v2/badges-wall.php?action=catalog'),true);
 t('Func: badges catalog',$bwResp&&$bwResp['success']===true&&count($bwResp['data']['badges'])>=10);
 
 // Badges wall user
-$bwuResp=json_decode(@file_get_contents('https://shippershop.vn/api/v2/badges-wall.php?action=user&user_id=2'),true);
+$bwuResp=json_decode(http_get('https://shippershop.vn/api/v2/badges-wall.php?action=user&user_id=2'),true);
 t('Func: badges user',$bwuResp&&$bwuResp['success']===true&&isset($bwuResp['data']['earned_count']));
 
 // Badges leaderboard
-$bwlResp=json_decode(@file_get_contents('https://shippershop.vn/api/v2/badges-wall.php?action=leaderboard'),true);
+$bwlResp=json_decode(http_get('https://shippershop.vn/api/v2/badges-wall.php?action=leaderboard'),true);
 t('Func: badges leaderboard',$bwlResp&&$bwlResp['success']===true);
 
 // Post sentiment
-$psaResp=json_decode(@file_get_contents('https://shippershop.vn/api/v2/post-sentiment.php?post_id=125'),true);
+$psaResp=json_decode(http_get('https://shippershop.vn/api/v2/post-sentiment.php?post_id=125'),true);
 t('Func: post sentiment',$psaResp&&$psaResp['success']===true&&isset($psaResp['data']['label']));
 
 // Sentiment overview
-$psoResp=json_decode(@file_get_contents('https://shippershop.vn/api/v2/post-sentiment.php?action=overview'),true);
+$psoResp=json_decode(http_get('https://shippershop.vn/api/v2/post-sentiment.php?action=overview'),true);
 t('Func: sentiment overview',$psoResp&&$psoResp['success']===true&&isset($psoResp['data']['positive_pct']));
 
 // User segments (admin)
 $usCtx=stream_context_create(['http'=>['ignore_errors'=>true]]);
-$usResp=json_decode(@file_get_contents('https://shippershop.vn/api/v2/user-segments.php',false,$usCtx),true);
+$usResp=json_decode(http_get_ctx('https://shippershop.vn/api/v2/user-segments.php',$usCtx),true);
 t('Func: user segments endpoint',$usResp!==null);
 
 // Conv export (auth)
 $ceCtx=stream_context_create(['http'=>['ignore_errors'=>true]]);
-$ceResp=json_decode(@file_get_contents('https://shippershop.vn/api/v2/conv-export.php?conversation_id=1',false,$ceCtx),true);
+$ceResp=json_decode(http_get_ctx('https://shippershop.vn/api/v2/conv-export.php?conversation_id=1',$ceCtx),true);
 t('Func: conv export endpoint',$ceResp!==null);
 
 
 // Auto-tag
-$atResp2=json_decode(@file_get_contents('https://shippershop.vn/api/v2/auto-tag.php?text=ghtk+giao+hang+nhanh+shipper'),true);
+$atResp2=json_decode(http_get('https://shippershop.vn/api/v2/auto-tag.php?text=ghtk+giao+hang+nhanh+shipper'),true);
 t('Func: auto tag',$atResp2&&$atResp2['success']===true&&count($atResp2['data']['suggested_tags'])>=1);
 
 // Achievements wall leaderboard
-$awlResp=json_decode(@file_get_contents('https://shippershop.vn/api/v2/achievements-wall.php?action=leaderboard'),true);
+$awlResp=json_decode(http_get('https://shippershop.vn/api/v2/achievements-wall.php?action=leaderboard'),true);
 t('Func: achievements leaderboard',$awlResp&&$awlResp['success']===true);
 
 // Achievements wall user
-$awuResp=json_decode(@file_get_contents('https://shippershop.vn/api/v2/achievements-wall.php?action=user&user_id=2'),true);
+$awuResp=json_decode(http_get('https://shippershop.vn/api/v2/achievements-wall.php?action=user&user_id=2'),true);
 t('Func: achievements user',$awuResp&&$awuResp['success']===true&&isset($awuResp['data']['level']));
 t('Func: achievements xp detail',isset($awuResp['data']['total_xp'])&&$awuResp['data']['level']>=1);
 
 // Achievements streaks
-$awsResp=json_decode(@file_get_contents('https://shippershop.vn/api/v2/achievements-wall.php?action=streaks'),true);
+$awsResp=json_decode(http_get('https://shippershop.vn/api/v2/achievements-wall.php?action=streaks'),true);
 t('Func: achievements streaks',$awsResp&&$awsResp['success']===true);
 
 // Admin content schedule (requires admin)
 $acsCtx=stream_context_create(['http'=>['ignore_errors'=>true]]);
-$acsResp=json_decode(@file_get_contents('https://shippershop.vn/api/v2/admin-content-schedule.php',false,$acsCtx),true);
+$acsResp=json_decode(http_get_ctx('https://shippershop.vn/api/v2/admin-content-schedule.php',$acsCtx),true);
 t('Func: admin content schedule',$acsResp!==null);
 
 // Typing stats (requires auth)
 $tsCtx=stream_context_create(['http'=>['ignore_errors'=>true]]);
-$tsResp=json_decode(@file_get_contents('https://shippershop.vn/api/v2/typing-stats.php',false,$tsCtx),true);
+$tsResp=json_decode(http_get_ctx('https://shippershop.vn/api/v2/typing-stats.php',$tsCtx),true);
 t('Func: typing stats endpoint',$tsResp!==null);
 
 
 // User portfolio (public)
-$upResp=json_decode(@file_get_contents('https://shippershop.vn/api/v2/user-portfolio.php?user_id=2'),true);
+$upResp=json_decode(http_get('https://shippershop.vn/api/v2/user-portfolio.php?user_id=2'),true);
 t('Func: user portfolio',$upResp&&$upResp['success']===true&&isset($upResp['data']['user']));
 t('Func: portfolio stats',isset($upResp['data']['stats']['posts'])&&isset($upResp['data']['stats']['level']));
 t('Func: portfolio best posts',is_array($upResp['data']['best_posts']));
 
 // Engagement predictor
-$epResp=json_decode(@file_get_contents(str_replace(' ','+','https://shippershop.vn/api/v2/engagement-predict.php?text=ghtk+giao+hang+nhanh+tphcm+shipper+chia+se+kinh+nghiem')),true);
+$epResp=json_decode(http_get(str_replace(' ','+','https://shippershop.vn/api/v2/engagement-predict.php?text=ghtk+giao+hang+nhanh+tphcm+shipper+chia+se+kinh+nghiem')),true);
 t('Func: engagement predict',$epResp&&$epResp['success']===true&&isset($epResp['data']['score']));
 t('Func: predict factors',is_array($epResp['data']['factors'])&&count($epResp['data']['factors'])>=1);
 
 // Announce schedule (public active)
-$annSchResp=json_decode(@file_get_contents('https://shippershop.vn/api/v2/announce-schedule.php'),true);
+$annSchResp=json_decode(http_get('https://shippershop.vn/api/v2/announce-schedule.php'),true);
 t('Func: announce schedule active',$annSchResp&&$annSchResp['success']===true&&isset($annSchResp['data']['announcements']));
 
 // Conv quick actions (requires auth)
 $cqaCtx=stream_context_create(['http'=>['ignore_errors'=>true]]);
-$cqaResp=json_decode(@file_get_contents('https://shippershop.vn/api/v2/conv-quick-actions.php?conversation_id=1',false,$cqaCtx),true);
+$cqaResp=json_decode(http_get_ctx('https://shippershop.vn/api/v2/conv-quick-actions.php?conversation_id=1',$cqaCtx),true);
 t('Func: conv quick actions',$cqaResp!==null);
 
 // Portfolio user 3
-$up3Resp=json_decode(@file_get_contents('https://shippershop.vn/api/v2/user-portfolio.php?user_id=3'),true);
+$up3Resp=json_decode(http_get('https://shippershop.vn/api/v2/user-portfolio.php?user_id=3'),true);
 t('Func: portfolio user 3',$up3Resp&&$up3Resp['success']===true);
 
 // Predict empty text
-$epEmptyResp=json_decode(@file_get_contents('https://shippershop.vn/api/v2/engagement-predict.php?text=hi'),true);
+$epEmptyResp=json_decode(http_get('https://shippershop.vn/api/v2/engagement-predict.php?text=hi'),true);
 t('Func: predict short text',$epEmptyResp&&$epEmptyResp['success']===true&&$epEmptyResp['data']['score']===50);
 
 
 // Post digest daily
-$pdgResp=json_decode(@file_get_contents('https://shippershop.vn/api/v2/post-digest.php?period=daily'),true);
+$pdgResp=json_decode(http_get('https://shippershop.vn/api/v2/post-digest.php?period=daily'),true);
 t('Func: post digest daily',$pdgResp&&$pdgResp['success']===true&&isset($pdgResp['data']['top_posts']));
 t('Func: digest stats',isset($pdgResp['data']['stats']['posts']));
 
 // Post digest weekly
-$pdwResp=json_decode(@file_get_contents('https://shippershop.vn/api/v2/post-digest.php?period=weekly'),true);
+$pdwResp=json_decode(http_get('https://shippershop.vn/api/v2/post-digest.php?period=weekly'),true);
 t('Func: post digest weekly',$pdwResp&&$pdwResp['success']===true&&$pdwResp['data']['period']==='weekly');
 
 // User connections
-$ucnResp=json_decode(@file_get_contents('https://shippershop.vn/api/v2/user-connections.php?user_id=2'),true);
+$ucnResp=json_decode(http_get('https://shippershop.vn/api/v2/user-connections.php?user_id=2'),true);
 t('Func: user connections',$ucnResp&&$ucnResp['success']===true&&isset($ucnResp['data']['followers']));
 t('Func: connections mutuals',isset($ucnResp['data']['mutuals']));
 
 // User connections mutual
-$ucmResp=json_decode(@file_get_contents('https://shippershop.vn/api/v2/user-connections.php?user_id=2&action=mutual&other_id=3'),true);
+$ucmResp=json_decode(http_get('https://shippershop.vn/api/v2/user-connections.php?user_id=2&action=mutual&other_id=3'),true);
 t('Func: mutual connections',$ucmResp&&$ucmResp['success']===true&&isset($ucmResp['data']['count']));
 
 // Admin stats cache (requires admin)
 $ascCtx=stream_context_create(['http'=>['ignore_errors'=>true]]);
-$ascResp=json_decode(@file_get_contents('https://shippershop.vn/api/v2/admin-stats-cache.php?action=info',false,$ascCtx),true);
+$ascResp=json_decode(http_get_ctx('https://shippershop.vn/api/v2/admin-stats-cache.php?action=info',$ascCtx),true);
 t('Func: admin cache endpoint',$ascResp!==null);
 
 // Cross-check: platform stats users > posts
-$ps3Resp=json_decode(@file_get_contents('https://shippershop.vn/api/v2/platform-stats.php'),true);
+$ps3Resp=json_decode(http_get('https://shippershop.vn/api/v2/platform-stats.php'),true);
 t('Func: platform users > 500',$ps3Resp&&$ps3Resp['data']['users']['total']>=500);
 
 // Cross-check: delivery stats > 50000
-$ds3Resp=json_decode(@file_get_contents('https://shippershop.vn/api/v2/delivery-stats.php?action=platform'),true);
+$ds3Resp=json_decode(http_get('https://shippershop.vn/api/v2/delivery-stats.php?action=platform'),true);
 t('Func: deliveries > 50000',$ds3Resp&&$ds3Resp['data']['total_deliveries']>=50000);
 
 
 // Skill tags presets
-$skResp=json_decode(@file_get_contents('https://shippershop.vn/api/v2/skill-tags.php'),true);
+$skResp=json_decode(http_get('https://shippershop.vn/api/v2/skill-tags.php'),true);
 t('Func: skill tags presets',$skResp&&$skResp['success']===true&&count($skResp['data']['presets'])>=5);
 
 // Skill tags user
-$skuResp=json_decode(@file_get_contents('https://shippershop.vn/api/v2/skill-tags.php?user_id=2'),true);
+$skuResp=json_decode(http_get('https://shippershop.vn/api/v2/skill-tags.php?user_id=2'),true);
 t('Func: skill tags user',$skuResp&&$skuResp['success']===true);
 
 // Template marketplace
-$tmResp=json_decode(@file_get_contents('https://shippershop.vn/api/v2/template-market.php'),true);
+$tmResp=json_decode(http_get('https://shippershop.vn/api/v2/template-market.php'),true);
 t('Func: template market',$tmResp&&$tmResp['success']===true&&count($tmResp['data']['templates'])>=8);
 t('Func: template categories',count($tmResp['data']['categories'])>=5);
 
 // Template popular
-$tmpResp=json_decode(@file_get_contents('https://shippershop.vn/api/v2/template-market.php?action=popular'),true);
+$tmpResp=json_decode(http_get('https://shippershop.vn/api/v2/template-market.php?action=popular'),true);
 t('Func: template popular',$tmpResp&&$tmpResp['success']===true&&count($tmpResp['data'])>=5);
 
 // Notif blast history (requires admin)
 $nbCtx=stream_context_create(['http'=>['ignore_errors'=>true]]);
-$nbResp=json_decode(@file_get_contents('https://shippershop.vn/api/v2/notif-blast.php',false,$nbCtx),true);
+$nbResp=json_decode(http_get_ctx('https://shippershop.vn/api/v2/notif-blast.php',$nbCtx),true);
 t('Func: notif blast endpoint',$nbResp!==null);
 
 // Conv threads (requires auth)
 $ctCtx=stream_context_create(['http'=>['ignore_errors'=>true]]);
-$ctResp=json_decode(@file_get_contents('https://shippershop.vn/api/v2/conv-threads.php?parent_id=1',false,$ctCtx),true);
+$ctResp=json_decode(http_get_ctx('https://shippershop.vn/api/v2/conv-threads.php?parent_id=1',$ctCtx),true);
 t('Func: conv threads endpoint',$ctResp!==null);
 
 
 // Reputation tiers list
-$rtResp=json_decode(@file_get_contents('https://shippershop.vn/api/v2/reputation-tiers.php?action=tiers'),true);
+$rtResp=json_decode(http_get('https://shippershop.vn/api/v2/reputation-tiers.php?action=tiers'),true);
 t('Func: reputation tiers',$rtResp&&$rtResp['success']===true&&count($rtResp['data']['tiers'])>=5);
 
 // Reputation user
-$rtuResp=json_decode(@file_get_contents('https://shippershop.vn/api/v2/reputation-tiers.php?action=user&user_id=2'),true);
+$rtuResp=json_decode(http_get('https://shippershop.vn/api/v2/reputation-tiers.php?action=user&user_id=2'),true);
 t('Func: reputation user',$rtuResp&&$rtuResp['success']===true&&isset($rtuResp['data']['score']));
 t('Func: reputation tier name',!empty($rtuResp['data']['tier']['name']));
 t('Func: reputation breakdown',isset($rtuResp['data']['breakdown']['posts']));
 
 // Reputation leaderboard
-$rtlResp=json_decode(@file_get_contents('https://shippershop.vn/api/v2/reputation-tiers.php?action=leaderboard'),true);
+$rtlResp=json_decode(http_get('https://shippershop.vn/api/v2/reputation-tiers.php?action=leaderboard'),true);
 t('Func: reputation leaderboard',$rtlResp&&$rtlResp['success']===true&&is_array($rtlResp['data']));
 
 // Analytics export (requires auth)
 $aeCtx=stream_context_create(['http'=>['ignore_errors'=>true]]);
-$aeResp=json_decode(@file_get_contents('https://shippershop.vn/api/v2/analytics-export.php',false,$aeCtx),true);
+$aeResp=json_decode(http_get_ctx('https://shippershop.vn/api/v2/analytics-export.php',$aeCtx),true);
 t('Func: analytics export endpoint',$aeResp!==null);
 
 // Admin dashboard v2 (requires admin)
 $ad2Ctx=stream_context_create(['http'=>['ignore_errors'=>true]]);
-$ad2Resp=json_decode(@file_get_contents('https://shippershop.vn/api/v2/admin-dashboard-v2.php',false,$ad2Ctx),true);
+$ad2Resp=json_decode(http_get_ctx('https://shippershop.vn/api/v2/admin-dashboard-v2.php',$ad2Ctx),true);
 t('Func: admin dashboard v2',$ad2Resp!==null);
 
 // Conv read status (requires auth)
 $crsCtx=stream_context_create(['http'=>['ignore_errors'=>true]]);
-$crsResp=json_decode(@file_get_contents('https://shippershop.vn/api/v2/conv-read-status.php?conversation_id=1',false,$crsCtx),true);
+$crsResp=json_decode(http_get_ctx('https://shippershop.vn/api/v2/conv-read-status.php?conversation_id=1',$crsCtx),true);
 t('Func: conv read status',$crsResp!==null);
 
 
 // Smart schedule optimal
-$ssResp2=json_decode(@file_get_contents('https://shippershop.vn/api/v2/smart-schedule.php'),true);
+$ssResp2=json_decode(http_get('https://shippershop.vn/api/v2/smart-schedule.php'),true);
 t('Func: smart schedule',$ssResp2&&$ssResp2['success']===true&&isset($ssResp2['data']['recommended_slots']));
 t('Func: schedule hour stats',isset($ssResp2['data']['hour_stats']));
 
 // Smart schedule next
-$ssnResp=json_decode(@file_get_contents('https://shippershop.vn/api/v2/smart-schedule.php?action=next'),true);
+$ssnResp=json_decode(http_get('https://shippershop.vn/api/v2/smart-schedule.php?action=next'),true);
 t('Func: schedule next time',$ssnResp&&$ssnResp['success']===true&&isset($ssnResp['data']['next_time']));
 
 // Wallet chart (requires auth)
 $wcCtx=stream_context_create(['http'=>['ignore_errors'=>true]]);
-$wcResp=json_decode(@file_get_contents('https://shippershop.vn/api/v2/wallet-chart.php',false,$wcCtx),true);
+$wcResp=json_decode(http_get_ctx('https://shippershop.vn/api/v2/wallet-chart.php',$wcCtx),true);
 t('Func: wallet chart endpoint',$wcResp!==null);
 
 // Growth funnel (requires admin)
 $gfCtx=stream_context_create(['http'=>['ignore_errors'=>true]]);
-$gfResp=json_decode(@file_get_contents('https://shippershop.vn/api/v2/growth-funnel.php',false,$gfCtx),true);
+$gfResp=json_decode(http_get_ctx('https://shippershop.vn/api/v2/growth-funnel.php',$gfCtx),true);
 t('Func: growth funnel endpoint',$gfResp!==null);
 
 // Conv media (requires auth)
 $cmCtx=stream_context_create(['http'=>['ignore_errors'=>true]]);
-$cmResp=json_decode(@file_get_contents('https://shippershop.vn/api/v2/conv-media.php?conversation_id=1',false,$cmCtx),true);
+$cmResp=json_decode(http_get_ctx('https://shippershop.vn/api/v2/conv-media.php?conversation_id=1',$cmCtx),true);
 t('Func: conv media endpoint',$cmResp!==null);
 
 
 // Leaderboard seasons (public)
-$lsResp=json_decode(@file_get_contents('https://shippershop.vn/api/v2/leaderboard-seasons.php?period=monthly&metric=posts'),true);
+$lsResp=json_decode(http_get('https://shippershop.vn/api/v2/leaderboard-seasons.php?period=monthly&metric=posts'),true);
 t('Func: leaderboard seasons',$lsResp&&$lsResp['success']===true&&isset($lsResp['data']['leaderboard']));
 t('Func: leaderboard season name',!empty($lsResp['data']['season']));
 t('Func: leaderboard rewards',count($lsResp['data']['rewards']??[])>=3);
 
 // Leaderboard metrics
-$lmResp=json_decode(@file_get_contents('https://shippershop.vn/api/v2/leaderboard-seasons.php?action=metrics'),true);
+$lmResp=json_decode(http_get('https://shippershop.vn/api/v2/leaderboard-seasons.php?action=metrics'),true);
 t('Func: leaderboard metrics',$lmResp&&$lmResp['success']===true&&count($lmResp['data']['metrics'])>=5);
 
 // Leaderboard weekly XP
-$lwxResp=json_decode(@file_get_contents('https://shippershop.vn/api/v2/leaderboard-seasons.php?period=weekly&metric=xp'),true);
+$lwxResp=json_decode(http_get('https://shippershop.vn/api/v2/leaderboard-seasons.php?period=weekly&metric=xp'),true);
 t('Func: leaderboard weekly xp',$lwxResp&&$lwxResp['success']===true);
 
 // AB test variant (public)
-$abvResp=json_decode(@file_get_contents('https://shippershop.vn/api/v2/ab-test.php?action=variant&test_id=test1&user_id=2'),true);
+$abvResp=json_decode(http_get('https://shippershop.vn/api/v2/ab-test.php?action=variant&test_id=test1&user_id=2'),true);
 t('Func: ab test variant',$abvResp&&$abvResp['success']===true&&isset($abvResp['data']['variant']));
 
 // Post collab (requires auth)
 $pcCtx=stream_context_create(['http'=>['ignore_errors'=>true]]);
-$pcResp=json_decode(@file_get_contents('https://shippershop.vn/api/v2/post-collab.php',false,$pcCtx),true);
+$pcResp=json_decode(http_get_ctx('https://shippershop.vn/api/v2/post-collab.php',$pcCtx),true);
 t('Func: post collab endpoint',$pcResp!==null);
 
 // Conv polls (requires auth)
 $cpCtx=stream_context_create(['http'=>['ignore_errors'=>true]]);
-$cpResp=json_decode(@file_get_contents('https://shippershop.vn/api/v2/conv-polls.php?conversation_id=1',false,$cpCtx),true);
+$cpResp=json_decode(http_get_ctx('https://shippershop.vn/api/v2/conv-polls.php?conversation_id=1',$cpCtx),true);
 t('Func: conv polls endpoint',$cpResp!==null);
 
 
 // Work history (public)
-$whResp=json_decode(@file_get_contents('https://shippershop.vn/api/v2/work-history.php?user_id=2'),true);
+$whResp=json_decode(http_get('https://shippershop.vn/api/v2/work-history.php?user_id=2'),true);
 t('Func: work history',$whResp&&$whResp['success']===true&&isset($whResp['data']['history']));
 
 // Reactions analytics (public)
-$raResp=json_decode(@file_get_contents('https://shippershop.vn/api/v2/reactions-analytics.php?days=30'),true);
+$raResp=json_decode(http_get('https://shippershop.vn/api/v2/reactions-analytics.php?days=30'),true);
 t('Func: reactions analytics',$raResp&&$raResp['success']===true&&isset($raResp['data']['total_likes']));
 t('Func: reactions avg',isset($raResp['data']['avg_per_post']));
 t('Func: reactions top posts',is_array($raResp['data']['top_posts']));
 t('Func: reactions top likers',is_array($raResp['data']['top_likers']));
 
 // Reactions user
-$rauResp=json_decode(@file_get_contents('https://shippershop.vn/api/v2/reactions-analytics.php?action=user&user_id=2'),true);
+$rauResp=json_decode(http_get('https://shippershop.vn/api/v2/reactions-analytics.php?action=user&user_id=2'),true);
 t('Func: reactions user',$rauResp&&$rauResp['success']===true&&isset($rauResp['data']['given']));
 
 // Feature flags (public)
-$ffResp=json_decode(@file_get_contents('https://shippershop.vn/api/v2/feature-flags.php'),true);
+$ffResp=json_decode(http_get('https://shippershop.vn/api/v2/feature-flags.php'),true);
 t('Func: feature flags',$ffResp&&$ffResp['success']===true&&isset($ffResp['data']['flags']));
 t('Func: flags count',count($ffResp['data']['flags'])>=10);
 t('Func: dark mode flag',$ffResp['data']['flags']['dark_mode']===true);
 
 // Feature flag check specific
-$ffcResp=json_decode(@file_get_contents('https://shippershop.vn/api/v2/feature-flags.php?action=check&flag=stories'),true);
+$ffcResp=json_decode(http_get('https://shippershop.vn/api/v2/feature-flags.php?action=check&flag=stories'),true);
 t('Func: flag check stories',$ffcResp&&$ffcResp['success']===true&&$ffcResp['data']['enabled']===true);
 
 // Conv schedule (requires auth)
 $csCtx=stream_context_create(['http'=>['ignore_errors'=>true]]);
-$csResp=json_decode(@file_get_contents('https://shippershop.vn/api/v2/conv-schedule.php',false,$csCtx),true);
+$csResp=json_decode(http_get_ctx('https://shippershop.vn/api/v2/conv-schedule.php',$csCtx),true);
 t('Func: conv schedule endpoint',$csResp!==null);
 
 // Reactions analytics 7d
-$ra7Resp=json_decode(@file_get_contents('https://shippershop.vn/api/v2/reactions-analytics.php?days=7'),true);
+$ra7Resp=json_decode(http_get('https://shippershop.vn/api/v2/reactions-analytics.php?days=7'),true);
 t('Func: reactions 7d',$ra7Resp&&$ra7Resp['success']===true);
 
 // Work history non-existent user
-$wh0Resp=json_decode(@file_get_contents('https://shippershop.vn/api/v2/work-history.php?user_id=999'),true);
+$wh0Resp=json_decode(http_get('https://shippershop.vn/api/v2/work-history.php?user_id=999'),true);
 t('Func: work history empty',$wh0Resp&&$wh0Resp['success']===true&&count($wh0Resp['data']['history'])===0);
 
 // Feature flags disabled check
-$ff2Resp=json_decode(@file_get_contents('https://shippershop.vn/api/v2/feature-flags.php?action=check&flag=ai_content'),true);
+$ff2Resp=json_decode(http_get('https://shippershop.vn/api/v2/feature-flags.php?action=check&flag=ai_content'),true);
 t('Func: flag check disabled',$ff2Resp&&$ff2Resp['data']['enabled']===false);
 
 // Leaderboard deliveries
-$ldResp=json_decode(@file_get_contents('https://shippershop.vn/api/v2/leaderboard-seasons.php?period=monthly&metric=deliveries'),true);
+$ldResp=json_decode(http_get('https://shippershop.vn/api/v2/leaderboard-seasons.php?period=monthly&metric=deliveries'),true);
 t('Func: leaderboard deliveries',$ldResp&&$ldResp['success']===true);
 
 // Platform stats online
-$ps4Resp=json_decode(@file_get_contents('https://shippershop.vn/api/v2/platform-stats.php'),true);
+$ps4Resp=json_decode(http_get('https://shippershop.vn/api/v2/platform-stats.php'),true);
 t('Func: platform shipping companies',$ps4Resp['data']['shipping_companies']>=5);
 
 // Smart schedule day stats
-$ss3Resp=json_decode(@file_get_contents('https://shippershop.vn/api/v2/smart-schedule.php'),true);
+$ss3Resp=json_decode(http_get('https://shippershop.vn/api/v2/smart-schedule.php'),true);
 t('Func: schedule day stats',isset($ss3Resp['data']['day_stats'])&&count($ss3Resp['data']['day_stats'])>=1);
 
 // Milestones user 3
-$ms3Resp=json_decode(@file_get_contents('https://shippershop.vn/api/v2/milestones.php?user_id=3'),true);
+$ms3Resp=json_decode(http_get('https://shippershop.vn/api/v2/milestones.php?user_id=3'),true);
 t('Func: milestones user 3',$ms3Resp&&$ms3Resp['success']===true&&isset($ms3Resp['data']['total_earned']));
 
 
 // Post reach (public)
-$prResp=json_decode(@file_get_contents('https://shippershop.vn/api/v2/post-reach.php?user_id=2'),true);
+$prResp=json_decode(http_get('https://shippershop.vn/api/v2/post-reach.php?user_id=2'),true);
 t('Func: post reach',$prResp&&$prResp['success']===true&&isset($prResp['data']['total_estimated_reach']));
 t('Func: reach followers',isset($prResp['data']['direct_followers']));
 
 // Post reach by post
-$pr2Resp=json_decode(@file_get_contents('https://shippershop.vn/api/v2/post-reach.php?post_id=125'),true);
+$pr2Resp=json_decode(http_get('https://shippershop.vn/api/v2/post-reach.php?post_id=125'),true);
 t('Func: post reach by post',$pr2Resp&&$pr2Resp['success']===true);
 
 // User availability statuses
-$uaResp=json_decode(@file_get_contents('https://shippershop.vn/api/v2/user-availability.php'),true);
+$uaResp=json_decode(http_get('https://shippershop.vn/api/v2/user-availability.php'),true);
 t('Func: availability statuses',$uaResp&&$uaResp['success']===true&&count($uaResp['data']['statuses'])>=4);
 
 // User availability check
-$ua2Resp=json_decode(@file_get_contents('https://shippershop.vn/api/v2/user-availability.php?user_id=2'),true);
+$ua2Resp=json_decode(http_get('https://shippershop.vn/api/v2/user-availability.php?user_id=2'),true);
 t('Func: availability user',$ua2Resp&&$ua2Resp['success']===true&&isset($ua2Resp['data']['current']));
 
 // Post similar
-$psimResp=json_decode(@file_get_contents('https://shippershop.vn/api/v2/post-similar.php?post_id=125'),true);
+$psimResp=json_decode(http_get('https://shippershop.vn/api/v2/post-similar.php?post_id=125'),true);
 t('Func: post similar',$psimResp&&$psimResp['success']===true&&isset($psimResp['data']['similar']));
 
 // User goals (requires auth)
 $ugCtx=stream_context_create(['http'=>['ignore_errors'=>true]]);
-$ugResp=json_decode(@file_get_contents('https://shippershop.vn/api/v2/user-goals.php',false,$ugCtx),true);
+$ugResp=json_decode(http_get_ctx('https://shippershop.vn/api/v2/user-goals.php',$ugCtx),true);
 t('Func: user goals endpoint',$ugResp!==null);
 
 // Admin audit (requires admin)
 $aaCtx=stream_context_create(['http'=>['ignore_errors'=>true]]);
-$aaResp=json_decode(@file_get_contents('https://shippershop.vn/api/v2/admin-audit.php',false,$aaCtx),true);
+$aaResp=json_decode(http_get_ctx('https://shippershop.vn/api/v2/admin-audit.php',$aaCtx),true);
 t('Func: admin audit endpoint',$aaResp!==null);
 
 // Admin audit actions
 $aa2Ctx=stream_context_create(['http'=>['ignore_errors'=>true]]);
-$aa2Resp=json_decode(@file_get_contents('https://shippershop.vn/api/v2/admin-audit.php?action=actions',false,$aa2Ctx),true);
+$aa2Resp=json_decode(http_get_ctx('https://shippershop.vn/api/v2/admin-audit.php?action=actions',$aa2Ctx),true);
 t('Func: audit actions list',$aa2Resp!==null);
 
 
 // Income tracker (requires auth)
 $itCtx=stream_context_create(['http'=>['ignore_errors'=>true]]);
-$itResp=json_decode(@file_get_contents('https://shippershop.vn/api/v2/income-tracker.php',false,$itCtx),true);
+$itResp=json_decode(http_get_ctx('https://shippershop.vn/api/v2/income-tracker.php',$itCtx),true);
 t('Func: income tracker endpoint',$itResp!==null);
 
 // Post highlights (public)
-$phResp=json_decode(@file_get_contents('https://shippershop.vn/api/v2/post-highlights.php?user_id=2'),true);
+$phResp=json_decode(http_get('https://shippershop.vn/api/v2/post-highlights.php?user_id=2'),true);
 t('Func: post highlights',$phResp&&$phResp['success']===true&&isset($phResp['data']['highlights']));
 
 // Mod queue (requires admin)
 $mqCtx=stream_context_create(['http'=>['ignore_errors'=>true]]);
-$mqResp=json_decode(@file_get_contents('https://shippershop.vn/api/v2/mod-queue.php',false,$mqCtx),true);
+$mqResp=json_decode(http_get_ctx('https://shippershop.vn/api/v2/mod-queue.php',$mqCtx),true);
 t('Func: mod queue endpoint',$mqResp!==null);
 
 // Conv bookmarks (requires auth)
 $cbCtx=stream_context_create(['http'=>['ignore_errors'=>true]]);
-$cbResp=json_decode(@file_get_contents('https://shippershop.vn/api/v2/conv-bookmarks.php',false,$cbCtx),true);
+$cbResp=json_decode(http_get_ctx('https://shippershop.vn/api/v2/conv-bookmarks.php',$cbCtx),true);
 t('Func: conv bookmarks endpoint',$cbResp!==null);
 
 // User summary card (public)
-$uscResp=json_decode(@file_get_contents('https://shippershop.vn/api/v2/user-summary-card.php?user_id=2'),true);
+$uscResp=json_decode(http_get('https://shippershop.vn/api/v2/user-summary-card.php?user_id=2'),true);
 t('Func: user summary card',$uscResp&&$uscResp['success']===true&&isset($uscResp['data']['fullname']));
 t('Func: summary card level',$uscResp['data']['level']>=1);
 t('Func: summary card stats',$uscResp['data']['posts']>=1&&$uscResp['data']['days']>=1);
 
 // User summary card user 3
-$usc3Resp=json_decode(@file_get_contents('https://shippershop.vn/api/v2/user-summary-card.php?user_id=3'),true);
+$usc3Resp=json_decode(http_get('https://shippershop.vn/api/v2/user-summary-card.php?user_id=3'),true);
 t('Func: summary card user 3',$usc3Resp&&$usc3Resp['success']===true);
 
 // Post highlights empty user
-$ph0Resp=json_decode(@file_get_contents('https://shippershop.vn/api/v2/post-highlights.php?user_id=999'),true);
+$ph0Resp=json_decode(http_get('https://shippershop.vn/api/v2/post-highlights.php?user_id=999'),true);
 t('Func: highlights empty',$ph0Resp&&$ph0Resp['success']===true&&count($ph0Resp['data']['highlights'])===0);
 
 
 // User ratings categories
-$urResp=json_decode(@file_get_contents('https://shippershop.vn/api/v2/user-ratings.php'),true);
+$urResp=json_decode(http_get('https://shippershop.vn/api/v2/user-ratings.php'),true);
 t('Func: rating categories',$urResp&&$urResp['success']===true&&count($urResp['data']['categories'])>=5);
 
 // User ratings for user
-$ur2Resp=json_decode(@file_get_contents('https://shippershop.vn/api/v2/user-ratings.php?user_id=2'),true);
+$ur2Resp=json_decode(http_get('https://shippershop.vn/api/v2/user-ratings.php?user_id=2'),true);
 t('Func: user rating',$ur2Resp&&$ur2Resp['success']===true&&isset($ur2Resp['data']['overall']));
 t('Func: rating by category',isset($ur2Resp['data']['by_category']));
 
 // Content warnings types
-$cwResp=json_decode(@file_get_contents('https://shippershop.vn/api/v2/content-warnings.php'),true);
+$cwResp=json_decode(http_get('https://shippershop.vn/api/v2/content-warnings.php'),true);
 t('Func: warning types',$cwResp&&$cwResp['success']===true&&count($cwResp['data']['types'])>=5);
 
 // Content warnings for post
-$cw2Resp=json_decode(@file_get_contents('https://shippershop.vn/api/v2/content-warnings.php?post_id=125'),true);
+$cw2Resp=json_decode(http_get('https://shippershop.vn/api/v2/content-warnings.php?post_id=125'),true);
 t('Func: post warnings',$cw2Resp&&$cw2Resp['success']===true&&isset($cw2Resp['data']['warnings']));
 
 // Engagement dashboard (admin)
 $edCtx=stream_context_create(['http'=>['ignore_errors'=>true]]);
-$edResp=json_decode(@file_get_contents('https://shippershop.vn/api/v2/engagement-dashboard.php',false,$edCtx),true);
+$edResp=json_decode(http_get_ctx('https://shippershop.vn/api/v2/engagement-dashboard.php',$edCtx),true);
 t('Func: engagement dashboard',$edResp!==null);
 
 // Voice notes (auth)
 $vnCtx=stream_context_create(['http'=>['ignore_errors'=>true]]);
-$vnResp=json_decode(@file_get_contents('https://shippershop.vn/api/v2/voice-notes.php?conversation_id=1',false,$vnCtx),true);
+$vnResp=json_decode(http_get_ctx('https://shippershop.vn/api/v2/voice-notes.php?conversation_id=1',$vnCtx),true);
 t('Func: voice notes endpoint',$vnResp!==null);
 
 
 // Delivery map hotspots
-$dmResp=json_decode(@file_get_contents('https://shippershop.vn/api/v2/delivery-map.php'),true);
+$dmResp=json_decode(http_get('https://shippershop.vn/api/v2/delivery-map.php'),true);
 t('Func: delivery hotspots',$dmResp&&$dmResp['success']===true&&isset($dmResp['data']['by_province']));
 t('Func: delivery total location',$dmResp['data']['total_with_location']>=0);
 
 // Delivery map user
-$dmuResp=json_decode(@file_get_contents('https://shippershop.vn/api/v2/delivery-map.php?action=user&user_id=2'),true);
+$dmuResp=json_decode(http_get('https://shippershop.vn/api/v2/delivery-map.php?action=user&user_id=2'),true);
 t('Func: delivery map user',$dmuResp&&$dmuResp['success']===true&&isset($dmuResp['data']['areas']));
 
 // Engagement heatmap
-$ehResp=json_decode(@file_get_contents('https://shippershop.vn/api/v2/engagement-heatmap.php'),true);
+$ehResp=json_decode(http_get('https://shippershop.vn/api/v2/engagement-heatmap.php'),true);
 t('Func: engagement heatmap',$ehResp&&$ehResp['success']===true&&isset($ehResp['data']['grid']));
 t('Func: heatmap best slots',isset($ehResp['data']['best_slots']));
 
 // User lifecycle (admin)
 $ulCtx=stream_context_create(['http'=>['ignore_errors'=>true]]);
-$ulResp=json_decode(@file_get_contents('https://shippershop.vn/api/v2/user-lifecycle.php',false,$ulCtx),true);
+$ulResp=json_decode(http_get_ctx('https://shippershop.vn/api/v2/user-lifecycle.php',$ulCtx),true);
 t('Func: user lifecycle endpoint',$ulResp!==null);
 
 // Conv auto-label (auth)
 $calCtx=stream_context_create(['http'=>['ignore_errors'=>true]]);
-$calResp=json_decode(@file_get_contents('https://shippershop.vn/api/v2/conv-auto-label.php?conversation_id=1',false,$calCtx),true);
+$calResp=json_decode(http_get_ctx('https://shippershop.vn/api/v2/conv-auto-label.php?conversation_id=1',$calCtx),true);
 t('Func: conv auto label',$calResp!==null);
 
 
 // Shift planner (auth)
 $spCtx=stream_context_create(['http'=>['ignore_errors'=>true]]);
-$spResp=json_decode(@file_get_contents('https://shippershop.vn/api/v2/shift-planner.php',false,$spCtx),true);
+$spResp=json_decode(http_get_ctx('https://shippershop.vn/api/v2/shift-planner.php',$spCtx),true);
 t('Func: shift planner endpoint',$spResp!==null);
 
 // Content score (public)
-$csResp2=json_decode(@file_get_contents(str_replace(' ','+','https://shippershop.vn/api/v2/content-score.php?text=ghtk+shipper+giao+hang+nhanh+tphcm+quan+7+lien+he+0909+#shipper+#ghtk')),true);
+$csResp2=json_decode(http_get(str_replace(' ','+','https://shippershop.vn/api/v2/content-score.php?text=ghtk+shipper+giao+hang+nhanh+tphcm+quan+7+lien+he+0909+#shipper+#ghtk')),true);
 t('Func: content score',$csResp2&&$csResp2['success']===true&&isset($csResp2['data']['score']));
 t('Func: content grade',!empty($csResp2['data']['grade']));
 t('Func: content factors',count($csResp2['data']['factors'])>=3);
 
 // Content score for post
-$cs3Resp=json_decode(@file_get_contents('https://shippershop.vn/api/v2/content-score.php?post_id=125'),true);
+$cs3Resp=json_decode(http_get('https://shippershop.vn/api/v2/content-score.php?post_id=125'),true);
 t('Func: content score post',$cs3Resp&&$cs3Resp['success']===true);
 
 // Churn predict (admin)
 $cpCtx2=stream_context_create(['http'=>['ignore_errors'=>true]]);
-$cpResp2=json_decode(@file_get_contents('https://shippershop.vn/api/v2/churn-predict.php',false,$cpCtx2),true);
+$cpResp2=json_decode(http_get_ctx('https://shippershop.vn/api/v2/churn-predict.php',$cpCtx2),true);
 t('Func: churn predict endpoint',$cpResp2!==null);
 
 // Contact card (auth)
 $ccCtx=stream_context_create(['http'=>['ignore_errors'=>true]]);
-$ccResp=json_decode(@file_get_contents('https://shippershop.vn/api/v2/contact-card.php?user_id=2',false,$ccCtx),true);
+$ccResp=json_decode(http_get_ctx('https://shippershop.vn/api/v2/contact-card.php?user_id=2',$ccCtx),true);
 t('Func: contact card endpoint',$ccResp!==null);
 
 
 // Daily report (auth)
 $drCtx=stream_context_create(['http'=>['ignore_errors'=>true]]);
-$drResp=json_decode(@file_get_contents('https://shippershop.vn/api/v2/daily-report.php',false,$drCtx),true);
+$drResp=json_decode(http_get_ctx('https://shippershop.vn/api/v2/daily-report.php',$drCtx),true);
 t('Func: daily report endpoint',$drResp!==null);
 
 // Calendar view (public)
-$cvResp=json_decode(@file_get_contents('https://shippershop.vn/api/v2/calendar-view.php?month=3&year=2026'),true);
+$cvResp=json_decode(http_get('https://shippershop.vn/api/v2/calendar-view.php?month=3&year=2026'),true);
 t('Func: calendar view',$cvResp&&$cvResp['success']===true&&isset($cvResp['data']['calendar']));
 t('Func: calendar days',count($cvResp['data']['calendar'])>=28);
 t('Func: calendar stats',$cvResp['data']['total_posts']>=0&&$cvResp['data']['active_days']>=0);
 
 // Calendar view user
-$cv2Resp=json_decode(@file_get_contents('https://shippershop.vn/api/v2/calendar-view.php?month=3&year=2026&user_id=2'),true);
+$cv2Resp=json_decode(http_get('https://shippershop.vn/api/v2/calendar-view.php?month=3&year=2026&user_id=2'),true);
 t('Func: calendar user',$cv2Resp&&$cv2Resp['success']===true);
 
 // Health score (admin)
 $hsCtx=stream_context_create(['http'=>['ignore_errors'=>true]]);
-$hsResp=json_decode(@file_get_contents('https://shippershop.vn/api/v2/health-score.php',false,$hsCtx),true);
+$hsResp=json_decode(http_get_ctx('https://shippershop.vn/api/v2/health-score.php',$hsCtx),true);
 t('Func: health score endpoint',$hsResp!==null);
 
 // Conv auto-archive (auth)
 $caaCtx=stream_context_create(['http'=>['ignore_errors'=>true]]);
-$caaResp=json_decode(@file_get_contents('https://shippershop.vn/api/v2/conv-auto-archive.php',false,$caaCtx),true);
+$caaResp=json_decode(http_get_ctx('https://shippershop.vn/api/v2/conv-auto-archive.php',$caaCtx),true);
 t('Func: conv auto archive endpoint',$caaResp!==null);
 
 // Cross-checks for milestone
-$allBadgesResp=json_decode(@file_get_contents('https://shippershop.vn/api/v2/badges-wall.php?action=catalog'),true);
+$allBadgesResp=json_decode(http_get('https://shippershop.vn/api/v2/badges-wall.php?action=catalog'),true);
 t('Func: badges catalog count',count($allBadgesResp['data']['badges'])>=10);
 
-$tiersResp=json_decode(@file_get_contents('https://shippershop.vn/api/v2/reputation-tiers.php?action=tiers'),true);
+$tiersResp=json_decode(http_get('https://shippershop.vn/api/v2/reputation-tiers.php?action=tiers'),true);
 t('Func: reputation tier count',count($tiersResp['data']['tiers'])===5);
 
-$flagsResp=json_decode(@file_get_contents('https://shippershop.vn/api/v2/feature-flags.php'),true);
+$flagsResp=json_decode(http_get('https://shippershop.vn/api/v2/feature-flags.php'),true);
 t('Func: flags total',count($flagsResp['data']['flags'])>=14);
 
-$tmResp2=json_decode(@file_get_contents('https://shippershop.vn/api/v2/template-market.php?action=popular'),true);
+$tmResp2=json_decode(http_get('https://shippershop.vn/api/v2/template-market.php?action=popular'),true);
 t('Func: template popular sorted',$tmResp2['data'][0]['uses']>=$tmResp2['data'][1]['uses']);
 
-$skillResp=json_decode(@file_get_contents('https://shippershop.vn/api/v2/skill-tags.php'),true);
+$skillResp=json_decode(http_get('https://shippershop.vn/api/v2/skill-tags.php'),true);
 t('Func: skill categories 5',count($skillResp['data']['presets'])===5);
 
-$cwResp3=json_decode(@file_get_contents('https://shippershop.vn/api/v2/content-warnings.php'),true);
+$cwResp3=json_decode(http_get('https://shippershop.vn/api/v2/content-warnings.php'),true);
 t('Func: content warning types 5',count($cwResp3['data']['types'])===5);
 
-$avResp=json_decode(@file_get_contents('https://shippershop.vn/api/v2/user-availability.php'),true);
+$avResp=json_decode(http_get('https://shippershop.vn/api/v2/user-availability.php'),true);
 t('Func: availability status 4',count($avResp['data']['statuses'])===4);
 
-$urResp2=json_decode(@file_get_contents('https://shippershop.vn/api/v2/user-ratings.php'),true);
+$urResp2=json_decode(http_get('https://shippershop.vn/api/v2/user-ratings.php'),true);
 t('Func: rating categories 5',count($urResp2['data']['categories'])===5);
 
-$dmResp2=json_decode(@file_get_contents('https://shippershop.vn/api/v2/delivery-map.php'),true);
+$dmResp2=json_decode(http_get('https://shippershop.vn/api/v2/delivery-map.php'),true);
 t('Func: delivery provinces 11',$dmResp2['data']['total_with_location']>=500);
 
 
 // Drafts sync (auth)
 $dsCtx=stream_context_create(['http'=>['ignore_errors'=>true]]);
-$dsResp=json_decode(@file_get_contents('https://shippershop.vn/api/v2/drafts-sync.php',false,$dsCtx),true);
+$dsResp=json_decode(http_get_ctx('https://shippershop.vn/api/v2/drafts-sync.php',$dsCtx),true);
 t('Func: drafts sync endpoint',$dsResp!==null);
 
 // Weekly challenge (auth)
 $wcCtx2=stream_context_create(['http'=>['ignore_errors'=>true]]);
-$wcResp2=json_decode(@file_get_contents('https://shippershop.vn/api/v2/weekly-challenge.php',false,$wcCtx2),true);
+$wcResp2=json_decode(http_get_ctx('https://shippershop.vn/api/v2/weekly-challenge.php',$wcCtx2),true);
 t('Func: weekly challenge endpoint',$wcResp2!==null);
 
 // Realtime monitor (admin)
 $rmCtx=stream_context_create(['http'=>['ignore_errors'=>true]]);
-$rmResp=json_decode(@file_get_contents('https://shippershop.vn/api/v2/realtime-monitor.php',false,$rmCtx),true);
+$rmResp=json_decode(http_get_ctx('https://shippershop.vn/api/v2/realtime-monitor.php',$rmCtx),true);
 t('Func: realtime monitor endpoint',$rmResp!==null);
 
 // Conv location (auth)
 $clCtx=stream_context_create(['http'=>['ignore_errors'=>true]]);
-$clResp=json_decode(@file_get_contents('https://shippershop.vn/api/v2/conv-location.php?conversation_id=1',false,$clCtx),true);
+$clResp=json_decode(http_get_ctx('https://shippershop.vn/api/v2/conv-location.php?conversation_id=1',$clCtx),true);
 t('Func: conv location endpoint',$clResp!==null);
 
 
 // Route planner (auth)
 $rpCtx=stream_context_create(['http'=>['ignore_errors'=>true]]);
-$rpResp=json_decode(@file_get_contents('https://shippershop.vn/api/v2/route-planner.php',false,$rpCtx),true);
+$rpResp=json_decode(http_get_ctx('https://shippershop.vn/api/v2/route-planner.php',$rpCtx),true);
 t('Func: route planner endpoint',$rpResp!==null);
 
 // Engagement compare posts
-$ecpResp=json_decode(@file_get_contents('https://shippershop.vn/api/v2/engagement-compare.php?post1=125&post2=126'),true);
+$ecpResp=json_decode(http_get('https://shippershop.vn/api/v2/engagement-compare.php?post1=125&post2=126'),true);
 t('Func: engagement compare posts',$ecpResp&&$ecpResp['success']===true);
 
 // Engagement compare users
-$ecuResp=json_decode(@file_get_contents('https://shippershop.vn/api/v2/engagement-compare.php?action=users&user1=2&user2=3'),true);
+$ecuResp=json_decode(http_get('https://shippershop.vn/api/v2/engagement-compare.php?action=users&user1=2&user2=3'),true);
 t('Func: engagement compare users',$ecuResp&&$ecuResp['success']===true&&isset($ecuResp['data']['winner']));
 
 // Notif analytics (admin)
 $naCtx=stream_context_create(['http'=>['ignore_errors'=>true]]);
-$naResp=json_decode(@file_get_contents('https://shippershop.vn/api/v2/notif-analytics.php',false,$naCtx),true);
+$naResp=json_decode(http_get_ctx('https://shippershop.vn/api/v2/notif-analytics.php',$naCtx),true);
 t('Func: notif analytics endpoint',$naResp!==null);
 
 // Disappearing msgs (auth)
 $dmCtx2=stream_context_create(['http'=>['ignore_errors'=>true]]);
-$dmResp2=json_decode(@file_get_contents('https://shippershop.vn/api/v2/disappearing-msgs.php?conversation_id=1',false,$dmCtx2),true);
+$dmResp2=json_decode(http_get_ctx('https://shippershop.vn/api/v2/disappearing-msgs.php?conversation_id=1',$dmCtx2),true);
 t('Func: disappearing msgs endpoint',$dmResp2!==null);
 
 
 // Fuel tracker (auth)
 $ftCtx=stream_context_create(['http'=>['ignore_errors'=>true]]);
-$ftResp=json_decode(@file_get_contents('https://shippershop.vn/api/v2/fuel-tracker.php',false,$ftCtx),true);
+$ftResp=json_decode(http_get_ctx('https://shippershop.vn/api/v2/fuel-tracker.php',$ftCtx),true);
 t('Func: fuel tracker endpoint',$ftResp!==null);
 
 // Plagiarism check (public)
-$pcResp2=json_decode(@file_get_contents(str_replace(' ','+','https://shippershop.vn/api/v2/plagiarism-check.php?text=shipper+giao+hang+nhanh+ghtk+tphcm+chia+se+kinh+nghiem+lam+shipper+cho+nguoi+moi')),true);
+$pcResp2=json_decode(http_get(str_replace(' ','+','https://shippershop.vn/api/v2/plagiarism-check.php?text=shipper+giao+hang+nhanh+ghtk+tphcm+chia+se+kinh+nghiem+lam+shipper+cho+nguoi+moi')),true);
 t('Func: plagiarism check',$pcResp2&&$pcResp2['success']===true&&isset($pcResp2['data']['is_original']));
 t('Func: plagiarism similarity',isset($pcResp2['data']['max_similarity']));
 t('Func: plagiarism phrases',$pcResp2['data']['phrases_checked']>=1);
 
 // Plagiarism short text
-$pcShort=json_decode(@file_get_contents('https://shippershop.vn/api/v2/plagiarism-check.php?text=hi'),true);
+$pcShort=json_decode(http_get('https://shippershop.vn/api/v2/plagiarism-check.php?text=hi'),true);
 t('Func: plagiarism short skip',$pcShort&&$pcShort['data']['is_original']===true);
 
 // Revenue forecast (admin)
 $rfCtx=stream_context_create(['http'=>['ignore_errors'=>true]]);
-$rfResp=json_decode(@file_get_contents('https://shippershop.vn/api/v2/revenue-forecast.php',false,$rfCtx),true);
+$rfResp=json_decode(http_get_ctx('https://shippershop.vn/api/v2/revenue-forecast.php',$rfCtx),true);
 t('Func: revenue forecast endpoint',$rfResp!==null);
 
 // Conv meeting (auth)
 $cmCtx2=stream_context_create(['http'=>['ignore_errors'=>true]]);
-$cmResp2=json_decode(@file_get_contents('https://shippershop.vn/api/v2/conv-meeting.php?conversation_id=1',false,$cmCtx2),true);
+$cmResp2=json_decode(http_get_ctx('https://shippershop.vn/api/v2/conv-meeting.php?conversation_id=1',$cmCtx2),true);
 t('Func: conv meeting endpoint',$cmResp2!==null);
 
 // Cross-checks for 850 target
-$wcResp3=json_decode(@file_get_contents('https://shippershop.vn/api/v2/content-warnings.php'),true);
+$wcResp3=json_decode(http_get('https://shippershop.vn/api/v2/content-warnings.php'),true);
 t('Func: content warnings types ok',count($wcResp3['data']['types'])===5);
 
-$csResp4=json_decode(@file_get_contents('https://shippershop.vn/api/v2/content-score.php?post_id=125'),true);
+$csResp4=json_decode(http_get('https://shippershop.vn/api/v2/content-score.php?post_id=125'),true);
 t('Func: content score exists',$csResp4&&$csResp4['success']===true&&$csResp4['data']['score']>=0);
 
-$eh2Resp=json_decode(@file_get_contents('https://shippershop.vn/api/v2/engagement-heatmap.php?days=7'),true);
+$eh2Resp=json_decode(http_get('https://shippershop.vn/api/v2/engagement-heatmap.php?days=7'),true);
 t('Func: heatmap 7d',$eh2Resp&&$eh2Resp['success']===true);
 
-$sk2Resp=json_decode(@file_get_contents('https://shippershop.vn/api/v2/skill-tags.php'),true);
+$sk2Resp=json_decode(http_get('https://shippershop.vn/api/v2/skill-tags.php'),true);
 t('Func: skills presets ok',count($sk2Resp['data']['presets'])===5);
 
-$tm3Resp=json_decode(@file_get_contents('https://shippershop.vn/api/v2/template-market.php?category=question'),true);
+$tm3Resp=json_decode(http_get('https://shippershop.vn/api/v2/template-market.php?category=question'),true);
 t('Func: templates filtered',count($tm3Resp['data']['templates'])>=1);
 
-$lb2Resp=json_decode(@file_get_contents('https://shippershop.vn/api/v2/leaderboard-seasons.php?period=weekly&metric=comments'),true);
+$lb2Resp=json_decode(http_get('https://shippershop.vn/api/v2/leaderboard-seasons.php?period=weekly&metric=comments'),true);
 t('Func: leaderboard comments',$lb2Resp&&$lb2Resp['success']===true);
 
-$usc2Resp=json_decode(@file_get_contents('https://shippershop.vn/api/v2/user-summary-card.php?user_id=999'),true);
+$usc2Resp=json_decode(http_get('https://shippershop.vn/api/v2/user-summary-card.php?user_id=999'),true);
 t('Func: summary card missing user',$usc2Resp&&$usc2Resp['success']===true&&$usc2Resp['data']===null);
 
 
 // Expense report (auth)
 $erCtx=stream_context_create(['http'=>['ignore_errors'=>true]]);
-$erResp=json_decode(@file_get_contents('https://shippershop.vn/api/v2/expense-report.php',false,$erCtx),true);
+$erResp=json_decode(http_get_ctx('https://shippershop.vn/api/v2/expense-report.php',$erCtx),true);
 t('Func: expense report endpoint',$erResp!==null);
 
 // Trend detector keywords
-$tdResp=json_decode(@file_get_contents('https://shippershop.vn/api/v2/trend-detector.php?hours=24'),true);
+$tdResp=json_decode(http_get('https://shippershop.vn/api/v2/trend-detector.php?hours=24'),true);
 t('Func: trend detector',$tdResp&&$tdResp['success']===true&&isset($tdResp['data']['keywords']));
 t('Func: trend hashtags',isset($tdResp['data']['hashtags']));
 t('Func: trend posts analyzed',$tdResp['data']['posts_analyzed']>=0);
 
 // Trend detector rising
-$trResp=json_decode(@file_get_contents('https://shippershop.vn/api/v2/trend-detector.php?action=rising&hours=24'),true);
+$trResp=json_decode(http_get('https://shippershop.vn/api/v2/trend-detector.php?action=rising&hours=24'),true);
 t('Func: trend rising',$trResp&&$trResp['success']===true&&isset($trResp['data']['rising']));
 
 // Trend 72h window
-$td72Resp=json_decode(@file_get_contents('https://shippershop.vn/api/v2/trend-detector.php?hours=72'),true);
+$td72Resp=json_decode(http_get('https://shippershop.vn/api/v2/trend-detector.php?hours=72'),true);
 t('Func: trend 72h',$td72Resp&&$td72Resp['success']===true);
 
 // Cohort analysis (admin)
 $caCtx=stream_context_create(['http'=>['ignore_errors'=>true]]);
-$caResp=json_decode(@file_get_contents('https://shippershop.vn/api/v2/cohort-analysis.php',false,$caCtx),true);
+$caResp=json_decode(http_get_ctx('https://shippershop.vn/api/v2/cohort-analysis.php',$caCtx),true);
 t('Func: cohort analysis endpoint',$caResp!==null);
 
 // Conv files (auth)
 $cfCtx=stream_context_create(['http'=>['ignore_errors'=>true]]);
-$cfResp=json_decode(@file_get_contents('https://shippershop.vn/api/v2/conv-files.php?conversation_id=1',false,$cfCtx),true);
+$cfResp=json_decode(http_get_ctx('https://shippershop.vn/api/v2/conv-files.php?conversation_id=1',$cfCtx),true);
 t('Func: conv files endpoint',$cfResp!==null);
 
 // Extra cross-checks for 900 push
-$dm3Resp=json_decode(@file_get_contents('https://shippershop.vn/api/v2/delivery-map.php?action=user&user_id=2'),true);
+$dm3Resp=json_decode(http_get('https://shippershop.vn/api/v2/delivery-map.php?action=user&user_id=2'),true);
 t('Func: delivery map user 2',$dm3Resp&&$dm3Resp['success']===true);
 
-$eh3Resp=json_decode(@file_get_contents('https://shippershop.vn/api/v2/engagement-heatmap.php?user_id=2'),true);
+$eh3Resp=json_decode(http_get('https://shippershop.vn/api/v2/engagement-heatmap.php?user_id=2'),true);
 t('Func: heatmap user 2',$eh3Resp&&$eh3Resp['success']===true);
 
-$ra2Resp=json_decode(@file_get_contents('https://shippershop.vn/api/v2/reactions-analytics.php?action=user&user_id=3&days=30'),true);
+$ra2Resp=json_decode(http_get('https://shippershop.vn/api/v2/reactions-analytics.php?action=user&user_id=3&days=30'),true);
 t('Func: reactions user 3',$ra2Resp&&$ra2Resp['success']===true);
 
-$cv3Resp=json_decode(@file_get_contents('https://shippershop.vn/api/v2/calendar-view.php?month=2&year=2026'),true);
+$cv3Resp=json_decode(http_get('https://shippershop.vn/api/v2/calendar-view.php?month=2&year=2026'),true);
 t('Func: calendar feb 2026',$cv3Resp&&$cv3Resp['success']===true&&$cv3Resp['data']['days_in_month']===28);
 
-$rt2Resp=json_decode(@file_get_contents('https://shippershop.vn/api/v2/reputation-tiers.php?action=user&user_id=3'),true);
+$rt2Resp=json_decode(http_get('https://shippershop.vn/api/v2/reputation-tiers.php?action=user&user_id=3'),true);
 t('Func: reputation user 3',$rt2Resp&&$rt2Resp['success']===true&&isset($rt2Resp['data']['score']));
 
-$ms4Resp=json_decode(@file_get_contents('https://shippershop.vn/api/v2/milestones.php?user_id=2'),true);
+$ms4Resp=json_decode(http_get('https://shippershop.vn/api/v2/milestones.php?user_id=2'),true);
 t('Func: milestones admin earned',$ms4Resp['data']['total_earned']>=5);
 
-$up2Resp=json_decode(@file_get_contents('https://shippershop.vn/api/v2/user-portfolio.php?user_id=3'),true);
+$up2Resp=json_decode(http_get('https://shippershop.vn/api/v2/user-portfolio.php?user_id=3'),true);
 t('Func: portfolio user 3 detail',$up2Resp&&$up2Resp['success']===true);
 
-$uc2Resp=json_decode(@file_get_contents('https://shippershop.vn/api/v2/user-connections.php?user_id=3'),true);
+$uc2Resp=json_decode(http_get('https://shippershop.vn/api/v2/user-connections.php?user_id=3'),true);
 t('Func: connections user 3',$uc2Resp&&$uc2Resp['success']===true);
 
-$ph2Resp=json_decode(@file_get_contents('https://shippershop.vn/api/v2/post-highlights.php?user_id=3'),true);
+$ph2Resp=json_decode(http_get('https://shippershop.vn/api/v2/post-highlights.php?user_id=3'),true);
 t('Func: highlights user 3',$ph2Resp&&$ph2Resp['success']===true);
 
-$wh2Resp=json_decode(@file_get_contents('https://shippershop.vn/api/v2/work-history.php?user_id=3'),true);
+$wh2Resp=json_decode(http_get('https://shippershop.vn/api/v2/work-history.php?user_id=3'),true);
 t('Func: work history user 3',$wh2Resp&&$wh2Resp['success']===true);
 
-$lb3Resp=json_decode(@file_get_contents('https://shippershop.vn/api/v2/leaderboard-seasons.php?period=monthly&metric=likes'),true);
+$lb3Resp=json_decode(http_get('https://shippershop.vn/api/v2/leaderboard-seasons.php?period=monthly&metric=likes'),true);
 t('Func: leaderboard monthly likes',$lb3Resp!==null);
 
-$pd2Resp=json_decode(@file_get_contents('https://shippershop.vn/api/v2/post-digest.php?period=weekly'),true);
+$pd2Resp=json_decode(http_get('https://shippershop.vn/api/v2/post-digest.php?period=weekly'),true);
 t('Func: digest weekly stats',$pd2Resp['data']['period']==='weekly');
 
-$ss4Resp=json_decode(@file_get_contents('https://shippershop.vn/api/v2/smart-schedule.php?action=next'),true);
+$ss4Resp=json_decode(http_get('https://shippershop.vn/api/v2/smart-schedule.php?action=next'),true);
 t('Func: schedule next ok',$ss4Resp&&$ss4Resp['success']===true);
 
-$pr3Resp=json_decode(@file_get_contents('https://shippershop.vn/api/v2/post-reach.php?post_id=125'),true);
+$pr3Resp=json_decode(http_get('https://shippershop.vn/api/v2/post-reach.php?post_id=125'),true);
 t('Func: reach post 125',$pr3Resp&&$pr3Resp['success']===true);
 
-$at3Resp=json_decode(@file_get_contents(str_replace(" ","+",'https://shippershop.vn/api/v2/auto-tag.php?text=tuyen shipper ghtk quan 7 tphcm')),true);
+$at3Resp=json_decode(http_get(str_replace(" ","+",'https://shippershop.vn/api/v2/auto-tag.php?text=tuyen shipper ghtk quan 7 tphcm')),true);
 t('Func: auto tag multi',$at3Resp&&$at3Resp['success']===true&&count($at3Resp['data']['suggested_tags'])>=2);
 
-$ps4Resp=json_decode(@file_get_contents('https://shippershop.vn/api/v2/post-similar.php?post_id=126'),true);
+$ps4Resp=json_decode(http_get('https://shippershop.vn/api/v2/post-similar.php?post_id=126'),true);
 t('Func: similar post 126',$ps4Resp&&$ps4Resp['success']===true);
 
-$ep2Resp=json_decode(@file_get_contents(str_replace(" ","+",'https://shippershop.vn/api/v2/engagement-predict.php?text=giao hang nhanh tphcm quan 7 shipper kinh nghiem chia se #ghtk lien he 0909')),true);
+$ep2Resp=json_decode(http_get(str_replace(" ","+",'https://shippershop.vn/api/v2/engagement-predict.php?text=giao hang nhanh tphcm quan 7 shipper kinh nghiem chia se #ghtk lien he 0909')),true);
 t('Func: predict detailed',$ep2Resp&&$ep2Resp['data']['score']>=40);
 
-$cs5Resp=json_decode(@file_get_contents(str_replace(" ","+",'https://shippershop.vn/api/v2/content-score.php?text=ghtk shipper giao hang nhanh tphcm quan 7 kinh nghiem chia se cho nguoi moi bat dau lam shipper lien he 0909 tuyen dung')),true);
+$cs5Resp=json_decode(http_get(str_replace(" ","+",'https://shippershop.vn/api/v2/content-score.php?text=ghtk shipper giao hang nhanh tphcm quan 7 kinh nghiem chia se cho nguoi moi bat dau lam shipper lien he 0909 tuyen dung')),true);
 t('Func: content score high',$cs5Resp&&$cs5Resp['data']['score']>=50);
 
-$ec3Resp=json_decode(@file_get_contents('https://shippershop.vn/api/v2/engagement-compare.php?action=users&user1=2&user2=4'),true);
+$ec3Resp=json_decode(http_get('https://shippershop.vn/api/v2/engagement-compare.php?action=users&user1=2&user2=4'),true);
 t('Func: compare users 2v4',$ec3Resp&&$ec3Resp['success']===true);
 
-$aw3Resp=json_decode(@file_get_contents('https://shippershop.vn/api/v2/achievements-wall.php?action=recent'),true);
+$aw3Resp=json_decode(http_get('https://shippershop.vn/api/v2/achievements-wall.php?action=recent'),true);
 t('Func: achievements recent',$aw3Resp!==null);
 
-$bw2Resp=json_decode(@file_get_contents('https://shippershop.vn/api/v2/badges-wall.php?action=leaderboard'),true);
+$bw2Resp=json_decode(http_get('https://shippershop.vn/api/v2/badges-wall.php?action=leaderboard'),true);
 t('Func: badges leaderboard ok',$bw2Resp&&$bw2Resp['success']===true);
 
 
 // Post bookmark folders (auth)
 $pbfCtx=stream_context_create(['http'=>['ignore_errors'=>true]]);
-$pbfResp=json_decode(@file_get_contents('https://shippershop.vn/api/v2/post-bookmarks-folder.php',false,$pbfCtx),true);
+$pbfResp=json_decode(http_get_ctx('https://shippershop.vn/api/v2/post-bookmarks-folder.php',$pbfCtx),true);
 t('Func: bookmark folders endpoint',$pbfResp!==null);
 
 // User dashboard (auth)
 $udCtx=stream_context_create(['http'=>['ignore_errors'=>true]]);
-$udResp=json_decode(@file_get_contents('https://shippershop.vn/api/v2/user-dashboard.php',false,$udCtx),true);
+$udResp=json_decode(http_get_ctx('https://shippershop.vn/api/v2/user-dashboard.php',$udCtx),true);
 t('Func: user dashboard endpoint',$udResp!==null);
 
 // Cross-verify: delivery map shippers
-$dmShp=json_decode(@file_get_contents('https://shippershop.vn/api/v2/delivery-map.php?action=shippers&province='),true);
+$dmShp=json_decode(http_get('https://shippershop.vn/api/v2/delivery-map.php?action=shippers&province='),true);
 t('Func: delivery shippers empty',$dmShp&&$dmShp['success']===true);
 
 // Cross-verify: calendar view March 2026 has posts
-$cvMar=json_decode(@file_get_contents('https://shippershop.vn/api/v2/calendar-view.php?month=3&year=2026'),true);
+$cvMar=json_decode(http_get('https://shippershop.vn/api/v2/calendar-view.php?month=3&year=2026'),true);
 t('Func: calendar march posts',$cvMar['data']['total_posts']>=100);
 
 // Cross-verify: engagement heatmap has grid
-$ehGrid=json_decode(@file_get_contents('https://shippershop.vn/api/v2/engagement-heatmap.php?days=30'),true);
+$ehGrid=json_decode(http_get('https://shippershop.vn/api/v2/engagement-heatmap.php?days=30'),true);
 t('Func: heatmap has grid cells',count($ehGrid['data']['grid'])>=10);
 
 // Cross-verify: reputation leaderboard has users
-$rtLb=json_decode(@file_get_contents('https://shippershop.vn/api/v2/reputation-tiers.php?action=leaderboard'),true);
+$rtLb=json_decode(http_get('https://shippershop.vn/api/v2/reputation-tiers.php?action=leaderboard'),true);
 t('Func: reputation lb users',count($rtLb['data'])>=5);
 
 // Cross-verify: smart schedule has slots
-$ssSlots=json_decode(@file_get_contents('https://shippershop.vn/api/v2/smart-schedule.php'),true);
+$ssSlots=json_decode(http_get('https://shippershop.vn/api/v2/smart-schedule.php'),true);
 t('Func: smart schedule slots',count($ssSlots['data']['recommended_slots'])>=3);
 
 // Cross-verify: post reach non-zero
-$prNz=json_decode(@file_get_contents('https://shippershop.vn/api/v2/post-reach.php?user_id=2'),true);
+$prNz=json_decode(http_get('https://shippershop.vn/api/v2/post-reach.php?user_id=2'),true);
 t('Func: post reach non-zero',$prNz['data']['total_estimated_reach']>=1);
 
 
 // Vehicle manager types
-$vmtResp=json_decode(@file_get_contents('https://shippershop.vn/api/v2/vehicle-manager.php?action=types'),true);
+$vmtResp=json_decode(http_get('https://shippershop.vn/api/v2/vehicle-manager.php?action=types'),true);
 t('Func: vehicle types',$vmtResp!==null);
 
 // Vehicle manager (auth)
 $vmCtx=stream_context_create(['http'=>['ignore_errors'=>true]]);
-$vmResp=json_decode(@file_get_contents('https://shippershop.vn/api/v2/vehicle-manager.php',false,$vmCtx),true);
+$vmResp=json_decode(http_get_ctx('https://shippershop.vn/api/v2/vehicle-manager.php',$vmCtx),true);
 t('Func: vehicle manager endpoint',$vmResp!==null);
 
 // Schedule queue (auth)
 $sqCtx=stream_context_create(['http'=>['ignore_errors'=>true]]);
-$sqResp=json_decode(@file_get_contents('https://shippershop.vn/api/v2/schedule-queue.php',false,$sqCtx),true);
+$sqResp=json_decode(http_get_ctx('https://shippershop.vn/api/v2/schedule-queue.php',$sqCtx),true);
 t('Func: schedule queue endpoint',$sqResp!==null);
 
 // Platform alerts (admin)
 $paCtx2=stream_context_create(['http'=>['ignore_errors'=>true]]);
-$paResp2=json_decode(@file_get_contents('https://shippershop.vn/api/v2/platform-alerts.php',false,$paCtx2),true);
+$paResp2=json_decode(http_get_ctx('https://shippershop.vn/api/v2/platform-alerts.php',$paCtx2),true);
 t('Func: platform alerts endpoint',$paResp2!==null);
 
 // Conv reactions summary (auth)
 $crsCtx2=stream_context_create(['http'=>['ignore_errors'=>true]]);
-$crsResp2=json_decode(@file_get_contents('https://shippershop.vn/api/v2/conv-reactions-summary.php?conversation_id=1',false,$crsCtx2),true);
+$crsResp2=json_decode(http_get_ctx('https://shippershop.vn/api/v2/conv-reactions-summary.php?conversation_id=1',$crsCtx2),true);
 t('Func: conv reactions summary',$crsResp2!==null);
 
 
 // Weather alerts
-$waResp=json_decode(@file_get_contents('https://shippershop.vn/api/v2/weather-alerts.php'),true);
+$waResp=json_decode(http_get('https://shippershop.vn/api/v2/weather-alerts.php'),true);
 t('Func: weather alerts',$waResp&&$waResp['success']===true&&count($waResp['data']['alerts'])>=5);
 t('Func: weather count',$waResp['data']['count']>=5);
 
 // Weather safety
-$wsResp=json_decode(@file_get_contents('https://shippershop.vn/api/v2/weather-alerts.php?action=safety'),true);
+$wsResp=json_decode(http_get('https://shippershop.vn/api/v2/weather-alerts.php?action=safety'),true);
 t('Func: weather safety',$wsResp&&$wsResp['success']===true&&count($wsResp['data'])>=5);
 
 // AI suggest
-$asResp=json_decode(@file_get_contents('https://shippershop.vn/api/v2/ai-suggest.php'),true);
+$asResp=json_decode(http_get('https://shippershop.vn/api/v2/ai-suggest.php'),true);
 t('Func: ai suggest',$asResp&&$asResp['success']===true&&count($asResp['data']['suggestions'])>=5);
 t('Func: ai categories',count($asResp['data']['categories'])===6);
 
 // AI suggest filtered
-$asfResp=json_decode(@file_get_contents('https://shippershop.vn/api/v2/ai-suggest.php?category=morning'),true);
+$asfResp=json_decode(http_get('https://shippershop.vn/api/v2/ai-suggest.php?category=morning'),true);
 t('Func: ai suggest morning',count($asfResp['data']['suggestions'])>=1);
 
 // Retention score (admin)
 $rsCtx=stream_context_create(['http'=>['ignore_errors'=>true]]);
-$rsResp=json_decode(@file_get_contents('https://shippershop.vn/api/v2/retention-score.php',false,$rsCtx),true);
+$rsResp=json_decode(http_get_ctx('https://shippershop.vn/api/v2/retention-score.php',$rsCtx),true);
 t('Func: retention score endpoint',$rsResp!==null);
 
 // Conv stickers
-$cstkResp=json_decode(@file_get_contents('https://shippershop.vn/api/v2/conv-stickers.php'),true);
+$cstkResp=json_decode(http_get('https://shippershop.vn/api/v2/conv-stickers.php'),true);
 t('Func: conv stickers',$cstkResp&&$cstkResp['success']===true&&count($cstkResp['data']['packs'])>=5);
 t('Func: sticker count',$cstkResp['data']['total_stickers']>=50);
 
 // Conv stickers filtered
-$cstkf=json_decode(@file_get_contents('https://shippershop.vn/api/v2/conv-stickers.php?pack=shipper'),true);
+$cstkf=json_decode(http_get('https://shippershop.vn/api/v2/conv-stickers.php?pack=shipper'),true);
 t('Func: sticker pack shipper',count($cstkf['data']['packs'])===1&&count($cstkf['data']['packs'][0]['stickers'])>=15);
 
 
 // Delivery stats v2
-$dsv2Resp=json_decode(@file_get_contents('https://shippershop.vn/api/v2/delivery-stats-v2.php?days=30'),true);
+$dsv2Resp=json_decode(http_get('https://shippershop.vn/api/v2/delivery-stats-v2.php?days=30'),true);
 t('Func: delivery stats v2',$dsv2Resp&&$dsv2Resp['success']===true&&isset($dsv2Resp['data']['total_posts']));
 t('Func: delivery peak hours',isset($dsv2Resp['data']['peak_hours']));
 t('Func: delivery by company',isset($dsv2Resp['data']['by_company']));
 
 // Delivery stats user
-$dsv2u=json_decode(@file_get_contents('https://shippershop.vn/api/v2/delivery-stats-v2.php?user_id=2&days=90'),true);
+$dsv2u=json_decode(http_get('https://shippershop.vn/api/v2/delivery-stats-v2.php?user_id=2&days=90'),true);
 t('Func: delivery stats user 2',$dsv2u&&$dsv2u['success']===true);
 
 // Delivery stats top
-$dsv2t=json_decode(@file_get_contents('https://shippershop.vn/api/v2/delivery-stats-v2.php?action=top&days=30'),true);
+$dsv2t=json_decode(http_get('https://shippershop.vn/api/v2/delivery-stats-v2.php?action=top&days=30'),true);
 t('Func: delivery top performers',$dsv2t&&$dsv2t['success']===true&&count($dsv2t['data'])>=1);
 
 // Content moderation safe
-$cmSafe=json_decode(@file_get_contents('https://shippershop.vn/api/v2/content-moderate.php?text='.urlencode('giao hang nhanh tphcm shipper cham chi')),true);
+$cmSafe=json_decode(http_get('https://shippershop.vn/api/v2/content-moderate.php?text='.urlencode('giao hang nhanh tphcm shipper cham chi')),true);
 t('Func: content moderate safe',$cmSafe&&$cmSafe['data']['safe']===true);
 t('Func: content moderate score',$cmSafe['data']['score']>=80);
 
 // Content moderation unsafe
-$cmUnsafe=json_decode(@file_get_contents('https://shippershop.vn/api/v2/content-moderate.php?text='.urlencode('casino lo de ca cuoc dam bao 100%')),true);
+$cmUnsafe=json_decode(http_get('https://shippershop.vn/api/v2/content-moderate.php?text='.urlencode('casino lo de ca cuoc dam bao 100%')),true);
 t('Func: content moderate unsafe',$cmUnsafe&&$cmUnsafe['data']['safe']===false);
 t('Func: content moderate issues',$cmUnsafe['data']['issue_count']>=2);
 
 // Growth metrics (admin)
 $gmCtx=stream_context_create(['http'=>['ignore_errors'=>true]]);
-$gmResp=json_decode(@file_get_contents('https://shippershop.vn/api/v2/growth-metrics.php',false,$gmCtx),true);
+$gmResp=json_decode(http_get_ctx('https://shippershop.vn/api/v2/growth-metrics.php',$gmCtx),true);
 t('Func: growth metrics endpoint',$gmResp!==null);
 
 // Conv templates
-$ctResp=json_decode(@file_get_contents('https://shippershop.vn/api/v2/conv-templates.php'),true);
+$ctResp=json_decode(http_get('https://shippershop.vn/api/v2/conv-templates.php'),true);
 t('Func: conv templates',$ctResp&&$ctResp['success']===true&&count($ctResp['data']['templates'])>=10);
 t('Func: conv template categories',count($ctResp['data']['categories'])===5);
 
 // Conv templates filtered
-$ctfResp=json_decode(@file_get_contents('https://shippershop.vn/api/v2/conv-templates.php?category=delivery'),true);
+$ctfResp=json_decode(http_get('https://shippershop.vn/api/v2/conv-templates.php?category=delivery'),true);
 t('Func: conv templates delivery',count($ctfResp['data']['templates'])>=2);
 
-$ctfResp2=json_decode(@file_get_contents('https://shippershop.vn/api/v2/conv-templates.php?category=payment'),true);
+$ctfResp2=json_decode(http_get('https://shippershop.vn/api/v2/conv-templates.php?category=payment'),true);
 t('Func: conv templates payment',count($ctfResp2['data']['templates'])>=2);
 
 // Extra cross-checks
-$wa2=json_decode(@file_get_contents('https://shippershop.vn/api/v2/weather-alerts.php?province=Ho+Chi+Minh'),true);
+$wa2=json_decode(http_get('https://shippershop.vn/api/v2/weather-alerts.php?province=Ho+Chi+Minh'),true);
 t('Func: weather filter hcm',$wa2['data']['count']>=1);
 
-$as2=json_decode(@file_get_contents('https://shippershop.vn/api/v2/ai-suggest.php?category=tip'),true);
+$as2=json_decode(http_get('https://shippershop.vn/api/v2/ai-suggest.php?category=tip'),true);
 t('Func: ai suggest tip',count($as2['data']['suggestions'])>=1);
 
-$stk2=json_decode(@file_get_contents('https://shippershop.vn/api/v2/conv-stickers.php?pack=emotions'),true);
+$stk2=json_decode(http_get('https://shippershop.vn/api/v2/conv-stickers.php?pack=emotions'),true);
 t('Func: stickers emotions',count($stk2['data']['packs'][0]['stickers'])>=10);
 
-$td2=json_decode(@file_get_contents('https://shippershop.vn/api/v2/trend-detector.php?hours=168'),true);
+$td2=json_decode(http_get('https://shippershop.vn/api/v2/trend-detector.php?hours=168'),true);
 t('Func: trend 7 days window',$td2&&$td2['success']===true);
 
-$cv4=json_decode(@file_get_contents('https://shippershop.vn/api/v2/calendar-view.php?month=1&year=2026'),true);
+$cv4=json_decode(http_get('https://shippershop.vn/api/v2/calendar-view.php?month=1&year=2026'),true);
 t('Func: calendar jan 2026',$cv4&&$cv4['data']['days_in_month']===31);
 
-$dm4=json_decode(@file_get_contents('https://shippershop.vn/api/v2/delivery-map.php'),true);
+$dm4=json_decode(http_get('https://shippershop.vn/api/v2/delivery-map.php'),true);
 t('Func: delivery map districts 30',count($dm4['data']['by_district'])>=10);
 
-$eh4=json_decode(@file_get_contents('https://shippershop.vn/api/v2/engagement-heatmap.php?days=7'),true);
+$eh4=json_decode(http_get('https://shippershop.vn/api/v2/engagement-heatmap.php?days=7'),true);
 t('Func: heatmap 7d grid',count($eh4['data']['grid'])>=1);
 
-$ur3=json_decode(@file_get_contents('https://shippershop.vn/api/v2/user-ratings.php?user_id=3'),true);
+$ur3=json_decode(http_get('https://shippershop.vn/api/v2/user-ratings.php?user_id=3'),true);
 t('Func: user ratings user 3',$ur3&&$ur3['success']===true);
 
-$ec4=json_decode(@file_get_contents('https://shippershop.vn/api/v2/engagement-compare.php?post1=125&post2=130'),true);
+$ec4=json_decode(http_get('https://shippershop.vn/api/v2/engagement-compare.php?post1=125&post2=130'),true);
 t('Func: compare posts 125v130',$ec4&&$ec4['success']===true);
 
-$pc3=json_decode(@file_get_contents('https://shippershop.vn/api/v2/plagiarism-check.php?text='.urlencode('shipper giao hang nhanh cho nguoi moi bat dau tai tphcm kinh nghiem thuc te')),true);
+$pc3=json_decode(http_get('https://shippershop.vn/api/v2/plagiarism-check.php?text='.urlencode('shipper giao hang nhanh cho nguoi moi bat dau tai tphcm kinh nghiem thuc te')),true);
 t('Func: plagiarism long text',$pc3&&$pc3['success']===true&&$pc3['data']['phrases_checked']>=2);
 
-$ff2=json_decode(@file_get_contents('https://shippershop.vn/api/v2/feature-flags.php'),true);
+$ff2=json_decode(http_get('https://shippershop.vn/api/v2/feature-flags.php'),true);
 t('Func: feature flags 14+',count($ff2['data']['flags'])>=14);
 
-$sc2=json_decode(@file_get_contents('https://shippershop.vn/api/v2/site-config.php'),true);
+$sc2=json_decode(http_get('https://shippershop.vn/api/v2/site-config.php'),true);
 t('Func: site config version',!empty($sc2['data']['site']['version']));
 
-$ss5=json_decode(@file_get_contents('https://shippershop.vn/api/v2/smart-schedule.php'),true);
+$ss5=json_decode(http_get('https://shippershop.vn/api/v2/smart-schedule.php'),true);
 t('Func: smart schedule 3+ slots',count($ss5['data']['recommended_slots'])>=3);
 
-$st3=json_decode(@file_get_contents('https://shippershop.vn/api/v2/status.php'),true);
+$st3=json_decode(http_get('https://shippershop.vn/api/v2/status.php'),true);
 
-$pr4=json_decode(@file_get_contents('https://shippershop.vn/api/v2/post-reach.php?post_id=126'),true);
+$pr4=json_decode(http_get('https://shippershop.vn/api/v2/post-reach.php?post_id=126'),true);
 t('Func: post reach 126',$pr4&&$pr4['success']===true);
 
-$ps5=json_decode(@file_get_contents('https://shippershop.vn/api/v2/post-similar.php?post_id=130'),true);
+$ps5=json_decode(http_get('https://shippershop.vn/api/v2/post-similar.php?post_id=130'),true);
 t('Func: similar post 130',$ps5&&$ps5['success']===true);
 
-$ms5=json_decode(@file_get_contents('https://shippershop.vn/api/v2/milestones.php?user_id=3'),true);
+$ms5=json_decode(http_get('https://shippershop.vn/api/v2/milestones.php?user_id=3'),true);
 t('Func: milestones user 3',$ms5&&$ms5['success']===true);
 
-$rt3=json_decode(@file_get_contents('https://shippershop.vn/api/v2/reputation-tiers.php?action=user&user_id=2'),true);
+$rt3=json_decode(http_get('https://shippershop.vn/api/v2/reputation-tiers.php?action=user&user_id=2'),true);
 t('Func: reputation admin tier',!empty($rt3['data']['tier']));
 
-$st3=json_decode(@file_get_contents('https://shippershop.vn/api/v2/status.php'),true);
-t('Func: status api healthy',$st3&&$stHealth=json_decode(@file_get_contents('https://shippershop.vn/api/v2/status.php'),true);
+$st3=json_decode(http_get('https://shippershop.vn/api/v2/status.php'),true);
+t('Func: status api healthy',$st3&&$stHealth=json_decode(http_get('https://shippershop.vn/api/v2/status.php'),true);
 t('Func: status api healthy',$stHealth&&$stHealth['status']==='healthy');
 // ============ RESULTS ============
-$total=$P+$F;$totalTests=$_tIdx;
+$total=$P+$F;
+$_totalTests=$_tIdx;$totalTests=$_tIdx;
 echo json_encode(['timestamp'=>date('Y-m-d H:i:s'),'passed'=>$P,'failed'=>$F,'total'=>$total,'score'=>$total>0?round($P/$total*100,1).'%':'0%','results'=>$R],JSON_PRETTY_PRINT|JSON_UNESCAPED_UNICODE);
