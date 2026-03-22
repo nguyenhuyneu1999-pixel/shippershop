@@ -83,5 +83,33 @@
                 btn.style.opacity = '1';
             }, 3000);
         }
-    });
+    
+    // Connection speed detection
+    if ('connection' in navigator) {
+        var conn = navigator.connection;
+        window.SSConnection = {
+            type: conn.effectiveType || 'unknown',
+            speed: conn.downlink || 0,
+            saveData: conn.saveData || false
+        };
+        // If slow connection, disable video autoplay and reduce image quality
+        if (conn.effectiveType === '2g' || conn.effectiveType === 'slow-2g' || conn.saveData) {
+            document.documentElement.classList.add('slow-connection');
+        }
+    }
+
+
+    // Connection speed detection
+    if ('connection' in navigator) {
+        var conn = navigator.connection;
+        window.SSConnection = {
+            type: conn.effectiveType || 'unknown',
+            speed: conn.downlink || 0,
+            saveData: conn.saveData || false
+        };
+        // If slow connection, disable video autoplay and reduce image quality
+        if (conn.effectiveType === '2g' || conn.effectiveType === 'slow-2g' || conn.saveData) {
+            document.documentElement.classList.add('slow-connection');
+        }
+    }
 })();

@@ -327,3 +327,7 @@ video{width:100%;max-height:600px;display:block;background:#000;}
 .loc-filter .loc-icon{color:#1976d2;font-size:14px;flex-shrink:0;}
 .loc-filter .loc-clear{background:none;border:1px solid #ddd;border-radius:20px;padding:4px 10px;font-size:11px;cursor:pointer;color:#999;flex-shrink:0;}
 @keyframes xpIn{from{transform:translateX(100px);opacity:0}to{transform:translateX(0);opacity:1}}
+
+/* Slow connection optimizations */
+.slow-connection video{display:none!important}
+.slow-connection .post-images img{image-rendering:pixelated}
