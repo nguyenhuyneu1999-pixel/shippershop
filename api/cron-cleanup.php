@@ -8,6 +8,7 @@ if (($_GET['key'] ?? '') !== 'ss_cleanup_cron') { http_response_code(403); exit;
 define('APP_ACCESS', true);
 require_once __DIR__ . '/../includes/config.php';
 require_once __DIR__ . '/../includes/db.php';
+require_once __DIR__ . '/../includes/functions.php';
 
 header('Content-Type: application/json');
 $d = db();
