@@ -19,6 +19,7 @@ function vm_ok($msg,$data=null){echo json_encode(['success'=>true,'message'=>$ms
 
 try {
 
+if($action==='types'){vm_ok('OK',['types'=>$TYPES]);}
 $uid=require_auth();
 $key='vehicles_'.$uid;
 
