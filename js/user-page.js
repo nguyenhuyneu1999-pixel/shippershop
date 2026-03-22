@@ -2,7 +2,14 @@
 
 var CU=JSON.parse(localStorage.getItem('user')||'null');var targetId=parseInt(new URLSearchParams(location.search).get('id'))||(CU?CU.id:0);var userData=null;
 var shipColors={'GHTK':'#00b14f','J&T':'#d32f2f','GHN':'#ff6600','SPX':'#7C3AED','Grab':'#00b14f','Be':'#5bc500','Gojek':'#00aa13','Ninja Van':'#c41230','Viettel Post':'#e21a1a','Lalamove':'#f5a623'};
-async function loadProfile(){if(!targetId){location.href='login.html';return;}try{var r=await fetch('/api/user-page.php?id='+targetId,{credentials:'include'});var d=await r.json();if(!d.success){document.getElementById('tabContent').innerHTML='<div class="empty"><i class="fas fa-user-slash"></i><p>Không tìm thấy</p></div>';return;}userData=d.data;renderProfile();loadTab('posts');}catch(e){document.getElementById('tabContent').innerHTML='<div class="empty"><p>Lỗi</p></div>';}}
+async function loadProfile(){if(!targetId){location.href='login.html';return;}try{var r=await fetch('/api/user-page.php?id='+targetId,{credentials:'include'});var d=await r.json();if(!d.success){document.getElementById('tabContent').innerHTML='<div class="empty"><i class="fas fa-user-slash"></i><p>Không tìm thấy</p></div>';return;}userData=d.data;renderProfile();loadTab('posts');
+    // Dynamic SEO
+    var _u=userData;
+    document.title=_u.fullname+' - ShipperShop';
+    var _sm=function(p,v){var m=document.querySelector('meta[property="'+p+'"]');if(m)m.content=v;else{m=document.createElement('meta');m.setAttribute('property',p);m.content=v;document.head.appendChild(m);}};
+    _sm('og:title',_u.fullname+' - ShipperShop');
+    _sm('og:description',(_u.shipping_company||'Shipper')+' · '+(_u.follower_count||0)+' nguoi theo doi');
+    if(_u.avatar)_sm('og:image','https://shippershop.vn'+_u.avatar);}catch(e){document.getElementById('tabContent').innerHTML='<div class="empty"><p>Lỗi</p></div>';}}
 function renderProfile(){var u=userData;document.title=u.fullname+' - ShipperShop';document.getElementById('navTitle').textContent=u.fullname;document.getElementById('pName').innerHTML=esc(u.fullname)+(u.sub_badge?'<span style="font-size:11px;padding:2px 8px;border-radius:4px;background:'+(u.sub_badge_color||'#7C3AED')+';color:#fff;margin-left:6px;font-weight:600;vertical-align:middle">'+esc(u.sub_badge)+'</span>':'')+(u.is_online?'<span class="online-dot"></span>':'');document.getElementById('pUsername').textContent='u/'+u.username;document.getElementById('pBio').textContent=u.bio||'';document.getElementById('sKarma').textContent=fN(u.total_success||0);document.getElementById('sPosts').textContent=fN(u.post_count);document.getElementById('sAge').textContent=u.account_age_days;document.getElementById('sFollowers').textContent=fN(u.follower_count);
 if(u.cover_image)document.getElementById('cover').style.backgroundImage='url('+u.cover_image+')';
 if(u.is_self){document.getElementById('coverEditBtn').style.display='flex';document.getElementById('avEditBtn').style.display='flex';}

@@ -146,6 +146,7 @@ window.closeSPM=function(){window._spmGroupId=null;
   document.getElementById("spmCount").textContent="0";
   document.getElementById("spmSend").disabled=true;
   spmFiles=[];spmType="post";
+  loadDraft();startDraftSave();
   document.querySelectorAll(".spm-tag").forEach(function(t){t.classList.remove("sel");});
   var first=document.querySelector(".spm-tag[data-t='post']");if(first)first.classList.add("sel");
 };
@@ -230,9 +231,34 @@ window.submitSPM=function(){
     return fetch(url,{method:"POST",headers:hdrs,credentials:"include",body:fd});
   })()
   .then(function(r){return r.json();})
-  .then(function(d){if(d.success){closeSPM();if(typeof loadPosts==="function")loadPosts();else location.reload();}else{if(typeof handleApiError==="function"&&handleApiError(d)){}else if(typeof toast==="function")toast(d.message||"L\u1ed7i","error");}})
+  .then(function(d){if(d.success){closeSPM();if(typeof loadPosts==="function")loadPosts();else clearDraft();location.reload();}else{if(typeof handleApiError==="function"&&handleApiError(d)){}else if(typeof toast==="function")toast(d.message||"L\u1ed7i","error");}})
   .catch(function(){if(typeof toast==="function")toast("L\u1ed7i k\u1ebft n\u1ed1i","error");})
   .finally(function(){btn.disabled=false;btn.textContent="\u0110\u0103ng";});
 };
+
+
+// Auto-save draft every 10s
+var _draftTimer=null;
+function startDraftSave(){
+    if(_draftTimer)clearInterval(_draftTimer);
+    _draftTimer=setInterval(function(){
+        var txt=document.getElementById('spmText');
+        if(txt&&txt.value.trim()){
+            localStorage.setItem('ss_draft',JSON.stringify({content:txt.value,type:spmType,ts:Date.now()}));
+        }
+    },10000);
+}
+function loadDraft(){
+    var raw=localStorage.getItem('ss_draft');
+    if(!raw)return;
+    try{
+        var d=JSON.parse(raw);
+        if(d.content&&(Date.now()-d.ts)<86400000){
+            var txt=document.getElementById('spmText');
+            if(txt&&!txt.value){txt.value=d.content;if(d.type)spmType=d.type;}
+        }
+    }catch(e){}
+}
+function clearDraft(){localStorage.removeItem('ss_draft');}
 
 })();

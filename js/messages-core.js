@@ -129,3 +129,27 @@ function viewImg(src){
     if(typeof openLb==='function'){openLb(src,0,[src]);}
     else{window.open(src,'_blank');}
 }
+
+// Typing indicator
+var _typingTimer=null;
+function sendTyping(convId){
+    if(_typingTimer)return;
+    _typingTimer=setTimeout(function(){_typingTimer=null;},3000);
+    var token=localStorage.getItem('token');
+    if(!token)return;
+    fetch('/api/messages-api.php?action=typing',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+token},body:JSON.stringify({conversation_id:convId})}).catch(function(){});
+}
+function showTyping(name){
+    var el=document.getElementById('typingIndicator');
+    if(!el){
+        el=document.createElement('div');
+        el.id='typingIndicator';
+        el.style.cssText='padding:4px 16px;font-size:12px;color:#65676B;font-style:italic;display:none';
+        var msgList=document.getElementById('msgList')||document.querySelector('.msg-list');
+        if(msgList)msgList.parentNode.insertBefore(el,msgList.nextSibling);
+    }
+    el.textContent=name+' đang nhập...';
+    el.style.display='block';
+    clearTimeout(el._hide);
+    el._hide=setTimeout(function(){el.style.display='none';},4000);
+}
