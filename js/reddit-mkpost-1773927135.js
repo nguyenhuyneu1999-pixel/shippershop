@@ -40,6 +40,14 @@ function hashtagify(text){
   });
 }
 
+
+function detectLinks(text){
+  var urlRegex=/(https?:\/\/[^\s<]+)/g;
+  return text.replace(urlRegex, function(url){
+    return '<a href="'+url+'" target="_blank" rel="noopener" style="color:#7C3AED;text-decoration:none;word-break:break-all">'+url+'</a>';
+  });
+}
+
 function mkPost(p){
   var likes=parseInt(p.likes_count||0);
   var isLiked=p.user_liked||p.user_vote==='up';
