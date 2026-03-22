@@ -23,6 +23,7 @@ require_once __DIR__ . '/../includes/api-error-handler.php';
 require_once __DIR__ . '/../includes/redis-rate-limiter.php';
 apiRateLimit('posts.php', 120);
 require_once __DIR__ . '/../includes/image-optimizer.php';
+define('DEBUG_MODE', true);
 setupApiErrorHandler();
 require_once __DIR__ . '/auth-check.php';
 require_once __DIR__ . '/../includes/xp-helper.php';
