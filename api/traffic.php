@@ -42,6 +42,7 @@ try {
 // GET - List alerts
 // ==========================================
 if ($method === 'GET' && empty($action)) {
+    api_try_cache('traffic_' . md5(json_encode($_GET)), 20);
     $cat = $_GET['category'] ?? '';
     
     $where = "a.`status`='active' AND a.expires_at > NOW()";
