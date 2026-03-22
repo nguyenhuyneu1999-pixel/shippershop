@@ -1,5 +1,6 @@
 <?php
 // ShipperShop API v2 — Post Version History
+// Tinh nang: Theo doi lich su chinh sua bai viet
 // Track post edit history with diff comparison
 session_start();
 require_once __DIR__.'/../../includes/config.php';
