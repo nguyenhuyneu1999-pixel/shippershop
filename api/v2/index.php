@@ -24,7 +24,7 @@ if (!$endpoint) {
 
     echo json_encode([
         'api' => 'ShipperShop API v2',
-        'version' => '5.0.0',
+        'version' => '5.1.0',
         'endpoint_count' => count($endpoints),
         'endpoints' => $endpoints,
         'docs' => 'https://shippershop.vn/docs/API.md',
