@@ -5,7 +5,7 @@ let CU=null,sort='hot',type='all',prov=null,company='',page=1,totalPg=1,imgs=[],
 
 document.addEventListener('DOMContentLoaded',()=>{
   CU=JSON.parse(localStorage.getItem('user')||'null');
-  renderNav(); renderProvinces(); loadPosts(); loadTrend();
+  renderNav(); renderProvinces(); loadPosts(); loadTrend(); loadHashtags();
   // mProv populated by async province API fetch below
   document.getElementById('stM').textContent=Math.floor(Math.random()*3000+1000).toLocaleString();
   document.getElementById('stO').textContent=Math.floor(Math.random()*500+100);
@@ -50,7 +50,7 @@ async function loadPosts(append=false){
       totalPg=d.data.total_pages||1;
       document.getElementById('stP').textContent=d.data.total||0;
       document.getElementById('stT').textContent=Math.floor((d.data.total||0)*0.15+Math.random()*20);
-      document.getElementById('loadMoreBtn').style.display=page<totalPg?'block':'none'; if(d.data&&d.data.next_cursor)_feedCursor=d.data.next_cursor; _feedLoading=false; var sk=document.getElementById('feedSkeleton'); if(sk)sk.style.display='none';
+      document.getElementById('loadMoreBtn').style.display=page<totalPg?'block':'none'; if(d.data&&d.data.next_cursor)_feedCursor=d.data.next_cursor; _feedLoading=false; if(!_infiniteObs)setupInfiniteScroll(); var sk=document.getElementById('feedSkeleton'); if(sk)sk.style.display='none';
       if(append) d.data.posts.forEach(p=>document.getElementById('feed').insertAdjacentHTML('beforeend',mkPost(p)));
       else{
         if(!d.data.posts.length) document.getElementById('feed').innerHTML='<div class="empty"><i class="fas fa-ghost"></i><p>Chưa có bài viết nào!</p><p style="font-size:13px;margin-top:6px">Hãy là người đầu tiên đăng bài 🎉</p></div>';
@@ -142,6 +142,24 @@ function onMDistChange(){
   });}
 }
 function clearLocFilter(){document.getElementById('fProvince').value='';document.getElementById('fDistrict').value='';document.getElementById('fWard').value='';document.getElementById('fDistrict').style.display='none';document.getElementById('fWard').style.display='none';document.getElementById('locClear').style.display='none';loadPosts();}
+
+
+// Infinite scroll: auto-load when reaching bottom
+var _infiniteObs = null;
+function setupInfiniteScroll() {
+    var btn = document.getElementById('loadMoreBtn');
+    if (!btn || !('IntersectionObserver' in window)) return;
+    if (_infiniteObs) _infiniteObs.disconnect();
+    _infiniteObs = new IntersectionObserver(function(entries) {
+        if (entries[0].isIntersecting && !_feedLoading && page < totalPg) {
+            page++;
+            loadPosts(true);
+        }
+    }, { rootMargin: '300px' });
+    _infiniteObs.observe(btn);
+}
+// Setup after first load
+var _origLoadPosts = loadPosts;
 
 function setSort(s,btn){ sort=s; page=1; document.querySelectorAll('.sort-btn').forEach(b=>b.classList.remove('active')); btn.classList.add('active'); loadPosts(); }
 
@@ -254,6 +272,25 @@ async function sendCmt(pid){
 async function loadTrend(){
   try{const r=await fetch('/api/posts.php?sort=top&limit=5');const d=await r.json();if(d.success&&d.data.posts.length){document.getElementById('trendBox').innerHTML='<div class="sidebar-title" style="padding:10px 12px">🔥 Đang thịnh hành</div>'+d.data.posts.map(p=>`<div class="trend-item" onclick="scrollTo2(${p.id})"><div class="trend-title">${esc((p.title||p.content).substring(0,80))}${(p.title||p.content).length>80?'...':''}</div><div class="trend-meta">▲${fN(p.score||0)} · ${fN(p.comments_count||0)} bình luận</div></div>`).join('');}}catch{}
 }
+
+// Load trending hashtags
+async function loadHashtags(){
+  try{
+    var r=await fetch('/api/trending.php?action=hashtags');
+    var d=await r.json();
+    if(d.success&&d.data&&d.data.length){
+      var box=document.getElementById('hashtagBox');
+      if(!box)return;
+      var html='<div class="sidebar-title" style="padding:10px 12px"># Hashtag phổ biến</div><div style="padding:4px 12px 12px;display:flex;flex-wrap:wrap;gap:6px">';
+      d.data.forEach(function(h){
+        html+='<span onclick="doSearch(\'#'+h.tag+'\')" style="padding:4px 10px;background:#f0f0f0;border-radius:16px;font-size:12px;cursor:pointer;color:#333">#'+h.tag+' <span style=\'color:#999;font-size:11px\'>'+h.count+'</span></span>';
+      });
+      html+='</div>';
+      box.innerHTML=html;
+    }
+  }catch(e){}
+}
+
 async function scrollTo2(id){
   var el=document.getElementById('P'+id);
   if(el){el.scrollIntoView({behavior:'smooth',block:'center'});el.style.background='#FFF8E1';setTimeout(function(){el.style.background='';},3000);return;}

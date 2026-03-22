@@ -21,6 +21,9 @@ function apiRateLimit($endpoint = '', $maxPerMinute = 120) {
                 exit;
             }
             $sc->set($key, $current + 1, 120); // 2 min TTL
+            // Rate limit headers
+            header('X-RateLimit-Limit: ' . $maxPerMinute);
+            header('X-RateLimit-Remaining: ' . max(0, $maxPerMinute - $current - 1));
             return true;
         } catch (Throwable $e) {
             return true; // If fails, allow request

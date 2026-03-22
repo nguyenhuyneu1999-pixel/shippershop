@@ -48,6 +48,7 @@ function mkPost(p){
   var anonBadge=anon?'<span class="anon-badge">🎭</span>':'';
   var shipColors={'GHTK':'#00b14f','J&T':'#d32f2f','GHN':'#ff6600','Viettel Post':'#e21a1a','BEST':'#ffc107','Ninja Van':'#c41230','SPX':'#EE4D2D','Ahamove':'#f5a623','Lalamove':'#f5a623','Grab':'#00b14f','Be':'#5bc500','Gojek':'#00aa13'};
   var shipBadge='';
+  var lvlBadge=p.user_level&&p.user_level>1?'<span style="font-size:10px;padding:1px 5px;border-radius:3px;background:linear-gradient(135deg,#7C3AED,#5B21B6);color:#fff;font-weight:600">Lv.'+p.user_level+'</span>':'';
   var subBadge=p.sub_badge?'<span style="font-size:10px;padding:1px 5px;border-radius:3px;background:'+(p.sub_badge_color||'#7C3AED')+';color:#fff;margin-left:4px;font-weight:600">'+esc(p.sub_badge)+'</span>':'';
   if(!anon&&p.shipping_company){
     var sc=p.shipping_company;
@@ -80,7 +81,7 @@ function mkPost(p){
   var canDel=CU&&parseInt(p.user_id)===parseInt(CU.id);
   return '<div class="post-card" id="P'+p.id+'">'
   +'<div class="post-body">'
-  +'<div class="post-meta">'+av+'<div style="flex:1;min-width:0"><div style="display:flex;align-items:center;justify-content:space-between">'+authorLink+'<button class="post-dots" onclick="event.stopPropagation();togMenu('+p.id+')"><i class="fas fa-ellipsis"></i></button></div><div style="font-size:12px;color:#999;display:flex;align-items:center;gap:4px">'+shipBadge+'<span>·</span><span>'+ago(p.created_at)+'</span>'+badge+pvBadge+anonBadge+subBadge+'</div></div></div>'
+  +'<div class="post-meta">'+av+'<div style="flex:1;min-width:0"><div style="display:flex;align-items:center;justify-content:space-between">'+authorLink+'<button class="post-dots" onclick="event.stopPropagation();togMenu('+p.id+')"><i class="fas fa-ellipsis"></i></button></div><div style="font-size:12px;color:#999;display:flex;align-items:center;gap:4px">'+shipBadge+lvlBadge+'<span>·</span><span>'+ago(p.created_at)+'</span>'+badge+pvBadge+anonBadge+subBadge+'</div></div></div>'
   +title+'<div class="post-menu" id="pm'+p.id+'" style="display:none"><div id="sv'+p.id+'" onclick="togSave('+p.id+')"><i class="'+(isSaved?'fas':'far')+' fa-bookmark" style="color:'+(isSaved?'#7C3AED':'inherit')+'"></i> '+(isSaved?'Bỏ lưu':'Lưu bài viết')+'</div>'+(canDel?'<div onclick="editP('+p.id+')"><i class="fas fa-pen"></i> Sửa bài</div><div onclick="delP('+p.id+')"><i class="far fa-trash-can"></i> Xóa bài</div>':'')+'<div onclick="reportP('+p.id+')"><i class="fas fa-flag"></i> Báo cáo</div>'+(canDel?'':'<div onclick="blockUser('+p.user_id+')"><i class="fas fa-ban"></i> Chặn</div>')+'<div onclick="togMenu('+p.id+')"><i class="fas fa-times"></i> Đóng</div></div>'+contentH+imgH+vidH
   +'</div>'
   +'<div class="pa3-stats"><span>'+(likes>0?fN(likes)+' đơn giao thành công':'')+'</span><span>'+(parseInt(p.comments_count||0)>0?fN(p.comments_count||0)+' ghi chú':'')+'</span><span></span></div>'
