@@ -22,6 +22,7 @@ require_once __DIR__ . '/../includes/api-cache.php';
 require_once __DIR__ . '/../includes/api-error-handler.php';
 require_once __DIR__ . '/../includes/image-optimizer.php';
 setupApiErrorHandler();
+try { require_once __DIR__ . '/../includes/redis-rate-limiter.php'; apiRateLimit('posts.php'); } catch (Throwable $e) {}
 require_once __DIR__ . '/auth-check.php';
 require_once __DIR__ . '/../includes/xp-helper.php';
 
