@@ -276,7 +276,13 @@ function deleteFile($path) {
 function jsonResponse($data, $statusCode = 200) {
     http_response_code($statusCode);
     header('Content-Type: application/json; charset=utf-8');
-    echo json_encode($data, JSON_UNESCAPED_UNICODE);
+    $json = json_encode($data, JSON_UNESCAPED_UNICODE);
+    // Auto-save pending cache (from api_try_cache MISS)
+    if (isset($GLOBALS['_ssPendingCacheKey']) && $statusCode === 200) {
+        try { api_cache_set($GLOBALS['_ssPendingCacheKey'], $json, $GLOBALS['_ssPendingCacheTTL'] ?? 30); } catch (Throwable $e) {}
+        unset($GLOBALS['_ssPendingCacheKey'], $GLOBALS['_ssPendingCacheTTL']);
+    }
+    echo $json;
     exit;
 }
 

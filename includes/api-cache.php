@@ -13,6 +13,15 @@
 define('API_CACHE_DIR', '/tmp/ss_api_cache');
 
 function api_cache_get($key) {
+    // Try Redis first (if available)
+    try {
+        if (class_exists('Redis')) {
+            static $r = null, $rtried = false;
+            if (!$rtried) { $rtried = true; try { $r = new Redis(); $r->connect('127.0.0.1', 6379, 0.3); $r->select(1); } catch (Exception $e) { $r = null; } }
+            if ($r) { $v = $r->get('ss:ac:' . $key); if ($v !== false) return $v; }
+        }
+    } catch (Throwable $e) {}
+    // File fallback
     $path = API_CACHE_DIR . '/' . md5($key) . '.json';
     if (!file_exists($path)) return null;
     $raw = @file_get_contents($path);
@@ -26,6 +35,15 @@ function api_cache_get($key) {
 }
 
 function api_cache_set($key, $body, $ttl = 30) {
+    // Save to Redis (fast)
+    try {
+        if (class_exists('Redis')) {
+            static $r2 = null, $r2tried = false;
+            if (!$r2tried) { $r2tried = true; try { $r2 = new Redis(); $r2->connect('127.0.0.1', 6379, 0.3); $r2->select(1); } catch (Exception $e) { $r2 = null; } }
+            if ($r2) $r2->setex('ss:ac:' . $key, $ttl, $body);
+        }
+    } catch (Throwable $e) {}
+    // Save to file (backup)
     if (!is_dir(API_CACHE_DIR)) @mkdir(API_CACHE_DIR, 0755, true);
     $path = API_CACHE_DIR . '/' . md5($key) . '.json';
     $data = json_encode(['exp' => time() + $ttl, 'body' => $body, 'key' => $key]);
@@ -38,6 +56,14 @@ function api_cache_del($key) {
 }
 
 function api_cache_flush($prefix = '') {
+    // Flush Redis
+    try {
+        if (class_exists('Redis')) {
+            $rf = new Redis(); $rf->connect('127.0.0.1', 6379, 0.3); $rf->select(1);
+            $keys = $rf->keys('ss:ac:' . $prefix . '*');
+            if ($keys && count($keys)) $rf->del($keys);
+        }
+    } catch (Throwable $e) {}
     if (!is_dir(API_CACHE_DIR)) return;
     // If prefix, need to check stored keys
     $files = glob(API_CACHE_DIR . '/*.json');
@@ -72,6 +98,9 @@ function api_try_cache($key, $ttl = 30) {
         exit;
     }
     header('X-Cache: MISS');
+    // Store for auto-save in jsonResponse
+    $GLOBALS['_ssPendingCacheKey'] = $key;
+    $GLOBALS['_ssPendingCacheTTL'] = $ttl;
     return false;
 }
 
