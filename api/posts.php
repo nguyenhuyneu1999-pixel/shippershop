@@ -20,7 +20,7 @@ require_once __DIR__ . '/../includes/functions.php';
 require_once __DIR__ . '/../includes/api-cache.php';
 require_once __DIR__ . '/../includes/api-error-handler.php';
 try { require_once __DIR__ . '/../includes/redis-rate-limiter.php'; apiRateLimit('posts.php', 120); } catch (Throwable $e) { /* rate limit skip */ }
-require_once __DIR__ . '/../includes/image-optimizer.php';
+// require_once __DIR__ . '/../includes/image-optimizer.php'; // loaded on demand
 setupApiErrorHandler();
 require_once __DIR__ . '/auth-check.php';
 require_once __DIR__ . '/../includes/xp-helper.php';
