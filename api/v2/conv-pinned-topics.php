@@ -1,6 +1,6 @@
 <?php
 // ShipperShop API v2 — Conversation Pinned Topics
-// Pin important discussion topics in group/1:1 conversations
+// Pin important topics/messages in conversation for quick access
 session_start();
 require_once __DIR__.'/../../includes/config.php';
 require_once __DIR__.'/../../includes/db.php';
@@ -43,11 +43,12 @@ if($_SERVER['REQUEST_METHOD']==='POST'){
 
     if(!$action||$action==='pin'){
         $title=trim($input['title']??'');
-        $description=trim($input['description']??'');
+        $content=trim($input['content']??'');
+        $color=$input['color']??'#7c3aed';
         if(!$title) cpt_ok('Nhap tieu de');
         $maxId=0;foreach($topics as $t){if(intval($t['id']??0)>$maxId)$maxId=intval($t['id']);}
-        $topics[]=['id'=>$maxId+1,'title'=>$title,'description'=>$description,'pinned_by'=>$uid,'pinned_at'=>date('c')];
-        if(count($topics)>10) cpt_ok('Toi da 10 chu de ghim');
+        array_unshift($topics,['id'=>$maxId+1,'title'=>$title,'content'=>$content,'color'=>$color,'pinned_by'=>$uid,'pinned_at'=>date('c')]);
+        if(count($topics)>20) $topics=array_slice($topics,0,20);
     }
 
     if($action==='unpin'){
@@ -58,7 +59,7 @@ if($_SERVER['REQUEST_METHOD']==='POST'){
     $existing=$d->fetchOne("SELECT id FROM settings WHERE `key`=?",[$key]);
     if($existing) $d->query("UPDATE settings SET value=? WHERE `key`=?",[json_encode(array_values($topics)),$key]);
     else $d->query("INSERT INTO settings (`key`,value) VALUES (?,?)",[$key,json_encode(array_values($topics))]);
-    cpt_ok($action==='unpin'?'Da go ghim':'Da ghim chu de!');
+    cpt_ok($action==='unpin'?'Da go':'Da ghim chu de!');
 }
 
 } catch (\Throwable $e) {
