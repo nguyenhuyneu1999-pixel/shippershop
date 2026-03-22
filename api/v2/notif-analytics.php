@@ -1,6 +1,6 @@
 <?php
 // ShipperShop API v2 — Admin Notification Analytics
-// Track notification delivery, open rates, engagement
+// Track notification delivery, open rates, types distribution
 session_start();
 require_once __DIR__.'/../../includes/config.php';
 require_once __DIR__.'/../../includes/db.php';
@@ -15,34 +15,37 @@ if($_SERVER['REQUEST_METHOD']==='OPTIONS'){http_response_code(204);exit;}
 
 $d=db();
 
-function na_ok($msg,$data=null){echo json_encode(['success'=>true,'message'=>$msg,'data'=>$data],JSON_UNESCAPED_UNICODE);exit;}
-function na_fail($msg,$code=400){http_response_code($code);echo json_encode(['success'=>false,'message'=>$msg]);exit;}
+function na3_ok($msg,$data=null){echo json_encode(['success'=>true,'message'=>$msg,'data'=>$data],JSON_UNESCAPED_UNICODE);exit;}
+function na3_fail($msg,$code=400){http_response_code($code);echo json_encode(['success'=>false,'message'=>$msg]);exit;}
 
 try {
 
 $uid=require_auth();
 $admin=$d->fetchOne("SELECT role FROM users WHERE id=?",[$uid]);
-if(!$admin||$admin['role']!=='admin') na_fail('Admin only',403);
+if(!$admin||$admin['role']!=='admin') na3_fail('Admin only',403);
 
-$data=cache_remember('notif_analytics', function() use($d) {
-    $total=intval($d->fetchOne("SELECT COUNT(*) as c FROM notifications")['c']);
-    $read=intval($d->fetchOne("SELECT COUNT(*) as c FROM notifications WHERE is_read=1")['c']);
-    $readRate=$total>0?round($read/$total*100,1):0;
+$data=cache_remember('notif_analytics_v3', function() use($d) {
+    $totalSent=intval($d->fetchOne("SELECT COUNT(*) as c FROM notifications")['c']);
+    $totalRead=intval($d->fetchOne("SELECT COUNT(*) as c FROM notification_reads")['c']);
+    $openRate=$totalSent>0?round($totalRead/$totalSent*100,1):0;
 
     // By type
-    $byType=$d->fetchAll("SELECT type,COUNT(*) as count,SUM(is_read) as read_count FROM notifications GROUP BY type ORDER BY count DESC LIMIT 10");
-    foreach($byType as &$bt){$bt['read_rate']=$bt['count']>0?round(intval($bt['read_count'])/intval($bt['count'])*100,1):0;}unset($bt);
+    $byType=$d->fetchAll("SELECT type, COUNT(*) as c FROM notifications GROUP BY type ORDER BY c DESC LIMIT 10");
 
-    // Daily trend
-    $daily=$d->fetchAll("SELECT DATE(created_at) as day,COUNT(*) as sent,SUM(is_read) as opened FROM notifications WHERE created_at >= DATE_SUB(NOW(), INTERVAL 14 DAY) GROUP BY DATE(created_at) ORDER BY day");
+    // Recent 7 days daily
+    $daily=$d->fetchAll("SELECT DATE(created_at) as day, COUNT(*) as sent FROM notifications WHERE created_at >= DATE_SUB(NOW(), INTERVAL 7 DAY) GROUP BY DATE(created_at) ORDER BY day");
 
     // Push subscriptions
     $pushSubs=intval($d->fetchOne("SELECT COUNT(*) as c FROM push_subscriptions")['c']);
 
-    return ['total'=>$total,'read'=>$read,'read_rate'=>$readRate,'by_type'=>$byType,'daily'=>$daily,'push_subscriptions'=>$pushSubs];
+    // Avg per user
+    $uniqueUsers=intval($d->fetchOne("SELECT COUNT(DISTINCT user_id) as c FROM notifications")['c']);
+    $avgPerUser=$uniqueUsers>0?round($totalSent/$uniqueUsers,1):0;
+
+    return ['total_sent'=>$totalSent,'total_read'=>$totalRead,'open_rate'=>$openRate,'by_type'=>$byType,'daily'=>$daily,'push_subs'=>$pushSubs,'avg_per_user'=>$avgPerUser,'unique_users'=>$uniqueUsers];
 }, 600);
 
-na_ok('OK',$data);
+na3_ok('OK',$data);
 
 } catch (\Throwable $e) {
     echo json_encode(['success'=>false,'message'=>$e->getMessage()]);
