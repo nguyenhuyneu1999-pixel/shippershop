@@ -151,3 +151,6 @@ FileETag MTime Size
     Header always set X-Content-Type-Options "nosniff"
     Header always set X-Frame-Options "SAMEORIGIN"
 </IfModule>
+
+# Custom error pages
+ErrorDocument 404 /404.html

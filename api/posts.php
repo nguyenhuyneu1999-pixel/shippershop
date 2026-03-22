@@ -200,9 +200,13 @@ if ($method === 'GET') {
                 u.fullname as user_name,
                 u.avatar as user_avatar,
                 u.username as user_username,
-                u.shipping_company as shipping_company
+                u.shipping_company as shipping_company,
+                sp.badge as sub_badge,
+                sp.badge_color as sub_badge_color
             FROM posts p
             LEFT JOIN users u ON p.user_id = u.id
+            LEFT JOIN user_subscriptions us2 ON us2.user_id = p.user_id AND us2.`status` = 'active' AND us2.expires_at > NOW()
+            LEFT JOIN subscription_plans sp ON sp.id = us2.plan_id AND sp.price > 0
             WHERE $whereClause
             ORDER BY p.created_at DESC
             LIMIT {$pagination['per_page']} OFFSET {$pagination['offset']}";
