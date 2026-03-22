@@ -409,8 +409,8 @@ function _gcLoadCmts(pid){
   var wrap=document.getElementById("gcCmts");
   if(!wrap)return;
   fetch("/api/posts.php?action=comments&post_id="+pid+"&_t="+Date.now(),{credentials:"include"}).then(function(r){return r.json();}).then(function(d){
-    if(!d.success||!d.data||!d.data.length){wrap.innerHTML="<div class='gc-empty'>Chưa có ghi chú</div>";return;}
-    var flat=d.data,map={},list=[];
+    var _raw=d.data; var flat=Array.isArray(_raw)?_raw:(_raw&&_raw.comments?_raw.comments:[]); if(!d.success||!flat.length){wrap.innerHTML="<div class='gc-empty'>Chưa có ghi chú</div>";return;}
+    var map={},list=[];
     for(var i=0;i<flat.length;i++){map[flat[i].id]=flat[i];}
     function addF(cc,depth,pn){list.push({c:cc,dp:Math.min(depth,1),rpl:depth>0?pn:null});for(var x=0;x<flat.length;x++){if(flat[x].parent_id===cc.id)addF(flat[x],depth+1,cc.user_name);}}
     for(var j=0;j<flat.length;j++){if(!flat[j].parent_id||flat[j].parent_id<=0||!map[flat[j].parent_id])addF(flat[j],0,null);}
