@@ -1390,7 +1390,7 @@ $ss5=json_decode(@file_get_contents('https://shippershop.vn/api/v2/smart-schedul
 t('Func: smart schedule 3+ slots',count($ss5['data']['recommended_slots'])>=3);
 
 $st3=json_decode(@file_get_contents('https://shippershop.vn/api/v2/status.php'),true);
-t('Func: status api healthy',$st3&&$st3['success']===true&&$st3['data']['database']==='connected');
+t('Func: status api healthy',$st3t('Func: status api healthy',$st3&&$st3['success']===true&&$st3['data']['database']==='connected');t('Func: status api healthy',$st3&&$st3['success']===true&&$st3['data']['database']==='connected');$st3['status']==='healthy');
 
 $pr4=json_decode(@file_get_contents('https://shippershop.vn/api/v2/post-reach.php?post_id=126'),true);
 t('Func: post reach 126',$pr4&&$pr4['success']===true);
