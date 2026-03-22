@@ -1,5 +1,6 @@
 <?php
 // ShipperShop API v2 — Route History
+// Tinh nang: Luu va phat lai cac tuyen giao hang
 // Save and replay past delivery routes with stats comparison
 session_start();
 require_once __DIR__.'/../../includes/config.php';
