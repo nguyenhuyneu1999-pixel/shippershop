@@ -170,19 +170,45 @@ if($action==='conversations'){
   $tab=$_GET['tab']??'active';
   $sf=$tab==='pending'?'pending':'active';
   $rows=$d->fetchAll("SELECT id,user1_id,user2_id,last_message,last_message_at,`status` FROM conversations WHERE (user1_id=? OR user2_id=?) AND `status`=? AND (type='private' OR type IS NULL) ORDER BY last_message_at DESC",[$userId,$userId,$sf]);
-  $result=[];
+  
+  // OPTIMIZED: N+1 → 3 queries (batch load users + unread counts)
+  $otherIds=[];$convIds=[];
   foreach($rows as $c){
     $oid=($c['user1_id']==$userId)?$c['user2_id']:$c['user1_id'];
-    $other=$d->fetchOne("SELECT id,fullname,avatar,shipping_company,is_online,last_active FROM users WHERE id=?",[$oid]);
+    $otherIds[$c['id']]=intval($oid);
+    $convIds[]=intval($c['id']);
+  }
+  
+  // Batch load users (1 query)
+  $usersMap=[];
+  if(!empty($otherIds)){
+    $uids=array_unique(array_values($otherIds));
+    $ph=implode(',',array_fill(0,count($uids),'?'));
+    $users=$d->fetchAll("SELECT id,fullname,avatar,shipping_company,is_online,last_active FROM users WHERE id IN ($ph)",$uids);
+    foreach($users as $u) $usersMap[intval($u['id'])]=$u;
+  }
+  
+  // Batch load unread counts (1 query)
+  $unreadMap=[];
+  if(!empty($convIds)){
+    $ph=implode(',',array_fill(0,count($convIds),'?'));
+    $unreads=$d->fetchAll("SELECT conversation_id,COUNT(*) as c FROM messages WHERE conversation_id IN ($ph) AND sender_id!=? AND is_read=0 GROUP BY conversation_id",array_merge($convIds,[$userId]));
+    foreach($unreads as $u) $unreadMap[intval($u['conversation_id'])]=intval($u['c']);
+  }
+  
+  // Merge results (0 queries)
+  $result=[];
+  foreach($rows as $c){
+    $oid=$otherIds[$c['id']]??0;
+    $other=$usersMap[$oid]??null;
     if(!$other) continue;
-    $un=$d->fetchOne("SELECT COUNT(*) as c FROM messages WHERE conversation_id=? AND sender_id!=? AND is_read=0",[$c['id'],$userId]);
     $result[]=[
       'id'=>$c['id'],'user1_id'=>$c['user1_id'],'user2_id'=>$c['user2_id'],
       'last_message'=>$c['last_message'],'last_message_at'=>$c['last_message_at'],
       'other_id'=>$oid,'other_name'=>$other['fullname'],'other_avatar'=>$other['avatar'],
       'other_ship'=>$other['shipping_company'],'other_online'=>$other['is_online'],
       'other_last_active'=>$other['last_active'],
-      'unread_count'=>intval($un['c']??0),'type'=>'private'
+      'unread_count'=>$unreadMap[intval($c['id'])]??0,'type'=>'private'
     ];
   }
   echo json_encode(['success'=>true,'data'=>$result]);exit;
