@@ -67,7 +67,7 @@ function mkPost(p){
     if(p.video_url.indexOf('/uploads/')!==-1){
       vidH='<video controls playsinline preload="metadata" style="width:100%;max-height:500px;display:block"><source src="'+p.video_url+'">Video không hỗ trợ</video>';
     }else{
-      vidH='<div style="margin-top:8px;position:relative;padding-bottom:56%;height:0;overflow:hidden;border-radius:4px"><iframe src="'+ytEmbed(p.video_url)+'" style="position:absolute;top:0;left:0;width:100%;height:100%;border:0" allowfullscreen></iframe></div>';
+      vidH='<div style="margin-top:8px;position:relative;padding-bottom:56%;height:0;overflow:hidden;border-radius:4px;background:#000;cursor:pointer" onclick="this.innerHTML=\'<iframe src=&quot;'+ytEmbed(p.video_url)+'&quot; style=&quot;position:absolute;top:0;left:0;width:100%;height:100%;border:0&quot; allowfullscreen autoplay></iframe>\'"><div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center"><div style="width:56px;height:56px;background:rgba(255,0,0,.85);border-radius:12px;display:flex;align-items:center;justify-content:center"><i class=\'fas fa-play\' style=\'color:#fff;font-size:20px;margin-left:3px\'></i></div></div></div>';
     }
   }
   var likeCls=isLiked?'act-btn liked':'act-btn';

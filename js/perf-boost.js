@@ -85,3 +85,26 @@
         };
     }
 })();
+
+
+    // 6. Save/restore scroll position for feed
+    var page = location.pathname;
+    if (page === '/' || page === '/index.html' || page.indexOf('index.html') > -1) {
+        // Restore scroll position on back navigation
+        var savedScroll = sessionStorage.getItem('ss_feedScroll');
+        if (savedScroll && performance.navigation && performance.navigation.type === 2) {
+            // Back/forward navigation
+            setTimeout(function() { window.scrollTo(0, parseInt(savedScroll)); }, 300);
+        }
+        // Save scroll position before leaving
+        window.addEventListener('beforeunload', function() {
+            sessionStorage.setItem('ss_feedScroll', window.scrollY);
+        });
+        // Also save on link clicks
+        document.addEventListener('click', function(e) {
+            var a = e.target.closest('a[href]');
+            if (a && a.href && a.href.indexOf('index.html') < 0) {
+                sessionStorage.setItem('ss_feedScroll', window.scrollY);
+            }
+        });
+    }

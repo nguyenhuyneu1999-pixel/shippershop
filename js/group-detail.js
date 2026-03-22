@@ -134,7 +134,7 @@ function mkPost(p){
   var imgH="";
   if(p.images){try{var arr=JSON.parse(p.images);if(arr&&arr.length){imgH="<div class='post-images"+(arr.length>1?" multi-img":"")+"'>";for(var i=0;i<Math.min(arr.length,4);i++)imgH+="<img class='post-img' src='"+arr[i]+"' loading='lazy' onerror=\"this.style.display='none'\">";imgH+="</div>";}}catch(x){}}
   var canDel=CU&&parseInt(uid)===parseInt(CU.id);
-  var menuH="<div class='post-menu' id='gpm"+p.id+"' style='display:none'>"+(canDel?"<div onclick='gDelP("+p.id+")'><i class='far fa-trash-can'></i> X\u00f3a b\u00e0i</div>":"")+"<div onclick='gTogMenu("+p.id+")'><i class='fas fa-times'></i> \u0110\u00f3ng</div></div>";
+  var menuH="<div class='post-menu' id='gpm"+p.id+"' style='display:none'>"+(canDel?"<div onclick='editGrpPost("+p.id+")'><i class='fas fa-pen'></i> S\u1eeda b\u00e0i</div><div onclick='gDelP("+p.id+")'><i class='far fa-trash-can'></i> X\u00f3a b\u00e0i</div>":"")+"<div onclick='gTogMenu("+p.id+")'><i class='fas fa-times'></i> \u0110\u00f3ng</div></div>";
   return "<div class='post-card' id='GP"+p.id+"'><div class='post-body'><div class='post-meta'>"+av+"<div style='flex:1;min-width:0'><div style='display:flex;align-items:center;justify-content:space-between'><a href='user.html?id="+uid+"' class='post-author' style='text-decoration:none;color:#1a1a1a'>"+esc(uName)+"</a><button class='post-dots' onclick='event.stopPropagation();gTogMenu("+p.id+")'><i class='fas fa-ellipsis'></i></button></div><div style='font-size:12px;color:#999;display:flex;align-items:center;gap:4px'>"+shipH+"<span>"+ago(p.created_at)+"</span></div></div></div>"+menuH+contentH+imgH+"</div><div class='pa3-stats'><span>"+(likes>0?fN(likes)+" \u0111\u01a1n giao th\u00e0nh c\u00f4ng":"")+"</span><span>"+(cmts>0?fN(cmts)+" ghi ch\u00fa":"")+"</span><span>"+(shares>0?fN(shares)+" \u0111\u01a1n chuy\u1ec3n ti\u1ebfp":"")+"</span></div><div class='post-actions-3'><button class='pa3-btn"+(liked?" pa3-active":"")+"' onclick='gLike("+p.id+",this)'>Th\u00e0nh c\u00f4ng</button><button class='pa3-btn' onclick='openGhiChu("+p.id+")'>Ghi ch\u00fa</button><button class='pa3-btn' onclick='gShare("+p.id+")'>Chuy\u1ec3n ti\u1ebfp</button></div></div>";
 }
 
@@ -276,3 +276,35 @@ function uploadGroupImg(type,input){
 document.addEventListener("click",function(e){if(!e.target.closest(".post-dots")&&!e.target.closest(".post-menu")){document.querySelectorAll(".post-menu").forEach(function(m){m.style.display="none";});}});
 if(groupSlug||groupId)loadGroup();
 
+
+function editGrpPost(pid){
+  var el=document.querySelector('[data-gpid="'+pid+'"] .gp-content, #gp'+pid+' .gp-content');
+  if(!el)el=document.querySelector('[data-gpid="'+pid+'"] .post-content, #gp'+pid+' .post-content');
+  if(!el)return;
+  var oldText=el.textContent||'';
+  var ta=document.createElement('textarea');
+  ta.value=oldText;
+  ta.style.cssText='width:100%;min-height:60px;padding:8px;border:1px solid #7C3AED;border-radius:8px;font-size:14px;resize:vertical;box-sizing:border-box;margin:4px 0';
+  var btns=document.createElement('div');
+  btns.style.cssText='display:flex;gap:8px;justify-content:flex-end;padding:4px 0';
+  btns.innerHTML='<button onclick="this.parentNode.previousSibling.remove();this.parentNode.previousSibling.style.display=\'\';this.parentNode.remove()" style="padding:6px 14px;border:1px solid #ddd;border-radius:6px;background:#fff;cursor:pointer;font-size:13px">Huy</button><button onclick="saveGrpEdit('+pid+',this.parentNode.previousSibling)" style="padding:6px 14px;border:none;border-radius:6px;background:#7C3AED;color:#fff;cursor:pointer;font-weight:600;font-size:13px">Luu</button>';
+  el.style.display='none';
+  el.parentNode.insertBefore(ta,el.nextSibling);
+  el.parentNode.insertBefore(btns,ta.nextSibling);
+  ta.focus();
+}
+function saveGrpEdit(pid,ta){
+  if(!ta||!ta.value.trim())return;
+  var token=localStorage.getItem('token');
+  fetch('/api/groups.php?action=edit_post',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+(token||'')},body:JSON.stringify({post_id:pid,content:ta.value.trim()})}).then(function(r){return r.json()}).then(function(d){
+    if(d.success){location.reload();}else{alert(d.message||'Loi');}
+  });
+}
+function delGrpPost(pid){
+  if(!confirm('Xoa bai viet nay?'))return;
+  var token=localStorage.getItem('token');
+  fetch('/api/groups.php?action=delete_post',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+(token||'')},body:JSON.stringify({post_id:pid})}).then(function(r){return r.json()}).then(function(d){
+    if(d.success){var el=document.getElementById('gp'+pid)||document.querySelector('[data-gpid="'+pid+'"]');if(el)el.style.display='none';toast('Da xoa');}
+    else{toast(d.message||'Loi','error');}
+  });
+}

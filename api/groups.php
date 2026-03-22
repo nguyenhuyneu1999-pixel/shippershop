@@ -260,7 +260,21 @@ if ($method === 'POST') {
     if ($action === 'like_comment') {
         $uid = getAuthUserId();
         $cid = intval($input['comment_id'] ?? 0);
-        if (!$cid) { echo json_encode(['success'=>false,'message'=>'Missing comment_id']); exit; }
+        if (!$cid) { 
+    // Delete group post
+    if ($action === 'delete_post') {
+        $uid = getAuthUserId(); if (!$uid) gErr('Auth required', 401);
+        $input = json_decode(file_get_contents('php://input'), true);
+        $postId = intval($input['post_id'] ?? 0);
+        if (!$postId) gErr('Missing post_id');
+        $post = $d->fetchOne("SELECT user_id, group_id FROM group_posts WHERE id = ? AND `status` = 'active'", [$postId]);
+        if (!$post || intval($post['user_id']) !== $uid) gErr('No permission');
+        $d->query("UPDATE group_posts SET `status` = 'deleted' WHERE id = ?", [$postId]);
+        api_cache_flush('grp_');
+        gOk('Deleted', ['post_id' => $postId]);
+    }
+
+echo json_encode(['success'=>false,'message'=>'Missing comment_id']); exit; }
         $exists = $d->fetchOne("SELECT id FROM group_post_comment_likes WHERE comment_id = ? AND user_id = ?", [$cid, $uid]);
         if ($exists) {
             $d->query("DELETE FROM group_post_comment_likes WHERE comment_id = ? AND user_id = ?", [$cid, $uid]);
