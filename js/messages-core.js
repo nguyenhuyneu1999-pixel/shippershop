@@ -124,3 +124,8 @@ curConvId=null;curOtherId=null;if(pollTimer)clearInterval(pollTimer);loadConvs()
 
 function esc(t){if(!t)return"";return String(t).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");}
 function ago(dt){if(!dt)return"";var s=Math.floor((new Date()-new Date(dt.replace(" ","T")))/1000);if(s<60)return"Vừa xong";if(s<3600)return Math.floor(s/60)+"p";if(s<86400)return Math.floor(s/3600)+"h";if(s<604800)return Math.floor(s/86400)+"d";return new Date(dt).toLocaleDateString("vi-VN");}
+
+function viewImg(src){
+    if(typeof openLb==='function'){openLb(src,0,[src]);}
+    else{window.open(src,'_blank');}
+}
