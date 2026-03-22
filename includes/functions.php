@@ -276,7 +276,9 @@ function deleteFile($path) {
 function jsonResponse($data, $statusCode = 200) {
     http_response_code($statusCode);
     header('Content-Type: application/json; charset=utf-8');
-    echo json_encode($data, JSON_UNESCAPED_UNICODE);
+    $json = json_encode($data, JSON_UNESCAPED_UNICODE);
+    if (isset($GLOBALS['_ssCK']) && function_exists('_ssCacheSave')) { try { _ssCacheSave($json); } catch (Throwable $e) {} }
+    echo $json;
     exit;
 }
 
