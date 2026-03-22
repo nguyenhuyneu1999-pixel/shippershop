@@ -271,7 +271,7 @@ t('Func: badge earned count',$badgeResp2&&$badgeResp2['success']===true&&$badgeR
 // Schedule calendar (requires auth, just check endpoint exists)
 // Schedule calendar requires auth - check endpoint responds
 $calCtx=stream_context_create(['http'=>['ignore_errors'=>true]]);
-$calRaw=http_get_ctx('https://shippershop.vn/api/v2/schedule-calendar.php',false,$calCtx);
+$calRaw=http_get_ctx('https://shippershop.vn/api/v2/schedule-calendar.php',$calCtx);
 $calResp=json_decode($calRaw,true);
 t('Func: schedule calendar',$calResp!==null);
 
@@ -1418,4 +1418,4 @@ t('Func: status api healthy',$stHealth&&$stHealth['status']==='healthy');
 // ============ RESULTS ============
 $total=$P+$F;
 $_totalTests=$_tIdx;$totalTests=$_tIdx;
-echo json_encode(['timestamp'=>date('Y-m-d H:i:s'),'passed'=>$P,'failed'=>$F,'total'=>$total,'score'=>$total>0?round($P/$total*100,1).'%':'0%','results'=>$R],JSON_PRETTY_PRINT|JSON_UNESCAPED_UNICODE);
+echo json_encode(['timestamp'=>date('Y-m-d H:i:s'),'passed'=>$P,'failed'=>$F,'total'=>$total,'total_tests'=>$_tIdx,'page'=>$_page,'per_page'=>$_perPage,'score'=>$total>0?round($P/$total*100,1).'%':'0%','results'=>$R],JSON_PRETTY_PRINT|JSON_UNESCAPED_UNICODE);
