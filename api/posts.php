@@ -255,7 +255,15 @@ if ($method === 'GET') {
     ]];
     // Save to cache
     api_save_cache($_cacheKey, $feedResponse, 30);
-    echo json_encode($feedResponse, JSON_UNESCAPED_UNICODE);
+    $json = json_encode($feedResponse, JSON_UNESCAPED_UNICODE);
+    // ETag for 304
+    $etag = '"' . md5($json) . '"';
+    header('Content-Type: application/json; charset=utf-8');
+    header('ETag: ' . $etag);
+    if (isset($_SERVER['HTTP_IF_NONE_MATCH']) && trim($_SERVER['HTTP_IF_NONE_MATCH']) === $etag) {
+        http_response_code(304); exit;
+    }
+    echo $json;
     exit;
 }
 
