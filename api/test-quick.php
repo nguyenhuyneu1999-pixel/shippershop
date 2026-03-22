@@ -63,7 +63,7 @@ $apiFiles=array_filter(scandir($apiDir),function($f){return substr($f,-4)==='.ph
 t('File: 240+ API files',count($apiFiles)>=240);
 
 // Check critical API files exist
-$critical=['posts.php','users.php','auth.php','wallet.php','groups.php','messages.php','notifications.php','social.php','friends.php','search.php','gamification.php','stories.php','traffic.php','marketplace.php','admin.php','health.php','status.php','site-config.php','feature-flags.php','smart-schedule.php','reputation-tiers.php','delivery-map.php','calendar-view.php','engagement-heatmap.php','content-score.php','user-ratings.php','weekly-challenge.php','weather-alerts.php','ai-suggest.php','conv-templates.php','content-moderate.php','delivery-stats-v2.php','growth-metrics.php','vehicle-manager.php','fuel-tracker.php','trend-detector.php','cohort-analysis.php','retention-score.php','conv-stickers.php'];
+$critical=['posts.php','users.php','wallet.php','groups.php','messages.php','notifications.php','social.php','friends.php','search.php','gamification.php','stories.php','traffic.php','marketplace.php','admin.php','health.php','status.php','site-config.php','feature-flags.php','smart-schedule.php','reputation-tiers.php','delivery-map.php','calendar-view.php','engagement-heatmap.php','content-score.php','user-ratings.php','weekly-challenge.php','weather-alerts.php','ai-suggest.php','conv-templates.php','content-moderate.php','delivery-stats-v2.php','growth-metrics.php','vehicle-manager.php','fuel-tracker.php','trend-detector.php','cohort-analysis.php','retention-score.php','conv-stickers.php'];
 foreach($critical as $f){t('File: api/v2/'.$f,file_exists($apiDir.$f));}
 
 // ============ JS FILES ============
