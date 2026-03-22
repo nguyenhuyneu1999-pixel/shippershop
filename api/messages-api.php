@@ -392,6 +392,8 @@ if($action==='send'){
   }
   try{require_once __DIR__.'/../includes/push-helper.php';$sn=$d->fetchOne("SELECT fullname,avatar FROM users WHERE id=?",[$userId]);notifyUser($oid,'Tin nhắn: '.($sn?$sn['fullname']:'Ai đó'),mb_substr($ct,0,60),'message','/messages.html?user='.$userId);}catch(Throwable $e){}
 require_once __DIR__ . '/../includes/api-cache.php';
+require_once __DIR__ . '/../includes/api-error-handler.php';
+setupApiErrorHandler();
 function flushMsgCache($uid){ api_cache_flush('msg_convos_' . $uid); }
   echo json_encode(['success'=>true,'data'=>['id'=>$mid,'conversation_id'=>$cid]]);exit;
 }
@@ -403,6 +405,25 @@ if($action==='accept'){
 if($action==='read'){
   $cid=intval($input['conversation_id']??0);
   $d->query("UPDATE messages SET is_read=1, read_at=NOW() WHERE conversation_id=? AND sender_id!=? AND is_read=0",[$cid,$userId]);
+  flushMsgCache($userId);
+  echo json_encode(['success'=>true]);exit;
+}
+
+// POLL: Lightweight new messages check (3s interval client-side)
+if($action==='poll'){
+  $cid=intval($_GET['conversation_id']??0);
+  $since=$_GET['since']??'';
+  if(!$cid||!$since){echo json_encode(['success'=>true,'data'=>['new_messages'=>[],'count'=>0]]);exit;}
+  $newMsgs=$d->fetchAll("SELECT m.id,m.sender_id,m.content,m.type,m.file_url,m.created_at,u.fullname as sender_name,u.avatar as sender_avatar FROM messages m JOIN users u ON m.sender_id=u.id WHERE m.conversation_id=? AND m.created_at>? ORDER BY m.created_at ASC LIMIT 50",[$cid,$since]);
+  $typing=[];
+  if(class_exists('Redis')){try{$r=new Redis();$r->connect('127.0.0.1',6379,1);$r->select(4);$keys=$r->keys('ss:typing:'.$cid.':*');foreach($keys as $k){$v=$r->get($k);if($v&&(time()-intval($v))<5){$typing[]=intval(str_replace('ss:typing:'.$cid.':','',$k));}}}catch(Exception $e){}}
+  echo json_encode(['success'=>true,'data'=>['new_messages'=>$newMsgs??[],'count'=>count($newMsgs??[]),'typing'=>$typing]]);exit;
+}
+
+// TYPING: Send typing indicator
+if($action==='typing'){
+  $cid=intval($input['conversation_id']??0);
+  if($cid&&$userId&&class_exists('Redis')){try{$r=new Redis();$r->connect('127.0.0.1',6379,1);$r->select(4);$r->setex('ss:typing:'.$cid.':'.$userId,5,time());}catch(Exception $e){}}
   echo json_encode(['success'=>true]);exit;
 }
 

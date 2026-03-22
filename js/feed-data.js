@@ -50,7 +50,7 @@ async function loadPosts(append=false){
       totalPg=d.data.total_pages||1;
       document.getElementById('stP').textContent=d.data.total||0;
       document.getElementById('stT').textContent=Math.floor((d.data.total||0)*0.15+Math.random()*20);
-      document.getElementById('loadMoreBtn').style.display=page<totalPg?'block':'none';
+      document.getElementById('loadMoreBtn').style.display=page<totalPg?'block':'none'; _feedLoading=false;
       if(append) d.data.posts.forEach(p=>document.getElementById('feed').insertAdjacentHTML('beforeend',mkPost(p)));
       else{
         if(!d.data.posts.length) document.getElementById('feed').innerHTML='<div class="empty"><i class="fas fa-ghost"></i><p>Chưa có bài viết nào!</p><p style="font-size:13px;margin-top:6px">Hãy là người đầu tiên đăng bài 🎉</p></div>';
@@ -59,7 +59,8 @@ async function loadPosts(append=false){
     }
   }catch(e){ document.getElementById('feed').innerHTML='<div class="empty"><i class="fas fa-wifi"></i><p>Lỗi kết nối API</p></div>'; }
 }
-function loadMore(){ page++; loadPosts(true); }
+var _feedLoading=false;
+function loadMore(){ if(_feedLoading)return; _feedLoading=true; page++; loadPosts(true); }
 var _loadingMore=false;
 window.addEventListener('scroll',function(){
   if(_loadingMore||page>=totalPg)return;

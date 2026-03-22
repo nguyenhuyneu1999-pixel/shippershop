@@ -1,12 +1,17 @@
 // ShipperShop Service Worker v13
 // Cache strategies: Cache First (static), Network First (API), Stale While Revalidate (images)
-var CACHE = 'shippershop-v13';
+var CACHE = 'shippershop-v14';
 var STATIC_ASSETS = [
   '/',
   '/index.html',
   '/css/design-system.min.css',
   '/css/design-system.css',
   '/css/style-v2.css',
+  '/js/network-handler.js',
+  '/js/feed-search.js',
+  '/js/feed-notifications.js',
+  '/js/feed-comments.js',
+  '/js/feed-data.js',
   '/mobile.css',
   '/js/ss-critical.min.js',
   '/js/ss-smart-loader.js',

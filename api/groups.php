@@ -5,6 +5,8 @@ require_once __DIR__ . '/../includes/config.php';
 require_once __DIR__ . '/../includes/db.php';
 require_once __DIR__ . '/../includes/functions.php';
 require_once __DIR__ . '/../includes/api-cache.php';
+require_once __DIR__ . '/../includes/api-error-handler.php';
+setupApiErrorHandler();
 require_once __DIR__ . '/auth-check.php';
 header('Content-Type: application/json; charset=utf-8');
 header('Access-Control-Allow-Origin: *');
@@ -142,6 +144,7 @@ if ($method === 'GET') {
     }
 
     if ($action === 'comments') {
+        api_try_cache('grp_comments_' . intval($_GET['post_id'] ?? 0), 15);
         $pid = intval($_GET['post_id'] ?? 0);
         $uid = 0;
         try { $uid = getAuthUserId(); } catch(Throwable $e) {}

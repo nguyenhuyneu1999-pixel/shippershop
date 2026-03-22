@@ -4,6 +4,8 @@ require_once __DIR__ . '/../includes/config.php';
 require_once __DIR__ . '/../includes/db.php';
 require_once __DIR__ . '/../includes/functions.php';
 require_once __DIR__ . '/../includes/api-cache.php';
+require_once __DIR__ . '/../includes/api-error-handler.php';
+setupApiErrorHandler();
 // auth handled by tAuth()
 
 header('Content-Type: application/json; charset=utf-8');
