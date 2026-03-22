@@ -190,6 +190,14 @@ if ($method === 'GET') {
     }
     
     // Count total
+    // Cursor-based pagination (faster for infinite scroll)
+    $cursor = intval($_GET['cursor'] ?? 0);
+    if ($cursor > 0) {
+        $where[] = "p.id < ?";
+        $params[] = $cursor;
+        $whereClause = implode(' AND ', $where);
+    }
+    
     $total = $db->fetchOne("SELECT COUNT(*) as c FROM posts p LEFT JOIN users u ON p.user_id = u.id WHERE $whereClause", $params)['c'];
     
     $pagination = paginate($total, $page, $limit);

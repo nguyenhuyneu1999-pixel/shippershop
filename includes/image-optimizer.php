@@ -89,3 +89,56 @@ function optimizeImage($sourcePath, $destPath = null, $maxWidth = 1200, $quality
 function createThumbnail($sourcePath, $thumbPath, $maxWidth = 400, $quality = 75) {
     return optimizeImage($sourcePath, $thumbPath, $maxWidth, $quality);
 }
+
+
+/**
+ * Convert image to WebP format (50% smaller than JPEG)
+ * Returns WebP path, or original if conversion fails
+ */
+function convertToWebP($sourcePath, $quality = 80) {
+    if (!function_exists('imagewebp')) return $sourcePath;
+    
+    $info = @getimagesize($sourcePath);
+    if (!$info) return $sourcePath;
+    
+    $mime = $info['mime'];
+    $src = null;
+    
+    switch ($mime) {
+        case 'image/jpeg':
+        case 'image/jpg':
+            $src = @imagecreatefromjpeg($sourcePath);
+            break;
+        case 'image/png':
+            $src = @imagecreatefrompng($sourcePath);
+            break;
+        case 'image/webp':
+            return $sourcePath; // Already WebP
+    }
+    
+    if (!$src) return $sourcePath;
+    
+    $webpPath = preg_replace('/\.(jpg|jpeg|png)$/i', '.webp', $sourcePath);
+    if (imagewebp($src, $webpPath, $quality)) {
+        imagedestroy($src);
+        // Only use WebP if it's actually smaller
+        if (filesize($webpPath) < filesize($sourcePath)) {
+            return $webpPath;
+        }
+        @unlink($webpPath);
+    } else {
+        imagedestroy($src);
+    }
+    
+    return $sourcePath;
+}
+
+/**
+ * Optimize + convert to WebP in one step
+ */
+function optimizeAndWebP($sourcePath, $maxWidth = 1200, $quality = 82) {
+    // First resize/compress
+    optimizeImage($sourcePath, $sourcePath, $maxWidth, $quality);
+    // Then convert to WebP
+    return convertToWebP($sourcePath, $quality);
+}

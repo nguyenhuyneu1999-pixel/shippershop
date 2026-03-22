@@ -211,7 +211,24 @@ function togMenu(pid){
 /* Report post */
 function reportP(pid){
   togMenu(pid);
-  toast('Đã gửi báo cáo!','success');
+  var reasons=['Spam/Quảng cáo','Nội dung không phù hợp','Thông tin sai lệch','Quấy rối/Bắt nạt','Khác'];
+  var html='<div style="padding:16px"><h3 style="margin:0 0 12px;font-size:16px">Báo cáo bài viết</h3>';
+  reasons.forEach(function(r,i){
+    html+='<div onclick="submitReport('+pid+',this.textContent)" style="padding:10px 12px;margin:4px 0;border:1px solid #e4e6eb;border-radius:8px;cursor:pointer;font-size:14px">'+r+'</div>';
+  });
+  html+='<button onclick="this.parentNode.parentNode.remove()" style="width:100%;margin-top:12px;padding:10px;border:1px solid #ddd;border-radius:8px;background:#fff;font-size:14px;cursor:pointer">Hủy</button></div>';
+  var ov=document.createElement('div');
+  ov.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:2000;display:flex;align-items:center;justify-content:center';
+  ov.innerHTML='<div style="background:#fff;border-radius:12px;max-width:340px;width:90%">'+html+'</div>';
+  ov.onclick=function(e){if(e.target===ov)ov.remove();};
+  document.body.appendChild(ov);
+}
+function submitReport(pid,reason){
+  document.querySelector('[style*="z-index:2000"]').remove();
+  var token=localStorage.getItem('token');
+  fetch('/api/posts.php?action=report',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+(token||'')},body:JSON.stringify({post_id:pid,reason:reason})}).then(function(r){return r.json()}).then(function(d){
+    toast(d.message||'Đã báo cáo','success');
+  }).catch(function(){toast('Lỗi kết nối','error');});
 }
 
 /* Delete post */
