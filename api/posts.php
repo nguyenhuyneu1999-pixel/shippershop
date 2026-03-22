@@ -245,6 +245,8 @@ if ($method === 'GET') {
 // CREATE POST
 // ============================================
 if ($method === 'POST') {
+    // Rate limit: max 5 posts per minute per user
+    $postUserId = getAuthUserId();
 
     $action = $_GET["action"] ?? null;
     if ($action) {
