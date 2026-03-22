@@ -26,7 +26,7 @@ $method = $_SERVER['REQUEST_METHOD'];
 
 // GET - List pins
 if ($method === 'GET') {
-    api_try_cache('map_pins_' . md5(json_encode(\$_GET)), 120);
+    api_try_cache('map_pins_' . md5(json_encode($_GET)), 120);
     $type = $_GET['type'] ?? '';
     $where = "1=1"; $params = [];
     if ($type) { $where .= " AND p.pin_type = ?"; $params[] = $type; }
