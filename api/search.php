@@ -92,4 +92,16 @@ if ($type === 'all' || $type === 'groups') {
 $totalResults = 0;
 foreach ($results as $arr) $totalResults += count($arr);
 
+
+
+// Lightweight user search for @mentions
+if ($type === 'mentions') {
+    api_try_cache('mention_' . md5($q), 30);
+    $users = $d->fetchAll(
+        "SELECT id, fullname, username, avatar FROM users WHERE `status` = 'active' AND (fullname LIKE ? OR username LIKE ?) ORDER BY fullname LIMIT 8",
+        ['%' . $q . '%', '%' . $q . '%']
+    );
+    success('OK', ['users' => $users ?: []]);
+}
+
 success('OK', ['results' => $results, 'total' => $totalResults, 'query' => $q]);

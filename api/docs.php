@@ -29,7 +29,13 @@ echo json_encode([
             ['GET /search.php', 'Global search', '?q=keyword&type=all|posts|users|groups&limit=10'],
         ],
         'Groups' => [
-            ['GET /groups.php?action=discover', 'Discover groups', 'popular, recommended, by_category'],
+            ['GET /groups.php?action=discover', 'Discover groups', 'popular, recommended, by_category',
+            ['POST /groups.php?action=set_role', 'Set member role', '{group_id, user_id, role} (admin only)']
+        ,
+            ['POST /groups.php?action=kick_member', 'Kick member', '{group_id, user_id} (admin/mod)']
+        ,
+            ['POST /groups.php?action=update_settings', 'Group settings', '{group_id, name, description, privacy}']
+        ],
             ['GET /groups.php?action=posts&group_id=X', 'Group posts', '?page=1&sort=new|hot|top&cursor=X'],
             ['GET /groups.php?action=members&group_id=X', 'Members', ''],
             ['GET /groups.php?action=comments&post_id=X', 'Post comments', ''],
@@ -74,7 +80,9 @@ echo json_encode([
             ['POST /traffic.php?action=vote', 'Confirm/deny', '{alert_id, vote}'],
         ],
         'Marketplace' => [
-            ['GET /marketplace.php', 'Listings', '?category=X&search=X&page=1'],
+            ['GET /marketplace.php', 'Listings', '?category=X&search=X&page=1',
+            ['GET /marketplace.php?sort=price_asc', 'Sort by price', '?price_min=X&price_max=Y&condition=new|used']
+        ],
             ['GET /marketplace.php?id=X', 'Single listing', ''],
             ['POST /marketplace.php', 'Create listing', '{title, price, category, images[]}'],
         ],

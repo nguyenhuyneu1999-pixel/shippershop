@@ -332,6 +332,34 @@ if ($method === 'POST') {
         gOk('Member removed');
     }
 
+
+    // Update group settings (admin only)
+    if ($action === 'update_settings') {
+        $uid = getAuthUserId(); if (!$uid) gErr('Auth required', 401);
+        $input = json_decode(file_get_contents('php://input'), true);
+        $groupId = intval($input['group_id'] ?? 0);
+        if (!$groupId) gErr('Missing group_id');
+        
+        $member = $d->fetchOne("SELECT role FROM group_members WHERE group_id = ? AND user_id = ?", [$groupId, $uid]);
+        if (!$member || $member['role'] !== 'admin') gErr('Admin only');
+        
+        $allowed = ['name', 'description', 'privacy', 'post_approval'];
+        $updates = [];
+        $params = [];
+        foreach ($allowed as $key) {
+            if (isset($input[$key])) {
+                $updates[] = "`$key` = ?";
+                $params[] = $input[$key];
+            }
+        }
+        if ($updates) {
+            $params[] = $groupId;
+            $d->query("UPDATE `groups` SET " . implode(', ', $updates) . " WHERE id = ?", $params);
+            api_cache_flush('grp_');
+        }
+        gOk('Updated');
+    }
+
 echo json_encode(['success'=>false,'message'=>'Missing comment_id']); exit; }
         $exists = $d->fetchOne("SELECT id FROM group_post_comment_likes WHERE comment_id = ? AND user_id = ?", [$cid, $uid]);
         if ($exists) {
