@@ -130,6 +130,22 @@ foreach($quickTests as $url=>$label){
     t('API: '.$label,$resp&&($resp['success']===true||isset($resp['status'])));
 }
 
+
+// Session 76 APIs
+$quickTests2=[
+    'shipper-profile-v2.php?user_id=2'=>'shipper_profile',
+    'shipper-profile-v2.php?user_id=3'=>'shipper_profile_3',
+    'post-analytics-v2.php?post_id=125'=>'post_analytics',
+    'conv-templates.php?category=delivery'=>'templates_delivery',
+    'conv-stickers.php?pack=weather'=>'stickers_weather',
+    'delivery-stats-v2.php?action=top&days=30'=>'delivery_top',
+    'content-moderate.php?text='.urlencode('hello shipper giao hang')=>'moderate_safe',
+];
+foreach($quickTests2 as $url=>$label){
+    $resp=@json_decode(@file_get_contents($base.$url,false,$ctx),true);
+    t('API: '.$label,$resp&&($resp['success']===true||isset($resp['status'])));
+}
+
 // ============ BUNDLE SIZE ============
 $bundleSize=filesize($jsRoot.'ss-bundle.min.js');
 t('Perf: bundle < 600KB',$bundleSize<600000);
