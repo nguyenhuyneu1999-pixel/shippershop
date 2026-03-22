@@ -186,7 +186,7 @@ t('Func: OG tags',$ogResp&&$ogResp['success']===true&&!empty($ogResp['data']['ti
 
 // Moderation reasons
 $modResp=json_decode(http_get('https://shippershop.vn/api/v2/moderation.php?action=reasons'),true);
-t('Func: mod reasons',$modResp&&$modResp['success']===true&&count($modResp['data'])>=5);
+t('Func: mod reasons',$modResp&&$modResp['success']===true&&count($modResp['data'] ?? [])>=5);
 
 // Webhook events
 $whResp=json_decode(http_get('https://shippershop.vn/api/v2/webhooks.php?action=events'),true);
@@ -207,11 +207,11 @@ t('Func: reputation',$repResp&&$repResp['success']===true&&isset($repResp['data'
 
 // Templates (public)
 $tplResp=json_decode(http_get('https://shippershop.vn/api/v2/templates.php'),true);
-t('Func: templates',$tplResp&&$tplResp['success']===true&&count($tplResp['data'])>=5);
+t('Func: templates',$tplResp&&$tplResp['success']===true&&count($tplResp['data'] ?? [])>=5);
 
 // Badges (public)
 $bdgResp=json_decode(http_get('https://shippershop.vn/api/v2/badges.php?action=all'),true);
-t('Func: badges list',$bdgResp&&$bdgResp['success']===true&&count($bdgResp['data'])>=8);
+t('Func: badges list',$bdgResp&&$bdgResp['success']===true&&count($bdgResp['data'] ?? [])>=8);
 
 // Polls (get for post without poll)
 $pollResp=json_decode(http_get('https://shippershop.vn/api/v2/polls.php?post_id=5'),true);
@@ -234,7 +234,7 @@ t('Func: checkin leaderboard',$ciResp&&$ciResp['success']===true);
 
 // Profile Themes (presets)
 $ptResp=json_decode(http_get('https://shippershop.vn/api/v2/profile-themes.php?action=presets'),true);
-t('Func: profile themes',$ptResp&&$ptResp['success']===true&&count($ptResp['data']['presets'])>=8);
+t('Func: profile themes',$ptResp&&$ptResp['success']===true&&count($ptResp['data']['presets'] ?? [])>=8);
 
 // Health Alerts
 $haResp=json_decode(http_get('https://shippershop.vn/api/v2/health-alerts.php'),true);
@@ -339,8 +339,8 @@ t('Func: weekly report endpoint',$wrResp!==null);
 
 // FAQ
 $faqResp=json_decode(http_get('https://shippershop.vn/api/v2/faq.php'),true);
-t('Func: faq list',$faqResp&&$faqResp['success']===true&&count($faqResp['data']['faqs'])>=10);
-t('Func: faq categories',count($faqResp['data']['categories'])>=5);
+t('Func: faq list',$faqResp&&$faqResp['success']===true&&count($faqResp['data']['faqs'] ?? [])>=10);
+t('Func: faq categories',count($faqResp['data']['categories'] ?? [])>=5);
 
 // FAQ search
 $faqSResp=json_decode(http_get('https://shippershop.vn/api/v2/faq.php?q=dang+ky'),true);
@@ -430,7 +430,7 @@ t('Func: trending 72h',$tt72Resp&&$tt72Resp['success']===true&&isset($tt72Resp['
 
 // FAQ category filter
 $faqWResp=json_decode(http_get('https://shippershop.vn/api/v2/faq.php?category=wallet'),true);
-t('Func: faq wallet category',$faqWResp&&$faqWResp['success']===true&&count($faqWResp['data']['faqs'])>=2);
+t('Func: faq wallet category',$faqWResp&&$faqWResp['success']===true&&count($faqWResp['data']['faqs'] ?? [])>=2);
 
 // Heatmap with 365 days
 $hm365Resp=json_decode(http_get('https://shippershop.vn/api/v2/engagement-heatmap.php?days=90'),true);
@@ -446,7 +446,7 @@ t('Func: timeline user 3',$tl3Resp&&$tl3Resp['success']===true);
 
 // Suggest empty
 $sugEResp=json_decode(http_get('https://shippershop.vn/api/v2/suggest.php?q='),true);
-t('Func: suggest empty',$sugEResp&&$sugEResp['success']===true&&count($sugEResp['data'])===0);
+t('Func: suggest empty',$sugEResp&&$sugEResp['success']===true&&count($sugEResp['data'] ?? [])===0);
 
 // Short link create via POST
 $slCtx=stream_context_create(['http'=>['method'=>'POST','header'=>'Content-Type: application/json','content'=>json_encode(['type'=>'post','id'=>5])]]);
@@ -455,11 +455,11 @@ t('Func: short link create',$slCreateResp&&$slCreateResp['success']===true&&!emp
 
 // Feedback categories count
 $faqCatResp=json_decode(http_get('https://shippershop.vn/api/v2/faq.php?action=categories'),true);
-t('Func: faq categories only',$faqCatResp&&$faqCatResp['success']===true&&count($faqCatResp['data'])>=5);
+t('Func: faq categories only',$faqCatResp&&$faqCatResp['success']===true&&count($faqCatResp['data'] ?? [])>=5);
 
 // Platform delivery
 $pdResp=json_decode(http_get('https://shippershop.vn/api/v2/delivery-stats.php?action=platform'),true);
-t('Func: platform top provinces',isset($pdResp['data']['top_provinces'])&&count($pdResp['data']['top_provinces'])>=5);
+t('Func: platform top provinces',isset($pdResp['data']['top_provinces'])&&count($pdResp['data']['top_provinces'] ?? [])>=5);
 
 
 // User compare (public)
@@ -538,12 +538,12 @@ t('Func: admin revenue endpoint',$arResp!==null);
 // Milestones (public)
 $msResp=json_decode(http_get('https://shippershop.vn/api/v2/milestones.php?user_id=2'),true);
 t('Func: milestones',$msResp&&$msResp['success']===true&&isset($msResp['data']['earned']));
-t('Func: milestones progress',count($msResp['data']['progress'])>=10);
+t('Func: milestones progress',count($msResp['data']['progress'] ?? [])>=10);
 t('Func: milestones earned count',$msResp['data']['total_earned']>=1);
 
 // Schedule templates (public GET)
 $stResp=json_decode(http_get('https://shippershop.vn/api/v2/schedule-templates.php'),true);
-t('Func: schedule templates',$stResp&&$stResp['success']===true&&count($stResp['data']['templates'])>=8);
+t('Func: schedule templates',$stResp&&$stResp['success']===true&&count($stResp['data']['templates'] ?? [])>=8);
 
 // Conv reminders (requires auth)
 $crCtx=stream_context_create(['http'=>['ignore_errors'=>true]]);
@@ -558,7 +558,7 @@ t('Func: admin revenue endpoint',$arResp!==null);
 
 // Badges wall catalog
 $bwResp=json_decode(http_get('https://shippershop.vn/api/v2/badges-wall.php?action=catalog'),true);
-t('Func: badges catalog',$bwResp&&$bwResp['success']===true&&count($bwResp['data']['badges'])>=10);
+t('Func: badges catalog',$bwResp&&$bwResp['success']===true&&count($bwResp['data']['badges'] ?? [])>=10);
 
 // Badges wall user
 $bwuResp=json_decode(http_get('https://shippershop.vn/api/v2/badges-wall.php?action=user&user_id=2'),true);
@@ -589,7 +589,7 @@ t('Func: conv export endpoint',$ceResp!==null);
 
 // Auto-tag
 $atResp2=json_decode(http_get('https://shippershop.vn/api/v2/auto-tag.php?text=ghtk+giao+hang+nhanh+shipper'),true);
-t('Func: auto tag',$atResp2&&$atResp2['success']===true&&count($atResp2['data']['suggested_tags'])>=1);
+t('Func: auto tag',$atResp2&&$atResp2['success']===true&&count($atResp2['data']['suggested_tags'] ?? [])>=1);
 
 // Achievements wall leaderboard
 $awlResp=json_decode(http_get('https://shippershop.vn/api/v2/achievements-wall.php?action=leaderboard'),true);
@@ -624,7 +624,7 @@ t('Func: portfolio best posts',is_array($upResp['data']['best_posts']));
 // Engagement predictor
 $epResp=json_decode(http_get(str_replace(' ','+','https://shippershop.vn/api/v2/engagement-predict.php?text=ghtk+giao+hang+nhanh+tphcm+shipper+chia+se+kinh+nghiem')),true);
 t('Func: engagement predict',$epResp&&$epResp['success']===true&&isset($epResp['data']['score']));
-t('Func: predict factors',is_array($epResp['data']['factors'])&&count($epResp['data']['factors'])>=1);
+t('Func: predict factors',is_array($epResp['data']['factors'])&&count($epResp['data']['factors'] ?? [])>=1);
 
 // Announce schedule (public active)
 $annSchResp=json_decode(http_get('https://shippershop.vn/api/v2/announce-schedule.php'),true);
@@ -678,7 +678,7 @@ t('Func: deliveries > 50000',$ds3Resp&&$ds3Resp['data']['total_deliveries']>=500
 
 // Skill tags presets
 $skResp=json_decode(http_get('https://shippershop.vn/api/v2/skill-tags.php'),true);
-t('Func: skill tags presets',$skResp&&$skResp['success']===true&&count($skResp['data']['presets'])>=5);
+t('Func: skill tags presets',$skResp&&$skResp['success']===true&&count($skResp['data']['presets'] ?? [])>=5);
 
 // Skill tags user
 $skuResp=json_decode(http_get('https://shippershop.vn/api/v2/skill-tags.php?user_id=2'),true);
@@ -686,12 +686,12 @@ t('Func: skill tags user',$skuResp&&$skuResp['success']===true);
 
 // Template marketplace
 $tmResp=json_decode(http_get('https://shippershop.vn/api/v2/template-market.php'),true);
-t('Func: template market',$tmResp&&$tmResp['success']===true&&count($tmResp['data']['templates'])>=8);
-t('Func: template categories',count($tmResp['data']['categories'])>=5);
+t('Func: template market',$tmResp&&$tmResp['success']===true&&count($tmResp['data']['templates'] ?? [])>=8);
+t('Func: template categories',count($tmResp['data']['categories'] ?? [])>=5);
 
 // Template popular
 $tmpResp=json_decode(http_get('https://shippershop.vn/api/v2/template-market.php?action=popular'),true);
-t('Func: template popular',$tmpResp&&$tmpResp['success']===true&&count($tmpResp['data'])>=5);
+t('Func: template popular',$tmpResp&&$tmpResp['success']===true&&count($tmpResp['data'] ?? [])>=5);
 
 // Notif blast history (requires admin)
 $nbCtx=stream_context_create(['http'=>['ignore_errors'=>true]]);
@@ -706,7 +706,7 @@ t('Func: conv threads endpoint',$ctResp!==null);
 
 // Reputation tiers list
 $rtResp=json_decode(http_get('https://shippershop.vn/api/v2/reputation-tiers.php?action=tiers'),true);
-t('Func: reputation tiers',$rtResp&&$rtResp['success']===true&&count($rtResp['data']['tiers'])>=5);
+t('Func: reputation tiers',$rtResp&&$rtResp['success']===true&&count($rtResp['data']['tiers'] ?? [])>=5);
 
 // Reputation user
 $rtuResp=json_decode(http_get('https://shippershop.vn/api/v2/reputation-tiers.php?action=user&user_id=2'),true);
@@ -767,7 +767,7 @@ t('Func: leaderboard rewards',count($lsResp['data']['rewards']??[])>=3);
 
 // Leaderboard metrics
 $lmResp=json_decode(http_get('https://shippershop.vn/api/v2/leaderboard-seasons.php?action=metrics'),true);
-t('Func: leaderboard metrics',$lmResp&&$lmResp['success']===true&&count($lmResp['data']['metrics'])>=5);
+t('Func: leaderboard metrics',$lmResp&&$lmResp['success']===true&&count($lmResp['data']['metrics'] ?? [])>=5);
 
 // Leaderboard weekly XP
 $lwxResp=json_decode(http_get('https://shippershop.vn/api/v2/leaderboard-seasons.php?period=weekly&metric=xp'),true);
@@ -806,7 +806,7 @@ t('Func: reactions user',$rauResp&&$rauResp['success']===true&&isset($rauResp['d
 // Feature flags (public)
 $ffResp=json_decode(http_get('https://shippershop.vn/api/v2/feature-flags.php'),true);
 t('Func: feature flags',$ffResp&&$ffResp['success']===true&&isset($ffResp['data']['flags']));
-t('Func: flags count',count($ffResp['data']['flags'])>=10);
+t('Func: flags count',count($ffResp['data']['flags'] ?? [])>=10);
 t('Func: dark mode flag',$ffResp['data']['flags']['dark_mode']===true);
 
 // Feature flag check specific
@@ -824,7 +824,7 @@ t('Func: reactions 7d',$ra7Resp&&$ra7Resp['success']===true);
 
 // Work history non-existent user
 $wh0Resp=json_decode(http_get('https://shippershop.vn/api/v2/work-history.php?user_id=999'),true);
-t('Func: work history empty',$wh0Resp&&$wh0Resp['success']===true&&count($wh0Resp['data']['history'])===0);
+t('Func: work history empty',$wh0Resp&&$wh0Resp['success']===true&&count($wh0Resp['data']['history'] ?? [])===0);
 
 // Feature flags disabled check
 $ff2Resp=json_decode(http_get('https://shippershop.vn/api/v2/feature-flags.php?action=check&flag=ai_content'),true);
@@ -840,7 +840,7 @@ t('Func: platform shipping companies',$ps4Resp['data']['shipping_companies']>=5)
 
 // Smart schedule day stats
 $ss3Resp=json_decode(http_get('https://shippershop.vn/api/v2/smart-schedule.php'),true);
-t('Func: schedule day stats',isset($ss3Resp['data']['day_stats'])&&count($ss3Resp['data']['day_stats'])>=1);
+t('Func: schedule day stats',isset($ss3Resp['data']['day_stats'])&&count($ss3Resp['data']['day_stats'] ?? [])>=1);
 
 // Milestones user 3
 $ms3Resp=json_decode(http_get('https://shippershop.vn/api/v2/milestones.php?user_id=3'),true);
@@ -858,7 +858,7 @@ t('Func: post reach by post',$pr2Resp&&$pr2Resp['success']===true);
 
 // User availability statuses
 $uaResp=json_decode(http_get('https://shippershop.vn/api/v2/user-availability.php'),true);
-t('Func: availability statuses',$uaResp&&$uaResp['success']===true&&count($uaResp['data']['statuses'])>=4);
+t('Func: availability statuses',$uaResp&&$uaResp['success']===true&&count($uaResp['data']['statuses'] ?? [])>=4);
 
 // User availability check
 $ua2Resp=json_decode(http_get('https://shippershop.vn/api/v2/user-availability.php?user_id=2'),true);
@@ -915,12 +915,12 @@ t('Func: summary card user 3',$usc3Resp&&$usc3Resp['success']===true);
 
 // Post highlights empty user
 $ph0Resp=json_decode(http_get('https://shippershop.vn/api/v2/post-highlights.php?user_id=999'),true);
-t('Func: highlights empty',$ph0Resp&&$ph0Resp['success']===true&&count($ph0Resp['data']['highlights'])===0);
+t('Func: highlights empty',$ph0Resp&&$ph0Resp['success']===true&&count($ph0Resp['data']['highlights'] ?? [])===0);
 
 
 // User ratings categories
 $urResp=json_decode(http_get('https://shippershop.vn/api/v2/user-ratings.php'),true);
-t('Func: rating categories',$urResp&&$urResp['success']===true&&count($urResp['data']['categories'])>=5);
+t('Func: rating categories',$urResp&&$urResp['success']===true&&count($urResp['data']['categories'] ?? [])>=5);
 
 // User ratings for user
 $ur2Resp=json_decode(http_get('https://shippershop.vn/api/v2/user-ratings.php?user_id=2'),true);
@@ -929,7 +929,7 @@ t('Func: rating by category',isset($ur2Resp['data']['by_category']));
 
 // Content warnings types
 $cwResp=json_decode(http_get('https://shippershop.vn/api/v2/content-warnings.php'),true);
-t('Func: warning types',$cwResp&&$cwResp['success']===true&&count($cwResp['data']['types'])>=5);
+t('Func: warning types',$cwResp&&$cwResp['success']===true&&count($cwResp['data']['types'] ?? [])>=5);
 
 // Content warnings for post
 $cw2Resp=json_decode(http_get('https://shippershop.vn/api/v2/content-warnings.php?post_id=125'),true);
@@ -980,7 +980,7 @@ t('Func: shift planner endpoint',$spResp!==null);
 $csResp2=json_decode(http_get(str_replace(' ','+','https://shippershop.vn/api/v2/content-score.php?text=ghtk+shipper+giao+hang+nhanh+tphcm+quan+7+lien+he+0909+#shipper+#ghtk')),true);
 t('Func: content score',$csResp2&&$csResp2['success']===true&&isset($csResp2['data']['score']));
 t('Func: content grade',!empty($csResp2['data']['grade']));
-t('Func: content factors',count($csResp2['data']['factors'])>=3);
+t('Func: content factors',count($csResp2['data']['factors'] ?? [])>=3);
 
 // Content score for post
 $cs3Resp=json_decode(http_get('https://shippershop.vn/api/v2/content-score.php?post_id=125'),true);
@@ -1005,7 +1005,7 @@ t('Func: daily report endpoint',$drResp!==null);
 // Calendar view (public)
 $cvResp=json_decode(http_get('https://shippershop.vn/api/v2/calendar-view.php?month=3&year=2026'),true);
 t('Func: calendar view',$cvResp&&$cvResp['success']===true&&isset($cvResp['data']['calendar']));
-t('Func: calendar days',count($cvResp['data']['calendar'])>=28);
+t('Func: calendar days',count($cvResp['data']['calendar'] ?? [])>=28);
 t('Func: calendar stats',$cvResp['data']['total_posts']>=0&&$cvResp['data']['active_days']>=0);
 
 // Calendar view user
@@ -1024,28 +1024,28 @@ t('Func: conv auto archive endpoint',$caaResp!==null);
 
 // Cross-checks for milestone
 $allBadgesResp=json_decode(http_get('https://shippershop.vn/api/v2/badges-wall.php?action=catalog'),true);
-t('Func: badges catalog count',count($allBadgesResp['data']['badges'])>=10);
+t('Func: badges catalog count',count($allBadgesResp['data']['badges'] ?? [])>=10);
 
 $tiersResp=json_decode(http_get('https://shippershop.vn/api/v2/reputation-tiers.php?action=tiers'),true);
-t('Func: reputation tier count',count($tiersResp['data']['tiers'])===5);
+t('Func: reputation tier count',count($tiersResp['data']['tiers'] ?? [])===5);
 
 $flagsResp=json_decode(http_get('https://shippershop.vn/api/v2/feature-flags.php'),true);
-t('Func: flags total',count($flagsResp['data']['flags'])>=14);
+t('Func: flags total',count($flagsResp['data']['flags'] ?? [])>=14);
 
 $tmResp2=json_decode(http_get('https://shippershop.vn/api/v2/template-market.php?action=popular'),true);
 t('Func: template popular sorted',$tmResp2['data'][0]['uses']>=$tmResp2['data'][1]['uses']);
 
 $skillResp=json_decode(http_get('https://shippershop.vn/api/v2/skill-tags.php'),true);
-t('Func: skill categories 5',count($skillResp['data']['presets'])===5);
+t('Func: skill categories 5',count($skillResp['data']['presets'] ?? [])===5);
 
 $cwResp3=json_decode(http_get('https://shippershop.vn/api/v2/content-warnings.php'),true);
-t('Func: content warning types 5',count($cwResp3['data']['types'])===5);
+t('Func: content warning types 5',count($cwResp3['data']['types'] ?? [])===5);
 
 $avResp=json_decode(http_get('https://shippershop.vn/api/v2/user-availability.php'),true);
-t('Func: availability status 4',count($avResp['data']['statuses'])===4);
+t('Func: availability status 4',count($avResp['data']['statuses'] ?? [])===4);
 
 $urResp2=json_decode(http_get('https://shippershop.vn/api/v2/user-ratings.php'),true);
-t('Func: rating categories 5',count($urResp2['data']['categories'])===5);
+t('Func: rating categories 5',count($urResp2['data']['categories'] ?? [])===5);
 
 $dmResp2=json_decode(http_get('https://shippershop.vn/api/v2/delivery-map.php'),true);
 t('Func: delivery provinces 11',$dmResp2['data']['total_with_location']>=500);
@@ -1123,7 +1123,7 @@ t('Func: conv meeting endpoint',$cmResp2!==null);
 
 // Cross-checks for 850 target
 $wcResp3=json_decode(http_get('https://shippershop.vn/api/v2/content-warnings.php'),true);
-t('Func: content warnings types ok',count($wcResp3['data']['types'])===5);
+t('Func: content warnings types ok',count($wcResp3['data']['types'] ?? [])===5);
 
 $csResp4=json_decode(http_get('https://shippershop.vn/api/v2/content-score.php?post_id=125'),true);
 t('Func: content score exists',$csResp4&&$csResp4['success']===true&&$csResp4['data']['score']>=0);
@@ -1132,10 +1132,10 @@ $eh2Resp=json_decode(http_get('https://shippershop.vn/api/v2/engagement-heatmap.
 t('Func: heatmap 7d',$eh2Resp&&$eh2Resp['success']===true);
 
 $sk2Resp=json_decode(http_get('https://shippershop.vn/api/v2/skill-tags.php'),true);
-t('Func: skills presets ok',count($sk2Resp['data']['presets'])===5);
+t('Func: skills presets ok',count($sk2Resp['data']['presets'] ?? [])===5);
 
 $tm3Resp=json_decode(http_get('https://shippershop.vn/api/v2/template-market.php?category=question'),true);
-t('Func: templates filtered',count($tm3Resp['data']['templates'])>=1);
+t('Func: templates filtered',count($tm3Resp['data']['templates'] ?? [])>=1);
 
 $lb2Resp=json_decode(http_get('https://shippershop.vn/api/v2/leaderboard-seasons.php?period=weekly&metric=comments'),true);
 t('Func: leaderboard comments',$lb2Resp&&$lb2Resp['success']===true);
@@ -1217,7 +1217,7 @@ $pr3Resp=json_decode(http_get('https://shippershop.vn/api/v2/post-reach.php?post
 t('Func: reach post 125',$pr3Resp&&$pr3Resp['success']===true);
 
 $at3Resp=json_decode(http_get(str_replace(" ","+",'https://shippershop.vn/api/v2/auto-tag.php?text=tuyen shipper ghtk quan 7 tphcm')),true);
-t('Func: auto tag multi',$at3Resp&&$at3Resp['success']===true&&count($at3Resp['data']['suggested_tags'])>=2);
+t('Func: auto tag multi',$at3Resp&&$at3Resp['success']===true&&count($at3Resp['data']['suggested_tags'] ?? [])>=2);
 
 $ps4Resp=json_decode(http_get('https://shippershop.vn/api/v2/post-similar.php?post_id=126'),true);
 t('Func: similar post 126',$ps4Resp&&$ps4Resp['success']===true);
@@ -1258,15 +1258,15 @@ t('Func: calendar march posts',$cvMar['data']['total_posts']>=100);
 
 // Cross-verify: engagement heatmap has grid
 $ehGrid=json_decode(http_get('https://shippershop.vn/api/v2/engagement-heatmap.php?days=30'),true);
-t('Func: heatmap has grid cells',count($ehGrid['data']['grid'])>=10);
+t('Func: heatmap has grid cells',count($ehGrid['data']['grid'] ?? [])>=10);
 
 // Cross-verify: reputation leaderboard has users
 $rtLb=json_decode(http_get('https://shippershop.vn/api/v2/reputation-tiers.php?action=leaderboard'),true);
-t('Func: reputation lb users',count($rtLb['data'])>=5);
+t('Func: reputation lb users',count($rtLb['data'] ?? [])>=5);
 
 // Cross-verify: smart schedule has slots
 $ssSlots=json_decode(http_get('https://shippershop.vn/api/v2/smart-schedule.php'),true);
-t('Func: smart schedule slots',count($ssSlots['data']['recommended_slots'])>=3);
+t('Func: smart schedule slots',count($ssSlots['data']['recommended_slots'] ?? [])>=3);
 
 // Cross-verify: post reach non-zero
 $prNz=json_decode(http_get('https://shippershop.vn/api/v2/post-reach.php?user_id=2'),true);
@@ -1300,21 +1300,21 @@ t('Func: conv reactions summary',$crsResp2!==null);
 
 // Weather alerts
 $waResp=json_decode(http_get('https://shippershop.vn/api/v2/weather-alerts.php'),true);
-t('Func: weather alerts',$waResp&&$waResp['success']===true&&count($waResp['data']['alerts'])>=5);
+t('Func: weather alerts',$waResp&&$waResp['success']===true&&count($waResp['data']['alerts'] ?? [])>=5);
 t('Func: weather count',$waResp['data']['count']>=5);
 
 // Weather safety
 $wsResp=json_decode(http_get('https://shippershop.vn/api/v2/weather-alerts.php?action=safety'),true);
-t('Func: weather safety',$wsResp&&$wsResp['success']===true&&count($wsResp['data'])>=5);
+t('Func: weather safety',$wsResp&&$wsResp['success']===true&&count($wsResp['data'] ?? [])>=5);
 
 // AI suggest
 $asResp=json_decode(http_get('https://shippershop.vn/api/v2/ai-suggest.php'),true);
-t('Func: ai suggest',$asResp&&$asResp['success']===true&&count($asResp['data']['suggestions'])>=5);
-t('Func: ai categories',count($asResp['data']['categories'])===6);
+t('Func: ai suggest',$asResp&&$asResp['success']===true&&count($asResp['data']['suggestions'] ?? [])>=5);
+t('Func: ai categories',count($asResp['data']['categories'] ?? [])===6);
 
 // AI suggest filtered
 $asfResp=json_decode(http_get('https://shippershop.vn/api/v2/ai-suggest.php?category=morning'),true);
-t('Func: ai suggest morning',count($asfResp['data']['suggestions'])>=1);
+t('Func: ai suggest morning',count($asfResp['data']['suggestions'] ?? [])>=1);
 
 // Retention score (admin)
 $rsCtx=stream_context_create(['http'=>['ignore_errors'=>true]]);
@@ -1323,12 +1323,12 @@ t('Func: retention score endpoint',$rsResp!==null);
 
 // Conv stickers
 $cstkResp=json_decode(http_get('https://shippershop.vn/api/v2/conv-stickers.php'),true);
-t('Func: conv stickers',$cstkResp&&$cstkResp['success']===true&&count($cstkResp['data']['packs'])>=5);
+t('Func: conv stickers',$cstkResp&&$cstkResp['success']===true&&count($cstkResp['data']['packs'] ?? [])>=5);
 t('Func: sticker count',$cstkResp['data']['total_stickers']>=50);
 
 // Conv stickers filtered
 $cstkf=json_decode(http_get('https://shippershop.vn/api/v2/conv-stickers.php?pack=shipper'),true);
-t('Func: sticker pack shipper',count($cstkf['data']['packs'])===1&&count($cstkf['data']['packs'][0]['stickers'])>=15);
+t('Func: sticker pack shipper',count($cstkf['data']['packs'] ?? [])===1&&count($cstkf['data']['packs'][0]['stickers'])>=15);
 
 
 // Delivery stats v2
@@ -1343,7 +1343,7 @@ t('Func: delivery stats user 2',$dsv2u&&$dsv2u['success']===true);
 
 // Delivery stats top
 $dsv2t=json_decode(http_get('https://shippershop.vn/api/v2/delivery-stats-v2.php?action=top&days=30'),true);
-t('Func: delivery top performers',$dsv2t&&$dsv2t['success']===true&&count($dsv2t['data'])>=1);
+t('Func: delivery top performers',$dsv2t&&$dsv2t['success']===true&&count($dsv2t['data'] ?? [])>=1);
 
 // Content moderation safe
 $cmSafe=json_decode(http_get('https://shippershop.vn/api/v2/content-moderate.php?text='.urlencode('giao hang nhanh tphcm shipper cham chi')),true);
@@ -1362,22 +1362,22 @@ t('Func: growth metrics endpoint',$gmResp!==null);
 
 // Conv templates
 $ctResp=json_decode(http_get('https://shippershop.vn/api/v2/conv-templates.php'),true);
-t('Func: conv templates',$ctResp&&$ctResp['success']===true&&count($ctResp['data']['templates'])>=10);
-t('Func: conv template categories',count($ctResp['data']['categories'])===5);
+t('Func: conv templates',$ctResp&&$ctResp['success']===true&&count($ctResp['data']['templates'] ?? [])>=10);
+t('Func: conv template categories',count($ctResp['data']['categories'] ?? [])===5);
 
 // Conv templates filtered
 $ctfResp=json_decode(http_get('https://shippershop.vn/api/v2/conv-templates.php?category=delivery'),true);
-t('Func: conv templates delivery',count($ctfResp['data']['templates'])>=2);
+t('Func: conv templates delivery',count($ctfResp['data']['templates'] ?? [])>=2);
 
 $ctfResp2=json_decode(http_get('https://shippershop.vn/api/v2/conv-templates.php?category=payment'),true);
-t('Func: conv templates payment',count($ctfResp2['data']['templates'])>=2);
+t('Func: conv templates payment',count($ctfResp2['data']['templates'] ?? [])>=2);
 
 // Extra cross-checks
 $wa2=json_decode(http_get('https://shippershop.vn/api/v2/weather-alerts.php?province=Ho+Chi+Minh'),true);
 t('Func: weather filter hcm',$wa2['data']['count']>=1);
 
 $as2=json_decode(http_get('https://shippershop.vn/api/v2/ai-suggest.php?category=tip'),true);
-t('Func: ai suggest tip',count($as2['data']['suggestions'])>=1);
+t('Func: ai suggest tip',count($as2['data']['suggestions'] ?? [])>=1);
 
 $stk2=json_decode(http_get('https://shippershop.vn/api/v2/conv-stickers.php?pack=emotions'),true);
 t('Func: stickers emotions',count($stk2['data']['packs'][0]['stickers'])>=10);
@@ -1389,10 +1389,10 @@ $cv4=json_decode(http_get('https://shippershop.vn/api/v2/calendar-view.php?month
 t('Func: calendar jan 2026',$cv4&&$cv4['data']['days_in_month']===31);
 
 $dm4=json_decode(http_get('https://shippershop.vn/api/v2/delivery-map.php'),true);
-t('Func: delivery map districts 30',count($dm4['data']['by_district'])>=10);
+t('Func: delivery map districts 30',count($dm4['data']['by_district'] ?? [])>=10);
 
 $eh4=json_decode(http_get('https://shippershop.vn/api/v2/engagement-heatmap.php?days=7'),true);
-t('Func: heatmap 7d grid',count($eh4['data']['grid'])>=1);
+t('Func: heatmap 7d grid',count($eh4['data']['grid'] ?? [])>=1);
 
 $ur3=json_decode(http_get('https://shippershop.vn/api/v2/user-ratings.php?user_id=3'),true);
 t('Func: user ratings user 3',$ur3&&$ur3['success']===true);
@@ -1404,13 +1404,13 @@ $pc3=json_decode(http_get('https://shippershop.vn/api/v2/plagiarism-check.php?te
 t('Func: plagiarism long text',$pc3&&$pc3['success']===true&&$pc3['data']['phrases_checked']>=2);
 
 $ff2=json_decode(http_get('https://shippershop.vn/api/v2/feature-flags.php'),true);
-t('Func: feature flags 14+',count($ff2['data']['flags'])>=14);
+t('Func: feature flags 14+',count($ff2['data']['flags'] ?? [])>=14);
 
 $sc2=json_decode(http_get('https://shippershop.vn/api/v2/site-config.php'),true);
 t('Func: site config version',!empty($sc2['data']['site']['version']));
 
 $ss5=json_decode(http_get('https://shippershop.vn/api/v2/smart-schedule.php'),true);
-t('Func: smart schedule 3+ slots',count($ss5['data']['recommended_slots'])>=3);
+t('Func: smart schedule 3+ slots',count($ss5['data']['recommended_slots'] ?? [])>=3);
 
 $st3=json_decode(http_get('https://shippershop.vn/api/v2/status.php'),true);
 
@@ -1434,10 +1434,10 @@ $wa3=json_decode(http_get('https://shippershop.vn/api/v2/weather-alerts.php?acti
 t('Cross: weather safety sorted',$wa3&&$wa3['data'][0]['score']>=50);
 
 $ctAll=json_decode(http_get('https://shippershop.vn/api/v2/conv-templates.php'),true);
-t('Cross: conv templates 10+',$ctAll&&count($ctAll['data']['templates'])>=10);
+t('Cross: conv templates 10+',$ctAll&&count($ctAll['data']['templates'] ?? [])>=10);
 
 $ctAddr=json_decode(http_get('https://shippershop.vn/api/v2/conv-templates.php?category=address'),true);
-t('Cross: conv templates address',count($ctAddr['data']['templates'])>=2);
+t('Cross: conv templates address',count($ctAddr['data']['templates'] ?? [])>=2);
 
 $dsTop=json_decode(http_get('https://shippershop.vn/api/v2/delivery-stats-v2.php?action=top&days=7'),true);
 t('Cross: delivery top 7d',$dsTop&&$dsTop['success']===true);
@@ -1446,22 +1446,22 @@ $cmClean=json_decode(http_get('https://shippershop.vn/api/v2/content-moderate.ph
 t('Cross: moderate clean 100',$cmClean&&$cmClean['data']['score']===100);
 
 $vmTypes=json_decode(http_get('https://shippershop.vn/api/v2/vehicle-manager.php?action=types'),true);
-t('Cross: vehicle 6 types',$vmTypes&&count($vmTypes['data']['types'])===6);
+t('Cross: vehicle 6 types',$vmTypes&&count($vmTypes['data']['types'] ?? [])===6);
 
 $asMorn=json_decode(http_get('https://shippershop.vn/api/v2/ai-suggest.php?category=evening'),true);
-t('Cross: ai suggest evening',count($asMorn['data']['suggestions'])>=1);
+t('Cross: ai suggest evening',count($asMorn['data']['suggestions'] ?? [])>=1);
 
 $stkAll=json_decode(http_get('https://shippershop.vn/api/v2/conv-stickers.php'),true);
 t('Cross: stickers 60+',$stkAll['data']['total_stickers']>=60);
 
 $stkFood=json_decode(http_get('https://shippershop.vn/api/v2/conv-stickers.php?pack=food'),true);
-t('Cross: sticker food pack',$stkFood&&count($stkFood['data']['packs'])===1);
+t('Cross: sticker food pack',$stkFood&&count($stkFood['data']['packs'] ?? [])===1);
 
 $cvFeb=json_decode(http_get('https://shippershop.vn/api/v2/calendar-view.php?month=2&year=2026&user_id=3'),true);
 t('Cross: calendar feb user 3',$cvFeb&&$cvFeb['success']===true);
 
 $dmDist=json_decode(http_get('https://shippershop.vn/api/v2/delivery-map.php'),true);
-t('Cross: delivery map province 10+',count($dmDist['data']['by_province'])>=10);
+t('Cross: delivery map province 10+',count($dmDist['data']['by_province'] ?? [])>=10);
 
 $ehUser=json_decode(http_get('https://shippershop.vn/api/v2/engagement-heatmap.php?user_id=3&days=30'),true);
 t('Cross: heatmap user3 30d',$ehUser&&$ehUser['success']===true);
@@ -1493,11 +1493,11 @@ t('Cross: reach user 3',$pr5&&$pr5['success']===true);
 
 // Earnings calculator rates
 $ecRates=json_decode(http_get('https://shippershop.vn/api/v2/earnings-calc.php?action=rates'),true);
-t('Func: earnings rates',$ecRates&&$ecRates['success']===true&&count($ecRates['data']['rates'])>=8);
+t('Func: earnings rates',$ecRates&&$ecRates['success']===true&&count($ecRates['data']['rates'] ?? [])>=8);
 
 // Earnings calculator compute
 $ecCalc=json_decode(http_get('https://shippershop.vn/api/v2/earnings-calc.php?action=calculate&deliveries=15&avg_km=5&avg_cod=200000&hours=8'),true);
-t('Func: earnings calc',$ecCalc&&$ecCalc['success']===true&&count($ecCalc['data']['results'])>=8);
+t('Func: earnings calc',$ecCalc&&$ecCalc['success']===true&&count($ecCalc['data']['results'] ?? [])>=8);
 t('Func: earnings sorted',$ecCalc['data']['results'][0]['net']>=$ecCalc['data']['results'][1]['net']);
 t('Func: earnings positive',$ecCalc['data']['results'][0]['net']>0);
 
@@ -1506,7 +1506,7 @@ $caText=json_decode(http_get('https://shippershop.vn/api/v2/content-analyzer.php
 t('Func: content analyzer',$caText&&$caText['success']===true&&$caText['data']['word_count']>=10);
 t('Func: analyzer sentiment',$caText['data']['sentiment']==='positive');
 t('Func: analyzer readability',!empty($caText['data']['readability']));
-t('Func: analyzer keywords',count($caText['data']['keywords'])>=2);
+t('Func: analyzer keywords',count($caText['data']['keywords'] ?? [])>=2);
 
 // API usage (admin)
 $auCtx=stream_context_create(['http'=>['ignore_errors'=>true,'timeout'=>10]]);
@@ -1521,17 +1521,17 @@ t('Func: voice transcribe endpoint',$vtResp!==null);
 
 // Tip calculator
 $tcResp=json_decode(http_get('https://shippershop.vn/api/v2/tip-calculator.php?order_value=200000&distance=5&weather=rain'),true);
-t('Func: tip calculator',$tcResp&&$tcResp['success']===true&&count($tcResp['data']['tips'])===4);
+t('Func: tip calculator',$tcResp&&$tcResp['success']===true&&count($tcResp['data']['tips'] ?? [])===4);
 t('Func: tip multiplier rain',$tcResp['data']['multiplier']>1);
-t('Func: tip quick amounts',count($tcResp['data']['quick_tips'])>=6);
+t('Func: tip quick amounts',count($tcResp['data']['quick_tips'] ?? [])>=6);
 
 // Content rewriter styles
 $crStyles=json_decode(http_get('https://shippershop.vn/api/v2/content-rewriter.php'),true);
-t('Func: rewriter styles',$crStyles&&count($crStyles['data']['styles'])>=5);
+t('Func: rewriter styles',$crStyles&&count($crStyles['data']['styles'] ?? [])>=5);
 
 // Content rewriter rewrite
 $crResp=json_decode(http_get('https://shippershop.vn/api/v2/content-rewriter.php?text='.urlencode('giao hang nhanh tphcm')),true);
-t('Func: content rewrite',$crResp&&count($crResp['data']['rewritten'])>=5);
+t('Func: content rewrite',$crResp&&count($crResp['data']['rewritten'] ?? [])>=5);
 t('Func: rewrite has text',!empty($crResp['data']['rewritten'][0]['text']));
 
 // Content pipeline (admin)
@@ -1573,7 +1573,7 @@ t('Func: conv pinned topics endpoint',$cptResp!==null);
 // Area coverage overview
 $acResp=json_decode(http_get('https://shippershop.vn/api/v2/area-coverage.php'),true);
 t('Func: area coverage',$acResp&&$acResp['success']===true&&isset($acResp['data']['stats']));
-t('Func: area provinces',count($acResp['data']['provinces'])>=5);
+t('Func: area provinces',count($acResp['data']['provinces'] ?? [])>=5);
 
 // Area coverage gaps
 $acGaps=json_decode(http_get('https://shippershop.vn/api/v2/area-coverage.php?action=gaps'),true);
@@ -1582,7 +1582,7 @@ t('Func: area gaps',$acGaps&&$acGaps['success']===true&&$acGaps['data']['total']
 // Predict v2
 $pv2Resp=json_decode(http_get('https://shippershop.vn/api/v2/predict-v2.php?text='.urlencode('giao hang nhanh tphcm quan 7 co ai can khong? #shipper').'&has_image=1&hour=20'),true);
 t('Func: predict v2',$pv2Resp&&$pv2Resp['success']===true&&$pv2Resp['data']['score']>=50);
-t('Func: predict factors',count($pv2Resp['data']['factors'])>=3);
+t('Func: predict factors',count($pv2Resp['data']['factors'] ?? [])>=3);
 t('Func: predict estimates',$pv2Resp['data']['estimated_likes']>=0);
 
 // User funnel (admin)
@@ -1627,7 +1627,7 @@ $tcRain=json_decode(http_get('https://shippershop.vn/api/v2/tip-calculator.php?o
 t('Cross: tip storm multiplier',$tcRain&&$tcRain['data']['multiplier']>=2);
 
 $crStyle=json_decode(http_get('https://shippershop.vn/api/v2/content-rewriter.php?text='.urlencode('test content').'&style=urgent'),true);
-t('Cross: rewriter urgent style',count($crStyle['data']['rewritten'])>=1);
+t('Cross: rewriter urgent style',count($crStyle['data']['rewritten'] ?? [])>=1);
 
 
 // KPI dashboard (auth)
@@ -1651,7 +1651,7 @@ t('Func: conv status update endpoint',$csuResp!==null);
 
 // Cross-checks for 1100 push
 $ecAll=json_decode(http_get('https://shippershop.vn/api/v2/earnings-calc.php?action=rates'),true);
-t('Cross: earnings 8 companies',count($ecAll['data']['rates'])===8);
+t('Cross: earnings 8 companies',count($ecAll['data']['rates'] ?? [])===8);
 
 $caDeep=json_decode(http_get('https://shippershop.vn/api/v2/content-analyzer.php?text='.urlencode('Giao hang nhanh, an toan, chat luong cao. Cam on ban rat nhieu!')),true);
 t('Cross: analyzer positive',isset($caDeep['data']['sentiment'])&&$caDeep['data']['sentiment']==='positive');
@@ -1660,10 +1660,10 @@ $cmSpam=json_decode(http_get('https://shippershop.vn/api/v2/content-moderate.php
 t('Cross: moderate spam+scam',$cmSpam&&$cmSpam['data']['issue_count']>=3);
 
 $crAll=json_decode(http_get('https://shippershop.vn/api/v2/content-rewriter.php?text='.urlencode('shipper tphcm').'&style=story'),true);
-t('Cross: rewriter story',count($crAll['data']['rewritten'])===1);
+t('Cross: rewriter story',count($crAll['data']['rewritten'] ?? [])===1);
 
 $wa4=json_decode(http_get('https://shippershop.vn/api/v2/weather-alerts.php?province=Da+Nang'),true);
-t('Cross: weather da nang',count($wa4['data']['alerts'])>=1);
+t('Cross: weather da nang',count($wa4['data']['alerts'] ?? [])>=1);
 
 $stk3=json_decode(http_get('https://shippershop.vn/api/v2/conv-stickers.php?pack=weather'),true);
 t('Cross: sticker weather 10',count($stk3['data']['packs'][0]['stickers'])>=10);
@@ -1896,7 +1896,7 @@ t('Func: delivery analytics endpoint',$da2Resp!==null);
 $qgClean=json_decode(http_get('https://shippershop.vn/api/v2/quality-gate.php?text='.urlencode('Giao hang nhanh tphcm quan 7 shipper chuyen nghiep #shipper #tphcm').'&has_image=1'),true);
 t('Func: quality gate pass',$qgClean&&$qgClean['success']===true&&$qgClean['data']['pass']===true);
 t('Func: quality grade A or B',in_array($qgClean['data']['grade'],['A','B']));
-t('Func: quality checks',count($qgClean['data']['checks'])>=4);
+t('Func: quality checks',count($qgClean['data']['checks'] ?? [])>=4);
 
 // Quality gate fail
 $qgSpam=json_decode(http_get('https://shippershop.vn/api/v2/quality-gate.php?text='.urlencode('casino lo de ca cuoc dam bao 100%')),true);
@@ -1920,12 +1920,12 @@ t('Func: customer contacts endpoint',$cc3Resp!==null);
 
 // Template library
 $tlResp=json_decode(http_get('https://shippershop.vn/api/v2/template-library.php'),true);
-t('Func: template library',$tlResp&&$tlResp['success']===true&&count($tlResp['data']['templates'])>=8);
-t('Func: template 5 categories',count($tlResp['data']['categories'])>=5);
+t('Func: template library',$tlResp&&$tlResp['success']===true&&count($tlResp['data']['templates'] ?? [])>=8);
+t('Func: template 5 categories',count($tlResp['data']['categories'] ?? [])>=5);
 
 // Template filter
 $tlDel=json_decode(http_get('https://shippershop.vn/api/v2/template-library.php?category=delivery'),true);
-t('Func: template delivery filter',count($tlDel['data']['templates'])>=2);
+t('Func: template delivery filter',count($tlDel['data']['templates'] ?? [])>=2);
 
 // Retention dashboard (admin)
 $rd2Ctx=stream_context_create(['http'=>['ignore_errors'=>true,'timeout'=>10]]);
@@ -2007,7 +2007,7 @@ t('Cross: AI detect thu nhap topic',$ciaTest&&$ciaTest['data']['topic']==='thu_n
 
 // Template library tip category
 $tlTip=json_decode(http_get('https://shippershop.vn/api/v2/template-library.php?category=tip'),true);
-t('Cross: template tip 2+',count($tlTip['data']['templates'])>=2);
+t('Cross: template tip 2+',count($tlTip['data']['templates'] ?? [])>=2);
 
 
 // Income tracker (auth)
