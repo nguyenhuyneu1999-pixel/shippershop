@@ -290,6 +290,48 @@ if ($method === 'POST') {
         gOk($newPin ? 'Đã ghim' : 'Đã bỏ ghim', ['pinned' => (bool)$newPin]);
     }
 
+
+    // Set member role (admin only)
+    if ($action === 'set_role') {
+        $uid = getAuthUserId(); if (!$uid) gErr('Auth required', 401);
+        $input = json_decode(file_get_contents('php://input'), true);
+        $groupId = intval($input['group_id'] ?? 0);
+        $targetId = intval($input['user_id'] ?? 0);
+        $newRole = $input['role'] ?? '';
+        
+        if (!$groupId || !$targetId || !in_array($newRole, ['member', 'moderator', 'admin'])) gErr('Invalid params');
+        
+        // Check caller is admin
+        $caller = $d->fetchOne("SELECT role FROM group_members WHERE group_id = ? AND user_id = ?", [$groupId, $uid]);
+        if (!$caller || $caller['role'] !== 'admin') gErr('Admin only');
+        
+        // Can't change own role
+        if ($targetId === $uid) gErr('Cannot change own role');
+        
+        $d->query("UPDATE group_members SET role = ? WHERE group_id = ? AND user_id = ?", [$newRole, $groupId, $targetId]);
+        gOk('Role updated', ['user_id' => $targetId, 'role' => $newRole]);
+    }
+
+    // Kick member (admin/mod only)
+    if ($action === 'kick_member') {
+        $uid = getAuthUserId(); if (!$uid) gErr('Auth required', 401);
+        $input = json_decode(file_get_contents('php://input'), true);
+        $groupId = intval($input['group_id'] ?? 0);
+        $targetId = intval($input['user_id'] ?? 0);
+        
+        if (!$groupId || !$targetId) gErr('Invalid');
+        $caller = $d->fetchOne("SELECT role FROM group_members WHERE group_id = ? AND user_id = ?", [$groupId, $uid]);
+        if (!$caller || !in_array($caller['role'], ['admin', 'moderator'])) gErr('Permission denied');
+        
+        $target = $d->fetchOne("SELECT role FROM group_members WHERE group_id = ? AND user_id = ?", [$groupId, $targetId]);
+        if ($target && $target['role'] === 'admin') gErr('Cannot kick admin');
+        
+        $d->query("DELETE FROM group_members WHERE group_id = ? AND user_id = ?", [$groupId, $targetId]);
+        $d->query("UPDATE `groups` SET member_count = GREATEST(member_count - 1, 0) WHERE id = ?", [$groupId]);
+        api_cache_flush('grp_');
+        gOk('Member removed');
+    }
+
 echo json_encode(['success'=>false,'message'=>'Missing comment_id']); exit; }
         $exists = $d->fetchOne("SELECT id FROM group_post_comment_likes WHERE comment_id = ? AND user_id = ?", [$cid, $uid]);
         if ($exists) {

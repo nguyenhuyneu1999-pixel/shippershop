@@ -237,4 +237,41 @@ if ($method === 'GET' && $action === 'users') {
     exit;
 }
 
+
+
+// === GET: Content queue ===
+if ($method === 'GET' && $action === 'content_queue') {
+    $uid = adminAuth();
+    $status = $_GET['status'] ?? 'pending';
+    $page = max(1, intval($_GET['page'] ?? 1));
+    $limit = 20;
+    $offset = ($page - 1) * $limit;
+    
+    $total = intval($d->fetchOne("SELECT COUNT(*) as c FROM content_queue WHERE `status` = ?", [$status])['c']);
+    $items = $d->fetchAll(
+        "SELECT cq.*, u.fullname, u.avatar FROM content_queue cq LEFT JOIN users u ON cq.user_id = u.id WHERE cq.`status` = ? ORDER BY cq.created_at DESC LIMIT $limit OFFSET $offset", [$status]
+    );
+    
+    echo json_encode(['success' => true, 'data' => ['items' => $items ?: [], 'total' => $total, 'page' => $page]]);
+    exit;
+}
+
+// === POST: Approve/reject content ===
+if ($method === 'POST' && $action === 'review_content') {
+    $uid = adminAuth();
+    $input = json_decode(file_get_contents('php://input'), true);
+    $itemId = intval($input['item_id'] ?? 0);
+    $decision = $input['decision'] ?? '';
+    
+    if (!$itemId || !in_array($decision, ['approve', 'reject'])) {
+        echo json_encode(['success' => false, 'message' => 'Invalid']); exit;
+    }
+    
+    $newStatus = $decision === 'approve' ? 'published' : 'rejected';
+    $d->query("UPDATE content_queue SET `status` = ?, reviewed_by = ?, reviewed_at = NOW() WHERE id = ?", [$newStatus, $uid, $itemId]);
+    
+    echo json_encode(['success' => true, 'message' => $decision === 'approve' ? 'Đã duyệt' : 'Đã từ chối']);
+    exit;
+}
+
 echo json_encode(['success' => false, 'message' => 'Invalid action']);
