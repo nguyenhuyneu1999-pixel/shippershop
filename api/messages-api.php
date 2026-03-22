@@ -8,6 +8,25 @@ $d=db();
 $method=$_SERVER['REQUEST_METHOD'];
 $action=$_GET['action']??'';
 
+// Quick unread count for badge polling
+if ($method === 'GET' && $action === 'unread_total') {
+    $uid = null;
+    if (!empty($_SESSION['user_id'])) $uid = intval($_SESSION['user_id']);
+    if (!$uid) {
+        $headers = getallheaders();
+        $h = $headers['Authorization'] ?? $headers['authorization'] ?? '';
+        if (preg_match('/Bearer\s+(.+)/i', $h, $m)) {
+            $data = verifyJWT($m[1]);
+            if ($data && isset($data['user_id'])) $uid = intval($data['user_id']);
+        }
+    }
+    if (!$uid) { echo json_encode(['success'=>true,'data'=>['count'=>0]]); exit; }
+    $count = intval($d->fetchOne("SELECT COUNT(*) as c FROM messages m JOIN conversations cv ON m.conversation_id=cv.id WHERE (cv.user1_id=? OR cv.user2_id=?) AND m.sender_id!=? AND m.is_read=0", [$uid,$uid,$uid])['c'] ?? 0);
+    echo json_encode(['success'=>true,'data'=>['count'=>$count]]);
+    exit;
+}
+
+
 function getMsgUserId(){
   if(!empty($_SESSION["user_id"])) return intval($_SESSION["user_id"]);
   // JWT check directly (getAuthUserId calls exit which is uncatchable)
