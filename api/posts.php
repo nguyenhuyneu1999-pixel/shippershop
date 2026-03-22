@@ -184,7 +184,8 @@ if ($method === 'GET') {
     
     // === CACHE: Feed response (30s TTL, 0 DB queries on hit) ===
     $sort = $_GET['sort'] ?? 'new';
-    $_cacheKey = 'feed_' . md5($whereClause . $sort . $page . $limit . json_encode($params));
+    $_cursor = intval($_GET['cursor'] ?? 0);
+    $_cacheKey = 'feed_' . md5($_cursor . '_' . $whereClause . $sort . $page . $limit . json_encode($params));
     if ($method === 'GET' && !isset($_GET['id']) && !isset($_GET['action'])) {
         api_try_cache($_cacheKey, 30);
     }
