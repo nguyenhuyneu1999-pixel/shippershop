@@ -442,24 +442,7 @@ if ($method === 'POST') {
         
         $postId = $db->insert('posts', [
 
-    try {
-    // Extract and save hashtags
-        preg_match_all('/#([a-zA-ZÀ-ỹ0-9_]+)/u', $input['content'] ?? '', $hashMatches);
-        if (!empty($hashMatches[1])) {
-            $postIdForHash = $db->getLastInsertId();
-            if (!$postIdForHash) $postIdForHash = intval($db->fetchOne("SELECT MAX(id) as m FROM posts")['m']);
-            foreach (array_unique($hashMatches[1]) as $tag) {
-                try {
-                    $existing = $db->fetchOne("SELECT id FROM hashtags WHERE tag = ?", [mb_strtolower($tag)]);
-                    if ($existing) {
-                        $db->query("UPDATE hashtags SET count = count + 1 WHERE id = ?", [$existing['id']]);
-                    } else {
-                        $db->query("INSERT INTO hashtags (tag, count, created_at) VALUES (?, 1, NOW())", [mb_strtolower($tag)]);
-                    }
-                } catch (Throwable $e) {}
-            }
-        }
-    } catch (Throwable $hashErr) {}
+    
             'user_id' => $userId,
             'content' => $content,
             'images' => $imagesJson,
