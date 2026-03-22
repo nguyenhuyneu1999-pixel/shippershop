@@ -1,4 +1,5 @@
 <?php
+session_start();
 /**
  * ============================================
  * POSTS API
@@ -19,8 +20,7 @@ require_once __DIR__ . '/../includes/db.php';
 require_once __DIR__ . '/../includes/functions.php';
 require_once __DIR__ . '/../includes/api-cache.php';
 require_once __DIR__ . '/../includes/api-error-handler.php';
-try { require_once __DIR__ . '/../includes/redis-rate-limiter.php'; apiRateLimit('posts.php', 120); } catch (Throwable $e) { /* rate limit skip */ }
-// require_once __DIR__ . '/../includes/image-optimizer.php'; // loaded on demand
+require_once __DIR__ . '/../includes/image-optimizer.php';
 setupApiErrorHandler();
 require_once __DIR__ . '/auth-check.php';
 require_once __DIR__ . '/../includes/xp-helper.php';
@@ -181,8 +181,7 @@ if ($method === 'GET') {
     
     // === CACHE: Feed response (30s TTL, 0 DB queries on hit) ===
     $sort = $_GET['sort'] ?? 'new';
-    $_authForCache = getOptionalAuthUserId() ?: 0;
-    $_cacheKey = 'feed_' . md5($_authForCache . '_' . $whereClause . $sort . $page . $limit . json_encode($params));
+    $_cacheKey = 'feed_' . md5($whereClause . $sort . $page . $limit . json_encode($params));
     if ($method === 'GET' && !isset($_GET['id']) && !isset($_GET['action'])) {
         api_try_cache($_cacheKey, 30);
     }
@@ -282,29 +281,20 @@ if ($method === 'POST') {
             $pid = intval($input["post_id"] ?? 0);
             $newContent = sanitize($input["content"] ?? "");
             if (!$pid || empty($newContent)) error("Thiếu thông tin");
-            $post = $db->fetchOne("SELECT user_id, content FROM posts WHERE id = ? AND `status` = 'active'", [$pid]);
-            if (!$post) error("Bài viết không tồn tại");
-            if (intval($post["user_id"]) !== $userId) error("Không có quyền chỉnh sửa");
-            // Save edit history
+            $post = $db->fetchOne("SELECT user_id FROM posts WHERE id = ? AND `status` = 'active'", [$pid]);
+            if (!$post || intval($post["user_id"]) !== $userId) error("Không có quyền");
             $db->query("UPDATE posts SET content = ?, edited_at = NOW() WHERE id = ?", [$newContent, $pid]);
             api_cache_flush("feed_");
-            success("Đã cập nhật bài viết", ["post_id" => $pid, "content" => $newContent]);
+            success("Đã cập nhật", ["post_id" => $pid]);
         }
         if ($action === "report") {
             $pid = intval($input["post_id"] ?? 0);
             $reason = sanitize($input["reason"] ?? "");
-            $detail = sanitize($input["detail"] ?? "");
-            if (!$pid || empty($reason)) error("Thiếu thông tin báo cáo");
+            if (!$pid || empty($reason)) error("Thiếu thông tin");
             $existing = $db->fetchOne("SELECT id FROM post_reports WHERE post_id = ? AND user_id = ?", [$pid, $userId]);
             if ($existing) error("Bạn đã báo cáo bài viết này");
-            $db->query("INSERT INTO post_reports (post_id, user_id, reason, detail, `status`, created_at) VALUES (?, ?, ?, ?, 'pending', NOW())", [$pid, $userId, $reason, $detail]);
-            // Auto-hide if 3+ reports
-            $reportCount = intval($db->fetchOne("SELECT COUNT(*) as c FROM post_reports WHERE post_id = ? AND `status` = 'pending'", [$pid])['c']);
-            if ($reportCount >= 3) {
-                $db->query("UPDATE posts SET `status` = 'hidden' WHERE id = ?", [$pid]);
-                api_cache_flush("feed_");
-            }
-            success("Đã báo cáo. Cảm ơn bạn!", ["report_count" => $reportCount]);
+            $db->query("INSERT INTO post_reports (post_id, user_id, reason, `status`, created_at) VALUES (?, ?, ?, 'pending', NOW())", [$pid, $userId, $reason]);
+            success("Đã báo cáo");
         }
 
         if ($action === "comments") { $pid = intval($_GET["post_id"] ?? 0); $cmts = $db->fetchAll("SELECT c.*, u.fullname as user_name, u.avatar as user_avatar FROM comments c LEFT JOIN users u ON c.user_id = u.id WHERE c.post_id = ? AND c.status = 'active' ORDER BY c.created_at ASC", [$pid]); success("OK", $cmts); }
