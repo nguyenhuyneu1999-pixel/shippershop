@@ -94,6 +94,14 @@ function api_try_cache($key, $ttl = 30) {
         header('Content-Type: application/json; charset=utf-8');
         header('X-Cache: HIT');
         header('X-Cache-Key: ' . substr(md5($key), 0, 8));
+        // ETag for 304 on cache HIT too
+        $etag = '"' . md5($cached) . '"';
+        header('ETag: ' . $etag);
+        if (isset($_SERVER['HTTP_IF_NONE_MATCH']) && trim($_SERVER['HTTP_IF_NONE_MATCH']) === $etag) {
+            http_response_code(304);
+            exit;
+        }
+        header('Content-Length: ' . strlen($cached));
         echo $cached;
         exit;
     }
