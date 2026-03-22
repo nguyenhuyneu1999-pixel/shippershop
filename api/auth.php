@@ -379,4 +379,36 @@ if ($action === 'search_users') {
     echo json_encode(['success'=>true,'data'=>$users], JSON_UNESCAPED_UNICODE); exit;
 }
 
+if ($action === 'get_preferences' || $action === 'update_preferences') {
+    $headers = getallheaders();
+    $h = $headers['Authorization'] ?? $headers['authorization'] ?? '';
+    $uid = null;
+    if (preg_match('/Bearer\s+(.+)/i', $h, $m)) {
+        $data = verifyJWT($m[1]);
+        if ($data && isset($data['user_id'])) $uid = intval($data['user_id']);
+    }
+    if (!$uid) { echo json_encode(['success' => false, 'message' => 'Auth required']); exit; }
+    
+    if ($action === 'get_preferences') {
+        $prefs = $db->fetchOne("SELECT notification_email, notification_push, privacy_profile, privacy_online FROM users WHERE id = ?", [$uid]);
+        echo json_encode(['success' => true, 'data' => $prefs ?: ['notification_email' => 1, 'notification_push' => 1, 'privacy_profile' => 'public', 'privacy_online' => 1]]);
+        exit;
+    }
+    
+    $input = json_decode(file_get_contents('php://input'), true);
+    $allowed = ['notification_email', 'notification_push', 'privacy_profile', 'privacy_online'];
+    $updates = [];
+    foreach ($allowed as $key) {
+        if (isset($input[$key])) $updates[$key] = $input[$key];
+    }
+    if ($updates) {
+        $set = implode(', ', array_map(function($k) { return "`$k` = ?"; }, array_keys($updates)));
+        $params = array_values($updates);
+        $params[] = $uid;
+        $db->query("UPDATE users SET $set WHERE id = ?", $params);
+    }
+    echo json_encode(['success' => true, 'message' => 'Saved']); exit;
+}
+
+
 apiError('Action không hợp lệ: ' . $action, 400);
