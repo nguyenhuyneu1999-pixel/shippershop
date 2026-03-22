@@ -505,3 +505,25 @@ if ($action === 'like_comment') {
         echo json_encode(['success'=>true,'data'=>['liked'=>true,'count'=>intval($count)]]); exit;
     }
 }
+
+// Block/Unblock user
+if ($action === 'block') {
+    $userId = getAuthUserId();
+    if (!$userId) { echo json_encode(['success'=>false,'message'=>'Auth required']); exit; }
+    $input = json_decode(file_get_contents('php://input'), true);
+    $targetId = intval($input['user_id'] ?? 0);
+    if (!$targetId || $targetId === $userId) { echo json_encode(['success'=>false,'message'=>'Invalid']); exit; }
+    
+    $existing = $d->fetchOne("SELECT id FROM user_blocks WHERE user_id = ? AND blocked_id = ?", [$userId, $targetId]);
+    if ($existing) {
+        $d->query("DELETE FROM user_blocks WHERE user_id = ? AND blocked_id = ?", [$userId, $targetId]);
+        echo json_encode(['success'=>true,'message'=>'Đã bỏ chặn','data'=>['blocked'=>false]]);
+    } else {
+        $d->query("INSERT INTO user_blocks (user_id, blocked_id, created_at) VALUES (?, ?, NOW())", [$userId, $targetId]);
+        // Also unfollow
+        $d->query("DELETE FROM follows WHERE follower_id = ? AND following_id = ?", [$userId, $targetId]);
+        $d->query("DELETE FROM follows WHERE follower_id = ? AND following_id = ?", [$targetId, $userId]);
+        echo json_encode(['success'=>true,'message'=>'Đã chặn','data'=>['blocked'=>true]]);
+    }
+    exit;
+}
