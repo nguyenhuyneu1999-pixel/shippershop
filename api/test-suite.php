@@ -15,9 +15,16 @@ require_once __DIR__.'/../includes/validator.php';
 require_once __DIR__.'/../includes/auth-v2.php';
 
 $d=db();$pdo=$d->getConnection();
-$R=[];$P=0;$F=0;
+$R=[];$P=0;$F=0;$_tIdx=0;
+$_page=intval($_GET['page']??0);
+$_perPage=200;
+$_startIdx=$_page>0?($_page-1)*$_perPage:0;
+$_endIdx=$_page>0?$_page*$_perPage:999999;
 
-function t($n,$ok,$det=''){global $R,$P,$F;if($ok){$P++;$R[]=['n'=>$n,'s'=>'PASS'];}else{$F++;$R[]=['n'=>$n,'s'=>'FAIL','d'=>$det];}}
+// Set default timeout for external HTTP calls
+stream_context_set_default(['http'=>['timeout'=>8,'ignore_errors'=>true]]);
+
+function t($n,$ok,$det=''){global $R,$P,$F,$_tIdx,$_startIdx,$_endIdx;$_tIdx++;if($_tIdx<$_startIdx||$_tIdx>=$_endIdx)return;if($ok){$P++;$R[]=['n'=>$n,'s'=>'PASS'];}else{$F++;$R[]=['n'=>$n,'s'=>'FAIL','d'=>$det];}}
 
 // ============ DATABASE ============
 $tc=$d->fetchOne("SELECT COUNT(*) as c FROM information_schema.tables WHERE table_schema=DATABASE()");
@@ -1409,5 +1416,5 @@ $st3=json_decode(@file_get_contents('https://shippershop.vn/api/v2/status.php'),
 t('Func: status api healthy',$st3&&$stHealth=json_decode(@file_get_contents('https://shippershop.vn/api/v2/status.php'),true);
 t('Func: status api healthy',$stHealth&&$stHealth['status']==='healthy');
 // ============ RESULTS ============
-$total=$P+$F;
+$total=$P+$F;$totalTests=$_tIdx;
 echo json_encode(['timestamp'=>date('Y-m-d H:i:s'),'passed'=>$P,'failed'=>$F,'total'=>$total,'score'=>$total>0?round($P/$total*100,1).'%':'0%','results'=>$R],JSON_PRETTY_PRINT|JSON_UNESCAPED_UNICODE);
