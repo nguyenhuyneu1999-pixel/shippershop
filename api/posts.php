@@ -189,7 +189,15 @@ if ($method === 'GET') {
         $params[] = $_GET['ward'];
     }
     
-    $whereClause = implode(' AND ', $where);
+    
+    // Following feed
+    $followSort = $_GET['sort'] ?? '';
+    if ($followSort === 'following') {
+        $fUid = getOptionalAuthUserId();
+        if ($fUid) { $where[] = "p.user_id IN (SELECT following_id FROM follows WHERE follower_id = ?)"; $params[] = $fUid; }
+    }
+    
+$whereClause = implode(' AND ', $where);
     
     // === CACHE: Feed response (30s TTL, 0 DB queries on hit) ===
     $sort = $_GET['sort'] ?? 'new';
