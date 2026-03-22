@@ -1,0 +1,98 @@
+/* ShipperShop marketplace.html CSS */
+
+        :root { --primary: #7C3AED; --bg: #f0f2f5; --card: #fff; --text: #1c1e21; --text2: #65676b; --radius: 12px; }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family:'Be Vietnam Pro',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif; background: var(--bg); color: var(--text); padding-bottom: 70px; -webkit-tap-highlight-color: transparent; }
+        a { text-decoration: none; color: inherit; }
+
+        /* HEADER */
+        .mk-header { position: sticky; top: 0; z-index: 100; background: var(--card); padding: 10px 12px; box-shadow: 0 1px 3px rgba(0,0,0,.1); display: flex; align-items: center; gap: 10px; }
+        .mk-header h1 { font-size: 20px; font-weight: 800; white-space: nowrap; }
+        .mk-header h1 i { color: var(--primary); }
+        .mk-search { flex: 1; position: relative; }
+        .mk-search input { width: 100%; padding: 8px 12px 8px 36px; border: none; background: var(--bg); border-radius: 20px; font-size: 14px; outline: none; }
+        .mk-search i { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: var(--text2); font-size: 14px; }
+        .mk-header-btn { width: 36px; height: 36px; border-radius: 50%; background: var(--bg); display: flex; align-items: center; justify-content: center; border: none; font-size: 16px; color: var(--text); cursor: pointer; }
+
+        /* CATEGORIES */
+        .mk-cats { display: flex; gap: 8px; padding: 12px; overflow-x: auto; -webkit-overflow-scrolling: touch; scrollbar-width: none; background: var(--card); border-bottom: 1px solid #e4e6eb; }
+        .mk-cats::-webkit-scrollbar { display: none; }
+        .mk-cat { flex-shrink: 0; display: flex; flex-direction: column; align-items: center; gap: 4px; padding: 8px 14px; border-radius: 10px; background: var(--bg); cursor: pointer; transition: all .2s; font-size: 11px; color: var(--text2); min-width: 72px; text-align: center; border: 2px solid transparent; }
+        .mk-cat.active { background: #fce4ec; color: var(--primary); border-color: var(--primary); font-weight: 600; }
+        .mk-cat i { font-size: 20px; }
+
+        /* GRID */
+        .mk-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; padding: 8px; }
+        .mk-item { background: var(--card); border-radius: var(--radius); overflow: hidden; cursor: pointer; transition: transform .15s; }
+        .mk-item:active { transform: scale(.97); }
+        .mk-item-img { width: 100%; aspect-ratio: 1; object-fit: cover; background: #e4e6eb; display: block; }
+        .mk-item-info { padding: 8px 10px 12px; }
+        .mk-item-price { font-size: 15px; font-weight: 700; color: var(--text); }
+        .mk-item-title { font-size: 13px; color: var(--text2); margin-top: 2px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        .mk-item-loc { font-size: 11px; color: var(--text2); margin-top: 4px; display: flex; align-items: center; gap: 4px; }
+
+        /* FAB */
+        .mk-fab { position: fixed; bottom: 80px; right: 16px; z-index: 90; width: 52px; height: 52px; border-radius: 50%; background: var(--primary); color: #fff; border: none; font-size: 24px; box-shadow: 0 4px 12px rgba(124,58,237,.4); cursor: pointer; display: flex; align-items: center; justify-content: center; }
+
+        /* MODAL */
+        .mk-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,.5); z-index: 200; }
+        .mk-overlay.active { display: block; }
+        .mk-modal { position: fixed; bottom: 0; left: 0; right: 0; z-index: 201; background: var(--card); border-radius: 16px 16px 0 0; max-height: 92vh; display: none; flex-direction: column; }
+        .mk-modal.active { display: flex; }
+        .mk-modal-header { display: flex; align-items: center; justify-content: space-between; padding: 14px 16px; border-bottom: 1px solid #e4e6eb; flex-shrink: 0; }
+        .mk-modal-header h2 { font-size: 17px; font-weight: 700; }
+        .mk-modal-close { width: 32px; height: 32px; border-radius: 50%; background: var(--bg); border: none; font-size: 16px; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+        .mk-modal-body { flex: 1; overflow-y: auto; padding: 16px; -webkit-overflow-scrolling: touch; }
+        .mk-modal-footer { padding: 12px 16px; border-top: 1px solid #e4e6eb; flex-shrink: 0; }
+
+        /* FORM */
+        .mk-field { margin-bottom: 16px; }
+        .mk-field label { display: block; font-size: 13px; font-weight: 600; color: var(--text2); margin-bottom: 6px; }
+        .mk-field input, .mk-field textarea, .mk-field select { width: 100%; padding: 10px 14px; border: 1.5px solid #ddd; border-radius: 10px; font-size: 15px; outline: none; transition: border .2s; background: var(--card); }
+        .mk-field input:focus, .mk-field textarea:focus, .mk-field select:focus { border-color: var(--primary); }
+        .mk-field textarea { resize: vertical; min-height: 80px; }
+        .mk-btn { display: block; width: 100%; padding: 12px; border: none; border-radius: 10px; font-size: 15px; font-weight: 700; cursor: pointer; text-align: center; }
+        .mk-btn-primary { background: var(--primary); color: #fff; }
+        .mk-btn-primary:disabled { opacity: .5; }
+
+        /* IMAGE UPLOAD */
+        .mk-images { display: flex; gap: 8px; flex-wrap: wrap; }
+        .mk-img-add { width: 80px; height: 80px; border: 2px dashed #ccc; border-radius: 10px; display: flex; flex-direction: column; align-items: center; justify-content: center; cursor: pointer; color: var(--text2); font-size: 11px; gap: 2px; }
+        .mk-img-add i { font-size: 20px; }
+        .mk-img-preview { width: 80px; height: 80px; border-radius: 10px; object-fit: cover; position: relative; }
+        .mk-img-preview img { width: 100%; height: 100%; object-fit: cover; border-radius: 10px; }
+        .mk-img-del { position: absolute; top: -6px; right: -6px; width: 22px; height: 22px; border-radius: 50%; background: #333; color: #fff; border: none; font-size: 12px; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+
+        /* DETAIL */
+        .mk-detail-imgs { width: 100%; aspect-ratio: 1; position: relative; overflow: hidden; background: #000; }
+        .mk-detail-imgs img { width: 100%; height: 100%; object-fit: contain; }
+        .mk-detail-dots { position: absolute; bottom: 10px; left: 50%; transform: translateX(-50%); display: flex; gap: 6px; }
+        .mk-detail-dots span { width: 8px; height: 8px; border-radius: 50%; background: rgba(255,255,255,.5); }
+        .mk-detail-dots span.active { background: #fff; }
+        .mk-seller { display: flex; align-items: center; gap: 10px; padding: 14px 0; border-top: 1px solid #e4e6eb; margin-top: 14px; }
+        .mk-seller-avatar { width: 40px; height: 40px; border-radius: 50%; background: var(--primary); color: #fff; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 16px; overflow: hidden; }
+        .mk-seller-avatar img { width: 100%; height: 100%; object-fit: cover; }
+        .mk-cond { display: inline-block; padding: 4px 10px; border-radius: 6px; background: var(--bg); font-size: 12px; color: var(--text2); margin-top: 6px; }
+
+        /* EMPTY */
+        .mk-empty { text-align: center; padding: 60px 20px; color: var(--text2); }
+        .mk-empty i { font-size: 56px; color: #ddd; margin-bottom: 12px; display: block; }
+
+        /* BOTTOM NAV */
+        .mk-bnav { position: fixed; bottom: 0; left: 0; right: 0; z-index: 100; background: #fff; display: flex; align-items: flex-end; border-top: 1px solid #e4e6eb; padding: 6px 0 max(6px, env(safe-area-inset-bottom)); }
+        .mk-bnav .mnav-item { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 2px; font-size: 10px; color: #999; padding: 4px 0; text-decoration: none; -webkit-tap-highlight-color: transparent; }
+        .mk-bnav .mnav-item.active { color: #7C3AED; }
+        .mk-bnav .mnav-item i { font-size: 20px; }
+        .mk-bnav .mnav-item.active i { transform: scale(1.1); }
+        
+        
+        .mk-badge { position: absolute; top: 0; right: calc(50% - 18px); background: var(--primary); color: #fff; font-size: 10px; padding: 1px 5px; border-radius: 8px; font-weight: 700; }
+
+        @keyframes spin { to { transform: rotate(360deg); } }
+        .mk-loading { width: 32px; height: 32px; border: 3px solid #e4e6eb; border-top-color: var(--primary); border-radius: 50%; animation: spin .8s linear infinite; margin: 40px auto; }
+    
+@media (min-width: 769px) {
+  .mk-header { max-width: 900px; margin: 0 auto; position: sticky; }
+  body { padding-bottom: 0 !important; }
+  .mk-overlay, .mk-modal { max-width: 500px; margin: 0 auto; }
+}

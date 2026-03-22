@@ -5,6 +5,7 @@ require_once __DIR__ . '/../includes/db.php';
 require_once __DIR__ . '/../includes/functions.php';
 require_once __DIR__ . '/../includes/api-cache.php';
 require_once __DIR__ . '/../includes/api-error-handler.php';
+require_once __DIR__ . '/../includes/image-optimizer.php';
 setupApiErrorHandler();
 // auth handled by tAuth()
 

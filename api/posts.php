@@ -332,6 +332,7 @@ if ($method === 'POST') {
                 $data = base64_decode(preg_replace('/^data:image\/\w+;base64,/', '', $base64));
                 $filename = uniqid('post_') . '.' . $ext;
                 file_put_contents($uploadDir . $filename, $data);
+                optimizeImage($uploadDir . $filename, $uploadDir . $filename, 1200, 82);
                 $savedImages[] = '/uploads/posts/' . $filename;
             }
         }
@@ -351,6 +352,7 @@ if ($method === 'POST') {
             if ($_FILES['images']['size'][$i] > 10 * 1024 * 1024) continue;
             $filename = uniqid('post_') . '.' . $ext;
             move_uploaded_file($_FILES['images']['tmp_name'][$i], $uploadDir . $filename);
+            optimizeImage($uploadDir . $filename, $uploadDir . $filename, 1200, 82);
             $savedImages[] = '/uploads/posts/' . $filename;
         }
         if (!empty($savedImages)) $imagesJson = json_encode($savedImages);
