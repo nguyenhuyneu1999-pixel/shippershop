@@ -1422,8 +1422,7 @@ t('Func: milestones user 3',$ms5&&$ms5['success']===true);
 $rt3=json_decode(http_get('https://shippershop.vn/api/v2/reputation-tiers.php?action=user&user_id=2'),true);
 t('Func: reputation admin tier',!empty($rt3['data']['tier']));
 
-$st3=json_decode(http_get('https://shippershop.vn/api/v2/status.php'),true);
-t('Func: status api healthy',$st3&&$stHealth=json_decode(http_get('https://shippershop.vn/api/v2/status.php'),true);
+$stHealth=json_decode(http_get('https://shippershop.vn/api/v2/status.php'),true);
 t('Func: status api healthy',$stHealth&&$stHealth['status']==='healthy');
 // ============ RESULTS ============
 $total=$P+$F;
