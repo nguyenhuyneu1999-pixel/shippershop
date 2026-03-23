@@ -338,3 +338,9 @@ function sortGroupPosts(mode){
   var parent=posts[0].parentNode;
   arr.forEach(function(el){parent.appendChild(el);});
 }
+
+function updateMemberCount(delta){
+  if(GROUP)GROUP.member_count=(GROUP.member_count||0)+delta;
+  var el=document.querySelector('.gm');
+  if(el&&GROUP)el.textContent=GROUP.member_count+' thành viên';
+}
