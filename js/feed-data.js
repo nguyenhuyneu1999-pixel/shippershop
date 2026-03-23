@@ -22,7 +22,7 @@ let CU=null,sort='hot',type='all',prov=null,company='',page=1,totalPg=1,imgs=[],
 
 document.addEventListener('DOMContentLoaded',()=>{
   CU=JSON.parse(localStorage.getItem('user')||'null');
-  renderNav(); renderProvinces(); loadPosts(); loadTrend(); loadHashtags(); loadSuggestions(); loadAnnouncement(); loadFriendsLatest(); timeGreeting(); loadPeopleCarousel(); loadDailyQuote(); loadHashtagCloud(); loadCheckin(); loadStories(); loadOnlineCount(); checkPostReminder(); checkAchievementsOnLoad(); showWelcomeBanner(); showOnboarding();
+  renderNav(); renderProvinces(); loadPosts(); loadTrend(); loadHashtags(); loadSuggestions(); loadAnnouncement(); loadFriendsLatest(); timeGreeting(); loadPeopleCarousel(); loadDailyQuote(); loadHashtagCloud(); loadCheckin(); loadDeliveryCounter(); loadStories(); loadOnlineCount(); checkPostReminder(); checkAchievementsOnLoad(); showWelcomeBanner(); showOnboarding();
   // mProv populated by async province API fetch below
   document.getElementById('stM').textContent=Math.floor(Math.random()*3000+1000).toLocaleString();
   document.getElementById('stO').textContent=Math.floor(Math.random()*500+100);
@@ -674,7 +674,7 @@ async function doCheckin(){
     var d=await r.json();
     if(d.success){
       toast(d.message,'success');
-      loadCheckin(); loadStories(); loadOnlineCount(); checkPostReminder(); checkAchievementsOnLoad(); showWelcomeBanner(); showOnboarding();
+      loadCheckin(); loadDeliveryCounter(); loadStories(); loadOnlineCount(); checkPostReminder(); checkAchievementsOnLoad(); showWelcomeBanner(); showOnboarding();
       haptic('success');
     }else{toast(d.message||'Loi','error');}
   }catch(e){toast('Lỗi kết nối','error');}
@@ -914,4 +914,79 @@ async function loadOnlineCount(){
       if(el)el.innerHTML='<span style="display:inline-flex;align-items:center;gap:4px;font-size:12px;color:#00b14f"><span style="width:6px;height:6px;border-radius:50%;background:#00b14f;animation:pulse-dot 1.5s infinite"></span>'+d.data.online_now+' đang online</span>';
     }
   }catch(e){}
+}
+
+// === Delivery counter widget (Đơn giao thành công hôm nay) ===
+async function loadDeliveryCounter(){
+  var token=localStorage.getItem('token');
+  if(!token)return;
+  try{
+    var r=await fetch('/api/deliveries.php?action=today',{headers:{'Authorization':'Bearer '+token}});
+    var d=await r.json();
+    if(!d.success)return;
+    var data=d.data;
+    var box=document.getElementById('deliveryWidget');
+    if(!box)return;
+    
+    var pct=Math.min(100, Math.round(data.deliveries_today/50*100));
+    var nextTier=null;
+    for(var i=0;i<data.rewards.length;i++){
+      if(!data.rewards[i].reached){nextTier=data.rewards[i];break;}
+    }
+    var canClaim=data.rewards.filter(function(r){return r.can_claim;});
+    
+    var html='<div style="padding:14px 16px;background:linear-gradient(135deg,#7C3AED,#5B21B6);border-radius:12px;margin:8px 0;color:#fff">';
+    html+='<div style="display:flex;justify-content:space-between;align-items:center">';
+    html+='<div><div style="font-size:11px;opacity:.8">Đơn giao thành công hôm nay</div>';
+    html+='<div style="font-size:32px;font-weight:800;line-height:1.1">'+data.deliveries_today+'</div></div>';
+    html+='<div style="text-align:right"><div style="font-size:11px;opacity:.8">Tổng</div>';
+    html+='<div style="font-size:18px;font-weight:700">'+data.all_time+'</div></div></div>';
+    
+    // Progress bar to next milestone
+    if(nextTier){
+      html+='<div style="margin-top:10px"><div style="display:flex;justify-content:space-between;font-size:10px;opacity:.8"><span>'+data.deliveries_today+'/'+nextTier.threshold+'</span><span>'+nextTier.label+'</span></div>';
+      html+='<div style="background:rgba(255,255,255,.2);border-radius:4px;height:6px;margin-top:3px"><div style="background:#FBBF24;border-radius:4px;height:6px;width:'+Math.min(100,Math.round(data.deliveries_today/nextTier.threshold*100))+'%;transition:width .5s"></div></div></div>';
+    }
+    
+    // Quick stats row
+    html+='<div style="display:flex;gap:8px;margin-top:10px">';
+    html+='<div style="flex:1;background:rgba(255,255,255,.15);border-radius:8px;padding:6px 8px;text-align:center"><div style="font-size:16px;font-weight:700">'+data.streak+'</div><div style="font-size:9px;opacity:.7">🔥 Streak</div></div>';
+    html+='<div style="flex:1;background:rgba(255,255,255,.15);border-radius:8px;padding:6px 8px;text-align:center"><div style="font-size:16px;font-weight:700">'+data.given_today+'</div><div style="font-size:9px;opacity:.7">👍 Đã cho</div></div>';
+    html+='<div style="flex:1;background:rgba(255,255,255,.15);border-radius:8px;padding:6px 8px;text-align:center"><div style="font-size:16px;font-weight:700">'+data.best_day.count+'</div><div style="font-size:9px;opacity:.7">⭐ Kỷ lục</div></div>';
+    html+='</div>';
+    
+    // Claimable rewards
+    if(canClaim.length>0){
+      html+='<div style="margin-top:10px">';
+      canClaim.forEach(function(rw){
+        html+='<button onclick="claimDeliveryReward(\x27'+rw.name+'\x27,this)" style="width:100%;padding:10px;background:#FBBF24;color:#92400E;border:none;border-radius:8px;font-weight:700;font-size:13px;cursor:pointer;margin-top:4px">🎁 Nhận thưởng '+rw.label+' (+'+rw.xp+' XP)</button>';
+      });
+      html+='</div>';
+    }
+    
+    // Reward milestones
+    html+='<div style="display:flex;gap:4px;margin-top:10px;justify-content:center">';
+    data.rewards.forEach(function(rw){
+      var bg=rw.claimed?'#FBBF24':(rw.reached?'rgba(251,191,36,.5)':'rgba(255,255,255,.2)');
+      html+='<div title="'+rw.label+'" style="width:24px;height:24px;border-radius:50%;background:'+bg+';display:flex;align-items:center;justify-content:center;font-size:12px">'+(rw.claimed?'✓':(rw.reached?'!':rw.threshold))+'</div>';
+    });
+    html+='</div>';
+    
+    html+='</div>';
+    box.innerHTML=html;
+    box.style.display='block';
+  }catch(e){}
+}
+
+async function claimDeliveryReward(tier,btn){
+  var token=localStorage.getItem('token');
+  if(!token)return;
+  btn.disabled=true;btn.textContent='Đang nhận...';
+  try{
+    var r=await fetch('/api/deliveries.php?action=claim_reward',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+token},body:JSON.stringify({tier:tier})});
+    var d=await r.json();
+    if(typeof toast==='function')toast(d.message||'Done',d.success?'success':'error');
+    if(d.success)loadDeliveryCounter();
+  }catch(e){}
+  btn.disabled=false;
 }

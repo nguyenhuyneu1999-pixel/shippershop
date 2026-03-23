@@ -542,3 +542,22 @@ function addSettingsLink(){
   header.style.position='relative';
   header.appendChild(btn);
 }
+
+// Load delivery stats for profile
+async function loadProfileDeliveries(){
+  var token=localStorage.getItem('token');
+  if(!token)return;
+  try{
+    var r=await fetch('/api/deliveries.php?action=today',{headers:{'Authorization':'Bearer '+token}});
+    var d=await r.json();
+    if(!d.success)return;
+    var data=d.data;
+    // Update XP display to show deliveries
+    var xpEl=document.querySelector('.xp-display,.xp-number,[id*="xp"]');
+    // Update streak display
+    var el=document.getElementById('profileDeliveries');
+    if(el){
+      el.innerHTML='<div style="display:flex;gap:8px;margin:8px 0"><div style="flex:1;text-align:center;padding:8px;background:#f3f0ff;border-radius:10px"><div style="font-size:20px;font-weight:800;color:#7C3AED">'+data.deliveries_today+'</div><div style="font-size:10px;color:#666">Đơn hôm nay</div></div><div style="flex:1;text-align:center;padding:8px;background:#f0fdf4;border-radius:10px"><div style="font-size:20px;font-weight:800;color:#00b14f">'+data.all_time+'</div><div style="font-size:10px;color:#666">Tổng đơn</div></div><div style="flex:1;text-align:center;padding:8px;background:#fef3c7;border-radius:10px"><div style="font-size:20px;font-weight:800;color:#92400E">'+data.best_day.count+'</div><div style="font-size:10px;color:#666">Kỷ lục/ngày</div></div></div>';
+    }
+  }catch(e){}
+}
