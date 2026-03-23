@@ -176,3 +176,29 @@ function showPostAnalytics(postId){
       +'</div><button onclick="this.closest(\'[style]\').remove()" style="margin-top:16px;padding:8px 20px;border:1px solid #ddd;border-radius:8px;background:#fff;cursor:pointer">Đóng</button>';
   });
 }
+
+// Follow with animation
+function followWithAnim(userId, btn){
+  var token=localStorage.getItem('token');
+  if(!token){toast('Đăng nhập!');return;}
+  btn.disabled=true;
+  btn.innerHTML='<i class="fas fa-spinner fa-spin"></i>';
+  
+  fetch('/api/social.php?action=follow',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+token},body:JSON.stringify({user_id:userId})})
+    .then(function(r){return r.json()})
+    .then(function(d){
+      if(d.success){
+        var isFollowing=d.data&&d.data.following;
+        btn.innerHTML=isFollowing?'Đang theo dõi':'Theo dõi';
+        btn.style.background=isFollowing?'#f0f0f0':'#7C3AED';
+        btn.style.color=isFollowing?'#333':'#fff';
+        btn.style.transform='scale(1.1)';
+        setTimeout(function(){btn.style.transform='';},200);
+        if(typeof haptic==='function')haptic('light');
+        // Update follower count
+        var fc=document.getElementById('pFollowers');
+        if(fc){var n=parseInt(fc.textContent)||0;fc.textContent=isFollowing?n+1:Math.max(0,n-1);}
+      }else{toast(d.message||'Lỗi','error');}
+      btn.disabled=false;
+    }).catch(function(){btn.disabled=false;btn.innerHTML='Theo dõi';});
+}

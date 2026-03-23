@@ -92,6 +92,30 @@ function showAchievementToast(badgeId){
 }
 
 
+
+function reportPost(pid){
+  var reasons=['Spam hoặc lừa đảo','Nội dung không phù hợp','Quấy rối, bắt nạt','Thông tin sai lệch','Vi phạm quyền riêng tư','Khác'];
+  var ov=document.createElement('div');
+  ov.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:2000;display:flex;align-items:center;justify-content:center';
+  var html='<div style="background:#fff;border-radius:16px;max-width:320px;width:90%"><div style="padding:14px 16px;font-weight:700;font-size:15px;border-bottom:1px solid #f0f0f0">🚩 Báo cáo bài viết</div>';
+  reasons.forEach(function(r){
+    html+='<div onclick="submitReport('+pid+',\''+r.replace(/'/g,"\\'")+'\',this.closest(\'[style]\'))" style="padding:12px 16px;cursor:pointer;border-bottom:1px solid #f8f8f8;font-size:14px">'+r+'</div>';
+  });
+  html+='<div onclick="this.closest(\'[style]\').remove()" style="padding:12px;text-align:center;color:#999;cursor:pointer">Hủy</div></div>';
+  ov.innerHTML=html;
+  ov.onclick=function(e){if(e.target===ov)ov.remove();};
+  document.body.appendChild(ov);
+}
+function submitReport(pid,reason,overlay){
+  var token=localStorage.getItem('token');
+  fetch('/api/posts.php?action=report',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+(token||'')},body:JSON.stringify({post_id:pid,reason:reason})})
+    .then(function(r){return r.json()})
+    .then(function(d){
+      toast(d.success?'Đã báo cáo!':'Lỗi',d.success?'success':'error');
+      if(overlay)overlay.remove();
+    });
+}
+
 function editPost(pid){
   var card=document.getElementById('P'+pid);
   if(!card)return;
