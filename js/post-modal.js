@@ -316,4 +316,44 @@ function insertMention(user,textarea){
   hideMentionPopup();
 }
 
+
+// Poll creation in post modal
+var _spmPollEnabled=false,_spmPollOptions=[];
+function togglePoll(){
+  _spmPollEnabled=!_spmPollEnabled;
+  var area=document.getElementById('spmPollArea');
+  if(!area){
+    area=document.createElement('div');
+    area.id='spmPollArea';
+    area.style.cssText='padding:8px 16px;display:none';
+    var ta=document.getElementById('spmText');
+    if(ta)ta.parentNode.insertBefore(area,ta.nextSibling);
+  }
+  if(_spmPollEnabled){
+    _spmPollOptions=['',''];
+    renderPollInputs();
+    area.style.display='block';
+  }else{
+    area.style.display='none';
+    _spmPollOptions=[];
+  }
+}
+function renderPollInputs(){
+  var area=document.getElementById('spmPollArea');
+  if(!area)return;
+  var html='<div style="font-weight:600;font-size:14px;margin-bottom:8px">Khảo sát</div>';
+  _spmPollOptions.forEach(function(opt,i){
+    html+='<input type="text" value="'+opt.replace(/"/g,'&quot;')+'" placeholder="Lựa chọn '+(i+1)+'" oninput="_spmPollOptions['+i+']=this.value" style="width:100%;padding:8px;border:1px solid #ddd;border-radius:8px;font-size:13px;margin-bottom:6px;box-sizing:border-box">';
+  });
+  if(_spmPollOptions.length<6){
+    html+='<button onclick="addPollOption()" type="button" style="padding:6px 12px;border:1px dashed #7C3AED;border-radius:8px;background:none;color:#7C3AED;font-size:13px;cursor:pointer;width:100%">+ Thêm lựa chọn</button>';
+  }
+  area.innerHTML=html;
+}
+function addPollOption(){
+  if(_spmPollOptions.length>=6)return;
+  _spmPollOptions.push('');
+  renderPollInputs();
+}
+
 })();

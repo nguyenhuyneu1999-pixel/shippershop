@@ -104,6 +104,12 @@ echo json_encode([
         'Batch' => [
             ['POST /batch.php', 'Batch requests', '{requests: [{url: ...}]} — max 5 parallel'],
         ],
+        
+        'Polls' => [
+            ['POST /polls.php?action=create', 'Create poll', '{post_id, question, options[], expires_hours}'],
+            ['POST /polls.php?action=vote', 'Vote on poll', '{poll_id, option_id}'],
+            ['GET /polls.php?action=results', 'Poll results', '?post_id=X'],
+        ],
         'Cron' => [
             ['GET /cron-master.php?key=ss_master_cron', 'Master cron (all tasks)', 'Every 5 min'],
             ['GET /cron-subscription.php?key=ss_sub_cron', 'Auto-renew subscriptions', 'Daily'],
