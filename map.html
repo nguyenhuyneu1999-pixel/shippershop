@@ -16,7 +16,6 @@
 <script src="https://unpkg.com/leaflet.heat@0.2.0/dist/leaflet-heat.js"></script>
 
 <link rel="stylesheet" href="mobile.css">
-<link rel="stylesheet" href="/css/design-system.css?v=1774228696">
 <link rel="stylesheet" href="css/style-v2.css">
 <script src="/js/network-handler.js" defer></script>
 <link rel="stylesheet" href="/css/map-page.css?v=20260322">
@@ -94,7 +93,6 @@
 <a href="profile.html"><i class="fas fa-user"></i><span>Tài khoản</span></a>
 </nav>
 
-
 <script src="js/post-modal.js"></script>
 <!-- ASK LOCATION MODAL -->
 <div class="ask-overlay" id="askOverlay" onclick="if(event.target===this)closeAskLocation()">
@@ -132,63 +130,11 @@
 </div>
 </div>
 
-
-
 <script src="/js/ss-error-tracker.js"></script>
-<script src="/js/analytics.js"></script><nav id="mobileBottomNav" role="navigation" aria-label="Mobile navigation">
-    <a href="index.html" class="mnav-item" data-page="index.html">
-      <i class="fas fa-home"></i><span>Trang chủ</span>
-    </a>
-    <a href="marketplace.html" class="mnav-item" data-page="marketplace.html">
-      <i class="fas fa-store"></i><span>Mua sắm</span>
-    </a>
-    <button class="mnav-item mnav-fab-wrap" onclick="handleFab()" aria-label="Hành động nhanh">
-      <div class="mnav-fab"><i class="fas fa-search" id="fabIcon"></i></div>
-    </button>
-    <a href="map.html" class="mnav-item" data-page="map.html">
-      <i class="fas fa-map-marked-alt"></i><span>Bản đồ</span>
-    </a>
-    <a href="profile.html" class="mnav-item" data-page="profile.html" id="navProfileItem">
-      <i class="fas fa-user" id="navProfileIcon"></i><span id="navProfileName">Tài khoản</span>
-    </a>
-  </nav>
+<script src="/js/analytics.js"></script>
 <script src="js/mobile.js"></script>
-<script src="/js/pages/map-page.js" defer></script>
 <!-- SS v2 Core + Components -->
-<script src="/js/core/utils.js"></script>
-<script src="/js/core/store.js"></script>
-<script src="/js/core/ui.js"></script>
-<script src="/js/core/api.js"></script>
-<script src="/js/components/notification-bell.js"></script>
-<script src="/js/components/scroll-heartbeat.js"></script>
-<script src="/js/components/notif-sound.js"></script>
-<script src="/js/components/image-optimizer.js"></script>
-<script src="/js/components/connection-status.js"></script>
-<script src="/js/components/shortcuts.js"></script>
-<script src="/js/components/a11y.js"></script>
-<script src="/js/components/post-types.js"></script>
-<script src="/js/components/lazy-img.js"></script>
-<script src="/js/components/error-boundary.js"></script>
-<script src="/js/components/report-dialog.js"></script>
-<script src="/js/components/payment.js"></script>
-<script src="/js/components/notif-poll.js"></script>
-<script src="/js/components/pwa-install.js"></script>
-<script src="/js/components/dark-mode.js"></script>
-<script src="/js/components/search-overlay.js"></script>
-<script src="/js/components/image-viewer.js"></script>
-<script src="/js/components/location-picker.js"></script>
 
-<script>
-(function(){
-  if(typeof SS!=='undefined'&&SS.store&&SS.store.isLoggedIn()&&SS.NotifBell){
-    var nb=document.getElementById('ss-notif-bell');
-    if(nb)SS.NotifBell.init('ss-notif-bell');
-  }
-  if(typeof window.toast==='undefined'&&typeof SS!=='undefined'&&SS.ui){
-    window.toast=function(m,dur){SS.ui.toast(m,'info',dur||3000);};
-  }
-})();
-</script>
 <script src="/js/map-page.js?v=20260322" defer></script>
 <script src="/js/perf-boost.js" defer></script>
 </body>
