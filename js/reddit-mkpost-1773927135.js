@@ -238,7 +238,8 @@ async function likePost(pid,btn){
 
 /* Save/Unsave */
 async function savePost(pid,btn){
-  if(!CU){toast('Đăng nhập để lưu!','warning');return;}
+  if(!CU){var sbtn=document.querySelector('#P'+pid+' .pa3-btn[onclick*="savePost"]');if(sbtn){sbtn.style.transform='scale(1.3)';setTimeout(function(){sbtn.style.transform='';},200);}
+    toast('Đăng nhập để lưu!','warning');return;}
   try{
     var r=await fetch('/api/posts.php?action=save',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({post_id:pid})});
     var d=await r.json();
