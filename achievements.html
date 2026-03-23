@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Thành tựu - ShipperShop</title>
+<meta name="theme-color" content="#7C3AED">
+<link rel="icon" href="/favicon.ico">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="stylesheet" href="/css/dark-mode.css">
+<script src="/js/dark-mode.js"></script>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Be Vietnam Pro',sans-serif;background:#f0f2f5;min-height:100vh}
+.ach-header{background:linear-gradient(135deg,#7C3AED,#5B21B6);color:#fff;padding:20px 16px;text-align:center;position:relative}
+.ach-body{max-width:600px;margin:0 auto;padding:12px}
+.ach-stats{display:flex;gap:12px;justify-content:center;margin:12px 0}
+.ach-stat{background:#fff;border-radius:12px;padding:12px 20px;text-align:center;flex:1;max-width:140px}
+.ach-stat .num{font-size:24px;font-weight:700;color:#7C3AED}
+.ach-stat .lbl{font-size:11px;color:#65676B}
+.ach-card{background:#fff;border-radius:12px;overflow:hidden;margin-bottom:8px}
+.ach-item{display:flex;align-items:center;gap:14px;padding:14px 16px;border-bottom:1px solid #f5f5f5}
+.ach-item.locked{opacity:.5}
+.ach-icon{font-size:28px;width:44px;height:44px;display:flex;align-items:center;justify-content:center;border-radius:12px;flex-shrink:0}
+.ach-icon.earned{background:#f5f3ff}
+.ach-icon.locked{background:#f0f0f0;filter:grayscale(1)}
+.ach-name{font-weight:600;font-size:14px}
+.ach-desc{font-size:12px;color:#65676B;margin-top:2px}
+.ach-date{font-size:11px;color:#7C3AED;margin-top:2px}
+.back-link{position:absolute;left:16px;top:20px;color:#fff;text-decoration:none}
+</style>
+</head>
+<body>
+<div class="ach-header">
+  <a href="javascript:history.back()" class="back-link"><i class="fas fa-arrow-left"></i></a>
+  <h1>🏆 Thành tựu</h1>
+  <div style="font-size:13px;opacity:.8;margin-top:4px" id="achSubtitle"></div>
+</div>
+<div class="ach-stats" id="achStats"></div>
+<div class="ach-body"><div class="ach-card" id="achList"><div style="text-align:center;padding:30px"><i class="fas fa-spinner fa-spin" style="font-size:24px;color:#7C3AED"></i></div></div></div>
+
+<script>
+function esc(s){var d=document.createElement('div');d.textContent=s;return d.innerHTML;}
+var userId=new URLSearchParams(location.search).get('id');
+if(!userId){var u=JSON.parse(localStorage.getItem('user')||'{}');userId=u.id;}
+
+fetch('/api/achievements.php?action=user&id='+(userId||0))
+  .then(function(r){return r.json()})
+  .then(function(d){
+    if(!d.success)return;
+    var data=d.data;
+    var earned=data.earned_count||0;
+    var total=data.achievements.length;
+    
+    document.getElementById('achSubtitle').textContent=earned+'/'+total+' thành tựu đã mở';
+    document.getElementById('achStats').innerHTML='<div class="ach-stat"><div class="num">'+earned+'</div><div class="lbl">Đã mở</div></div><div class="ach-stat"><div class="num">'+(total-earned)+'</div><div class="lbl">Chưa mở</div></div>';
+    
+    var html='';
+    data.achievements.forEach(function(a){
+      var cls=a.earned?'':'locked';
+      var iconCls=a.earned?'earned':'locked';
+      html+='<div class="ach-item '+cls+'"><div class="ach-icon '+iconCls+'">'+a.icon+'</div><div><div class="ach-name">'+esc(a.name)+'</div><div class="ach-desc">'+esc(a.desc)+'</div>'+(a.earned_at?'<div class="ach-date">Đạt: '+a.earned_at.split(' ')[0]+'</div>':'')+'</div>'+(a.earned?'<div style="margin-left:auto;color:#00b14f"><i class="fas fa-check-circle"></i></div>':'<div style="margin-left:auto;color:#ddd"><i class="fas fa-lock"></i></div>')+'</div>';
+    });
+    document.getElementById('achList').innerHTML=html;
+  });
+</script>
+</body>
+</html>

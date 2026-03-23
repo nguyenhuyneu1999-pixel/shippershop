@@ -344,3 +344,25 @@ function updateMemberCount(delta){
   var el=document.querySelector('.gm');
   if(el&&GROUP)el.textContent=GROUP.member_count+' thành viên';
 }
+
+// Weekly challenge widget
+function loadChallenge(groupId){
+  fetch('/api/groups.php?action=weekly_challenge&group_id='+groupId)
+    .then(function(r){return r.json()})
+    .then(function(d){
+      if(!d.success||!d.data)return;
+      var ch=d.data;
+      var el=document.getElementById('weeklyChallenge');
+      if(!el)return;
+      var html='<div style="padding:14px 16px;background:linear-gradient(135deg,#FEF3C7,#FDE68A);border-radius:12px;margin:8px 0">';
+      html+='<div style="font-size:12px;color:#92400E;font-weight:600;margin-bottom:4px">🎯 Thử thách tuần #'+ch.week+'</div>';
+      html+='<div style="font-size:14px;font-weight:700;color:#78350F">'+ch.challenge+'</div>';
+      if(ch.participants&&ch.participants.length){
+        html+='<div style="margin-top:8px;font-size:12px;color:#A16207">Top: ';
+        ch.participants.forEach(function(p,i){html+=(i>0?', ':'')+p.fullname+' ('+p.posts+')';});
+        html+='</div>';
+      }
+      html+='</div>';
+      el.innerHTML=html;
+    }).catch(function(){});
+}

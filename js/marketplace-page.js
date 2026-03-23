@@ -305,3 +305,16 @@ function openMyListings() {
 
 // Init
 loadListings();
+
+// Validate listing before submit
+function validateListing(form){
+  var title=form.querySelector('[name="title"]');
+  var price=form.querySelector('[name="price"]');
+  var desc=form.querySelector('[name="description"]');
+  
+  if(!title||!title.value.trim()){toast('Nhập tiêu đề sản phẩm','error');return false;}
+  if(title.value.trim().length<5){toast('Tiêu đề tối thiểu 5 ký tự','error');return false;}
+  if(!price||isNaN(price.value)||parseInt(price.value)<1000){toast('Giá tối thiểu 1.000đ','error');return false;}
+  if(!desc||desc.value.trim().length<10){toast('Mô tả tối thiểu 10 ký tự','error');return false;}
+  return true;
+}

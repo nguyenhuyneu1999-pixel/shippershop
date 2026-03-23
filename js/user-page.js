@@ -20,6 +20,9 @@ function renderProfile(){var u=userData;document.title=u.fullname+' - ShipperSho
     +'<div><div style="font-size:18px;font-weight:700;color:#F59E0B">'+fN(u.account_age_days||0)+'</div><div style="font-size:11px;color:#999">Ngày</div></div>'+'<div><div style="font-size:18px;font-weight:700;color:#EE4D2D">'+fN(u.engagement_score||0)+'</div><div style="font-size:11px;color:#999">'+esc(u.engagement_level||"")+ '</div></div>'
     +'</div>';}
   // Badges
+  // Achievements link
+  var achLink=document.getElementById('pAchLink');
+  if(achLink)achLink.innerHTML='<a href="achievements.html?id='+u.id+'" style="display:inline-flex;align-items:center;gap:4px;padding:4px 12px;background:#f5f3ff;border-radius:8px;color:#7C3AED;font-size:12px;font-weight:600;text-decoration:none;margin:4px 0"><i class="fas fa-trophy"></i> Xem thành tựu</a>';
   if(u.badges&&u.badges.length){var bHtml='';u.badges.forEach(function(b){bHtml+='<span style="display:inline-flex;align-items:center;gap:4px;padding:3px 8px;background:#f5f3ff;border-radius:12px;font-size:11px;color:#7C3AED;font-weight:600;margin:2px">'+b.badge_icon+' '+b.badge_name+'</span>';});var bEl=document.getElementById('pBadges');if(bEl)bEl.innerHTML=bHtml;}
 if(u.cover_image)document.getElementById('cover').style.backgroundImage='url('+u.cover_image+')';
 if(u.is_self){document.getElementById('coverEditBtn').style.display='flex';document.getElementById('avEditBtn').style.display='flex';}
