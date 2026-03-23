@@ -34,6 +34,14 @@ function ytEmbed(u){if(u.indexOf("youtube.com/watch")!==-1)return"https://www.yo
    mkPost - Reddit-style post card
    ============================================ */
 
+
+function expandPost(pid){
+  var short=document.getElementById('pc'+pid);
+  var full=document.getElementById('pf'+pid);
+  if(short)short.style.display='none';
+  if(full)full.style.display='inline';
+}
+
 function hashtagify(text){
   return text.replace(/#([a-zA-ZÀ-ỹ0-9_]+)/gu, function(m, tag){
     return '<a href="javascript:void(0)" onclick="doSearch(\'#'+tag+'\')" style="color:#7C3AED;text-decoration:none;font-weight:600">#'+tag+'</a>';
@@ -118,7 +126,7 @@ function mkPost(p){
   return '<div class="post-card" id="P'+p.id+'">'
   +'<div class="post-body">'
   +'<div class="post-meta">'+av+'<div style="flex:1;min-width:0"><div style="display:flex;align-items:center;justify-content:space-between">'+authorLink+'<button class="post-dots" onclick="event.stopPropagation();togMenu('+p.id+')"><i class="fas fa-ellipsis"></i></button></div><div style="font-size:12px;color:#999;display:flex;align-items:center;gap:4px">'+shipBadge+lvlBadge+'<span>·</span><span>'+ago(p.created_at)+'</span>'+badge+pvBadge+anonBadge+subBadge+'</div></div></div>'
-  +title+'<div class="post-menu" id="pm'+p.id+'" style="display:none"><div id="sv'+p.id+'" onclick="togSave('+p.id+')"><i class="'+(isSaved?'fas':'far')+' fa-bookmark" style="color:'+(isSaved?'#7C3AED':'inherit')+'"></i> '+(isSaved?'Bỏ lưu':'Lưu bài viết')+'</div>'+(canDel?'<div onclick="editP('+p.id+')"><i class="fas fa-pen"></i> Sửa bài</div><div onclick="delP('+p.id+')"><i class="far fa-trash-can"></i> Xóa bài</div>':'')+'<div onclick="reportP('+p.id+')"><i class="fas fa-flag"></i> Báo cáo</div>'+(canDel?'':'<div onclick="muteUser('+p.user_id+')"><i class="fas fa-volume-mute"></i> Tắt tiếng</div><div onclick="blockUser('+p.user_id+')"><i class="fas fa-ban"></i> Chặn</div>')+'<div onclick="shareToGroup('+p.id+')"><i class="fas fa-share-from-square"></i> Chia sẻ vào nhóm</div><div onclick="togMenu('+p.id+')"><i class="fas fa-times"></i> Đóng</div></div>'+contentH+addSpoilerBlur(imgH+vidH,p)
+  +title+'<div class="post-menu" id="pm'+p.id+'" style="display:none"><div id="sv'+p.id+'" onclick="togSave('+p.id+')"><i class="'+(isSaved?'fas':'far')+' fa-bookmark" style="color:'+(isSaved?'#7C3AED':'inherit')+'"></i> '+(isSaved?'Bỏ lưu':'Lưu bài viết')+'</div>'+(canDel?'<div onclick="editP('+p.id+')"><i class="fas fa-pen"></i> Sửa bài</div><div onclick="delP('+p.id+')"><i class="far fa-trash-can"></i> Xóa bài</div>':'')+'<div onclick="reportP('+p.id+')"><i class="fas fa-flag"></i> Báo cáo</div>'+(canDel?'':'<div onclick="muteUser('+p.user_id+')"><i class="fas fa-volume-mute"></i> Tắt tiếng</div><div onclick="blockUser('+p.user_id+')"><i class="fas fa-ban"></i> Chặn</div>')+'<div onclick="copyLink('+p.id+')"><i class="fas fa-link"></i> Sao chép liên kết</div><div onclick="shareToGroup('+p.id+')"><i class="fas fa-share-from-square"></i> Chia sẻ vào nhóm</div><div onclick="togMenu('+p.id+')"><i class="fas fa-times"></i> Đóng</div></div>'+contentH+addSpoilerBlur(imgH+vidH,p)
   +'</div>'
   +'<div class="poll-container" id="poll'+p.id+'"></div><div class="pa3-stats"><span>'+(likes>0?fN(likes)+' đơn giao thành công':'')+'</span><span>'+(parseInt(p.comments_count||0)>0?fN(p.comments_count||0)+' ghi chú':'')+'</span><span>'+(parseInt(p.views_count||0)>0?fN(p.views_count)+' lượt xem':'')+'</span></div>'
   +'<div class="post-actions-3">'
@@ -257,6 +265,18 @@ function blockUser(uid){
   }).catch(function(){toast('Lỗi kết nối','error');});
 }
 
+
+
+function copyLink(pid){
+  document.querySelectorAll('.post-menu').forEach(function(el){el.style.display='none';});
+  var url=location.origin+'/post-detail.html?id='+pid;
+  if(navigator.clipboard&&navigator.clipboard.writeText){
+    navigator.clipboard.writeText(url).then(function(){toast('Đã sao chép liên kết!','success');});
+  }else{
+    var t=document.createElement('textarea');t.value=url;t.style.cssText='position:fixed;opacity:0';document.body.appendChild(t);t.select();document.execCommand('copy');document.body.removeChild(t);
+    toast('Đã sao chép liên kết!','success');
+  }
+}
 
 function shareToGroup(pid){
   var token=localStorage.getItem('token');

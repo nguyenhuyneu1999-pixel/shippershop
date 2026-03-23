@@ -113,7 +113,7 @@ function fetchPosts(append){
       return;
     }
     grpTotalPg=d.data.total_pages||1;
-    var html=d.data.posts.map(function(p){return mkPost(p);}).join("");
+    var html=d.data.posts.sort(function(a,b){return (b.is_pinned||0)-(a.is_pinned||0);}).map(function(p){return mkPost(p);}).join("");
     if(append)area.insertAdjacentHTML("beforeend",html);
     else area.innerHTML=html;
     var lb=document.getElementById("grpLoadMore");

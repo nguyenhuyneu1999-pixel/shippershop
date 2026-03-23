@@ -323,4 +323,42 @@ if ($method === 'GET' && $action === 'analytics') {
     exit;
 }
 
+
+
+// === GET: Export users CSV ===
+if ($method === 'GET' && $action === 'export_users') {
+    $uid = adminAuth();
+    
+    header('Content-Type: text/csv; charset=utf-8');
+    header('Content-Disposition: attachment; filename="users_' . date('Ymd') . '.csv"');
+    
+    $out = fopen('php://output', 'w');
+    fprintf($out, chr(0xEF).chr(0xBB).chr(0xBF));
+    fputcsv($out, ['ID', 'Tên', 'Username', 'Email', 'Hãng xe', 'Trạng thái', 'Bài viết', 'Followers', 'Ngày tạo']);
+    
+    $users = $d->fetchAll("SELECT u.id, u.fullname, u.username, u.email, u.shipping_company, u.`status`, u.created_at, (SELECT COUNT(*) FROM posts WHERE user_id=u.id AND `status`='active') as posts, (SELECT COUNT(*) FROM follows WHERE following_id=u.id) as followers FROM users u ORDER BY u.id", []);
+    foreach ($users ?: [] as $u) {
+        fputcsv($out, [$u['id'], $u['fullname'], $u['username'], $u['email'], $u['shipping_company'], $u['status'], $u['posts'], $u['followers'], $u['created_at']]);
+    }
+    fclose($out); exit;
+}
+
+// === GET: Export posts CSV ===
+if ($method === 'GET' && $action === 'export_posts') {
+    $uid = adminAuth();
+    
+    header('Content-Type: text/csv; charset=utf-8');
+    header('Content-Disposition: attachment; filename="posts_' . date('Ymd') . '.csv"');
+    
+    $out = fopen('php://output', 'w');
+    fprintf($out, chr(0xEF).chr(0xBB).chr(0xBF));
+    fputcsv($out, ['ID', 'Tác giả', 'Nội dung', 'Loại', 'Likes', 'Comments', 'Views', 'Trạng thái', 'Ngày tạo']);
+    
+    $posts = $d->fetchAll("SELECT p.id, u.fullname, p.content, p.type, p.likes_count, p.comments_count, p.views_count, p.`status`, p.created_at FROM posts p LEFT JOIN users u ON p.user_id=u.id ORDER BY p.id DESC LIMIT 5000", []);
+    foreach ($posts ?: [] as $p) {
+        fputcsv($out, [$p['id'], $p['fullname'], mb_substr($p['content'], 0, 200), $p['type'], $p['likes_count'], $p['comments_count'], $p['views_count'], $p['status'], $p['created_at']]);
+    }
+    fclose($out); exit;
+}
+
 echo json_encode(['success' => false, 'message' => 'Invalid action']);

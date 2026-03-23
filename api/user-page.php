@@ -29,6 +29,9 @@ if($method==='GET'){
       $user['is_following']=!!$fw;
     }
     $created=new DateTime($user['created_at']);$now=new DateTime();
+    // Badges
+    $badges=$d->fetchAll("SELECT badge_name, badge_icon, earned_at FROM user_badges WHERE user_id=? ORDER BY earned_at DESC LIMIT 10",[$targetId]);
+    $user['badges']=$badges?:[];
     $user['account_age_days']=$now->diff($created)->days;
     // Subscription badge
     $sub=$d->fetchOne("SELECT sp.badge, sp.badge_color, sp.name as plan_name FROM user_subscriptions us JOIN subscription_plans sp ON us.plan_id=sp.id WHERE us.user_id=? AND us.`status`='active' AND us.expires_at>NOW() AND sp.price>0 ORDER BY sp.price DESC LIMIT 1",[$targetId]);
