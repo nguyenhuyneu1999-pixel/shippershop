@@ -214,3 +214,12 @@ function contactSeller(sellerId, listingTitle){
       }else{toast(d.message||'Lỗi','error');}
     }).catch(function(){toast('Lỗi kết nối','error');});
 }
+
+function shareViaZalo(listingId, title){
+  var url=location.origin+'/listing.html?id='+listingId;
+  window.open('https://zalo.me/share?url='+encodeURIComponent(url)+'&title='+encodeURIComponent(title||'San pham'),'_blank');
+}
+function shareViaFB(listingId){
+  var url=location.origin+'/listing.html?id='+listingId;
+  window.open('https://www.facebook.com/sharer.php?u='+encodeURIComponent(url),'_blank');
+}

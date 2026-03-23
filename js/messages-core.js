@@ -162,3 +162,16 @@ function startVoiceNote(convId){
   }
   toast('Đang phát triển tính năng ghi âm...','info');
 }
+
+// Search conversations by name
+function searchConvs(query){
+  var items=document.querySelectorAll('.conv-item');
+  var q=query.toLowerCase();
+  items.forEach(function(item){
+    var name=item.querySelector('.conv-name');
+    if(name){
+      var show=!q||name.textContent.toLowerCase().indexOf(q)>-1;
+      item.style.display=show?'':'none';
+    }
+  });
+}

@@ -5,7 +5,7 @@ let CU=null,sort='hot',type='all',prov=null,company='',page=1,totalPg=1,imgs=[],
 
 document.addEventListener('DOMContentLoaded',()=>{
   CU=JSON.parse(localStorage.getItem('user')||'null');
-  renderNav(); renderProvinces(); loadPosts(); loadTrend(); loadHashtags(); loadSuggestions(); loadAnnouncement();
+  renderNav(); renderProvinces(); loadPosts(); loadTrend(); loadHashtags(); loadSuggestions(); loadAnnouncement(); loadFriendsLatest();
   // mProv populated by async province API fetch below
   document.getElementById('stM').textContent=Math.floor(Math.random()*3000+1000).toLocaleString();
   document.getElementById('stO').textContent=Math.floor(Math.random()*500+100);
@@ -512,3 +512,23 @@ function loadAnnouncement(){
     if(dy>50){page=1;loadPosts();}
   },{passive:true});
 })();
+
+// Friends' latest posts
+async function loadFriendsLatest(){
+  var token=localStorage.getItem('token');
+  if(!token)return;
+  try{
+    var r=await fetch('/api/posts.php?sort=following&limit=3',{headers:{'Authorization':'Bearer '+token}});
+    var d=await r.json();
+    if(d.success&&d.data&&d.data.posts&&d.data.posts.length){
+      var box=document.getElementById('friendsLatest');
+      if(!box)return;
+      var html='<div class="sidebar-title" style="padding:10px 12px">📨 Bạn bè đăng gần đây</div>';
+      d.data.posts.forEach(function(p){
+        var av=p.user_avatar?'<img src="'+p.user_avatar+'" style="width:28px;height:28px;border-radius:50%;object-fit:cover">':'';
+        html+='<a href="post-detail.html?id='+p.id+'" style="display:flex;gap:8px;padding:6px 12px;text-decoration:none;color:#333">'+av+'<div style="flex:1;min-width:0"><div style="font-size:12px;font-weight:600">'+esc(p.user_name)+'</div><div style="font-size:11px;color:#65676B;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+esc((p.content||'').substring(0,60))+'</div></div></a>';
+      });
+      box.innerHTML=html;
+    }
+  }catch(e){}
+}
