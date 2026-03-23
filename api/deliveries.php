@@ -42,6 +42,92 @@ $DAILY_REWARD = 5000;       // 5.000đ
 $MONTHLY_TARGET = 1300;
 $MONTHLY_REWARD = 100000;   // 100.000đ
 
+/**
+ * ANTI-FRAUD: Đếm đơn giao thành công hợp lệ
+ * 
+ * Rules:
+ * 1. 1 user tối đa 2 like/ngày cho cùng 1 người (chống like chéo)
+ * 2. Tài khoản liker < 3 ngày → không tính
+ * 3. Mutual like ratio > 60% → không tính cặp đó
+ * 4. Self-like → không tính
+ */
+function countValidDeliveries($d, $uid, $since) {
+    // Get all likes on my posts since $since
+    $likes = $d->fetchAll(
+        "SELECT pl.user_id as liker_id, pl.post_id, DATE(pl.created_at) as like_date,
+                u.created_at as liker_joined
+         FROM post_likes pl 
+         JOIN posts p ON pl.post_id = p.id 
+         JOIN users u ON pl.user_id = u.id
+         WHERE p.user_id = ? AND pl.created_at >= $since
+         ORDER BY pl.created_at",
+        [$uid]
+    );
+    
+    if (!$likes) return 0;
+    
+    $validCount = 0;
+    $likerDailyCount = [];  // [liker_id][date] => count
+    $mutualCache = [];      // cache mutual check results
+    
+    foreach ($likes as $like) {
+        $likerId = intval($like['liker_id']);
+        $likeDate = $like['like_date'];
+        
+        // Rule: Self-like không tính
+        if ($likerId === $uid) continue;
+        
+        // Rule: Tài khoản < 3 ngày không tính
+        $joinedDays = (time() - strtotime($like['liker_joined'])) / 86400;
+        if ($joinedDays < 3) continue;
+        
+        // Rule: 1 user tối đa 2 like/ngày cho cùng 1 người
+        $key = $likerId . '_' . $likeDate;
+        if (!isset($likerDailyCount[$key])) $likerDailyCount[$key] = 0;
+        $likerDailyCount[$key]++;
+        if ($likerDailyCount[$key] > 2) continue;
+        
+        // Rule: Mutual like ratio > 60% → không tính
+        if (!isset($mutualCache[$likerId])) {
+            $mutualCache[$likerId] = checkMutualLike($d, $uid, $likerId);
+        }
+        if ($mutualCache[$likerId]) continue;
+        
+        $validCount++;
+    }
+    
+    return $validCount;
+}
+
+/**
+ * Check mutual like abuse
+ * Nếu A like B >= 60% bài VÀ B like A >= 60% bài → collusion
+ */
+function checkMutualLike($d, $userA, $userB) {
+    // A's posts liked by B (last 30 days)
+    $aPosts = $d->fetchOne("SELECT COUNT(*) as c FROM posts WHERE user_id = ? AND `status` = 'active' AND created_at >= DATE_SUB(NOW(), INTERVAL 30 DAY)", [$userA]);
+    $bLikesA = $d->fetchOne("SELECT COUNT(DISTINCT pl.post_id) as c FROM post_likes pl JOIN posts p ON pl.post_id = p.id WHERE p.user_id = ? AND pl.user_id = ? AND pl.created_at >= DATE_SUB(NOW(), INTERVAL 30 DAY)", [$userA, $userB]);
+    
+    // B's posts liked by A
+    $bPosts = $d->fetchOne("SELECT COUNT(*) as c FROM posts WHERE user_id = ? AND `status` = 'active' AND created_at >= DATE_SUB(NOW(), INTERVAL 30 DAY)", [$userB]);
+    $aLikesB = $d->fetchOne("SELECT COUNT(DISTINCT pl.post_id) as c FROM post_likes pl JOIN posts p ON pl.post_id = p.id WHERE p.user_id = ? AND pl.user_id = ? AND pl.created_at >= DATE_SUB(NOW(), INTERVAL 30 DAY)", [$userB, $userA]);
+    
+    $totalA = intval($aPosts['c'] ?? 0);
+    $totalB = intval($bPosts['c'] ?? 0);
+    $bToA = intval($bLikesA['c'] ?? 0);
+    $aToB = intval($aLikesB['c'] ?? 0);
+    
+    // Need at least 5 posts each to check ratio
+    if ($totalA < 5 || $totalB < 5) return false;
+    
+    $ratioBA = $bToA / $totalA;  // B likes what % of A's posts
+    $ratioAB = $aToB / $totalB;  // A likes what % of B's posts
+    
+    // Both directions > 60% = collusion
+    return ($ratioBA > 0.6 && $ratioAB > 0.6);
+}
+
+
 try {
 
 // === TODAY ===
@@ -49,19 +135,14 @@ if ($action === 'today') {
     $uid = dAuth();
     if (!$uid) { error('Đăng nhập', 401); }
     
-    // Đơn hôm nay (likes received on my posts today)
-    $today = $d->fetchOne(
-        "SELECT COUNT(*) as c FROM post_likes pl JOIN posts p ON pl.post_id = p.id WHERE p.user_id = ? AND pl.created_at >= CURDATE()",
-        [$uid]
-    );
-    $todayCount = intval($today['c'] ?? 0);
+    // Đơn hôm nay (ANTI-FRAUD: chống like chéo)
+    // Rule 1: 1 user tối đa 2 like/ngày cho cùng 1 người
+    // Rule 2: Tài khoản < 3 ngày không tính
+    // Rule 3: Mutual like ratio > 60% không tính cặp đó
+    $todayCount = countValidDeliveries($d, $uid, 'CURDATE()');
     
-    // Đơn tháng này
-    $month = $d->fetchOne(
-        "SELECT COUNT(*) as c FROM post_likes pl JOIN posts p ON pl.post_id = p.id WHERE p.user_id = ? AND pl.created_at >= DATE_FORMAT(CURDATE(), '%Y-%m-01')",
-        [$uid]
-    );
-    $monthCount = intval($month['c'] ?? 0);
+    // Đơn tháng này (ANTI-FRAUD)
+    $monthCount = countValidDeliveries($d, $uid, "DATE_FORMAT(CURDATE(), '%Y-%m-01')");
     
     // Tổng all-time
     $allTime = $d->fetchOne(
@@ -134,11 +215,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $action === 'claim_daily') {
     $uid = dAuth();
     if (!$uid) { error('Đăng nhập', 401); }
     
-    $today = $d->fetchOne(
-        "SELECT COUNT(*) as c FROM post_likes pl JOIN posts p ON pl.post_id = p.id WHERE p.user_id = ? AND pl.created_at >= CURDATE()",
-        [$uid]
-    );
-    $todayCount = intval($today['c'] ?? 0);
+    $todayCount = countValidDeliveries($d, $uid, 'CURDATE()');
     
     if ($todayCount < $DAILY_TARGET) {
         error('Chưa đạt ' . $DAILY_TARGET . ' đơn (hiện có ' . $todayCount . ')');
@@ -198,11 +275,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $action === 'claim_monthly') {
     $uid = dAuth();
     if (!$uid) { error('Đăng nhập', 401); }
     
-    $month = $d->fetchOne(
-        "SELECT COUNT(*) as c FROM post_likes pl JOIN posts p ON pl.post_id = p.id WHERE p.user_id = ? AND pl.created_at >= DATE_FORMAT(CURDATE(), '%Y-%m-01')",
-        [$uid]
-    );
-    $monthCount = intval($month['c'] ?? 0);
+    $monthCount = countValidDeliveries($d, $uid, "DATE_FORMAT(CURDATE(), '%Y-%m-01')");
     
     if ($monthCount < $MONTHLY_TARGET) {
         error('Chưa đạt ' . number_format($MONTHLY_TARGET) . ' đơn tháng (hiện có ' . number_format($monthCount) . ')');
