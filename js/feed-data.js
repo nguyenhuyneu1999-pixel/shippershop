@@ -850,10 +850,10 @@ function submitStory(overlay){
     fd.append('content',text);
     fd.append('bg_color',window._storyBg||'#7C3AED');
     fetch('/api/stories.php?action=create',{method:'POST',headers:{'Authorization':'Bearer '+(token||'')},body:fd})
-      .then(function(r){return r.json()}).then(function(d){toast(d.message||'Done',d.success?'success':'error');if(d.success){if(overlay)overlay.remove();// loadStories();}});
+      .then(function(r){return r.json()}).then(function(d){toast(d.message||'Done',d.success?'success':'error');if(d.success){if(overlay)overlay.remove();}});
   }else{
     fetch('/api/stories.php?action=create',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+(token||'')},body:JSON.stringify({content:text,bg_color:window._storyBg||'#7C3AED'})})
-      .then(function(r){return r.json()}).then(function(d){toast(d.message||'Done',d.success?'success':'error');if(d.success){if(overlay)overlay.remove();// loadStories();}});
+      .then(function(r){return r.json()}).then(function(d){toast(d.message||'Done',d.success?'success':'error');if(d.success){if(overlay)overlay.remove();}});
   }
 }
 
