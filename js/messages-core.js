@@ -187,3 +187,21 @@ function formatLastSeen(lastActive){
   if(diff<86400)return Math.floor(diff/3600)+' giờ trước';
   return Math.floor(diff/86400)+' ngày trước';
 }
+
+// Unread indicator on conversation items
+function markUnreadConvs(){
+  document.querySelectorAll('.conv-item').forEach(function(el){
+    var unread=el.dataset.unread;
+    var dot=el.querySelector('.unread-dot');
+    if(unread&&unread!=='0'){
+      if(!dot){
+        dot=document.createElement('span');
+        dot.className='unread-dot';
+        dot.style.cssText='width:10px;height:10px;border-radius:50%;background:#7C3AED;flex-shrink:0';
+        el.appendChild(dot);
+      }
+    }else{
+      if(dot)dot.remove();
+    }
+  });
+}

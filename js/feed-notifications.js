@@ -210,3 +210,44 @@ if(localStorage.getItem('token')){
   setTimeout(pollMsgCount,4000);
   setInterval(pollMsgCount,60000); // Every 60s for messages
 }
+
+// Push notification permission
+function requestPushPermission(){
+  if(!('Notification' in window)){toast('Trình duyệt không hỗ trợ thông báo');return;}
+  if(Notification.permission==='granted'){toast('Đã bật thông báo!','success');return;}
+  if(Notification.permission==='denied'){toast('Thông báo đã bị chặn. Vui lòng bật trong cài đặt trình duyệt.','warning');return;}
+  Notification.requestPermission().then(function(perm){
+    if(perm==='granted'){
+      toast('Đã bật thông báo!','success');
+      // Subscribe to push
+      if('serviceWorker' in navigator&&navigator.serviceWorker.controller){
+        navigator.serviceWorker.ready.then(function(reg){
+          reg.pushManager.subscribe({userVisibleOnly:true,applicationServerKey:urlB64ToUint8Array('BKxE1234placeholder')}).then(function(sub){
+            var token=localStorage.getItem('token');
+            fetch('/api/push-subscribe.php',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+(token||'')},body:JSON.stringify({subscription:sub.toJSON()})}).catch(function(){});
+          }).catch(function(){});
+        });
+      }
+    }
+  });
+}
+function urlB64ToUint8Array(base64String){
+  var padding='='.repeat((4-base64String.length%4)%4);
+  var base64=(base64String+padding).replace(/-/g,'+').replace(/_/g,'/');
+  var rawData=atob(base64);
+  var outputArray=new Uint8Array(rawData.length);
+  for(var i=0;i<rawData.length;++i)outputArray[i]=rawData.charCodeAt(i);
+  return outputArray;
+}
+// Show push permission prompt after 30s on first visit
+if(localStorage.getItem('token')&&!localStorage.getItem('ss_push_asked')){
+  setTimeout(function(){
+    if(Notification.permission==='default'){
+      var banner=document.createElement('div');
+      banner.style.cssText='position:fixed;bottom:80px;left:16px;right:16px;background:#fff;border-radius:12px;padding:14px 16px;box-shadow:0 4px 20px rgba(0,0,0,.15);z-index:1500;display:flex;align-items:center;gap:12px';
+      banner.innerHTML='<i class="fas fa-bell" style="font-size:20px;color:#7C3AED"></i><div style="flex:1"><div style="font-weight:600;font-size:14px">Bật thông báo?</div><div style="font-size:12px;color:#65676B">Nhận thông báo khi có tương tác mới</div></div><button onclick="requestPushPermission();this.closest(\'div[style]\').remove();localStorage.setItem(\'ss_push_asked\',\'1\')" style="padding:6px 14px;background:#7C3AED;color:#fff;border:none;border-radius:8px;font-weight:600;font-size:13px;cursor:pointer">Bật</button><button onclick="this.closest(\'div[style]\').remove();localStorage.setItem(\'ss_push_asked\',\'1\')" style="background:none;border:none;color:#999;cursor:pointer;font-size:18px">&times;</button>';
+      document.body.appendChild(banner);
+    }
+    localStorage.setItem('ss_push_asked','1');
+  },30000);
+}

@@ -55,4 +55,13 @@ if (is_dir($dir)) {
 }
 $results[] = "file_cache: cleaned $cleaned files";
 
+
+
+// Auto-close marketplace listings after 30 days
+try {
+    $expired = $d->query("UPDATE marketplace_listings SET `status` = 'deleted' WHERE `status` = 'active' AND created_at < DATE_SUB(NOW(), INTERVAL 30 DAY)");
+    $tasks[] = ['task' => 'marketplace_expiry', 'status' => 'ok'];
+} catch (Throwable $e) {
+    $tasks[] = ['task' => 'marketplace_expiry', 'status' => 'error', 'msg' => $e->getMessage()];
+}
 echo json_encode(['success' => true, 'results' => $results, 'timestamp' => date('c')]);

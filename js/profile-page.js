@@ -442,3 +442,34 @@ function submitChangePassword(){
     else{toast(d.message||'Lỗi','error');}
   }).catch(function(){toast('Lỗi kết nối','error');});
 }
+
+function editShippingCompany(){
+  var companies=['GHTK','J&T','GHN','Viettel Post','BEST','Ninja Van','SPX','Ahamove','Grab','Be','Gojek','Khác'];
+  var current=(JSON.parse(localStorage.getItem('user')||'{}')).shipping_company||'';
+  var ov=document.createElement('div');
+  ov.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:2000;display:flex;align-items:center;justify-content:center';
+  var html='<div style="background:#fff;border-radius:12px;max-width:320px;width:90%;max-height:70vh;overflow-y:auto"><div style="padding:14px 16px;font-weight:700;border-bottom:1px solid #f0f0f0">Chọn hãng vận chuyển</div>';
+  companies.forEach(function(c){
+    var active=c===current?' style="background:#f5f3ff;color:#7C3AED;font-weight:600"':'';
+    html+='<div onclick="saveShippingCompany(\''+c+'\',this.closest(\'[style]\'))"'+active+' style="padding:12px 16px;cursor:pointer;border-bottom:1px solid #f8f8f8">'+c+'</div>';
+  });
+  html+='<div onclick="this.closest(\'[style]\').remove()" style="padding:12px;text-align:center;color:#999;cursor:pointer">Hủy</div></div>';
+  ov.innerHTML=html;
+  ov.onclick=function(e){if(e.target===ov)ov.remove();};
+  document.body.appendChild(ov);
+}
+function saveShippingCompany(company,overlay){
+  var token=localStorage.getItem('token');
+  fetch('/api/auth.php?action=update_profile',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+(token||'')},body:JSON.stringify({shipping_company:company})})
+    .then(function(r){return r.json()})
+    .then(function(d){
+      if(d.success){
+        var user=JSON.parse(localStorage.getItem('user')||'{}');
+        user.shipping_company=company;
+        localStorage.setItem('user',JSON.stringify(user));
+        if(overlay)overlay.remove();
+        toast('Đã cập nhật!','success');
+        location.reload();
+      }else{toast(d.message||'Lỗi','error');}
+    });
+}
