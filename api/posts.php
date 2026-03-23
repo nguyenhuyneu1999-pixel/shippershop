@@ -96,7 +96,7 @@ if ($method === 'GET') {
              FROM comments c 
              LEFT JOIN users u ON c.user_id = u.id 
              WHERE c.post_id = ? AND c.`status` = 'active' 
-             ORDER BY c.created_at ASC LIMIT $cLimit OFFSET $cOffset", [$pid]);
+             ORDER BY c.created_at ASC LIMIT ? OFFSET ?", [$pid, $cLimit, $cOffset]);
         success("OK", ['comments' => $cmts ?: [], 'total' => $cTotal, 'page' => $cPage, 'has_more' => ($cPage * $cLimit) < $cTotal]);
     }
 
@@ -382,7 +382,7 @@ if ($method === 'POST') {
         if ($action === "save") { $pid = intval($input["post_id"] ?? 0); $ex = $db->fetchOne("SELECT id FROM saved_posts WHERE post_id = ? AND user_id = ?", [$pid, $userId]); if ($ex) { $db->hardDelete("saved_posts", "post_id = ? AND user_id = ?", [$pid, $userId]); success("OK", ["saved" => false]); } else { $db->insert("saved_posts", ["post_id" => $pid, "user_id" => $userId]); success("OK", ["saved" => true]); } }
         if ($action === "share") { $pid = intval($input["post_id"] ?? 0); if ($pid) { $db->query("UPDATE posts SET shares_count = shares_count + 1 WHERE id = ?", [$pid]); $cnt = $db->fetchOne("SELECT shares_count FROM posts WHERE id = ?", [$pid]); try{$post=$db->fetchOne("SELECT user_id FROM posts WHERE id=?",[$pid]);if($post&&intval($post['user_id'])!==$userId){$me=$db->fetchOne("SELECT fullname FROM users WHERE id=?",[$userId]);asyncNotify(intval($post['user_id']),($me?$me['fullname']:'Ai đó').' đã chuyển tiếp','Bài viết được chia sẻ','post','/post-detail.html?id='.$pid);}}catch(Throwable $e){} api_cache_flush("feed_"); success("OK", ["shares_count" => intval($cnt['shares_count'] ?? 0)]); } else { success("OK"); } }
         if ($action === "delete") { $pid = intval($input["post_id"] ?? 0); $po = $db->fetchOne("SELECT user_id FROM posts WHERE id = ?", [$pid]); if (!$po || intval($po["user_id"]) !== $userId) error("Không có quyền"); $db->update("posts", ["status" => "deleted"], "id = ?", [$pid]); api_cache_flush("feed_"); success("Đã xóa"); }
-        if ($action === "comments") { $pid = intval($_GET["post_id"] ?? 0); $cPage = max(1, intval($_GET["cpage"] ?? 1)); $cLimit = min(intval($_GET["climit"] ?? 50), 100); $cOffset = ($cPage - 1) * $cLimit; $cTotal = intval($db->fetchOne("SELECT COUNT(*) as c FROM comments WHERE post_id = ? AND `status` = 'active'", [$pid])['c']); $cmts = $db->fetchAll("SELECT c.*, u.fullname as user_name, u.avatar as user_avatar FROM comments c LEFT JOIN users u ON c.user_id = u.id WHERE c.post_id = ? AND c.`status` = 'active' ORDER BY c.created_at ASC LIMIT $cLimit OFFSET $cOffset", [$pid]); success("OK", ['comments' => $cmts, 'total' => $cTotal, 'page' => $cPage, 'has_more' => ($cPage * $cLimit) < $cTotal]); }
+        if ($action === "comments") { $pid = intval($_GET["post_id"] ?? 0); $cPage = max(1, intval($_GET["cpage"] ?? 1)); $cLimit = min(intval($_GET["climit"] ?? 50), 100); $cOffset = ($cPage - 1) * $cLimit; $cTotal = intval($db->fetchOne("SELECT COUNT(*) as c FROM comments WHERE post_id = ? AND `status` = 'active'", [$pid])['c']); $cmts = $db->fetchAll("SELECT c.*, u.fullname as user_name, u.avatar as user_avatar FROM comments c LEFT JOIN users u ON c.user_id = u.id WHERE c.post_id = ? AND c.`status` = 'active' ORDER BY c.created_at ASC LIMIT ? OFFSET ?", [$pid, $cLimit, $cOffset]); success("OK", ['comments' => $cmts, 'total' => $cTotal, 'page' => $cPage, 'has_more' => ($cPage * $cLimit) < $cTotal]); }
         if ($action === "vote_comment") {
             $cid = intval($input["comment_id"] ?? 0);
             if (!$cid) error("Missing comment_id");

@@ -54,6 +54,8 @@ if ($method === 'GET') {
             WHERE c.user_id = ? AND p.`status` = 'active'
             ORDER BY c.created_at DESC";
     
+try {
+
     $cartItems = $db->fetchAll($sql, [$userId]);
     
     // Calculate totals
@@ -225,3 +227,5 @@ if ($method === 'DELETE') {
 
 // Method not allowed
 error('Method not allowed', 405);
+
+} catch (Throwable $e) { echo json_encode(["success"=>false,"message"=>"Server error"]); }

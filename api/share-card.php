@@ -13,6 +13,8 @@ if ($action === 'referral') {
     $code = $_GET['code'] ?? '';
     if (!$code) { header('HTTP/1.1 400'); die('Missing code'); }
     
+try {
+
     $ref = $d->fetchOne("SELECT rc.*, u.fullname, u.avatar, u.shipping_company 
         FROM referral_codes rc JOIN users u ON rc.user_id = u.id WHERE rc.code = ?", [$code]);
     if (!$ref) { header('HTTP/1.1 404'); die('Invalid code'); }
@@ -131,3 +133,5 @@ function imagefilledroundedrect($img, $x1, $y1, $x2, $y2, $r, $color) {
     imagefilledellipse($img, $x1 + $r, $y2 - $r, $r * 2, $r * 2, $color);
     imagefilledellipse($img, $x2 - $r, $y2 - $r, $r * 2, $r * 2, $color);
 }
+
+} catch (Throwable $e) { echo json_encode(["success"=>false,"message"=>"Server error"]); }

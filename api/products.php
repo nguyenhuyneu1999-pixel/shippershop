@@ -235,6 +235,8 @@ $sql = "SELECT
         ORDER BY $orderBy
         LIMIT $limit OFFSET $offset";
 
+try {
+
 $products = $db->fetchAll($sql, $params);
 
 // Calculate discount percentage for each product
@@ -266,3 +268,5 @@ jsonResponse([
         'sort' => $_GET['sort'] ?? 'newest'
     ]
 ]);
+
+} catch (Throwable $e) { echo json_encode(["success"=>false,"message"=>"Server error"]); }

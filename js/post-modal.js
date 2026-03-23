@@ -350,7 +350,7 @@ function showMentionPopup(users,textarea){
     var av=u.avatar?'<img src="'+u.avatar+'" style="width:30px;height:30px;border-radius:50%;object-fit:cover">':'<div style="width:30px;height:30px;border-radius:50%;background:#7C3AED;color:#fff;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700">'+(u.fullname||'U')[0]+'</div>';
     var div=document.createElement('div');
     div.style.cssText='display:flex;align-items:center;gap:8px;padding:8px 12px;cursor:pointer';
-    div.innerHTML=av+'<div><div style="font-weight:600;font-size:13px">'+u.fullname+'</div><div style="font-size:11px;color:#999">@'+u.username+'</div></div>';
+    div.innerHTML=av+'<div><div style="font-weight:600;font-size:13px">'+esc(u.fullname)+'</div><div style="font-size:11px;color:#999">@'+u.username+'</div></div>';
     div.onclick=function(){insertMention(u,textarea);};
     popup.appendChild(div);
   });
