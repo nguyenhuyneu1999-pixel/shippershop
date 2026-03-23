@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Về ShipperShop</title>
+<meta name="theme-color" content="#7C3AED">
+<link rel="icon" href="/favicon.ico">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="stylesheet" href="/css/dark-mode.css">
+<script src="/js/dark-mode.js"></script>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Be Vietnam Pro',sans-serif;background:#f0f2f5;min-height:100vh}
+.ab-header{background:linear-gradient(135deg,#7C3AED,#5B21B6);color:#fff;padding:40px 20px;text-align:center}
+.ab-body{max-width:600px;margin:0 auto;padding:16px}
+.ab-card{background:#fff;border-radius:12px;padding:20px;margin-bottom:12px}
+.ab-card h2{font-size:16px;color:#7C3AED;margin-bottom:8px}
+.ab-card p{font-size:14px;color:#333;line-height:1.6}
+.ab-stat{display:flex;gap:12px;text-align:center;margin:16px 0}
+.ab-stat div{flex:1;background:#f5f3ff;border-radius:12px;padding:16px}
+.ab-stat .num{font-size:24px;font-weight:700;color:#7C3AED}
+.ab-stat .lbl{font-size:11px;color:#65676B;margin-top:4px}
+</style>
+</head>
+<body>
+<div class="ab-header">
+  <div style="font-size:48px;margin-bottom:8px">🚚</div>
+  <h1 style="font-size:24px;margin-bottom:4px">ShipperShop</h1>
+  <div style="font-size:14px;opacity:.8">Cộng đồng Shipper Việt Nam #1</div>
+  <div style="font-size:12px;opacity:.6;margin-top:8px">Version 2.0 · 1000+ commits</div>
+</div>
+<div class="ab-body">
+  <div class="ab-stat" id="abStats"></div>
+  
+  <div class="ab-card">
+    <h2>🎯 Sứ mệnh</h2>
+    <p>ShipperShop ra đời với mong muốn tạo ra một cộng đồng kết nối hàng nghìn shipper trên khắp Việt Nam. Nơi chia sẻ kinh nghiệm, mẹo giao hàng, cảnh báo giao thông và hỗ trợ nhau mỗi ngày.</p>
+  </div>
+  
+  <div class="ab-card">
+    <h2>✨ Tính năng</h2>
+    <p>📝 Bảng tin cộng đồng · 👥 Hội nhóm · 💬 Tin nhắn · 🛒 Chợ mua bán · ⚠️ Cảnh báo giao thông · 💰 Ví tiền & Subscription · 🏆 Bảng xếp hạng & Thành tựu · 📊 Thống kê · 🗺️ Bản đồ</p>
+  </div>
+  
+  <div class="ab-card">
+    <h2>📧 Liên hệ</h2>
+    <p>Email: <a href="mailto:admin@shippershop.vn" style="color:#7C3AED">admin@shippershop.vn</a></p>
+    <p>Website: <a href="https://shippershop.vn" style="color:#7C3AED">shippershop.vn</a></p>
+  </div>
+  
+  <div style="text-align:center;padding:20px"><a href="index.html" style="padding:10px 24px;background:#7C3AED;color:#fff;border-radius:8px;text-decoration:none;font-weight:600">Về trang chủ</a></div>
+</div>
+
+<script>
+fetch('/api/analytics.php?action=overview').then(function(r){return r.json()}).then(function(d){
+  if(!d.success)return;
+  var s=d.data;
+  document.getElementById('abStats').innerHTML='<div><div class="num">'+Number(s.total_users).toLocaleString()+'</div><div class="lbl">Shipper</div></div><div><div class="num">'+Number(s.total_posts).toLocaleString()+'</div><div class="lbl">Bài viết</div></div><div><div class="num">'+Number(s.total_groups).toLocaleString()+'</div><div class="lbl">Nhóm</div></div>';
+});
+</script>
+</body>
+</html>

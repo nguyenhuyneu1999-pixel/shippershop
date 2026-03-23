@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Trợ giúp - ShipperShop</title>
+<meta name="theme-color" content="#7C3AED">
+<link rel="icon" href="/favicon.ico">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="stylesheet" href="/css/dark-mode.css">
+<script src="/js/dark-mode.js"></script>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Be Vietnam Pro',sans-serif;background:#f0f2f5;min-height:100vh}
+.h-header{background:#fff;padding:12px 16px;display:flex;align-items:center;gap:12px;border-bottom:1px solid #e4e6eb;position:sticky;top:0;z-index:100}
+.h-body{max-width:600px;margin:0 auto;padding:12px}
+.faq{background:#fff;border-radius:12px;margin-bottom:8px;overflow:hidden}
+.faq-q{padding:14px 16px;font-weight:600;font-size:14px;cursor:pointer;display:flex;align-items:center;gap:10px}
+.faq-q i{color:#7C3AED;transition:transform .2s}
+.faq-q.open i{transform:rotate(90deg)}
+.faq-a{padding:0 16px 14px;font-size:13px;color:#333;line-height:1.6;display:none}
+.faq-a.open{display:block}
+</style>
+</head>
+<body>
+<div class="h-header">
+  <a href="javascript:history.back()" style="color:#333;text-decoration:none"><i class="fas fa-arrow-left"></i></a>
+  <h1 style="font-size:17px">Trợ giúp & FAQ</h1>
+</div>
+<div class="h-body">
+  <div style="padding:12px 0;font-size:13px;color:#65676B">Câu hỏi thường gặp</div>
+  
+  <div class="faq"><div class="faq-q" onclick="toggleFAQ(this)"><i class="fas fa-chevron-right"></i>Làm sao để đăng bài?</div><div class="faq-a">Nhấn nút <b>+</b> ở giữa thanh điều hướng hoặc vào trang chủ và nhấn "Bạn đang nghĩ gì?". Chọn loại bài viết, nhập nội dung, thêm ảnh và đăng.</div></div>
+  
+  <div class="faq"><div class="faq-q" onclick="toggleFAQ(this)"><i class="fas fa-chevron-right"></i>XP và Thành tựu là gì?</div><div class="faq-a">XP (điểm kinh nghiệm) được tích lũy qua các hoạt động: đăng bài, bình luận, được thích, điểm danh hàng ngày. Bạn có thể mở khóa 10 thành tựu khác nhau và leo bảng xếp hạng.</div></div>
+  
+  <div class="faq"><div class="faq-q" onclick="toggleFAQ(this)"><i class="fas fa-chevron-right"></i>Cách nạp tiền vào ví?</div><div class="faq-a">Vào <b>Ví tiền</b> → nhấn <b>Hướng dẫn</b> để xem thông tin chuyển khoản. Sau khi chuyển, bấm "Yêu cầu nạp tiền" và đợi admin duyệt (1-24h).</div></div>
+  
+  <div class="faq"><div class="faq-q" onclick="toggleFAQ(this)"><i class="fas fa-chevron-right"></i>Gói Subscription có gì?</div><div class="faq-a"><b>Free:</b> 3 bài/ngày. <b>Pro 49k:</b> 20 bài + badge ⭐. <b>VIP 99k:</b> Unlimited + badge 👑. <b>Premium 199k:</b> Unlimited + priority + badge 💎.</div></div>
+  
+  <div class="faq"><div class="faq-q" onclick="toggleFAQ(this)"><i class="fas fa-chevron-right"></i>Làm sao để tham gia nhóm?</div><div class="faq-a">Vào <b>Cộng đồng</b> → tìm nhóm bạn muốn → nhấn <b>Tham gia</b>. Bạn cũng có thể được mời bởi thành viên khác.</div></div>
+  
+  <div class="faq"><div class="faq-q" onclick="toggleFAQ(this)"><i class="fas fa-chevron-right"></i>Điểm danh hàng ngày?</div><div class="faq-a">Mỗi ngày vào trang chủ, nhấn vào ô <b>"Điểm danh hôm nay"</b>. Bạn nhận 10 XP + bonus theo streak (liên tiếp), tối đa 50 XP/ngày.</div></div>
+  
+  <div class="faq"><div class="faq-q" onclick="toggleFAQ(this)"><i class="fas fa-chevron-right"></i>Cách mời bạn bè?</div><div class="faq-a">Vào <b>Cài đặt</b> → <b>Mời bạn bè</b> → sao chép link giới thiệu. Khi bạn bè đăng ký, bạn nhận 50 XP!</div></div>
+  
+  <div class="faq"><div class="faq-q" onclick="toggleFAQ(this)"><i class="fas fa-chevron-right"></i>Chế độ tối?</div><div class="faq-a">Nhấn biểu tượng <b>🌙</b> trên header hoặc vào <b>Cài đặt</b> → bật <b>Chế độ tối</b>. Tự động theo cài đặt hệ thống.</div></div>
+  
+  <div style="padding:20px;text-align:center">
+    <div style="font-size:13px;color:#65676B;margin-bottom:8px">Vẫn cần hỗ trợ?</div>
+    <a href="mailto:admin@shippershop.vn" style="padding:10px 24px;background:#7C3AED;color:#fff;border-radius:8px;text-decoration:none;font-weight:600;font-size:14px">Liên hệ hỗ trợ</a>
+  </div>
+</div>
+
+<script>
+function toggleFAQ(el){
+  el.classList.toggle('open');
+  var a=el.nextElementSibling;
+  if(a)a.classList.toggle('open');
+}
+</script>
+<div style="max-width:600px;margin:0 auto;padding:0 12px 20px">
+<div class="faq" style="padding:16px">
+  <div style="font-weight:700;font-size:14px;margin-bottom:10px">📝 Gửi phản hồi</div>
+  <select id="fbType" style="width:100%;padding:8px;border:1px solid #ddd;border-radius:8px;font-size:13px;margin-bottom:8px"><option value="feedback">Góp ý</option><option value="bug">Báo lỗi</option><option value="feature">Đề xuất tính năng</option></select>
+  <textarea id="fbMsg" placeholder="Nội dung phản hồi (tối thiểu 10 ký tự)..." style="width:100%;padding:8px;border:1px solid #ddd;border-radius:8px;font-size:13px;min-height:80px;resize:vertical;box-sizing:border-box;margin-bottom:8px"></textarea>
+  <input id="fbEmail" type="email" placeholder="Email (không bắt buộc)" style="width:100%;padding:8px;border:1px solid #ddd;border-radius:8px;font-size:13px;margin-bottom:8px;box-sizing:border-box">
+  <button onclick="sendFeedback()" style="width:100%;padding:10px;background:#7C3AED;color:#fff;border:none;border-radius:8px;font-weight:600;cursor:pointer">Gửi phản hồi</button>
+</div></div>
+<script>
+function sendFeedback(){
+  var msg=document.getElementById("fbMsg").value.trim();
+  if(msg.length<10){alert("Tối thiểu 10 ký tự");return;}
+  var token=localStorage.getItem("token");
+  fetch("/api/feedback.php",{method:"POST",headers:{"Content-Type":"application/json","Authorization":"Bearer "+(token||"")},body:JSON.stringify({type:document.getElementById("fbType").value,message:msg,email:document.getElementById("fbEmail").value})})
+    .then(function(r){return r.json()})
+    .then(function(d){alert(d.message);if(d.success){document.getElementById("fbMsg").value="";}});
+}
+</script>
+</body>
+</html>
