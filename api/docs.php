@@ -6,7 +6,7 @@ header('Content-Type: application/json; charset=utf-8');
 header('Access-Control-Allow-Origin: *');
 
 echo json_encode([
-    'name' => 'ShipperShop API',
+    'name' => 'ShipperShop API', 'milestone' => '1000 commits', 'version' => '2.0',
     'version' => 'v1.0',
     'base_url' => 'https://shippershop.vn/api',
     'auth' => 'Bearer JWT token in Authorization header',
