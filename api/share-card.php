@@ -11,13 +11,13 @@ $action = $_GET['action'] ?? 'referral';
 
 if ($action === 'referral') {
     $code = $_GET['code'] ?? '';
-    if (!$code) { header('HTTP/1.1 400'); die('Missing code'); }
+    if (!$code) { header('HTTP/1.1 400'); die(json_encode(['error'=>'Missing code'])); }
     
 try {
 
     $ref = $d->fetchOne("SELECT rc.*, u.fullname, u.avatar, u.shipping_company 
         FROM referral_codes rc JOIN users u ON rc.user_id = u.id WHERE rc.code = ?", [$code]);
-    if (!$ref) { header('HTTP/1.1 404'); die('Invalid code'); }
+    if (!$ref) { header('HTTP/1.1 404'); die(json_encode(['error'=>'Invalid code'])); }
     
     $w = 600; $h = 315; // Facebook share size
     $img = imagecreatetruecolor($w, $h);
@@ -78,7 +78,7 @@ try {
 
 if ($action === 'rank') {
     $uid = intval($_GET['user_id'] ?? 0);
-    if (!$uid) { header('HTTP/1.1 400'); die('Missing user_id'); }
+    if (!$uid) { header('HTTP/1.1 400'); die(json_encode(['error'=>'Missing user_id'])); }
     
     $user = $d->fetchOne("SELECT u.fullname, u.shipping_company, us.total_xp, us.level, us.current_streak 
         FROM users u LEFT JOIN user_streaks us ON u.id = us.user_id WHERE u.id = ?", [$uid]);
