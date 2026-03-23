@@ -46,6 +46,7 @@ body{font-family:'Be Vietnam Pro',sans-serif;background:#f0f2f5;color:#333}
   <button onclick="showTab('reports',this)"><i class="fas fa-flag"></i> Báo cáo</button>
   <button onclick="showTab('deposits',this)"><i class="fas fa-wallet"></i> Nạp tiền</button>
   <button onclick="showTab('content',this)"><i class="fas fa-newspaper"></i> Nội dung</button>
+  <button onclick="showTab('analytics',this)"><i class="fas fa-chart-line"></i> Analytics</button>
 </div>
 <div class="admin-body" id="adminBody"><div id="loading"><i class="fas fa-spinner fa-spin" style="font-size:24px"></i><p style="margin-top:8px">Đang tải...</p></div></div>
 
@@ -64,6 +65,7 @@ function showTab(tab,btn){
   else if(tab==='reports')loadReports();
   else if(tab==='deposits')loadDeposits();
   else if(tab==='content')loadContent();
+  else if(tab==='analytics')loadAnalytics();
 }
 
 function apiFetch(url){return fetch(url,{headers:{'Authorization':'Bearer '+TOKEN}}).then(function(r){return r.json();});}
@@ -162,3 +164,41 @@ showTab('overview');
 </script>
 </body>
 </html>
+function loadAnalytics(){
+  apiFetch(API+'?action=analytics&days=14').then(function(d){
+    if(!d.success){document.getElementById('adminBody').innerHTML='<div style="padding:20px;color:#e74c3c">Error</div>';return;}
+    var a=d.data;
+    var html='<div class="stat-grid"><div class="stat-card"><div class="number">'+fN(a.active_users)+'</div><div class="label">Active users (14d)</div></div></div>';
+    
+    // User growth chart (simple bar chart)
+    html+='<div class="section"><h2><i class="fas fa-users" style="color:#7C3AED"></i> User Growth</h2><div style="display:flex;align-items:flex-end;gap:4px;height:120px;padding:8px 0">';
+    var maxU=Math.max.apply(null,a.user_growth.map(function(d){return d.count;}).concat([1]));
+    a.user_growth.forEach(function(d){
+      var h=Math.max(4,Math.round(d.count/maxU*100));
+      html+='<div style="flex:1;display:flex;flex-direction:column;align-items:center"><div style="width:100%;height:'+h+'px;background:#7C3AED;border-radius:4px 4px 0 0"></div><div style="font-size:9px;color:#999;margin-top:4px">'+d.date.slice(5)+'</div></div>';
+    });
+    html+='</div></div>';
+    
+    // Post activity
+    html+='<div class="section"><h2><i class="fas fa-pen" style="color:#00b14f"></i> Post Activity</h2><div style="display:flex;align-items:flex-end;gap:4px;height:120px;padding:8px 0">';
+    var maxP=Math.max.apply(null,a.post_activity.map(function(d){return d.count;}).concat([1]));
+    a.post_activity.forEach(function(d){
+      var h=Math.max(4,Math.round(d.count/maxP*100));
+      html+='<div style="flex:1;display:flex;flex-direction:column;align-items:center"><div style="width:100%;height:'+h+'px;background:#00b14f;border-radius:4px 4px 0 0"></div><div style="font-size:9px;color:#999;margin-top:4px">'+d.date.slice(5)+'</div></div>';
+    });
+    html+='</div></div>';
+    
+    // Top posts
+    if(a.top_posts&&a.top_posts.length){
+      html+='<div class="section"><h2><i class="fas fa-trophy" style="color:#F59E0B"></i> Top Posts</h2>';
+      a.top_posts.forEach(function(p,i){
+        html+='<div class="item-row"><div style="width:24px;text-align:center;font-weight:700;color:#7C3AED">#'+(i+1)+'</div><div style="flex:1;min-width:0"><div style="font-size:13px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+(p.content||'').substring(0,80)+'</div><div style="font-size:11px;color:#999">'+p.fullname+' · '+fN(p.likes_count)+' thành công · '+fN(p.comments_count)+' ghi chú</div></div></div>';
+      });
+      html+='</div>';
+    }
+    
+    document.getElementById('adminBody').innerHTML=html;
+  });
+}
+
+
