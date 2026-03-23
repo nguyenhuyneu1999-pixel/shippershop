@@ -24,15 +24,15 @@ if ($action === 'status') {
     $uid = getOptionalAuthUserId();
     if (!$uid) { success('OK', ['checked_in' => false, 'streak' => 0]); }
     
-    $streak = $d->fetchOne("SELECT current_streak, last_checkin FROM user_streaks WHERE user_id = ?", [$uid]);
+    $streak = $d->fetchOne("SELECT current_streak, last_active_date FROM user_streaks WHERE user_id = ?", [$uid]);
     $checkedToday = false;
     $currentStreak = 0;
     
     if ($streak) {
-        $checkedToday = ($streak['last_checkin'] === date('Y-m-d'));
+        $checkedToday = ($streak['last_active_date'] === date('Y-m-d'));
         $currentStreak = intval($streak['current_streak']);
         // Reset if missed yesterday
-        if (!$checkedToday && $streak['last_checkin'] !== date('Y-m-d', strtotime('-1 day'))) {
+        if (!$checkedToday && $streak['last_active_date'] !== date('Y-m-d', strtotime('-1 day'))) {
             $currentStreak = 0;
         }
     }
@@ -48,21 +48,21 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $action === 'checkin') {
     $uid = getAuthUserId();
     if (!$uid) { error('Auth required', 401); }
     
-    $streak = $d->fetchOne("SELECT id, current_streak, last_checkin FROM user_streaks WHERE user_id = ?", [$uid]);
+    $streak = $d->fetchOne("SELECT id, current_streak, last_active_date FROM user_streaks WHERE user_id = ?", [$uid]);
     
-    if ($streak && $streak['last_checkin'] === date('Y-m-d')) {
+    if ($streak && $streak['last_active_date'] === date('Y-m-d')) {
         error('Hôm nay bạn đã điểm danh rồi!');
     }
     
     $newStreak = 1;
     if ($streak) {
-        if ($streak['last_checkin'] === date('Y-m-d', strtotime('-1 day'))) {
+        if ($streak['last_active_date'] === date('Y-m-d', strtotime('-1 day'))) {
             $newStreak = intval($streak['current_streak']) + 1;
         }
-        $d->query("UPDATE user_streaks SET current_streak = ?, last_checkin = CURDATE(), longest_streak = GREATEST(longest_streak, ?) WHERE user_id = ?",
+        $d->query("UPDATE user_streaks SET current_streak = ?, last_active_date = CURDATE(), longest_streak = GREATEST(longest_streak, ?), updated_at = NOW() WHERE user_id = ?",
             [$newStreak, $newStreak, $uid]);
     } else {
-        $d->query("INSERT INTO user_streaks (user_id, current_streak, longest_streak, last_checkin) VALUES (?, 1, 1, CURDATE())", [$uid]);
+        $d->query("INSERT INTO user_streaks (user_id, current_streak, longest_streak, last_active_date, updated_at) VALUES (?, 1, 1, CURDATE(), NOW())", [$uid]);
     }
     
     // Award XP (more for longer streaks, max 50)
