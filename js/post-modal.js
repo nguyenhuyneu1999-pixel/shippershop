@@ -221,6 +221,7 @@ window.submitSPM=function(){
   if(!ct)return;
   var btn=document.getElementById("spmSend");btn.disabled=true;btn.textContent="\u0110ang \u0111\u0103ng...";
   var fd=new FormData();fd.append("content",ct);fd.append("type",spmType);
+  if(_spmScheduled){var sv=document.getElementById('spmSchedInput');if(sv)fd.append('scheduled_at',sv.value);}
   spmFiles.forEach(function(f){if(f){if(f.type.indexOf("video")>-1)fd.append("video",f);else fd.append("images[]",f);}});
   var tk=localStorage.getItem("token");var hdrs={};if(tk)hdrs["Authorization"]="Bearer "+tk;
   (function(){
@@ -354,6 +355,32 @@ function addPollOption(){
   if(_spmPollOptions.length>=6)return;
   _spmPollOptions.push('');
   renderPollInputs();
+}
+
+
+// Schedule post
+var _spmScheduled=null;
+function toggleSchedule(){
+  var area=document.getElementById('spmScheduleArea');
+  if(!area){
+    area=document.createElement('div');
+    area.id='spmScheduleArea';
+    area.style.cssText='padding:8px 16px;display:none';
+    var pollArea=document.getElementById('spmPollArea');
+    var ref=pollArea||document.getElementById('spmText');
+    if(ref)ref.parentNode.insertBefore(area,ref.nextSibling);
+  }
+  if(area.style.display==='none'){
+    var now=new Date();
+    now.setHours(now.getHours()+1);
+    var iso=now.toISOString().slice(0,16);
+    area.innerHTML='<div style="font-weight:600;font-size:14px;margin-bottom:8px">⏰ Hẹn giờ đăng</div><input type="datetime-local" id="spmSchedInput" value="'+iso+'" min="'+new Date().toISOString().slice(0,16)+'" style="width:100%;padding:8px;border:1px solid #ddd;border-radius:8px;font-size:13px;box-sizing:border-box"><div style="font-size:11px;color:#999;margin-top:4px">Bài viết sẽ tự động đăng vào thời gian bạn chọn</div>';
+    area.style.display='block';
+    _spmScheduled=iso;
+  }else{
+    area.style.display='none';
+    _spmScheduled=null;
+  }
 }
 
 })();

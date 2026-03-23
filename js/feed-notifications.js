@@ -1,3 +1,25 @@
+
+function groupNotifs(notifs){
+  var grouped={};
+  notifs.forEach(function(n){
+    var key=(n.type||'post')+'_'+(n.post_id||n.target_id||0);
+    if(!grouped[key]){grouped[key]={first:n,count:0,actors:[]};}
+    grouped[key].count++;
+    if(grouped[key].actors.indexOf(n.actor_name)<0&&grouped[key].actors.length<3)grouped[key].actors.push(n.actor_name);
+  });
+  var result=[];
+  for(var k in grouped){
+    var g=grouped[k];
+    if(g.count>1){
+      var n=Object.assign({},g.first);
+      n.actor_name=g.actors.join(', ')+(g.count>3?' và '+(g.count-3)+' người khác':'');
+      n._grouped=g.count;
+      result.push(n);
+    }else{result.push(g.first);}
+  }
+  return result;
+}
+
 // ShipperShop Notifications Panel
 function toggleNotifPage(){
   var p=document.getElementById("notifPage");

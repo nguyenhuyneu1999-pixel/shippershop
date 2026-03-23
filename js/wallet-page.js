@@ -90,3 +90,27 @@ async function startPayOS(){
 
 function esc(t){return t?String(t).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;"):"";}
 function fmtD(d){if(!d)return"";try{return new Date(d.replace(" ","T")).toLocaleDateString("vi-VN",{day:"2-digit",month:"2-digit",year:"numeric",hour:"2-digit",minute:"2-digit"});}catch(e){return d;}}
+
+function showQR(amount){
+  var token=localStorage.getItem('token');
+  if(!token){toast('Đăng nhập!');return;}
+  var modal=document.createElement('div');
+  modal.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:2000;display:flex;align-items:center;justify-content:center';
+  modal.innerHTML='<div style="background:#fff;border-radius:16px;padding:24px;max-width:320px;width:90%;text-align:center"><div style="font-size:16px;font-weight:700;margin-bottom:12px">Quét mã QR để nạp tiền</div><div id="qrLoading"><i class="fas fa-spinner fa-spin" style="font-size:24px;color:#7C3AED"></i></div><div id="qrContent" style="display:none"></div><button onclick="this.closest(\x22[style]\x22).remove()" style="margin-top:16px;padding:8px 24px;border:none;border-radius:8px;background:#f0f0f0;cursor:pointer">Đóng</button></div>';
+  modal.onclick=function(e){if(e.target===modal)modal.remove();};
+  document.body.appendChild(modal);
+  
+  fetch('/api/wallet-api.php?action=qr_code&amount='+(amount||0),{headers:{'Authorization':'Bearer '+token}})
+    .then(function(r){return r.json()})
+    .then(function(d){
+      document.getElementById('qrLoading').style.display='none';
+      var el=document.getElementById('qrContent');
+      if(d.success&&d.data&&d.data.qr_url){
+        el.innerHTML='<img src="'+d.data.qr_url+'" style="width:240px;height:240px;border-radius:8px;margin:8px auto;display:block"><div style="font-size:13px;color:#333;margin-top:8px"><b>'+d.data.bank+'</b></div><div style="font-size:12px;color:#666">STK: '+d.data.account+'</div><div style="font-size:12px;color:#666">Nội dung: <b>'+d.data.description+'</b></div>'+(d.data.amount?'<div style="font-size:18px;font-weight:700;color:#7C3AED;margin-top:8px">'+Number(d.data.amount).toLocaleString("vi-VN")+'đ</div>':'');
+        el.style.display='block';
+      }else{
+        el.innerHTML='<div style="color:#e74c3c">Không thể tạo mã QR</div>';
+        el.style.display='block';
+      }
+    }).catch(function(){document.getElementById('qrLoading').innerHTML='<div style="color:#e74c3c">Lỗi kết nối</div>';});
+}

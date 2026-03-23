@@ -74,3 +74,26 @@ async function sendSheetCmt(){if(!CU||!sheetPostId)return;var ta=document.getEle
 async function togSheetLike(){if(!CU){toast("Dang nhap!","warning");return;}try{var r=await fetch("/api/posts.php?action=vote",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({post_id:sheetPostId,vote_type:"up"})});var d=await r.json();if(d.success){var btn=document.getElementById("sheetLkBtn");var lk=d.data.user_vote==="up";btn.className="pa3-btn"+(lk?" pa3-active":"");btn.innerHTML="Th\u00e0nh c\u00f4ng";}}catch(x){}}
 async function lkSC(cid,btn){if(!CU){toast("Dang nhap!","warning");return;}try{var r=await fetch("/api/posts.php?action=vote_comment",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({comment_id:cid,vote_type:"up"})});var d=await r.json();if(d.success){var lk=d.data.user_vote==="up";btn.className=lk?"liked":"";btn.textContent="Th\u00e0nh c\u00f4ng"+(d.data.score>0?" \u00b7 "+d.data.score:"");}}catch(x){}}
 function shrSheet(){var u=location.origin+"/post-detail.html?id="+sheetPostId;if(navigator.share)navigator.share({url:u});else{navigator.clipboard.writeText(u);toast("Da copy link!","success");}}
+
+function editBio(){
+  if(!userData||!userData.is_self)return;
+  var bioEl=document.getElementById('pBio');
+  if(!bioEl)return;
+  var current=userData.bio||'';
+  bioEl.innerHTML='<textarea id="bioEdit" style="width:100%;padding:8px;border:1px solid #ddd;border-radius:8px;font-size:13px;resize:vertical;min-height:60px;box-sizing:border-box">'+current+'</textarea><div style="display:flex;gap:6px;justify-content:flex-end;margin-top:6px"><button onclick="cancelBioEdit()" style="padding:4px 12px;border:1px solid #ddd;border-radius:6px;background:#fff;font-size:12px;cursor:pointer">Hủy</button><button onclick="saveBio()" style="padding:4px 12px;border:none;border-radius:6px;background:#7C3AED;color:#fff;font-size:12px;cursor:pointer;font-weight:600">Lưu</button></div>';
+  document.getElementById('bioEdit').focus();
+}
+function cancelBioEdit(){
+  var bioEl=document.getElementById('pBio');
+  if(bioEl)bioEl.innerHTML=esc(userData.bio||'Chưa có tiểu sử');
+}
+function saveBio(){
+  var newBio=document.getElementById('bioEdit').value.trim();
+  var token=localStorage.getItem('token');
+  fetch('/api/user-page.php',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+(token||'')},body:JSON.stringify({action:'update_profile',bio:newBio})})
+    .then(function(r){return r.json()})
+    .then(function(d){
+      if(d.success){userData.bio=newBio;cancelBioEdit();toast('Đã cập nhật!');}
+      else toast(d.message||'Lỗi','error');
+    });
+}
