@@ -23,14 +23,14 @@ api_try_cache('leaderboard_' . $type, 300);
 
 if ($type === 'xp') {
     $users = $d->fetchAll(
-        "SELECT ux.user_id, ux.total_xp, ux.level, u.fullname, u.avatar, u.shipping_company,
+        "SELECT ux.user_id, SUM(ux.xp) as total_xp, FLOOR(SUM(ux.xp)/100)+1 as level, u.fullname, u.avatar, u.shipping_company,
                 sp.badge as sub_badge
          FROM user_xp ux
          JOIN users u ON ux.user_id = u.id
          LEFT JOIN user_subscriptions us ON us.user_id = u.id AND us.`status` = 'active' AND us.expires_at > NOW()
          LEFT JOIN subscription_plans sp ON sp.id = us.plan_id AND sp.price > 0
          WHERE u.`status` = 'active'
-         ORDER BY ux.total_xp DESC LIMIT ?", [$limit]
+         GROUP BY ux.user_id ORDER BY total_xp DESC LIMIT ?", [$limit]
     );
     success('OK', ['leaderboard' => $users ?: [], 'type' => 'xp']);
 }
