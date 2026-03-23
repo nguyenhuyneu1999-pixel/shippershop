@@ -145,6 +145,15 @@ function countValidDeliveries($d, $uid, $since) {
         $validCount = $uniqueCount * 3;
     }
     
+    // Bonus: check-in hôm nay = +1 đơn
+    if ($since === 'CURDATE()') {
+        $checkinBonus = $d->fetchOne(
+            "SELECT COUNT(*) as c FROM daily_rewards WHERE user_id = ? AND reward_date = CURDATE() AND reward_tier = 'checkin'",
+            [$uid]
+        );
+        $validCount += intval($checkinBonus['c'] ?? 0);
+    }
+    
     return $validCount;
 }
 

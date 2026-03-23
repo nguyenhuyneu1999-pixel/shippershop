@@ -661,9 +661,9 @@ async function loadCheckin(){
     var box=document.getElementById('checkinWidget');
     if(!box)return;
     if(ci.checked_in){
-      box.innerHTML='<div style="padding:12px 16px;background:#f0fdf4;border-radius:12px;text-align:center;margin:8px 0"><div style="font-size:13px;color:#00b14f;font-weight:600">✅ Đã điểm danh hôm nay!</div><div style="font-size:12px;color:#666;margin-top:4px">🔥 Streak: '+ci.streak+' ngày liên tiếp</div></div>';
+      box.innerHTML='<div style="padding:12px 16px;background:#f0fdf4;border-radius:12px;text-align:center;margin:8px 0"><div style="font-size:13px;color:#00b14f;font-weight:600">✅ Đã điểm danh · +1 đơn giao thành công</div><div style="font-size:12px;color:#666;margin-top:4px">🔥 Streak: '+ci.streak+' ngày liên tiếp</div></div>';
     }else{
-      box.innerHTML='<div style="padding:14px 16px;background:linear-gradient(135deg,#FEF3C7,#FDE68A);border-radius:12px;text-align:center;margin:8px 0;cursor:pointer" onclick="doCheckin()"><div style="font-size:15px;font-weight:700;color:#92400E">📅 Điểm danh hôm nay</div><div style="font-size:12px;color:#A16207;margin-top:4px">Nhận +'+ci.xp_reward+' XP'+(ci.streak>0?' · 🔥 Streak '+ci.streak+' ngày':'')+'</div></div>';
+      box.innerHTML='<div style="padding:14px 16px;background:linear-gradient(135deg,#FEF3C7,#FDE68A);border-radius:12px;text-align:center;margin:8px 0;cursor:pointer" onclick="doCheckin()"><div style="font-size:15px;font-weight:700;color:#92400E">📅 Điểm danh hôm nay</div><div style="font-size:12px;color:#A16207;margin-top:4px">Nhận +1 đơn giao thành công'+(ci.streak>0?' · 🔥 Streak '+ci.streak+' ngày':'')+'</div></div>';
     }
   }catch(e){}
 }
