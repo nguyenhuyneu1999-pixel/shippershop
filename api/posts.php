@@ -258,8 +258,10 @@ $whereClause = implode(' AND ', $where);
             LEFT JOIN subscription_plans sp ON sp.id = us2.plan_id AND sp.price > 0
             WHERE $whereClause
             ORDER BY " . ($sort === 'hot' ? 'p.hot_score DESC, p.created_at DESC' : ($sort === 'trending' ? 'p.hot_score/(POW(TIMESTAMPDIFF(HOUR,p.created_at,NOW())+2,1.5)+1) DESC' : ($sort === 'top' ? 'p.likes_count DESC,p.created_at DESC' : 'p.created_at DESC'))) . "
-            LIMIT {$pagination['per_page']} OFFSET {$pagination['offset']}";
+            LIMIT ? OFFSET ?";
     
+    $params[] = intval($pagination['per_page']);
+    $params[] = intval($pagination['offset']);
     $posts = $db->fetchAll($sql, $params);
     
     // Batch check liked/saved (2 queries instead of 40 N+1 queries)
