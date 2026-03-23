@@ -155,3 +155,24 @@ function loadStreak(userId){
       }
     }).catch(function(){});
 }
+
+// Post analytics for own posts
+function showPostAnalytics(postId){
+  var ov=document.createElement('div');
+  ov.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:2000;display:flex;align-items:center;justify-content:center';
+  ov.innerHTML='<div style="background:#fff;border-radius:16px;padding:20px;max-width:320px;width:90%;text-align:center"><i class="fas fa-spinner fa-spin" style="font-size:24px;color:#7C3AED"></i></div>';
+  ov.onclick=function(e){if(e.target===ov)ov.remove();};
+  document.body.appendChild(ov);
+  
+  fetch('/api/posts.php?id='+postId).then(function(r){return r.json()}).then(function(d){
+    if(!d.success)return;
+    var p=d.data;
+    ov.querySelector('div').innerHTML='<h3 style="margin:0 0 16px;font-size:16px">📊 Thống kê bài viết</h3>'
+      +'<div style="display:grid;grid-template-columns:repeat(2,1fr);gap:8px">'
+      +'<div style="background:#f5f3ff;border-radius:8px;padding:12px"><div style="font-size:22px;font-weight:700;color:#7C3AED">'+(p.views_count||0)+'</div><div style="font-size:11px;color:#999">Lượt xem</div></div>'
+      +'<div style="background:#f0fdf4;border-radius:8px;padding:12px"><div style="font-size:22px;font-weight:700;color:#00b14f">'+(p.likes_count||0)+'</div><div style="font-size:11px;color:#999">Thành công</div></div>'
+      +'<div style="background:#eff6ff;border-radius:8px;padding:12px"><div style="font-size:22px;font-weight:700;color:#1877F2">'+(p.comments_count||0)+'</div><div style="font-size:11px;color:#999">Ghi chú</div></div>'
+      +'<div style="background:#fff5f3;border-radius:8px;padding:12px"><div style="font-size:22px;font-weight:700;color:#EE4D2D">'+(p.shares_count||0)+'</div><div style="font-size:11px;color:#999">Chia sẻ</div></div>'
+      +'</div><button onclick="this.closest(\'[style]\').remove()" style="margin-top:16px;padding:8px 20px;border:1px solid #ddd;border-radius:8px;background:#fff;cursor:pointer">Đóng</button>';
+  });
+}
