@@ -770,7 +770,8 @@ function checkNewPosts(){
         badge.id='newPostsBadge';
         badge.style.cssText='position:fixed;top:110px;left:50%;transform:translateX(-50%);background:#7C3AED;color:#fff;padding:8px 20px;border-radius:20px;font-size:13px;font-weight:600;cursor:pointer;z-index:500;box-shadow:0 4px 12px rgba(124,58,237,.4);animation:bounceIn .3s';
         badge.textContent='⬆️ Bài viết mới';
-        badge.onclick=function(){window.scrollTo({top:0,behavior:'smooth'});badge.remove();_lastPostCheck=Date.now();loadFeed();};
+        badge.onclick=function(){window.scrollTo({top:0,behavior:'smooth'});badge.remove();_lastPostCheck=Date.now();showSkeleton();
+  loadFeed();};
         document.body.appendChild(badge);
       }
     }
@@ -914,4 +915,15 @@ async function loadOnlineCount(){
       if(el)el.innerHTML='<span style="display:inline-flex;align-items:center;gap:4px;font-size:12px;color:#00b14f"><span style="width:6px;height:6px;border-radius:50%;background:#00b14f;animation:pulse-dot 1.5s infinite"></span>'+d.data.online_now+' đang online</span>';
     }
   }catch(e){}
+}
+
+// Skeleton loader while feed loads
+function showSkeleton(){
+  var feed=document.getElementById('feed');
+  if(!feed||feed.children.length>2)return;
+  var html='';
+  for(var i=0;i<3;i++){
+    html+='<div class="post-card" style="padding:12px"><div style="display:flex;gap:10px;margin-bottom:12px"><div class="skeleton-circle" style="width:40px;height:40px;border-radius:50%;background:#e8e8e8;animation:shimmer 1.5s infinite"></div><div style="flex:1"><div class="skeleton-line" style="width:60%;height:12px;background:#e8e8e8;border-radius:4px;margin-bottom:6px;animation:shimmer 1.5s infinite"></div><div class="skeleton-line" style="width:40%;height:10px;background:#e8e8e8;border-radius:4px;animation:shimmer 1.5s infinite"></div></div></div><div class="skeleton-line" style="width:100%;height:10px;background:#e8e8e8;border-radius:4px;margin-bottom:6px;animation:shimmer 1.5s infinite"></div><div class="skeleton-line" style="width:80%;height:10px;background:#e8e8e8;border-radius:4px;margin-bottom:12px;animation:shimmer 1.5s infinite"></div><div class="skeleton-img" style="width:100%;height:180px;background:#e8e8e8;border-radius:8px;animation:shimmer 1.5s infinite"></div></div>';
+  }
+  feed.innerHTML=html;
 }

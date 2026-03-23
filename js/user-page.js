@@ -4,6 +4,7 @@ var CU=JSON.parse(localStorage.getItem('user')||'null');var targetId=parseInt(ne
 var shipColors={'GHTK':'#00b14f','J&T':'#d32f2f','GHN':'#ff6600','SPX':'#7C3AED','Grab':'#00b14f','Be':'#5bc500','Gojek':'#00aa13','Ninja Van':'#c41230','Viettel Post':'#e21a1a','Lalamove':'#f5a623'};
 async function loadProfile(){if(!targetId){location.href='login.html';return;}try{var r=await fetch('/api/user-page.php?id='+targetId,{credentials:'include'});var d=await r.json();if(!d.success){document.getElementById('tabContent').innerHTML='<div class="empty"><i class="fas fa-user-slash"></i><p>Không tìm thấy</p></div>';return;}userData=d.data;renderProfile();loadTab('posts');
     if(userData.is_self)loadStreak(userData.id);
+    loadHeatmap(userData.id);
     // Dynamic SEO
     var _u=userData;
     document.title=_u.fullname+' - ShipperShop';
