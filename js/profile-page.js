@@ -527,3 +527,18 @@ function showReferral(){
 function copyRef(url){
   if(navigator.clipboard){navigator.clipboard.writeText(url).then(function(){toast('Đã sao chép!','success');});}
 }
+
+// Settings gear icon in profile header
+function addSettingsLink(){
+  var header=document.querySelector('.profile-header')||document.querySelector('[class*="header"]');
+  if(!header)return;
+  var existing=document.getElementById('profileSettingsBtn');
+  if(existing)return;
+  var btn=document.createElement('a');
+  btn.id='profileSettingsBtn';
+  btn.href='settings.html';
+  btn.innerHTML='<i class="fas fa-cog"></i>';
+  btn.style.cssText='position:absolute;top:12px;right:12px;color:#fff;font-size:18px;text-decoration:none;background:rgba(0,0,0,.3);width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center';
+  header.style.position='relative';
+  header.appendChild(btn);
+}

@@ -225,6 +225,12 @@ function shareViaFB(listingId){
 }
 
 // Track recently viewed listings
+
+// Store listing info for action buttons
+function storeListingInfo(listing){
+  window._listingSeller={id:listing.user_id,title:listing.title,listingId:listing.id};
+}
+
 function trackRecentView(listingId, title, image, price){
   var key='ss_recent_listings';
   var recent=JSON.parse(localStorage.getItem(key)||'[]');

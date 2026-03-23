@@ -72,3 +72,16 @@ function liveSearch(val){
         r.innerHTML=html;
     }).catch(function(){r.innerHTML='<div style="padding:20px;text-align:center;color:#999">Lỗi kết nối</div>';});
 }
+
+// Enter key → full search page
+document.addEventListener('DOMContentLoaded', function(){
+  var sInput = document.getElementById('sInput');
+  if(sInput){
+    sInput.addEventListener('keydown', function(e){
+      if(e.key==='Enter'){
+        var q=sInput.value.trim();
+        if(q.length>=2) location.href='search.html?q='+encodeURIComponent(q);
+      }
+    });
+  }
+});

@@ -93,5 +93,9 @@
 <script src="/js/listing-page.js?v=20260323"></script>
 <script src="/js/perf-boost.js" defer></script>
 <script src="/js/lightbox.js"></script>
+<div id="listingActions" style="position:fixed;bottom:0;left:0;right:0;background:#fff;padding:10px 16px;border-top:1px solid #e4e6eb;display:flex;gap:8px;z-index:100;padding-bottom:calc(10px + env(safe-area-inset-bottom))">
+  <button id="contactBtn" onclick="if(typeof contactSeller==='function'&&window._listingSeller)contactSeller(window._listingSeller.id,window._listingSeller.title)" style="flex:1;padding:10px;background:#7C3AED;color:#fff;border:none;border-radius:8px;font-weight:600;cursor:pointer"><i class="fas fa-comment-dots"></i> Liên hệ</button>
+  <button onclick="if(typeof shareViaZalo==='function'&&window._listingSeller)shareViaZalo(window._listingSeller.listingId,window._listingSeller.title)" style="padding:10px 16px;border:1px solid #0068FF;color:#0068FF;border-radius:8px;background:#fff;cursor:pointer"><i class="fas fa-share"></i> Zalo</button>
+</div>
 </body>
 </html>

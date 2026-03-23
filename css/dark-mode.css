@@ -56,3 +56,23 @@
 .dark .chip.active{background:#9C5FFF;color:#fff;border-color:#9C5FFF}
 .dark #emojiPicker{background:#1e1e1e;box-shadow:0 -4px 20px rgba(0,0,0,.4)}
 .dark .skeleton-card{background:#1e1e1e}
+
+/* New pages dark mode */
+.dark .s-section,.dark .faq,.dark .ab-card{background:#1e1e1e}
+.dark .s-item span,.dark .faq-q,.dark .ab-card p{color:#ddd}
+.dark .s-title{color:#9C5FFF}
+.dark .s-item{border-color:#333}
+.dark .sr-input{background:#2a2a2a;color:#ddd;border-color:#444}
+.dark .sr-user,.dark .sr-tab{color:#bbb}
+.dark .nt-item{background:#1e1e1e;border-color:#333}
+.dark .nt-item.unread{background:#1a1028}
+.dark .nt-text{color:#ddd}
+.dark .sv-header,.dark .nt-header,.dark .sr-header,.dark .s-header,.dark .h-header{background:#1e1e1e;border-color:#333}
+.dark .sv-header h1,.dark .nt-header h1,.dark .s-header h1,.dark .h-header h1{color:#ddd}
+.dark .ab-header{background:linear-gradient(135deg,#5B21B6,#3B0764)}
+.dark .ab-stat div{background:#1e1e1e}
+.dark .faq-a{color:#ccc}
+.dark .lb-item{border-color:#333}
+.dark .lb-card{background:#1e1e1e}
+.dark .ach-card,.dark .ach-item{background:#1e1e1e;border-color:#333}
+.dark .ach-name{color:#ddd}
