@@ -35,6 +35,30 @@ function ytEmbed(u){if(u.indexOf("youtube.com/watch")!==-1)return"https://www.yo
    ============================================ */
 
 
+
+// Double-tap to like
+var _dblTapTimer={};
+function dblTapLike(pid,el){
+  if(_dblTapTimer[pid]){
+    clearTimeout(_dblTapTimer[pid]);
+    _dblTapTimer[pid]=null;
+    // Double tap → like
+    var btn=el.closest('.post-card').querySelector('.pa3-btn');
+    if(btn&&!btn.classList.contains('liked'))btn.click();
+    // Heart animation
+    var heart=document.createElement('div');
+    heart.innerHTML='<i class="fas fa-heart"></i>';
+    heart.style.cssText='position:absolute;top:50%;left:50%;transform:translate(-50%,-50%) scale(0);font-size:60px;color:#e74c3c;z-index:10;pointer-events:none;transition:transform .3s,opacity .5s';
+    el.style.position='relative';
+    el.appendChild(heart);
+    requestAnimationFrame(function(){heart.style.transform='translate(-50%,-50%) scale(1)';});
+    setTimeout(function(){heart.style.opacity='0';},500);
+    setTimeout(function(){heart.remove();},1000);
+  }else{
+    _dblTapTimer[pid]=setTimeout(function(){_dblTapTimer[pid]=null;},300);
+  }
+}
+
 function expandPost(pid){
   var short=document.getElementById('pc'+pid);
   var full=document.getElementById('pf'+pid);
@@ -105,8 +129,29 @@ function mkPost(p){
   var long=body.length>400;
   var contentH='<div class="post-content'+(long?'':' full')+'" id="pc-'+p.id+'">'+body+'</div>'+(long?'<span class="show-more" onclick="xpnd(\''+p.id+'\')">Xem thêm ▼</span>':'');
   var imgH='';
-  var imgs2=p.images_arr||(p.images?tryParse(p.images):null)||(p.thumbnail?[p.thumbnail]:[]);
-  if(imgs2&&imgs2.length){var cl=imgs2.length>1?' multi':'';window._ssPI=window._ssPI||{};window._ssPI[p.id]=imgs2;imgH='<div class="post-images'+(imgs2.length>1?' multi-img':'')+'">'+imgs2.slice(0,4).map(function(i){return'<img class="post-img'+cl+'" src="'+i+'" loading="lazy" onclick="openLb(\''+i+'\','+p.id+',window._ssPI['+p.id+'])" onerror="this.style.display=\'none\'">';}).join('')+'</div>';}
+  if(p.images){
+    try{
+      var imgs=JSON.parse(p.images);
+      if(imgs&&imgs.length===1){
+        imgH='<div class="post-images"><img class="post-img" src="'+imgs[0]+'" loading="lazy" onclick="if(typeof openLb===\'function\')openLb(this.src,0,[this.src])" ondblclick="dblTapLike('+p.id+',this.parentNode)" onerror="this.style.display=\'none\'"></div>';
+      }else if(imgs&&imgs.length>1){
+        imgH='<div class="post-images carousel" data-idx="0" style="position:relative;overflow:hidden">';
+        imgH+='<div class="carousel-track" style="display:flex;transition:transform .3s;will-change:transform">';
+        imgs.forEach(function(src,i){
+          imgH+='<img class="post-img" src="'+src+'" loading="lazy" style="min-width:100%;max-width:100%;flex-shrink:0" onclick="if(typeof openLb===\'function\')openLb(this.src,'+i+','+JSON.stringify(imgs).replace(/'/g,"\\x27")+')" onerror="this.style.display=\'none\'">';
+        });
+        imgH+='</div>';
+        if(imgs.length>1){
+          imgH+='<div style="position:absolute;bottom:8px;left:50%;transform:translateX(-50%);display:flex;gap:4px">';
+          imgs.forEach(function(_,i){imgH+='<div class="carousel-dot'+(i===0?' active':'')+'" style="width:6px;height:6px;border-radius:50%;background:'+(i===0?'#fff':'rgba(255,255,255,.5)')+'"></div>';});
+          imgH+='</div>';
+          imgH+='<button onclick="slideCarousel(this.parentNode,-1)" style="position:absolute;left:4px;top:50%;transform:translateY(-50%);background:rgba(0,0,0,.4);color:#fff;border:none;border-radius:50%;width:28px;height:28px;cursor:pointer;font-size:12px"><i class="fas fa-chevron-left"></i></button>';
+          imgH+='<button onclick="slideCarousel(this.parentNode,1)" style="position:absolute;right:4px;top:50%;transform:translateY(-50%);background:rgba(0,0,0,.4);color:#fff;border:none;border-radius:50%;width:28px;height:28px;cursor:pointer;font-size:12px"><i class="fas fa-chevron-right"></i></button>';
+        }
+        imgH+='</div>';
+      }
+    }catch(e){}
+  }
   var vidH='';
   if(p.video_url){
     if(p.video_url.indexOf('/uploads/')!==-1){
@@ -679,3 +724,16 @@ function handleApiError(d, fallbackMsg){
   }
   return false;
 }
+// Touch swipe for carousel
+document.addEventListener('touchstart',function(e){
+  var c=e.target.closest('.carousel');
+  if(!c)return;
+  c._touchX=e.touches[0].clientX;
+},{passive:true});
+document.addEventListener('touchend',function(e){
+  var c=e.target.closest('.carousel');
+  if(!c||!c._touchX)return;
+  var diff=e.changedTouches[0].clientX-c._touchX;
+  if(Math.abs(diff)>40){slideCarousel(c,diff<0?1:-1);}
+  c._touchX=null;
+},{passive:true});

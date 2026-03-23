@@ -47,6 +47,7 @@ body{font-family:'Be Vietnam Pro',sans-serif;background:#f0f2f5;color:#333}
   <button onclick="showTab('deposits',this)"><i class="fas fa-wallet"></i> Nạp tiền</button>
   <button onclick="showTab('content',this)"><i class="fas fa-newspaper"></i> Nội dung</button>
   <button onclick="showTab('analytics',this)"><i class="fas fa-chart-line"></i> Analytics</button>
+  <button onclick="showTab('announce',this)"><i class="fas fa-bullhorn"></i> Thông báo</button>
 </div>
 <div class="admin-body" id="adminBody"><div id="loading"><i class="fas fa-spinner fa-spin" style="font-size:24px"></i><p style="margin-top:8px">Đang tải...</p></div></div>
 
@@ -66,6 +67,7 @@ function showTab(tab,btn){
   else if(tab==='deposits')loadDeposits();
   else if(tab==='content')loadContent();
   else if(tab==='analytics')loadAnalytics();
+  else if(tab==='announce')loadAnnounce();
 }
 
 function apiFetch(url){return fetch(url,{headers:{'Authorization':'Bearer '+TOKEN}}).then(function(r){return r.json();});}
@@ -164,6 +166,29 @@ showTab('overview');
 </script>
 </body>
 </html>
+
+function loadAnnounce(){
+  apiFetch(API+'?action=announcement').then(function(d){
+    var current=d.data?d.data.text:'';
+    var type=d.data?d.data.type:'info';
+    document.getElementById('adminBody').innerHTML='<div class="section"><h2><i class="fas fa-bullhorn" style="color:#7C3AED"></i> Thông báo toàn site</h2>'
+      +'<textarea id="annText" style="width:100%;padding:10px;border:1px solid #ddd;border-radius:8px;font-size:14px;min-height:80px;box-sizing:border-box" placeholder="Nhập nội dung thông báo...">'+current+'</textarea>'
+      +'<div style="display:flex;gap:8px;margin-top:8px;align-items:center"><select id="annType" style="padding:8px;border:1px solid #ddd;border-radius:8px"><option value="info"'+(type==='info'?' selected':'')+'>Thông tin</option><option value="warning"'+(type==='warning'?' selected':'')+'>Cảnh báo</option><option value="success"'+(type==='success'?' selected':'')+'>Thành công</option></select>'
+      +'<button class="btn-sm btn-approve" onclick="saveAnnounce()" style="padding:8px 20px">Lưu</button>'
+      +'<button class="btn-sm btn-reject" onclick="clearAnnounce()" style="padding:8px 20px">Xóa</button></div></div>';
+  });
+}
+function saveAnnounce(){
+  var text=document.getElementById('annText').value.trim();
+  var type=document.getElementById('annType').value;
+  if(!text){alert('Nhập nội dung');return;}
+  apiPost(API+'?action=set_announcement',{text:text,type:type}).then(function(d){alert(d.message);});
+}
+function clearAnnounce(){
+  if(!confirm('Xóa thông báo?'))return;
+  apiPost(API+'?action=set_announcement',{text:''}).then(function(d){alert(d.message);loadAnnounce();});
+}
+
 function loadAnalytics(){
   apiFetch(API+'?action=analytics&days=14').then(function(d){
     if(!d.success){document.getElementById('adminBody').innerHTML='<div style="padding:20px;color:#e74c3c">Error</div>';return;}

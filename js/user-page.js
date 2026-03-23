@@ -11,6 +11,14 @@ async function loadProfile(){if(!targetId){location.href='login.html';return;}tr
     _sm('og:description',(_u.shipping_company||'Shipper')+' · '+(_u.follower_count||0)+' nguoi theo doi');
     if(_u.avatar)_sm('og:image','https://shippershop.vn'+_u.avatar);}catch(e){document.getElementById('tabContent').innerHTML='<div class="empty"><p>Lỗi</p></div>';}}
 function renderProfile(){var u=userData;document.title=u.fullname+' - ShipperShop';document.getElementById('navTitle').textContent=u.fullname;document.getElementById('pName').innerHTML=esc(u.fullname)+(u.sub_badge?'<span style="font-size:11px;padding:2px 8px;border-radius:4px;background:'+(u.sub_badge_color||'#7C3AED')+';color:#fff;margin-left:6px;font-weight:600;vertical-align:middle">'+esc(u.sub_badge)+'</span>':'')+(u.is_online?'<span class="online-dot"></span>':'');document.getElementById('pUsername').textContent='u/'+u.username;document.getElementById('pBio').textContent=u.bio||'';document.getElementById('sKarma').textContent=fN(u.total_success||0);document.getElementById('sPosts').textContent=fN(u.post_count);document.getElementById('sAge').textContent=u.account_age_days;document.getElementById('sFollowers').textContent=fN(u.follower_count);
+  // Stats grid
+  var sg=document.getElementById('statsGrid');
+  if(sg){sg.innerHTML='<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;text-align:center;padding:12px 0">'
+    +'<div><div style="font-size:18px;font-weight:700;color:#7C3AED">'+fN(u.post_count)+'</div><div style="font-size:11px;color:#999">Bài viết</div></div>'
+    +'<div><div style="font-size:18px;font-weight:700;color:#00b14f">'+fN(u.total_success)+'</div><div style="font-size:11px;color:#999">Thành công</div></div>'
+    +'<div><div style="font-size:18px;font-weight:700;color:#1877F2">'+fN(u.follower_count)+'</div><div style="font-size:11px;color:#999">Theo dõi</div></div>'
+    +'<div><div style="font-size:18px;font-weight:700;color:#F59E0B">'+fN(u.account_age_days||0)+'</div><div style="font-size:11px;color:#999">Ngày</div></div>'
+    +'</div>';}
   // Badges
   if(u.badges&&u.badges.length){var bHtml='';u.badges.forEach(function(b){bHtml+='<span style="display:inline-flex;align-items:center;gap:4px;padding:3px 8px;background:#f5f3ff;border-radius:12px;font-size:11px;color:#7C3AED;font-weight:600;margin:2px">'+b.badge_icon+' '+b.badge_name+'</span>';});var bEl=document.getElementById('pBadges');if(bEl)bEl.innerHTML=bHtml;}
 if(u.cover_image)document.getElementById('cover').style.backgroundImage='url('+u.cover_image+')';
