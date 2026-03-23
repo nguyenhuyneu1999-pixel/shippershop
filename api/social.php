@@ -546,3 +546,19 @@ if ($action === 'mute') {
     }
     exit;
 }
+
+// Get or generate referral code
+if ($action === 'get_referral') {
+    $uid = getAuthUserId();
+    if (!$uid) { echo json_encode(['success'=>false,'message'=>'Auth required']); exit; }
+    
+    $existing = $d->fetchOne("SELECT code FROM referral_codes WHERE user_id = ? AND is_active = 1", [$uid]);
+    if ($existing) {
+        $refCount = intval($d->fetchOne("SELECT COUNT(*) as c FROM referral_logs WHERE referrer_id = ?", [$uid])['c']);
+        echo json_encode(['success'=>true,'data'=>['code'=>$existing['code'],'referrals'=>$refCount,'url'=>'https://shippershop.vn/register.html?ref='.$existing['code']]]); exit;
+    }
+    
+    $code = 'SS' . strtoupper(substr(md5($uid . time()), 0, 6));
+    $d->query("INSERT INTO referral_codes (user_id, code, is_active, created_at) VALUES (?, ?, 1, NOW())", [$uid, $code]);
+    echo json_encode(['success'=>true,'data'=>['code'=>$code,'referrals'=>0,'url'=>'https://shippershop.vn/register.html?ref='.$code]]); exit;
+}
