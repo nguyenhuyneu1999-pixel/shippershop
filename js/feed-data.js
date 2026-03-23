@@ -414,3 +414,8 @@ const up=new URLSearchParams(location.search);
 if(up.get('post'))setTimeout(function(){scrollTo2(parseInt(up.get('post')));},2000);
 if(up.get('type'))fType(up.get('type'));
 function handleFab(){if(!CU){toast('Đăng nhập để đăng bài!','warning');setTimeout(function(){location='login.html'},1000);return;}if(typeof openSPM==="function")openSPM();}
+
+function activateChip(btn){
+  document.querySelectorAll('.chip').forEach(function(c){c.classList.remove('active');});
+  btn.classList.add('active');
+}
