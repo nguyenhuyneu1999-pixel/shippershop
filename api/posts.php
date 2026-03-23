@@ -20,7 +20,6 @@ require_once __DIR__ . '/../includes/lscache.php';
 
 define('APP_ACCESS', true);
 
-error_reporting(E_ALL);ini_set('display_errors',1);
 require_once __DIR__ . '/../includes/config.php';
 require_once __DIR__ . '/../includes/db.php';
 require_once __DIR__ . '/../includes/functions.php';
@@ -321,8 +320,8 @@ if ($method === 'POST') {
         require_once __DIR__ . "/auth-check.php";
         $userId = getAuthUserId();
         $input = json_decode(file_get_contents("php://input"), true);
-        if (lscache_purge('feed');
-    $action === "vote") {
+        lscache_purge('feed');
+        if (    $action === "vote") {
             $postId = intval($input["post_id"] ?? 0);
             $voteType = $input["vote_type"] ?? "";
             // OPTIMIZED: toggle like in 1 check + 1 write + 1 update
