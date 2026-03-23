@@ -392,3 +392,5 @@ body{text-rendering:optimizeSpeed;-webkit-font-smoothing:antialiased}
 /* GPU acceleration hints */
 .post-card{will-change:transform}
 .carousel-track{will-change:transform}
+/* Color scheme hint */
+:root{color-scheme:light dark}
