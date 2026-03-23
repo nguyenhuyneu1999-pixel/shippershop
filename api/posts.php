@@ -198,24 +198,22 @@ if ($method === 'GET') {
     }
     
 
-    // Hide blocked users' posts
-    $blockUid = getOptionalAuthUserId();
-    if ($blockUid) {
-        $blocked = $db->fetchAll("SELECT blocked_id FROM user_blocks WHERE user_id = ?", [$blockUid]);
-        if ($blocked) {
-            $bids = array_column($blocked, 'blocked_id');
-            $where[] = "p.user_id NOT IN (" . implode(',', array_map('intval', $bids)) . ")";
+    // Hide blocked + muted users' posts (safe)
+    try {
+        $blockUid = getOptionalAuthUserId();
+        if ($blockUid) {
+            $blocked = $db->fetchAll("SELECT blocked_id FROM user_blocks WHERE user_id = ?", [$blockUid]);
+            if ($blocked) {
+                $bids = array_column($blocked, 'blocked_id');
+                if ($bids) $where[] = "p.user_id NOT IN (" . implode(',', array_map('intval', $bids)) . ")";
+            }
+            $muted = $db->fetchAll("SELECT muted_id FROM user_mutes WHERE user_id = ?", [$blockUid]);
+            if ($muted) {
+                $mids = array_column($muted, 'muted_id');
+                if ($mids) $where[] = "p.user_id NOT IN (" . implode(',', array_map('intval', $mids)) . ")";
+            }
         }
-    }
-  
-    // Hide muted users' posts
-    if ($blockUid) {
-        $muted = $db->fetchAll("SELECT muted_id FROM user_mutes WHERE user_id = ?", [$blockUid]);
-        if ($muted) {
-            $mids = array_column($muted, 'muted_id');
-            $where[] = "p.user_id NOT IN (" . implode(',', array_map('intval', $mids)) . ")";
-        }
-    }
+    } catch (Throwable $e) {}
   
 $whereClause = implode(' AND ', $where);
     
