@@ -96,3 +96,6 @@
   body { padding-bottom: 0 !important; }
   .mk-overlay, .mk-modal { max-width: 500px; margin: 0 auto; }
 }
+
+.listing-card[data-status="sold"] .listing-img{filter:grayscale(.5);opacity:.7}
+.sold-badge{position:absolute;top:8px;right:8px;padding:3px 8px;background:#e74c3c;color:#fff;font-size:10px;font-weight:700;border-radius:4px;z-index:1}

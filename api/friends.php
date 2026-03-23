@@ -33,4 +33,24 @@ if($action==='accept'){$d->query("UPDATE friends SET status='accepted',updated_a
 if($action==='reject'){$d->query("DELETE FROM friends WHERE user_id=? AND friend_id=? AND status='pending'",[$fid,$userId]);echo json_encode(['success'=>true]);exit;}
 if($action==='unfriend'){$d->query("DELETE FROM friends WHERE (user_id=? AND friend_id=?) OR (user_id=? AND friend_id=?)",[$userId,$fid,$fid,$userId]);echo json_encode(['success'=>true]);exit;}}
 } catch(Throwable $e){echo json_encode(['success'=>false,'message'=>$e->getMessage()]);exit;}
+
+if ($action === 'mutual') {
+    $uid = getOptionalAuthUserId();
+    if (!$uid) { success('OK', []); }
+    $targetId = intval($_GET['user_id'] ?? 0);
+    if (!$targetId) { success('OK', []); }
+    
+    // Find mutual followers
+    $mutuals = $d->fetchAll(
+        "SELECT u.id, u.fullname, u.avatar FROM follows f1
+         JOIN follows f2 ON f1.following_id = f2.following_id
+         JOIN users u ON u.id = f1.following_id
+         WHERE f1.follower_id = ? AND f2.follower_id = ? AND f1.following_id != ? AND f1.following_id != ?
+         LIMIT 10",
+        [$uid, $targetId, $uid, $targetId]
+    );
+    
+    success('OK', ['mutual' => $mutuals ?: [], 'count' => count($mutuals ?: [])]);
+}
+
 echo json_encode(['success'=>false,'message'=>'Invalid']);

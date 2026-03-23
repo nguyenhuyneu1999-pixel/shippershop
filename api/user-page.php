@@ -33,6 +33,9 @@ if($method==='GET'){
     $badges=$d->fetchAll("SELECT ub.badge_id, ub.earned_at FROM user_badges ub WHERE ub.user_id=? ORDER BY ub.earned_at DESC LIMIT 10",[$targetId]);
     // Shipping stats
     $totalDeliveries = intval($d->fetchOne("SELECT SUM(likes_count) as c FROM posts WHERE user_id = ? AND `status` = 'active'", [$targetId])['c'] ?? 0);
+    $engScore = intval($totalDeliveries) * 2 + intval($user['post_count']) * 3 + intval($user['follower_count']) * 5;
+    $user['engagement_score'] = $engScore;
+    $user['engagement_level'] = $engScore > 1000 ? 'Legend' : ($engScore > 500 ? 'Expert' : ($engScore > 200 ? 'Rising' : ($engScore > 50 ? 'Active' : 'Newcomer')));
     $user['shipping_stats'] = [
         'total_deliveries' => $totalDeliveries,
         'total_posts' => intval($user['post_count']),

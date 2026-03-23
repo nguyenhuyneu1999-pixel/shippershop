@@ -23,3 +23,22 @@ function highlightComment(){
     },1000);
   }
 }
+
+// Load related posts
+function loadRelated(postId, type){
+  fetch('/api/posts.php?sort=hot&limit=3&type='+(type||''))
+    .then(function(r){return r.json()})
+    .then(function(d){
+      if(!d.success||!d.data||!d.data.posts)return;
+      var el=document.getElementById('relatedPosts');
+      if(!el)return;
+      var posts=d.data.posts.filter(function(p){return p.id!==postId;}).slice(0,3);
+      if(!posts.length)return;
+      var html='<div style="padding:12px 16px;font-weight:700;font-size:16px">Bài viết liên quan</div>';
+      posts.forEach(function(p){
+        var av=p.user_avatar?'<img src="'+p.user_avatar+'" style="width:32px;height:32px;border-radius:50%;object-fit:cover">':'';
+        html+='<a href="post-detail.html?id='+p.id+'" style="display:flex;gap:10px;padding:10px 16px;text-decoration:none;color:#333;border-bottom:1px solid #f0f0f0">'+av+'<div style="flex:1;min-width:0"><div style="font-size:13px;font-weight:600">'+esc(p.user_name||"")+'</div><div style="font-size:12px;color:#65676B;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+esc((p.content||"").substring(0,80))+'</div><div style="font-size:11px;color:#999;margin-top:2px">'+fN(p.likes_count||0)+' thành công · '+fN(p.comments_count||0)+' ghi chú</div></div></a>';
+      });
+      el.innerHTML=html;
+    }).catch(function(){});
+}

@@ -148,6 +148,7 @@ window.closeSPM=function(){window._spmGroupId=null;
   spmFiles=[];spmType="post";
   setTimeout(function(){var ta=document.getElementById('spmText');if(ta)setupMention(ta);},200);
   loadDraft();startDraftSave();
+  createFormatToolbar();
   document.querySelectorAll(".spm-tag").forEach(function(t){t.classList.remove("sel");});
   var first=document.querySelector(".spm-tag[data-t='post']");if(first)first.classList.add("sel");
 };
@@ -381,6 +382,34 @@ function toggleSchedule(){
     area.style.display='none';
     _spmScheduled=null;
   }
+}
+
+
+// Text formatting toolbar
+function insertFormat(before, after){
+  var ta=document.getElementById('spmText');
+  if(!ta)return;
+  var start=ta.selectionStart, end=ta.selectionEnd;
+  var selected=ta.value.substring(start, end);
+  var text=ta.value;
+  ta.value=text.substring(0,start)+before+selected+after+text.substring(end);
+  ta.selectionStart=start+before.length;
+  ta.selectionEnd=start+before.length+selected.length;
+  ta.focus();
+}
+function createFormatToolbar(){
+  var bar=document.getElementById('spmFormatBar');
+  if(bar)return;
+  bar=document.createElement('div');
+  bar.id='spmFormatBar';
+  bar.style.cssText='display:flex;gap:4px;padding:4px 16px';
+  bar.innerHTML='<button type="button" onclick="insertFormat(\'**\',\'**\')" style="width:28px;height:28px;border:1px solid #ddd;border-radius:6px;background:#fff;font-weight:900;cursor:pointer;font-size:13px">B</button>'
+    +'<button type="button" onclick="insertFormat(\'*\',\'*\')" style="width:28px;height:28px;border:1px solid #ddd;border-radius:6px;background:#fff;font-style:italic;cursor:pointer;font-size:13px">I</button>'
+    +'<button type="button" onclick="insertFormat(\'#\',\' \')" style="width:28px;height:28px;border:1px solid #ddd;border-radius:6px;background:#fff;cursor:pointer;font-size:13px">#</button>'
+    +'<button type="button" onclick="togglePoll()" style="width:28px;height:28px;border:1px solid #ddd;border-radius:6px;background:#fff;cursor:pointer;font-size:13px" title="Khảo sát">📊</button>'
+    +'<button type="button" onclick="toggleSchedule()" style="width:28px;height:28px;border:1px solid #ddd;border-radius:6px;background:#fff;cursor:pointer;font-size:13px" title="Hẹn giờ">⏰</button>';
+  var ta=document.getElementById('spmText');
+  if(ta)ta.parentNode.insertBefore(bar,ta);
 }
 
 })();

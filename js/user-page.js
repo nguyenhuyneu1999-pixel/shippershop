@@ -17,7 +17,7 @@ function renderProfile(){var u=userData;document.title=u.fullname+' - ShipperSho
     +'<div><div style="font-size:18px;font-weight:700;color:#7C3AED">'+fN(u.post_count)+'</div><div style="font-size:11px;color:#999">Bài viết</div></div>'
     +'<div><div style="font-size:18px;font-weight:700;color:#00b14f">'+fN(u.total_success)+'</div><div style="font-size:11px;color:#999">Thành công</div></div>'
     +'<div><div style="font-size:18px;font-weight:700;color:#1877F2">'+fN(u.follower_count)+'</div><div style="font-size:11px;color:#999">Theo dõi</div></div>'
-    +'<div><div style="font-size:18px;font-weight:700;color:#F59E0B">'+fN(u.account_age_days||0)+'</div><div style="font-size:11px;color:#999">Ngày</div></div>'
+    +'<div><div style="font-size:18px;font-weight:700;color:#F59E0B">'+fN(u.account_age_days||0)+'</div><div style="font-size:11px;color:#999">Ngày</div></div>'+'<div><div style="font-size:18px;font-weight:700;color:#EE4D2D">'+fN(u.engagement_score||0)+'</div><div style="font-size:11px;color:#999">'+esc(u.engagement_level||"")+ '</div></div>'
     +'</div>';}
   // Badges
   if(u.badges&&u.badges.length){var bHtml='';u.badges.forEach(function(b){bHtml+='<span style="display:inline-flex;align-items:center;gap:4px;padding:3px 8px;background:#f5f3ff;border-radius:12px;font-size:11px;color:#7C3AED;font-weight:600;margin:2px">'+b.badge_icon+' '+b.badge_name+'</span>';});var bEl=document.getElementById('pBadges');if(bEl)bEl.innerHTML=bHtml;}
