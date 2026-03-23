@@ -5,3 +5,6 @@ Disallow: /includes/
 Disallow: /admin.html
 Disallow: /admin-*.html
 Sitemap: https://shippershop.vn/sitemap.xml
+Disallow: /api/
+Disallow: /includes/
+Allow: /api/docs.php
