@@ -389,3 +389,6 @@ body{text-rendering:optimizeSpeed;-webkit-font-smoothing:antialiased}
 /* Smooth touch interactions */
 .carousel{touch-action:pan-y}
 .post-images{touch-action:pan-x pan-y}
+/* GPU acceleration hints */
+.post-card{will-change:transform}
+.carousel-track{will-change:transform}
