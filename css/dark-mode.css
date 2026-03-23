@@ -49,3 +49,9 @@
 /* Group page */
 .dark .gh-header { background: #1e1e1e; }
 .dark .gh-join.joined { background: #2a2a2a; color: #999; }
+
+.dark .post-menu-overlay{background:rgba(0,0,0,.6)}
+.dark .cw-label{color:#ccc;background:rgba(0,0,0,.3)}
+.dark .chip{background:#2a2a2a;color:#bbb;border-color:#444}
+.dark .chip.active{background:#9C5FFF;color:#fff;border-color:#9C5FFF}
+.dark #emojiPicker{background:#1e1e1e;box-shadow:0 -4px 20px rgba(0,0,0,.4)}
