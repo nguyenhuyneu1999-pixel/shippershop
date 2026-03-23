@@ -116,3 +116,8 @@ FileETag MTime Size
 
 # Custom error pages
 ErrorDocument 404 /404.html
+
+# Custom error pages
+ErrorDocument 403 /403.html
+ErrorDocument 500 /500.html
+ErrorDocument 404 /404.html

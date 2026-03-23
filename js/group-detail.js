@@ -79,7 +79,8 @@ function toggleJoin(){
   if(GROUP.is_member&&!confirm('Bạn muốn rời nhóm?'))return;
   apiFetch("/api/groups.php?action=join",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({group_id:GROUP.id})})
   .then(function(d){
-    if(d.success){GROUP.is_member=d.data.joined;if(d.data.joined){GROUP.member_count++;toast("\u0110\u00e3 tham gia nh\u00f3m!");}else{GROUP.member_count--;toast("\u0110\u00e3 r\u1eddi nh\u00f3m");}renderHeader();loadPosts();}
+    if(d.success){GROUP.is_member=d.data.joined;if(d.data.joined){GROUP.member_count++;toast("\u0110\u00e3 tham gia nh\u00f3m!");}else{GROUP.member_count--;toast("\u0110\u00e3 r\u1eddi nh\u00f3m");}renderHeader();loadPosts();
+    loadChallenge(GROUP.id);}
     else{toast(d.message||"L\u1ed7i");}
   });
 }

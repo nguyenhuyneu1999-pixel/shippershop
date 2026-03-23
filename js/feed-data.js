@@ -22,7 +22,7 @@ let CU=null,sort='hot',type='all',prov=null,company='',page=1,totalPg=1,imgs=[],
 
 document.addEventListener('DOMContentLoaded',()=>{
   CU=JSON.parse(localStorage.getItem('user')||'null');
-  renderNav(); renderProvinces(); loadPosts(); loadTrend(); loadHashtags(); loadSuggestions(); loadAnnouncement(); loadFriendsLatest(); timeGreeting(); loadPeopleCarousel(); loadDailyQuote(); loadCheckin(); checkPostReminder();
+  renderNav(); renderProvinces(); loadPosts(); loadTrend(); loadHashtags(); loadSuggestions(); loadAnnouncement(); loadFriendsLatest(); timeGreeting(); loadPeopleCarousel(); loadDailyQuote(); loadCheckin(); checkPostReminder(); checkAchievementsOnLoad();
   // mProv populated by async province API fetch below
   document.getElementById('stM').textContent=Math.floor(Math.random()*3000+1000).toLocaleString();
   document.getElementById('stO').textContent=Math.floor(Math.random()*500+100);
@@ -674,7 +674,7 @@ async function doCheckin(){
     var d=await r.json();
     if(d.success){
       toast(d.message,'success');
-      loadCheckin(); checkPostReminder();
+      loadCheckin(); checkPostReminder(); checkAchievementsOnLoad();
       haptic('success');
     }else{toast(d.message||'Loi','error');}
   }catch(e){toast('Lỗi kết nối','error');}
@@ -711,4 +711,16 @@ function trackPostView(postId){
   recent.unshift(postId);
   if(recent.length>20)recent=recent.slice(0,20);
   localStorage.setItem(key,JSON.stringify(recent));
+}
+
+// Check achievements once on page load (debounced)
+function checkAchievementsOnLoad(){
+  var token=localStorage.getItem('token');
+  if(!token)return;
+  var lastCheck=sessionStorage.getItem('ss_ach_checked');
+  if(lastCheck)return;
+  sessionStorage.setItem('ss_ach_checked','1');
+  setTimeout(function(){
+    if(typeof checkAchievements==='function')checkAchievements();
+  },8000);
 }
