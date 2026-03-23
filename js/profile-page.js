@@ -376,31 +376,35 @@ function copyRef(){var i=document.getElementById("refLink");i.select();document.
 (function(){
 var tk=localStorage.getItem("token");if(!tk)return;
 document.getElementById("xpSection").style.display="block";
-fetch("/api/gamification.php?action=profile",{headers:{"Authorization":"Bearer "+tk}}).then(function(r){return r.json();}).then(function(d){
-  if(d.success){
+fetch("/api/deliveries.php?action=today",{headers:{"Authorization":"Bearer "+tk}}).then(function(r){return r.json();}).then(function(d){
+    if(!d.success)return;
     var p=d.data;
-    document.getElementById("xpTotal").textContent=p.total_xp;
-    document.getElementById("xpLevel").textContent=p.level;
-    document.getElementById("xpLevelName").textContent=p.level_info.name;
-    document.getElementById("xpBadge").textContent=p.level_info.badge;
-    document.getElementById("xpBar").style.width=p.progress+"%";
-    document.getElementById("xpProgress").textContent=p.progress+"%";
-    document.getElementById("xpStreak").textContent=p.streak.current;
-    document.getElementById("xpPosts").textContent=p.today.posts+p.today.comments;
-    if(p.next_level)document.getElementById("xpNextInfo").textContent=p.total_xp+" / "+p.next_level.xp+" XP đến "+p.next_level.name;
-    else document.getElementById("xpNextInfo").textContent="MAX LEVEL!";
-  }
+    document.getElementById("xpSection").style.display="block";
+    document.getElementById("xpLevelName").textContent="Shipper";
+    document.getElementById("xpLevel").textContent=p.month_label||"";
+    document.getElementById("xpTotal").textContent=p.month||0;
+    document.getElementById("xpBar").style.width=p.month_progress+"%";
+    document.getElementById("xpNextInfo").textContent=p.month+" / 1.300 đơn → 100.000đ";
+    document.getElementById("xpProgress").textContent=p.month_progress+"%";
+    document.getElementById("xpStreak").textContent=p.today||0;
+    document.getElementById("xpPosts").textContent=p.streak||0;
+    var balStr=(p.balance||0).toString().replace(/\B(?=(\d{3})+(?!\d))/g,".")+"đ";
+    document.getElementById("xpRefs").textContent=balStr;
+    var btn=document.getElementById("checkinBtn");
+    if(btn){
+        if(p.today>=0){
+            fetch("/api/checkin.php?action=status",{headers:{"Authorization":"Bearer "+tk}}).then(function(r2){return r2.json();}).then(function(d2){
+                if(d2.data&&d2.data.checked_in){btn.textContent="✅ Đã điểm danh hôm nay";btn.disabled=true;btn.style.background="#333";btn.style.color="#888";}
+            });
+        }
+    }
 }).catch(function(){});
-// Load referral count for XP section
-fetch("/api/referral.php?action=stats",{headers:{"Authorization":"Bearer "+tk}}).then(function(r){return r.json();}).then(function(d){
-  if(d.success)document.getElementById("xpRefs").textContent=d.data.total_referrals;
-}).catch(function(){});
-})();
+
 function doCheckin(){
 var tk=localStorage.getItem("token");if(!tk)return;
 var btn=document.getElementById("checkinBtn");
 btn.disabled=true;btn.textContent="⏳ Đang check-in...";
-fetch("/api/gamification.php?action=checkin",{method:"POST",headers:{"Authorization":"Bearer "+tk}}).then(function(r){return r.json();}).then(function(d){
+fetch("/api/checkin.php?action=checkin",{method:"POST",headers:{"Authorization":"Bearer "+tk}}).then(function(r){return r.json();}).then(function(d){
   if(d.success){btn.textContent="✅ "+d.data.message;btn.style.background="#00b14f";
     var xpEl=document.getElementById("xpTotal");xpEl.textContent=parseInt(xpEl.textContent)+5;
     document.getElementById("xpStreak").textContent=d.data.streak;
