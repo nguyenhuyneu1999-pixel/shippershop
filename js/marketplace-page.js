@@ -30,7 +30,7 @@ async function loadListings(append) {
                 var img = imgs.length > 0 ? imgs[0] : '';
                 var priceStr = item.price > 0 ? Number(item.price).toLocaleString('vi-VN') + ' ₫' : 'Miễn phí';
                 return '<div class="mk-item" onclick="goListing('+item.id+')">'
-                    + (img ? '<img class="mk-item-img" src="' + img + '" onerror="this.src=\'data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 1 1%22 loading=\"lazy\"><rect fill=%22%23e4e6eb%22 width=%221%22 height=%221%22/></svg>\'" loading=\"lazy\">' : '<div class="mk-item-img" style="display:flex;align-items:center;justify-content:center;font-size:40px;color:#ccc"><i class="fas fa-image"></i></div>')
+                    + (img ? '<img loading="lazy" class="mk-item-img" src="' + img + '" onerror="this.src=\'data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 1 1%22 loading=\"lazy\"><rect fill=%22%23e4e6eb%22 width=%221%22 height=%221%22/></svg>\'" loading=\"lazy\">' : '<div class="mk-item-img" style="display:flex;align-items:center;justify-content:center;font-size:40px;color:#ccc"><i class="fas fa-image"></i></div>')
                     + '<div class="mk-item-info">'
                     + '<div class="mk-item-price">' + priceStr + '</div>'
                     + '<div class="mk-item-title">' + esc(item.title) + '</div>'
@@ -103,7 +103,7 @@ async function handleImgUpload(input) {
 function renderImgPreviews() {
     var container = document.getElementById('imgPreviews');
     var html = uploadedImgUrls.map(function(url, i) {
-        return '<div class="mk-img-preview"><img src="' + url + '" loading=\"lazy\"><button class="mk-img-del" onclick="removeImg(' + i + ')"><i class="fas fa-times"></i></button></div>';
+        return '<div class="mk-img-preview"><img loading="lazy" src="' + url + '" loading=\"lazy\"><button class="mk-img-del" onclick="removeImg(' + i + ')"><i class="fas fa-times"></i></button></div>';
     }).join('');
     html += '<label class="mk-img-add" id="imgAddBtn"><i class="fas fa-camera"></i><span>Thêm</span><input type="file" accept="image/*" multiple style="display:none" onchange="handleImgUpload(this)"></label>';
     container.innerHTML = html;
@@ -164,7 +164,7 @@ async function handleShowcaseImgUpload(input) {
 function renderShowcasePreviews() {
     var c = document.getElementById('showcaseImgPreviews');
     var html = uploadedShowcaseUrls.map(function(url, i) {
-        return '<div class="mk-img-preview"><img src="' + url + '" loading=\"lazy\"><button class="mk-img-del" onclick="removeShowcaseImg(' + i + ')"><i class="fas fa-times"></i></button></div>';
+        return '<div class="mk-img-preview"><img loading="lazy" src="' + url + '" loading=\"lazy\"><button class="mk-img-del" onclick="removeShowcaseImg(' + i + ')"><i class="fas fa-times"></i></button></div>';
     }).join('');
     html += '<label class="mk-img-add" id="showcaseImgAddBtn"><i class="fas fa-plus-circle" style="font-size:24px;color:var(--primary)"></i><span>Thêm</span><input type="file" accept="image/*" multiple style="display:none" onchange="handleShowcaseImgUpload(this)"></label>';
     c.innerHTML = html;
@@ -228,7 +228,7 @@ async function openDetail(id) {
             var html = '';
             // Images
             if (imgs.length > 0) {
-                html += '<div class="mk-detail-imgs" id="detailImgWrap"><img id="detailMainImg" src="' + imgs[0] + '" loading=\"lazy\"><div class="mk-detail-dots">' + imgs.map(function(_,i){return '<span' + (i===0?' class="active"':'') + '></span>';}).join('') + '</div></div>';
+                html += '<div class="mk-detail-imgs" id="detailImgWrap"><img loading="lazy" id="detailMainImg" src="' + imgs[0] + '" loading=\"lazy\"><div class="mk-detail-dots">' + imgs.map(function(_,i){return '<span' + (i===0?' class="active"':'') + '></span>';}).join('') + '</div></div>';
             }
             html += '<div style="padding:16px">';
             html += '<div style="font-size:22px;font-weight:800;color:var(--primary)">' + priceStr + '</div>';
@@ -239,7 +239,7 @@ async function openDetail(id) {
             if (item.description) html += '<div style="margin-top:16px;padding-top:16px;border-top:1px solid #e4e6eb"><h4 style="font-size:14px;margin-bottom:8px">Mô tả</h4><p style="font-size:14px;line-height:1.6;color:var(--text2);white-space:pre-wrap">' + esc(item.description) + '</p></div>';
             // Seller
             html += '<div class="mk-seller">';
-            if (item.seller_avatar) html += '<div class="mk-seller-avatar"><img src="' + item.seller_avatar + '" loading=\"lazy\"></div>';
+            if (item.seller_avatar) html += '<div class="mk-seller-avatar"><img loading="lazy" src="' + item.seller_avatar + '" loading=\"lazy\"></div>';
             else html += '<div class="mk-seller-avatar">' + (item.seller_name||'U').charAt(0) + '</div>';
             html += '<div><div style="font-weight:600">' + esc(item.seller_name||'') + '</div>';
             if (item.seller_username) html += '<div style="font-size:12px;color:var(--text2)">@' + esc(item.seller_username) + '</div>';
@@ -296,7 +296,7 @@ function openMyListings() {
                     var imgs = []; try { imgs = JSON.parse(item.images || '[]'); } catch(e) {}
                     var img = imgs.length > 0 ? imgs[0] : '';
                     var priceStr = item.price > 0 ? Number(item.price).toLocaleString('vi-VN') + ' ₫' : 'Miễn phí';
-                    return '<div class="mk-item" onclick="goListing('+item.id+')">' + (img ? '<img class="mk-item-img" src="' + img + '" loading=\"lazy\">' : '<div class="mk-item-img" style="display:flex;align-items:center;justify-content:center;font-size:40px;color:#ccc"><i class="fas fa-image"></i></div>') + '<div class="mk-item-info"><div class="mk-item-price">' + priceStr + '</div><div class="mk-item-title">' + esc(item.title) + '</div></div></div>';
+                    return '<div class="mk-item" onclick="goListing('+item.id+')">' + (img ? '<img loading="lazy" class="mk-item-img" src="' + img + '" loading=\"lazy\">' : '<div class="mk-item-img" style="display:flex;align-items:center;justify-content:center;font-size:40px;color:#ccc"><i class="fas fa-image"></i></div>') + '<div class="mk-item-info"><div class="mk-item-price">' + priceStr + '</div><div class="mk-item-title">' + esc(item.title) + '</div></div></div>';
                 }).join('');
             }
         }
