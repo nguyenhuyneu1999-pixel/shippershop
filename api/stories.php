@@ -5,6 +5,8 @@
  * POST ?action=create — create story (text/image)
  * POST ?action=view — mark story viewed
  */
+ini_set('display_errors', 1);
+error_reporting(E_ALL);
 session_start();
 define('APP_ACCESS', true);
 require_once __DIR__ . '/../includes/config.php';
