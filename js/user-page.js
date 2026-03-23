@@ -97,3 +97,13 @@ function saveBio(){
       else toast(d.message||'Lỗi','error');
     });
 }
+
+// Follow button animation
+function animateFollowBtn(btn, isFollowing){
+  btn.style.transform='scale(0.9)';
+  setTimeout(function(){
+    btn.style.transform='scale(1.1)';
+    setTimeout(function(){btn.style.transform='scale(1)';},150);
+  },100);
+  btn.style.transition='transform .15s ease';
+}

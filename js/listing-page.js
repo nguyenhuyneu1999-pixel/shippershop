@@ -201,3 +201,16 @@ function openLB(src){
 function esc(t){return t?String(t).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;"):"";}
 function catName(c){var m={"xe_co":"Xe cộ","dien_thoai":"Điện thoại","do_dien_tu":"Đồ điện tử","thoi_trang":"Thời trang","do_gia_dung":"Đồ gia dụng","khac":"Khác"};return m[c]||c||"Khác";}
 function formatDate(dt){if(!dt)return"";try{var d=new Date(dt.replace(" ","T"));return d.toLocaleDateString("vi-VN");}catch(e){return dt;}}
+
+function contactSeller(sellerId, listingTitle){
+  var token=localStorage.getItem('token');
+  if(!token){toast('Đăng nhập để liên hệ!');setTimeout(function(){location='login.html'},1000);return;}
+  // Create or open conversation with seller
+  fetch('/api/messages-api.php?action=create_conversation',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+token},body:JSON.stringify({user_id:sellerId,initial_message:'Xin chào! Tôi quan tâm đến: '+(listingTitle||'sản phẩm của bạn')})})
+    .then(function(r){return r.json()})
+    .then(function(d){
+      if(d.success&&d.data&&d.data.conversation_id){
+        location.href='messages.html?conv='+d.data.conversation_id;
+      }else{toast(d.message||'Lỗi','error');}
+    }).catch(function(){toast('Lỗi kết nối','error');});
+}

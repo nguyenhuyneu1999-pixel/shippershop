@@ -389,4 +389,42 @@ if ($method === 'POST' && $action === 'update_config') {
     echo json_encode(['success' => true, 'message' => 'Saved']); exit;
 }
 
+
+
+// === POST: Set announcement banner ===
+if ($method === 'POST' && $action === 'set_announcement') {
+    $uid = adminAuth();
+    $input = json_decode(file_get_contents('php://input'), true);
+    $text = trim($input['text'] ?? '');
+    $type = $input['type'] ?? 'info'; // info, warning, success
+    
+    if (!$text) {
+        // Clear announcement
+        $d->query("UPDATE settings SET value = '' WHERE `key` = 'announcement'");
+        echo json_encode(['success'=>true,'message'=>'Đã xóa thông báo']); exit;
+    }
+    
+    $data = json_encode(['text' => $text, 'type' => $type, 'by' => $uid, 'at' => date('Y-m-d H:i:s')]);
+    $existing = $d->fetchOne("SELECT id FROM settings WHERE `key` = 'announcement'");
+    if ($existing) {
+        $d->query("UPDATE settings SET value = ? WHERE `key` = 'announcement'", [$data]);
+    } else {
+        $d->query("INSERT INTO settings (`key`, value) VALUES ('announcement', ?)", [$data]);
+    }
+    
+    api_cache_flush('announce');
+    echo json_encode(['success'=>true,'message'=>'Đã cập nhật thông báo']); exit;
+}
+
+// === GET: Get announcement ===
+if ($method === 'GET' && $action === 'announcement') {
+    api_try_cache('announce', 60);
+    $row = $d->fetchOne("SELECT value FROM settings WHERE `key` = 'announcement'");
+    $data = $row ? json_decode($row['value'], true) : null;
+    if ($data && $data['text']) {
+        echo json_encode(['success'=>true,'data'=>$data]); exit;
+    }
+    echo json_encode(['success'=>true,'data'=>null]); exit;
+}
+
 echo json_encode(['success' => false, 'message' => 'Invalid action']);

@@ -5,7 +5,7 @@ let CU=null,sort='hot',type='all',prov=null,company='',page=1,totalPg=1,imgs=[],
 
 document.addEventListener('DOMContentLoaded',()=>{
   CU=JSON.parse(localStorage.getItem('user')||'null');
-  renderNav(); renderProvinces(); loadPosts(); loadTrend(); loadHashtags(); loadSuggestions();
+  renderNav(); renderProvinces(); loadPosts(); loadTrend(); loadHashtags(); loadSuggestions(); loadAnnouncement();
   // mProv populated by async province API fetch below
   document.getElementById('stM').textContent=Math.floor(Math.random()*3000+1000).toLocaleString();
   document.getElementById('stO').textContent=Math.floor(Math.random()*500+100);
@@ -440,4 +440,37 @@ function handleFab(){if(!CU){toast('Đăng nhập để đăng bài!','warning')
 function activateChip(btn){
   document.querySelectorAll('.chip').forEach(function(c){c.classList.remove('active');});
   btn.classList.add('active');
+}
+
+// Scroll to top button
+(function(){
+  var btn=document.createElement('button');
+  btn.id='scrollTopBtn';
+  btn.innerHTML='<i class="fas fa-arrow-up"></i>';
+  btn.style.cssText='position:fixed;bottom:80px;right:16px;width:40px;height:40px;border-radius:50%;background:#7C3AED;color:#fff;border:none;font-size:16px;cursor:pointer;z-index:999;display:none;box-shadow:0 2px 8px rgba(0,0,0,.2);transition:opacity .2s';
+  btn.onclick=function(){window.scrollTo({top:0,behavior:'smooth'});};
+  document.body.appendChild(btn);
+  var _lastY=0;
+  window.addEventListener('scroll',function(){
+    var y=window.scrollY;
+    btn.style.display=y>600?'flex':'none';
+    if(btn.style.display==='flex'){btn.style.alignItems='center';btn.style.justifyContent='center';}
+    _lastY=y;
+  },{passive:true});
+})();
+
+// Load site announcement
+function loadAnnouncement(){
+  fetch('/api/admin-moderation.php?action=announcement')
+    .then(function(r){return r.json()})
+    .then(function(d){
+      var el=document.getElementById('siteBanner');
+      if(!el)return;
+      if(d.success&&d.data&&d.data.text){
+        var colors={info:'#7C3AED',warning:'#F59E0B',success:'#00b14f'};
+        var bg={info:'#f5f3ff',warning:'#fffbeb',success:'#f0fdf4'};
+        var type=d.data.type||'info';
+        el.innerHTML='<div style="padding:10px 16px;background:'+(bg[type]||bg.info)+';border-left:4px solid '+(colors[type]||colors.info)+';font-size:13px;color:#333;display:flex;align-items:center;gap:8px"><i class="fas fa-bullhorn" style="color:'+(colors[type]||colors.info)+'"></i><span style="flex:1">'+d.data.text+'</span><button onclick="this.parentNode.remove()" style="background:none;border:none;font-size:16px;cursor:pointer;color:#999">&times;</button></div>';
+      }else{el.innerHTML='';}
+    }).catch(function(){});
 }
