@@ -109,8 +109,8 @@ function buildPopup(pin,cfg){
     h+='<div class="pin-user">\ud83d\udc64 '+esc(pin.user_name||"User")+' \u00b7 '+timeAgo(pin.created_at)+'</div>';
     h+='<div style="display:flex;gap:6px;margin-top:6px;flex-wrap:wrap">';
     h+='<a href="https://www.google.com/maps/dir/?api=1&destination='+pin.lat+','+pin.lng+'" target="_blank" style="padding:4px 10px;background:#1976d2;color:#fff;border:none;border-radius:6px;font-size:11px;text-decoration:none"><i class="fas fa-directions"></i> Ch\u1ec9 \u0111\u01b0\u1eddng</a>';
-    h+='<button onclick="votePin('+pin.id+',1)" style="padding:4px 8px;background:#e8f5e9;color:#4caf50;border:1px solid #4caf50;border-radius:6px;font-size:11px;cursor:pointer">\ud83d\udc4d <span id="vu'+pin.id+'">'+(parseInt(pin.upvotes)||0)+'</span></button>';
-    h+='<button onclick="votePin('+pin.id+',-1)" style="padding:4px 8px;background:#fce4ec;color:#f44336;border:1px solid #f44336;border-radius:6px;font-size:11px;cursor:pointer">\ud83d\udc4e <span id="vd'+pin.id+'">'+(parseInt(pin.downvotes)||0)+'</span></button>';
+    h+='<button onclick="votePin('+pin.id+',1,this)" style="padding:4px 8px;background:'+(parseInt(pin.user_vote)===1?'#4caf50':'#e8f5e9')+';color:'+(parseInt(pin.user_vote)===1?'#fff':'#4caf50')+';border:1px solid #4caf50;border-radius:6px;font-size:11px;cursor:pointer">\ud83d\udc4d <span id="vu'+pin.id+'">'+(parseInt(pin.upvotes)||0)+'</span></button>';
+    h+='<button onclick="votePin('+pin.id+',-1,this)" style="padding:4px 8px;background:'+(parseInt(pin.user_vote)===-1?'#f44336':'#fce4ec')+';color:'+(parseInt(pin.user_vote)===-1?'#fff':'#f44336')+';border:1px solid #f44336;border-radius:6px;font-size:11px;cursor:pointer">\ud83d\udc4e <span id="vd'+pin.id+'">'+(parseInt(pin.downvotes)||0)+'</span></button>';
     if(user&&parseInt(pin.user_id)===user.id)h+='<button onclick="deletePin('+pin.id+')" style="padding:4px 10px;background:#f44;color:#fff;border:none;border-radius:6px;font-size:11px;cursor:pointer">X\u00f3a</button>';
     h+='</div></div>';
     return h;
