@@ -10,6 +10,11 @@
 <link rel="stylesheet" href="/css/style-v2.css">
 <link rel="stylesheet" href="/css/index-page.css">
 <link rel="stylesheet" href="/css/dark-mode.css">
+
+<div id="searchSuggestions" style="max-width:680px;margin:0 auto;padding:12px">
+  <div id="hashtagWidget" style="margin-bottom:12px"></div>
+  <div id="peopleCarousel" style="margin-bottom:12px"></div>
+</div>
 <script src="/js/dark-mode.js"></script>
 <style>
 .sr-header{background:#fff;padding:8px 12px;display:flex;align-items:center;gap:8px;border-bottom:1px solid #e4e6eb;position:sticky;top:0;z-index:100}
@@ -88,6 +93,50 @@ function doSearch(){
       }
     }).catch(function(){el.innerHTML='<div class="sr-empty">Lỗi kết nối</div>';});
 }
+</script>
+
+<script>
+// Hashtags + People suggestions on search page
+(function(){
+  var token=localStorage.getItem('token')||'';
+  var hdrs=token?{'Authorization':'Bearer '+token}:{};
+  
+  // Hashtags
+  fetch('/api/trending.php?action=hashtags').then(function(r){return r.json();}).then(function(d){
+    if(!d.success)return;
+    var tags=d.data||[];
+    if(!tags.length)return;
+    var el=document.getElementById('hashtagWidget');
+    if(!el)return;
+    var html='<div style="background:#fff;border-radius:12px;padding:12px 16px;box-shadow:0 1px 3px rgba(0,0,0,.08)">';
+    html+='<div style="font-weight:700;font-size:14px;margin-bottom:8px"><i class="fas fa-hashtag" style="color:#7C3AED;margin-right:6px"></i>Hashtag n\u1ed5i b\u1eadt</div>';
+    html+='<div style="display:flex;flex-wrap:wrap;gap:6px">';
+    tags.forEach(function(t){
+      var name=t.name||t.tag||t;
+      html+='<a href="search.html?q=%23'+encodeURIComponent(name)+'" style="padding:6px 14px;background:#f3f0ff;color:#7C3AED;border-radius:20px;font-size:13px;font-weight:600;text-decoration:none">#'+name+'</a>';
+    });
+    html+='</div></div>';
+    el.innerHTML=html;
+  }).catch(function(){});
+  
+  // People suggestions
+  fetch('/api/friends.php?action=suggestions',{headers:hdrs}).then(function(r){return r.json();}).then(function(d){
+    if(!d.success)return;
+    var users=d.data||[];
+    if(!users.length)return;
+    var el=document.getElementById('peopleCarousel');
+    if(!el)return;
+    var html='<div style="background:#fff;border-radius:12px;padding:12px 16px;box-shadow:0 1px 3px rgba(0,0,0,.08)">';
+    html+='<div style="font-weight:700;font-size:14px;margin-bottom:10px"><i class="fas fa-user-plus" style="color:#7C3AED;margin-right:6px"></i>G\u1ee3i \u00fd k\u1ebft b\u1ea1n</div>';
+    html+='<div style="display:flex;gap:12px;overflow-x:auto;padding-bottom:4px;scrollbar-width:none">';
+    users.slice(0,10).forEach(function(u){
+      var av=u.avatar?'<img src="'+u.avatar+'" style="width:56px;height:56px;border-radius:50%;object-fit:cover">':'<div style="width:56px;height:56px;border-radius:50%;background:#7C3AED;color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:20px">'+(u.fullname||'U')[0]+'</div>';
+      html+='<a href="user.html?id='+u.id+'" style="flex-shrink:0;width:80px;text-align:center;text-decoration:none;color:#333"><div style="display:flex;justify-content:center">'+av+'</div><div style="font-size:11px;margin-top:4px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+((u.fullname||'').split(' ').pop())+'</div></a>';
+    });
+    html+='</div></div>';
+    el.innerHTML=html;
+  }).catch(function(){});
+})();
 </script>
 </body>
 </html>

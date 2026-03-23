@@ -22,7 +22,7 @@ let CU=null,sort='hot',type='all',prov=null,company='',page=1,totalPg=1,imgs=[],
 
 document.addEventListener('DOMContentLoaded',()=>{
   CU=JSON.parse(localStorage.getItem('user')||'null');
-  renderNav(); renderProvinces(); loadPosts(); loadTrend(); loadHashtags(); loadSuggestions(); loadAnnouncement(); loadFriendsLatest(); timeGreeting(); loadPeopleCarousel(); loadDailyQuote(); loadHashtagCloud(); loadCheckin(); loadStories(); loadOnlineCount(); checkPostReminder(); checkAchievementsOnLoad(); showWelcomeBanner(); showOnboarding();
+  renderNav(); renderProvinces(); loadPosts(); loadTrend(); // // loadHashtags(); // moved/removed loadSuggestions(); loadAnnouncement(); loadFriendsLatest(); timeGreeting(); // // loadPeopleCarousel(); // moved/removed // // loadDailyQuote(); // moved/removed loadHashtagCloud(); // // loadCheckin(); // moved/removed loadStories(); // // loadOnlineCount(); // moved/removed checkPostReminder(); checkAchievementsOnLoad(); showWelcomeBanner(); showOnboarding();
   // mProv populated by async province API fetch below
   document.getElementById('stM').textContent=Math.floor(Math.random()*3000+1000).toLocaleString();
   document.getElementById('stO').textContent=Math.floor(Math.random()*500+100);
@@ -611,7 +611,7 @@ function setupImpressionTracking(){
 
 // Auto-refresh trending every 5 minutes
 setInterval(function(){
-  if(document.visibilityState==='visible'){loadTrend();loadHashtags();}
+  if(document.visibilityState==='visible'){loadTrend();// // loadHashtags(); // moved/removed}
 },300000);
 
 // People you may know (horizontal carousel)
@@ -674,7 +674,7 @@ async function doCheckin(){
     var d=await r.json();
     if(d.success){
       toast(d.message,'success');
-      loadCheckin(); loadStories(); loadOnlineCount(); checkPostReminder(); checkAchievementsOnLoad(); showWelcomeBanner(); showOnboarding();
+      // // loadCheckin(); // moved/removed loadStories(); // // loadOnlineCount(); // moved/removed checkPostReminder(); checkAchievementsOnLoad(); showWelcomeBanner(); showOnboarding();
       haptic('success');
     }else{toast(d.message||'Loi','error');}
   }catch(e){toast('Lỗi kết nối','error');}
@@ -857,10 +857,10 @@ function submitStory(overlay){
     fd.append('content',text);
     fd.append('bg_color',window._storyBg||'#7C3AED');
     fetch('/api/stories.php?action=create',{method:'POST',headers:{'Authorization':'Bearer '+(token||'')},body:fd})
-      .then(function(r){return r.json()}).then(function(d){toast(d.message||'Done',d.success?'success':'error');if(d.success){if(overlay)overlay.remove();loadStories(); loadOnlineCount();}});
+      .then(function(r){return r.json()}).then(function(d){toast(d.message||'Done',d.success?'success':'error');if(d.success){if(overlay)overlay.remove();loadStories(); // // loadOnlineCount(); // moved/removed}});
   }else{
     fetch('/api/stories.php?action=create',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+(token||'')},body:JSON.stringify({content:text,bg_color:window._storyBg||'#7C3AED'})})
-      .then(function(r){return r.json()}).then(function(d){toast(d.message||'Done',d.success?'success':'error');if(d.success){if(overlay)overlay.remove();loadStories(); loadOnlineCount();}});
+      .then(function(r){return r.json()}).then(function(d){toast(d.message||'Done',d.success?'success':'error');if(d.success){if(overlay)overlay.remove();loadStories(); // // loadOnlineCount(); // moved/removed}});
   }
 }
 
