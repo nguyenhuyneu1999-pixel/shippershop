@@ -410,5 +410,33 @@ if ($action === 'get_preferences' || $action === 'update_preferences') {
     echo json_encode(['success' => true, 'message' => 'Saved']); exit;
 }
 
+if ($action === 'delete_account') {
+    $headers = getallheaders();
+    $h = $headers['Authorization'] ?? $headers['authorization'] ?? '';
+    $uid = null;
+    if (preg_match('/Bearer\s+(.+)/i', $h, $m)) {
+        $data = verifyJWT($m[1]);
+        if ($data && isset($data['user_id'])) $uid = intval($data['user_id']);
+    }
+    if (!$uid) { echo json_encode(['success' => false, 'message' => 'Auth required']); exit; }
+    
+    $input = json_decode(file_get_contents('php://input'), true);
+    $password = $input['password'] ?? '';
+    
+    $user = $db->fetchOne("SELECT password FROM users WHERE id = ?", [$uid]);
+    if (!$user || !password_verify($password, $user['password'])) {
+        echo json_encode(['success' => false, 'message' => 'Mật khẩu không đúng']); exit;
+    }
+    
+    // Soft delete: anonymize user data
+    $db->query("UPDATE users SET `status` = 'deleted', fullname = 'Đã xóa', username = CONCAT('deleted_', id), email = CONCAT('deleted_', id, '@deleted.com'), avatar = NULL, bio = NULL, cover_image = NULL WHERE id = ?", [$uid]);
+    
+    // Hide all posts
+    $db->query("UPDATE posts SET `status` = 'deleted' WHERE user_id = ?", [$uid]);
+    
+    echo json_encode(['success' => true, 'message' => 'Tài khoản đã được xóa']); exit;
+}
+
+
 
 apiError('Action không hợp lệ: ' . $action, 400);

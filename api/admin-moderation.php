@@ -361,4 +361,32 @@ if ($method === 'GET' && $action === 'export_posts') {
     fclose($out); exit;
 }
 
+
+
+// === GET: System config ===
+if ($method === 'GET' && $action === 'config') {
+    $uid = adminAuth();
+    $settings = $d->fetchAll("SELECT `key`, `value` FROM settings ORDER BY `key`", []);
+    $config = [];
+    foreach ($settings ?: [] as $s) $config[$s['key']] = $s['value'];
+    echo json_encode(['success' => true, 'data' => $config]); exit;
+}
+
+// === POST: Update config ===
+if ($method === 'POST' && $action === 'update_config') {
+    $uid = adminAuth();
+    $input = json_decode(file_get_contents('php://input'), true);
+    $key = trim($input['key'] ?? '');
+    $value = $input['value'] ?? '';
+    if (!$key) { echo json_encode(['success' => false, 'message' => 'Missing key']); exit; }
+    
+    $existing = $d->fetchOne("SELECT id FROM settings WHERE `key` = ?", [$key]);
+    if ($existing) {
+        $d->query("UPDATE settings SET `value` = ? WHERE `key` = ?", [$value, $key]);
+    } else {
+        $d->query("INSERT INTO settings (`key`, `value`) VALUES (?, ?)", [$key, $value]);
+    }
+    echo json_encode(['success' => true, 'message' => 'Saved']); exit;
+}
+
 echo json_encode(['success' => false, 'message' => 'Invalid action']);
