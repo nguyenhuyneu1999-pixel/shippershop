@@ -22,7 +22,7 @@ let CU=null,sort='hot',type='all',prov=null,company='',page=1,totalPg=1,imgs=[],
 
 document.addEventListener('DOMContentLoaded',()=>{
   CU=JSON.parse(localStorage.getItem('user')||'null');
-  renderNav(); renderProvinces(); loadPosts(); loadTrend(); loadHashtags(); loadSuggestions(); loadAnnouncement(); loadFriendsLatest(); timeGreeting(); loadPeopleCarousel(); loadDailyQuote(); loadHashtagCloud(); loadCheckin(); checkPostReminder(); checkAchievementsOnLoad(); showWelcomeBanner(); showOnboarding();
+  renderNav(); renderProvinces(); loadPosts(); loadTrend(); loadHashtags(); loadSuggestions(); loadAnnouncement(); loadFriendsLatest(); timeGreeting(); loadPeopleCarousel(); loadDailyQuote(); loadHashtagCloud(); loadCheckin(); loadStories(); checkPostReminder(); checkAchievementsOnLoad(); showWelcomeBanner(); showOnboarding();
   // mProv populated by async province API fetch below
   document.getElementById('stM').textContent=Math.floor(Math.random()*3000+1000).toLocaleString();
   document.getElementById('stO').textContent=Math.floor(Math.random()*500+100);
@@ -674,7 +674,7 @@ async function doCheckin(){
     var d=await r.json();
     if(d.success){
       toast(d.message,'success');
-      loadCheckin(); checkPostReminder(); checkAchievementsOnLoad(); showWelcomeBanner(); showOnboarding();
+      loadCheckin(); loadStories(); checkPostReminder(); checkAchievementsOnLoad(); showWelcomeBanner(); showOnboarding();
       haptic('success');
     }else{toast(d.message||'Loi','error');}
   }catch(e){toast('Lỗi kết nối','error');}
@@ -796,4 +796,110 @@ async function loadHashtagCloud(){
     html+='</div>';
     el.innerHTML=html;
   }catch(e){}
+}
+
+// Stories carousel
+async function loadStories(){
+  var token=localStorage.getItem('token');
+  try{
+    var r=await fetch('/api/stories.php?action=list',{headers:token?{'Authorization':'Bearer '+token}:{}});
+    var d=await r.json();
+    if(!d.success)return;
+    var users=d.data||[];
+    if(!users.length)return;
+    var el=document.getElementById('storiesCarousel');
+    if(!el)return;
+    
+    var user=JSON.parse(localStorage.getItem('user')||'{}');
+    var html='<div style="display:flex;gap:10px;padding:10px 12px;overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none">';
+    
+    // My story (create)
+    if(user.id){
+      html+='<div onclick="createStory()" style="flex-shrink:0;width:72px;text-align:center;cursor:pointer"><div style="width:64px;height:64px;border-radius:50%;background:#f0f0f0;display:flex;align-items:center;justify-content:center;font-size:24px;margin:0 auto;border:2px dashed #7C3AED">+</div><div style="font-size:10px;color:#7C3AED;font-weight:600;margin-top:4px">Tạo story</div></div>';
+    }
+    
+    users.forEach(function(u){
+      var hasUnviewed=u.stories.some(function(s){return !s.is_viewed;});
+      var borderColor=hasUnviewed?'#7C3AED':'#ddd';
+      var av=u.user_avatar?'<img src="'+u.user_avatar+'" style="width:60px;height:60px;border-radius:50%;object-fit:cover">':'<div style="width:60px;height:60px;border-radius:50%;background:#7C3AED;color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:20px">'+(u.user_name||'U')[0]+'</div>';
+      html+='<div onclick="viewStory('+u.user_id+')" style="flex-shrink:0;width:72px;text-align:center;cursor:pointer"><div style="width:64px;height:64px;border-radius:50%;border:3px solid '+borderColor+';padding:2px;margin:0 auto">'+av+'</div><div style="font-size:10px;color:#333;margin-top:4px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+esc(u.user_name.split(' ').pop())+'</div></div>';
+    });
+    html+='</div>';
+    el.innerHTML=html;
+    el.style.display='block';
+  }catch(e){}
+}
+
+function createStory(){
+  var ov=document.createElement('div');
+  ov.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.8);z-index:3000;display:flex;flex-direction:column;align-items:center;justify-content:center';
+  var colors=['#7C3AED','#EE4D2D','#00b14f','#1877F2','#F59E0B','#333'];
+  var html='<div style="max-width:340px;width:90%">';
+  html+='<textarea id="storyText" maxlength="200" placeholder="Viết story... (tối đa 200 ký tự)" style="width:100%;min-height:150px;padding:16px;background:rgba(255,255,255,.1);border:none;border-radius:12px;color:#fff;font-size:18px;resize:none;box-sizing:border-box;font-family:inherit;text-align:center"></textarea>';
+  html+='<div style="display:flex;gap:8px;justify-content:center;margin:12px 0">';
+  colors.forEach(function(c){html+='<div onclick="document.getElementById(\'storyText\').style.background=\''+c+'\';window._storyBg=\''+c+'\'" style="width:28px;height:28px;border-radius:50%;background:'+c+';cursor:pointer;border:2px solid rgba(255,255,255,.3)"></div>';});
+  html+='</div>';
+  html+='<div style="display:flex;gap:8px"><label style="flex:1;padding:10px;background:rgba(255,255,255,.15);border-radius:8px;text-align:center;color:#fff;cursor:pointer;font-size:13px"><i class="fas fa-image"></i> Thêm ảnh<input type="file" accept="image/*" style="display:none" onchange="window._storyFile=this.files[0]"></label><button onclick="submitStory(this.closest(\'[style]\'))" style="flex:1;padding:10px;background:#7C3AED;color:#fff;border:none;border-radius:8px;font-weight:600;cursor:pointer;font-size:13px">Đăng story</button></div>';
+  html+='<div onclick="this.closest(\'[style]\').remove()" style="text-align:center;padding:12px;color:rgba(255,255,255,.6);cursor:pointer;font-size:14px">Hủy</div></div>';
+  ov.innerHTML=html;
+  document.body.appendChild(ov);
+  window._storyBg='#7C3AED';window._storyFile=null;
+}
+
+function submitStory(overlay){
+  var text=(document.getElementById('storyText')||{}).value||'';
+  var token=localStorage.getItem('token');
+  if(!text.trim()&&!window._storyFile){toast('Thêm nội dung hoặc ảnh','error');return;}
+  
+  if(window._storyFile){
+    var fd=new FormData();
+    fd.append('image',window._storyFile);
+    fd.append('content',text);
+    fd.append('bg_color',window._storyBg||'#7C3AED');
+    fetch('/api/stories.php?action=create',{method:'POST',headers:{'Authorization':'Bearer '+(token||'')},body:fd})
+      .then(function(r){return r.json()}).then(function(d){toast(d.message||'Done',d.success?'success':'error');if(d.success){if(overlay)overlay.remove();loadStories();}});
+  }else{
+    fetch('/api/stories.php?action=create',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+(token||'')},body:JSON.stringify({content:text,bg_color:window._storyBg||'#7C3AED'})})
+      .then(function(r){return r.json()}).then(function(d){toast(d.message||'Done',d.success?'success':'error');if(d.success){if(overlay)overlay.remove();loadStories();}});
+  }
+}
+
+function viewStory(userId){
+  // Fetch and display story
+  fetch('/api/stories.php?action=list').then(function(r){return r.json()}).then(function(d){
+    var users=d.data||[];
+    var target=users.find(function(u){return u.user_id==userId;});
+    if(!target||!target.stories.length)return;
+    
+    var idx=0;
+    var stories=target.stories;
+    
+    var ov=document.createElement('div');
+    ov.style.cssText='position:fixed;inset:0;background:#000;z-index:3000;display:flex;flex-direction:column';
+    
+    function showSlide(){
+      var s=stories[idx];
+      var token=localStorage.getItem('token');
+      // Mark viewed
+      fetch('/api/stories.php?action=view',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+(token||'')},body:JSON.stringify({story_id:s.id})}).catch(function(){});
+      
+      var bg=s.image_url?'url('+s.image_url+') center/cover':(s.bg_color||'#7C3AED');
+      ov.innerHTML='<div style="position:absolute;top:0;left:0;right:0;padding:8px 12px;display:flex;gap:4px;z-index:1">'+stories.map(function(_,i){return '<div style="flex:1;height:3px;border-radius:2px;background:'+(i<idx?'#fff':(i===idx?'rgba(255,255,255,.8)':'rgba(255,255,255,.3)'))+'"></div>';}).join('')+'</div>'
+        +'<div style="position:absolute;top:20px;left:12px;right:12px;display:flex;align-items:center;gap:10px;z-index:1">'+(target.user_avatar?'<img src="'+target.user_avatar+'" style="width:36px;height:36px;border-radius:50%;object-fit:cover">':'')+'<div style="color:#fff;font-weight:600;font-size:14px">'+esc(target.user_name)+'</div><div style="color:rgba(255,255,255,.6);font-size:12px">'+ago(s.created_at)+'</div><button onclick="this.closest(\'[style]\').remove()" style="margin-left:auto;background:none;border:none;color:#fff;font-size:20px;cursor:pointer">&times;</button></div>'
+        +'<div style="flex:1;display:flex;align-items:center;justify-content:center;background:'+bg+';padding:40px 20px">'+(s.content?'<div style="color:#fff;font-size:22px;font-weight:700;text-align:center;text-shadow:0 2px 8px rgba(0,0,0,.3);max-width:280px">'+esc(s.content)+'</div>':'')+'</div>'
+        +'<div style="position:absolute;bottom:20px;left:0;right:0;text-align:center;color:rgba(255,255,255,.5);font-size:12px">'+s.view_count+' lượt xem</div>'
+        +'<div onclick="if('+idx+'<'+(stories.length-1)+'){idx++;showSlide();}else{this.closest(\'[style]\').remove();}" style="position:absolute;right:0;top:60px;bottom:60px;width:40%;cursor:pointer;z-index:1"></div>'
+        +'<div onclick="if('+idx+'>0){idx--;showSlide();}" style="position:absolute;left:0;top:60px;bottom:60px;width:40%;cursor:pointer;z-index:1"></div>';
+    }
+    showSlide();
+    document.body.appendChild(ov);
+    
+    // Auto-advance every 5s
+    var timer=setInterval(function(){
+      idx++;
+      if(idx>=stories.length){clearInterval(timer);ov.remove();return;}
+      showSlide();
+    },5000);
+    ov.addEventListener('click',function(e){if(e.target===ov){clearInterval(timer);ov.remove();}});
+  });
 }
