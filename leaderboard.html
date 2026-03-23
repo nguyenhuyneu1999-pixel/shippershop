@@ -1,198 +1,82 @@
 <!DOCTYPE html>
-<html lang="vi"><head>
+<html lang="vi">
+<head>
 <meta charset="UTF-8">
-
-<link rel="icon" type="image/x-icon" href="/favicon.ico">
-<link rel="icon" type="image/png" sizes="32x32" href="/icons/icon-32.png">
-<link rel="icon" type="image/png" sizes="16x16" href="/icons/icon-16.png">
-<link rel="apple-touch-icon" sizes="180x180" href="/icons/apple-touch-icon.png">
-<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700&display=swap" rel="stylesheet"><meta property="og:title" content="ShipperShop - Cộng đồng Shipper Việt Nam">
-<meta property="og:image" content="https://shippershop.vn/api/og-image.php">
-<meta property="og:url" content="https://shippershop.vn/leaderboard.html">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Bảng xếp hạng - ShipperShop</title>
-<meta name="description" content="Bảng xếp hạng shipper tích cực nhất trên ShipperShop - Cộng đồng Shipper Việt Nam">
+<meta name="theme-color" content="#7C3AED">
+<meta name="description" content="Bảng xếp hạng shipper hàng đầu ShipperShop">
+<link rel="icon" href="/favicon.ico">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-<link rel="stylesheet" href="/css/design-system.css">
-<link rel="stylesheet" href="css/style-v2.css">
-<link rel="stylesheet" href="mobile.css">
+<link rel="stylesheet" href="/css/dark-mode.css">
+<script src="/js/dark-mode.js"></script>
 <style>
-body,input,button,select,textarea{font-family:'Be Vietnam Pro',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif}
-body{background:#f0f2f5;padding-top:56px;padding-bottom:70px}
-.lb-wrap{max-width:500px;margin:0 auto;padding:12px}
-.lb-head{background:linear-gradient(135deg,#7C3AED,#5B21B6);border-radius:16px;padding:20px;color:#fff;text-align:center;margin-bottom:16px}
-.lb-head h1{font-size:20px;margin-bottom:4px}
-.lb-head p{font-size:12px;opacity:.8}
-.lb-tabs{display:flex;gap:6px;margin-bottom:12px;overflow-x:auto;padding:2px 0}
-.lb-tab{padding:8px 16px;border-radius:20px;background:#fff;font-size:13px;font-weight:600;color:#65676B;cursor:pointer;white-space:nowrap;border:none}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Be Vietnam Pro',sans-serif;background:#f0f2f5;min-height:100vh}
+.lb-header{background:linear-gradient(135deg,#7C3AED,#5B21B6);color:#fff;padding:20px 16px;text-align:center}
+.lb-header h1{font-size:20px;margin-bottom:4px}
+.lb-tabs{display:flex;gap:4px;padding:8px 16px;background:#fff;border-bottom:1px solid #e4e6eb;overflow-x:auto}
+.lb-tab{padding:8px 16px;border:none;background:none;font-size:13px;cursor:pointer;border-radius:8px;white-space:nowrap;font-weight:500;color:#65676B}
 .lb-tab.active{background:#7C3AED;color:#fff}
-.lb-card{background:#fff;border-radius:12px;margin-bottom:8px;overflow:hidden}
-.lb-me{border:2px solid #7C3AED}
-.lb-row{display:flex;align-items:center;gap:10px;padding:12px 14px}
-.lb-rank{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:13px;flex-shrink:0;color:#fff}
-.r1{background:linear-gradient(135deg,#FFD700,#FFA500)}.r2{background:linear-gradient(135deg,#C0C0C0,#A0A0A0)}.r3{background:linear-gradient(135deg,#CD7F32,#A0522D)}
-.r-n{background:#e4e6eb;color:#333}
+.lb-body{max-width:600px;margin:0 auto;padding:12px}
+.lb-card{background:#fff;border-radius:12px;overflow:hidden}
+.lb-item{display:flex;align-items:center;gap:12px;padding:12px 16px;border-bottom:1px solid #f5f5f5}
+.lb-rank{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:13px;flex-shrink:0}
+.lb-rank.gold{background:#FEF3C7;color:#D97706}
+.lb-rank.silver{background:#F3F4F6;color:#6B7280}
+.lb-rank.bronze{background:#FED7AA;color:#C2410C}
+.lb-rank.normal{background:#f0f0f0;color:#666}
 .lb-av{width:40px;height:40px;border-radius:50%;object-fit:cover;flex-shrink:0}
-.lb-av-ph{width:40px;height:40px;border-radius:50%;background:#e4e6eb;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:14px;flex-shrink:0}
-.lb-info{flex:1;min-width:0}
-.lb-name{font-weight:700;font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.lb-sub{font-size:11px;color:#65676B;display:flex;align-items:center;gap:6px}
-.lb-xp{text-align:right}
-.lb-xp .val{font-size:16px;font-weight:700;color:#7C3AED}
-.lb-xp .unit{font-size:10px;color:#888}
-.lb-badge{font-size:16px}
-.lb-streak{font-size:11px;color:#ff9800}
-.lb-empty{text-align:center;color:#999;padding:40px 20px;font-size:14px}
-.lb-my{background:#f8f6ff;border-radius:12px;padding:14px;margin-bottom:12px;display:none}
-.lb-my-head{font-size:12px;color:#7C3AED;font-weight:600;margin-bottom:8px}
-.lb-my-stats{display:flex;gap:8px}
-.lb-my-stat{flex:1;text-align:center;background:#fff;border-radius:8px;padding:8px}
-.lb-my-stat .v{font-size:18px;font-weight:700;color:#7C3AED}
-.lb-my-stat .l{font-size:10px;color:#888}
-.share-btn{display:inline-flex;align-items:center;gap:6px;padding:8px 16px;border-radius:8px;background:#7C3AED;color:#fff;border:none;font-size:13px;font-weight:600;cursor:pointer;margin-top:8px}
+.lb-name{font-weight:600;font-size:14px}
+.lb-meta{font-size:12px;color:#65676B}
+.lb-score{font-weight:700;color:#7C3AED;font-size:15px;margin-left:auto;flex-shrink:0}
+.lb-empty{text-align:center;padding:40px;color:#999}
+.back-link{position:absolute;left:16px;top:20px;color:#fff;text-decoration:none;font-size:14px}
+@media(min-width:769px){.lb-body{padding:20px}}
 </style>
-</head><body>
-<nav class="top-nav">
-  <div class="nav-left"><a href="index.html" style="text-decoration:none;color:inherit"><i class="fas fa-arrow-left"></i></a></div>
-  <div class="nav-title">🏆 Bảng xếp hạng</div>
-  <div class="nav-right"></div>
-</nav>
-
-<div class="lb-wrap">
-  <div class="lb-head">
-    <h1>🏆 Bảng xếp hạng Shipper</h1>
-    <p>Ae shipper tích cực nhất cộng đồng</p>
-  </div>
-
-  <div id="mySection" class="lb-my">
-    <div class="lb-my-head">📊 Thứ hạng của bạn</div>
-    <div class="lb-my-stats">
-      <div class="lb-my-stat"><div class="v" id="myRank">-</div><div class="l">Hạng</div></div>
-      <div class="lb-my-stat"><div class="v" id="myXP">0</div><div class="l">XP</div></div>
-      <div class="lb-my-stat"><div class="v" id="myLevel">1</div><div class="l">Level</div></div>
-      <div class="lb-my-stat"><div class="v" id="myStreak">0</div><div class="l">🔥</div></div>
-    </div>
-    <button class="share-btn" onclick="shareRank()"><i class="fas fa-share"></i> Chia sẻ thứ hạng</button>
-  </div>
-
-  <div class="lb-tabs">
-    <button class="lb-tab active" onclick="loadLB('all',this)">Tất cả</button>
-    <button class="lb-tab" onclick="loadLB('month',this)">Tháng này</button>
-    <button class="lb-tab" onclick="loadLB('week',this)">Tuần này</button>
-    <button class="lb-tab" onclick="loadLB('referral',this)">Referral</button>
-  </div>
-
-  <div id="lbList"><div class="lb-empty"><i class="fas fa-spinner fa-spin"></i></div></div>
+</head>
+<body>
+<div class="lb-header" style="position:relative">
+  <a href="index.html" class="back-link"><i class="fas fa-arrow-left"></i></a>
+  <h1>🏆 Bảng xếp hạng</h1>
+  <div style="font-size:13px;opacity:.8">Shipper hàng đầu ShipperShop</div>
 </div>
+<div class="lb-tabs">
+  <button class="lb-tab active" onclick="loadLB('xp',this)">⭐ XP</button>
+  <button class="lb-tab" onclick="loadLB('posts',this)">📝 Bài viết</button>
+  <button class="lb-tab" onclick="loadLB('helpful',this)">❤️ Hữu ích</button>
+</div>
+<div class="lb-body"><div class="lb-card" id="lbList"><div class="lb-empty"><i class="fas fa-spinner fa-spin" style="font-size:24px"></i></div></div></div>
 
 <script>
-var CU=JSON.parse(localStorage.getItem("user")||"null");
-var TK=localStorage.getItem("token");
-var BADGES={"1":"🟢","2":"🟡","3":"🟠","4":"🔴","5":"🟣"};
-var LEVELS={"1":"Tân binh","2":"Shipper","3":"Pro Shipper","4":"Master","5":"Legend"};
+function esc(s){var d=document.createElement('div');d.textContent=s;return d.innerHTML;}
+function fN(n){return Number(n||0).toLocaleString('vi-VN');}
 
-function loadLB(period,btn){
-  document.querySelectorAll(".lb-tab").forEach(function(b){b.classList.remove("active");});
-  if(btn)btn.classList.add("active");
-  var el=document.getElementById("lbList");
-  el.innerHTML='<div class="lb-empty"><i class="fas fa-spinner fa-spin"></i></div>';
-
-  var url=period==="referral"?"/api/referral.php?action=leaderboard&period=all":"/api/gamification.php?action=leaders&period="+period;
-  var hdrs={};if(TK)hdrs["Authorization"]="Bearer "+TK;
+function loadLB(type,btn){
+  document.querySelectorAll('.lb-tab').forEach(function(t){t.classList.remove('active');});
+  if(btn)btn.classList.add('active');
+  var list=document.getElementById('lbList');
+  list.innerHTML='<div class="lb-empty"><i class="fas fa-spinner fa-spin" style="font-size:24px"></i></div>';
   
-  fetch(url,{headers:hdrs}).then(function(r){return r.json();}).then(function(d){
-    if(!d.success||!d.data||!d.data.length){el.innerHTML='<div class="lb-empty">Chưa có dữ liệu. Hãy là người đầu tiên!</div>';return;}
-    var html="";
-    d.data.forEach(function(u,i){
-      var rank=i+1;
-      var rClass=rank===1?"r1":rank===2?"r2":rank===3?"r3":"r-n";
-      var medal=rank===1?"🥇":rank===2?"🥈":rank===3?"🥉":rank;
-      var av=u.avatar?"<img src='"+u.avatar+"' class='lb-av' onerror=\"this.outerHTML='<div class=lb-av-ph loading="lazy">'+(this.alt||'?')[0]+'</div>'\">":"<div class='lb-av-ph'>"+(u.fullname||"?")[0]+"</div>";
-      var xpVal=period==="referral"?(u.referral_count||0):(u.total_xp||0);
-      var xpUnit=period==="referral"?"refs":"XP";
-      var isMe=CU&&u.id==CU.id;
-      var badge=BADGES[u.level||1]||"🟢";
-      var streak=u.streak>0?"🔥"+u.streak:"";
-      var company=u.shipping_company?"<span style='color:"+({"GHTK":"#00b14f","GHN":"#ff6600","J&T":"#d32f2f","SPX":"#EE4D2D","Grab":"#00b14f"}[u.shipping_company]||"#999")+"'>"+u.shipping_company+"</span>":"";
-      
-      html+="<div class='lb-card"+(isMe?" lb-me":"")+"'><div class='lb-row'>";
-      html+="<div class='lb-rank "+rClass+"'>"+medal+"</div>";
-      html+=av;
-      html+="<div class='lb-info'><div class='lb-name'>"+badge+" "+(u.fullname||"Shipper")+"</div>";
-      html+="<div class='lb-sub'>"+company+(streak?" <span class='lb-streak'>"+streak+"</span>":"")+" <span>Lv"+(u.level||1)+"</span></div></div>";
-      html+="<div class='lb-xp'><div class='val'>"+xpVal.toLocaleString()+"</div><div class='unit'>"+xpUnit+"</div></div>";
-      html+="</div></div>";
-
-      if(isMe){
-        document.getElementById("myRank").textContent="#"+rank;
-        document.getElementById("myXP").textContent=u.total_xp||0;
-        document.getElementById("myLevel").textContent=u.level||1;
-        document.getElementById("myStreak").textContent=u.streak||0;
+  fetch('/api/leaderboard.php?type='+type+'&limit=20')
+    .then(function(r){return r.json()})
+    .then(function(d){
+      if(!d.success||!d.data.leaderboard.length){
+        list.innerHTML='<div class="lb-empty">Chưa có dữ liệu</div>';return;
       }
-    });
-    el.innerHTML=html;
-  }).catch(function(e){el.innerHTML='<div class="lb-empty">Lỗi tải dữ liệu</div>';});
+      var scoreLabel=type==='xp'?'XP':(type==='posts'?'bài':'likes');
+      list.innerHTML=d.data.leaderboard.map(function(u,i){
+        var rankClass=i===0?'gold':(i===1?'silver':(i===2?'bronze':'normal'));
+        var medal=i===0?'🥇':(i===1?'🥈':(i===2?'🥉':(i+1)));
+        var av=u.avatar?'<img class="lb-av" src="'+u.avatar+'" loading="lazy">':'<div class="lb-av" style="background:#7C3AED;color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700">'+(u.fullname||'U')[0]+'</div>';
+        var score=type==='xp'?fN(u.total_xp):(type==='posts'?fN(u.post_count):fN(u.total_likes));
+        var badge=u.sub_badge?'<span style="margin-left:4px">'+u.sub_badge+'</span>':'';
+        return '<a href="user.html?id='+u.user_id+'" style="text-decoration:none;color:inherit" class="lb-item"><div class="lb-rank '+rankClass+'">'+medal+'</div>'+av+'<div><div class="lb-name">'+esc(u.fullname)+badge+'</div><div class="lb-meta">'+(u.shipping_company||'Shipper')+(type==='xp'&&u.level?' · Lv.'+u.level:'')+'</div></div><div class="lb-score">'+score+' '+scoreLabel+'</div></a>';
+      }).join('');
+    })
+    .catch(function(){list.innerHTML='<div class="lb-empty">Lỗi tải dữ liệu</div>';});
 }
-
-// Load my stats
-if(CU&&TK){
-  document.getElementById("mySection").style.display="block";
-  fetch("/api/gamification.php?action=profile",{headers:{"Authorization":"Bearer "+TK}}).then(function(r){return r.json();}).then(function(d){
-    if(d.success){
-      document.getElementById("myXP").textContent=d.data.total_xp;
-      document.getElementById("myLevel").textContent=d.data.level;
-      document.getElementById("myStreak").textContent=d.data.streak.current;
-    }
-  }).catch(function(){});
-}
-
-function shareRank(){
-  var text="🏆 Tôi đang hạng "+document.getElementById("myRank").textContent+" trên ShipperShop với "+document.getElementById("myXP").textContent+" XP!\n\n📱 Tham gia cộng đồng shipper: shippershop.vn";
-  if(navigator.share)navigator.share({title:"ShipperShop Ranking",text:text,url:"https://shippershop.vn/leaderboard.html"});
-  else{navigator.clipboard.writeText(text);alert("Đã copy!");}
-}
-
-loadLB("all");
+loadLB('xp');
 </script>
-<script src="js/mobile.js"></script>
-<img src="/api/auto-cron.php" style="display:none" width="1" height="1" alt="">
-<script src="/js/ss-error-tracker.js"></script>
-<script src="/js/analytics.js"></script>
-<script src="/js/pages/leaderboard.js"></script>
-<!-- SS v2 Core + Components -->
-<script src="/js/core/utils.js"></script>
-<script src="/js/core/store.js"></script>
-<script src="/js/core/ui.js"></script>
-<script src="/js/core/api.js"></script>
-<script src="/js/components/notification-bell.js"></script>
-<script src="/js/components/scroll-heartbeat.js"></script>
-<script src="/js/components/notif-sound.js"></script>
-<script src="/js/components/image-optimizer.js"></script>
-<script src="/js/components/connection-status.js"></script>
-<script src="/js/components/shortcuts.js"></script>
-<script src="/js/components/a11y.js"></script>
-<script src="/js/components/post-types.js"></script>
-<script src="/js/components/lazy-img.js"></script>
-<script src="/js/components/error-boundary.js"></script>
-<script src="/js/components/report-dialog.js"></script>
-<script src="/js/components/payment.js"></script>
-<script src="/js/components/notif-poll.js"></script>
-<script src="/js/components/pwa-install.js"></script>
-<script src="/js/components/dark-mode.js"></script>
-<script src="/js/components/search-overlay.js"></script>
-<script src="/js/components/image-viewer.js"></script>
-<script src="/js/components/user-card.js"></script>
-<script src="/js/components/gamification.js"></script>
-
-<script>
-(function(){
-  if(typeof SS!=='undefined'&&SS.store&&SS.store.isLoggedIn()&&SS.NotifBell){
-    var nb=document.getElementById('ss-notif-bell');
-    if(nb)SS.NotifBell.init('ss-notif-bell');
-  }
-  if(typeof window.toast==='undefined'&&typeof SS!=='undefined'&&SS.ui){
-    window.toast=function(m,dur){SS.ui.toast(m,'info',dur||3000);};
-  }
-})();
-</script>
-</body></html>
+</body>
+</html>
