@@ -4,13 +4,30 @@ require_once __DIR__ . '/../includes/config.php';
 require_once __DIR__ . '/../includes/db.php';
 header('Content-Type: application/json');
 $pdo = db()->getConnection();
+$r = [];
 
-$cols = $pdo->query("SHOW COLUMNS FROM map_pins")->fetchAll(PDO::FETCH_ASSOC);
-$indexes = $pdo->query("SHOW INDEX FROM map_pins")->fetchAll(PDO::FETCH_ASSOC);
-$count = $pdo->query("SELECT COUNT(*) as c FROM map_pins")->fetch(PDO::FETCH_ASSOC);
+// Add compound index for bounding box queries
+try {
+    $pdo->exec("ALTER TABLE map_pins ADD INDEX idx_lat_lng (lat, lng)");
+    $r[] = 'idx_lat_lng added';
+} catch (Throwable $e) {
+    $r[] = 'idx_lat_lng: ' . $e->getMessage();
+}
 
-echo json_encode([
-    'columns' => array_map(function($c){return $c['Field'].':'.$c['Type'];}, $cols),
-    'indexes' => array_map(function($i){return $i['Key_name'].':'.$i['Column_name'];}, $indexes),
-    'row_count' => $count['c']
-]);
+// Add index on pin_type for filtered queries
+try {
+    $pdo->exec("ALTER TABLE map_pins ADD INDEX idx_type_lat_lng (pin_type, lat, lng)");
+    $r[] = 'idx_type_lat_lng added';
+} catch (Throwable $e) {
+    $r[] = 'idx_type_lat_lng: ' . $e->getMessage();
+}
+
+// Add index on created_at for sorting
+try {
+    $pdo->exec("ALTER TABLE map_pins ADD INDEX idx_created (created_at)");
+    $r[] = 'idx_created added';
+} catch (Throwable $e) {
+    $r[] = 'idx_created: ' . $e->getMessage();
+}
+
+echo json_encode(['success' => true, 'results' => $r]);
