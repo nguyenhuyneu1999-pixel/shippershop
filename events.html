@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Sự kiện - ShipperShop</title>
+<meta name="theme-color" content="#7C3AED">
+<link rel="icon" href="/favicon.ico">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="stylesheet" href="/css/dark-mode.css">
+<script src="/js/dark-mode.js"></script>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Be Vietnam Pro',sans-serif;background:#f0f2f5;min-height:100vh}
+.ev-header{background:linear-gradient(135deg,#7C3AED,#5B21B6);color:#fff;padding:20px 16px;text-align:center;position:relative}
+.ev-body{max-width:600px;margin:0 auto;padding:12px}
+.ev-card{background:#fff;border-radius:12px;overflow:hidden;margin-bottom:10px}
+.ev-date-box{background:#f5f3ff;padding:12px;text-align:center;min-width:60px}
+.ev-date-num{font-size:22px;font-weight:700;color:#7C3AED}
+.ev-date-month{font-size:11px;color:#999}
+.ev-empty{text-align:center;padding:60px 20px;color:#999}
+.ev-btn{padding:6px 14px;border:1px solid #7C3AED;border-radius:8px;color:#7C3AED;background:#fff;font-size:12px;font-weight:600;cursor:pointer}
+.ev-btn.going{background:#7C3AED;color:#fff}
+.back-link{position:absolute;left:16px;top:20px;color:#fff;text-decoration:none}
+</style>
+</head>
+<body>
+<div class="ev-header">
+  <a href="javascript:history.back()" class="back-link"><i class="fas fa-arrow-left"></i></a>
+  <h1 style="font-size:20px">📅 Sự kiện</h1>
+  <div style="font-size:13px;opacity:.8;margin-top:4px">Offline meetup & hoạt động cộng đồng</div>
+</div>
+<div class="ev-body" id="evList"><div style="text-align:center;padding:40px"><i class="fas fa-spinner fa-spin" style="font-size:24px;color:#7C3AED"></i></div></div>
+
+<script>
+function esc(s){var d=document.createElement('div');d.textContent=s;return d.innerHTML;}
+var months=['Th01','Th02','Th03','Th04','Th05','Th06','Th07','Th08','Th09','Th10','Th11','Th12'];
+
+fetch('/api/events.php?action=upcoming')
+  .then(function(r){return r.json()})
+  .then(function(d){
+    var el=document.getElementById('evList');
+    var events=d.data||[];
+    if(!events.length){el.innerHTML='<div class="ev-empty"><div style="font-size:48px;margin-bottom:12px">📅</div><div style="font-size:16px;font-weight:600;color:#333">Chưa có sự kiện nào</div><div style="margin-top:8px">Sự kiện sẽ được tạo bởi admin các nhóm</div></div>';return;}
+    el.innerHTML=events.map(function(e){
+      var dt=new Date(e.event_date.replace(' ','T'));
+      var timeStr=dt.getHours()+':'+(dt.getMinutes()<10?'0':'')+dt.getMinutes();
+      return '<div class="ev-card"><div style="display:flex"><div class="ev-date-box"><div class="ev-date-num">'+dt.getDate()+'</div><div class="ev-date-month">'+months[dt.getMonth()]+'</div></div><div style="flex:1;padding:12px"><div style="font-weight:700;font-size:15px">'+esc(e.title)+'</div><div style="font-size:12px;color:#65676B;margin-top:4px"><i class="fas fa-clock" style="width:14px"></i> '+timeStr+(e.location?' · <i class="fas fa-map-marker-alt" style="width:14px"></i> '+esc(e.location):'')+'</div><div style="font-size:12px;color:#999;margin-top:4px">'+esc(e.group_name||'')+'</div><div style="display:flex;gap:6px;margin-top:8px"><button class="ev-btn going" onclick="rsvp('+e.id+',\\'going\\')">✅ Tham gia ('+e.going_count+')</button><button class="ev-btn" onclick="rsvp('+e.id+',\\'interested\\')">⭐ Quan tâm ('+e.interested_count+')</button></div></div></div></div>';
+    }).join('');
+  });
+
+function rsvp(eventId,status){
+  var token=localStorage.getItem('token');
+  if(!token){location.href='login.html';return;}
+  fetch('/api/events.php?action=rsvp',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+(token||'')},body:JSON.stringify({event_id:eventId,status:status})})
+    .then(function(r){return r.json()})
+    .then(function(d){
+      if(d.success)location.reload();
+      else alert(d.message||'Error');
+    });
+}
+</script>
+</body>
+</html>

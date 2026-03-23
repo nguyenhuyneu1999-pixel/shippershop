@@ -80,7 +80,8 @@ function toggleJoin(){
   apiFetch("/api/groups.php?action=join",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({group_id:GROUP.id})})
   .then(function(d){
     if(d.success){GROUP.is_member=d.data.joined;if(d.data.joined){GROUP.member_count++;toast("\u0110\u00e3 tham gia nh\u00f3m!");}else{GROUP.member_count--;toast("\u0110\u00e3 r\u1eddi nh\u00f3m");}renderHeader();loadPosts();
-    loadChallenge(GROUP.id);}
+    loadChallenge(GROUP.id);
+    loadGroupEvents(GROUP.id);}
     else{toast(d.message||"L\u1ed7i");}
   });
 }
@@ -377,4 +378,50 @@ function inviteFriend(groupId){
     .then(function(r){return r.json()})
     .then(function(d){toast(d.message||'Done',d.success?'success':'error');})
     .catch(function(){toast('Lỗi','error');});
+}
+
+// Group events
+function loadGroupEvents(groupId){
+  fetch('/api/events.php?action=list&group_id='+groupId)
+    .then(function(r){return r.json()})
+    .then(function(d){
+      var events=d.data||[];
+      if(!events.length)return;
+      var el=document.getElementById('groupEvents');
+      if(!el)return;
+      var html='<div style="padding:12px 16px;font-weight:700;font-size:14px">📅 Sự kiện sắp tới</div>';
+      events.slice(0,3).forEach(function(e){
+        var dt=new Date(e.event_date.replace(' ','T'));
+        var months=['Th01','Th02','Th03','Th04','Th05','Th06','Th07','Th08','Th09','Th10','Th11','Th12'];
+        html+='<div style="padding:8px 16px;display:flex;gap:12px;align-items:flex-start;border-bottom:1px solid #f5f5f5"><div style="background:#f5f3ff;border-radius:8px;padding:8px 12px;text-align:center;flex-shrink:0"><div style="font-size:18px;font-weight:700;color:#7C3AED">'+dt.getDate()+'</div><div style="font-size:10px;color:#999">'+months[dt.getMonth()]+'</div></div><div><div style="font-weight:600;font-size:14px">'+esc(e.title)+'</div>'+(e.location?'<div style="font-size:12px;color:#65676B;margin-top:2px">📍 '+esc(e.location)+'</div>':'')+'<div style="font-size:12px;color:#999;margin-top:2px">'+e.going_count+' tham gia · '+e.interested_count+' quan tâm</div></div></div>';
+      });
+      el.innerHTML=html;
+    }).catch(function(){});
+}
+
+function createEvent(groupId){
+  var ov=document.createElement('div');
+  ov.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:2000;display:flex;align-items:center;justify-content:center';
+  ov.innerHTML='<div style="background:#fff;border-radius:16px;padding:20px;max-width:380px;width:90%;max-height:80vh;overflow-y:auto"><h3 style="margin:0 0 14px;font-size:16px">📅 Tạo sự kiện</h3><input id="evTitle" placeholder="Tên sự kiện *" style="width:100%;padding:10px;border:1px solid #ddd;border-radius:8px;font-size:14px;margin-bottom:8px;box-sizing:border-box"><textarea id="evDesc" placeholder="Mô tả..." style="width:100%;padding:10px;border:1px solid #ddd;border-radius:8px;font-size:14px;min-height:60px;resize:vertical;box-sizing:border-box;margin-bottom:8px"></textarea><input id="evLoc" placeholder="Địa điểm" style="width:100%;padding:10px;border:1px solid #ddd;border-radius:8px;font-size:14px;margin-bottom:8px;box-sizing:border-box"><input id="evDate" type="datetime-local" style="width:100%;padding:10px;border:1px solid #ddd;border-radius:8px;font-size:14px;margin-bottom:12px;box-sizing:border-box"><div style="display:flex;gap:8px;justify-content:flex-end"><button onclick="this.closest(\'[style]\').remove()" style="padding:8px 16px;border:1px solid #ddd;border-radius:8px;background:#fff;cursor:pointer">Hủy</button><button onclick="submitEvent('+groupId+',this.closest(\'[style]\'))" style="padding:8px 16px;background:#7C3AED;color:#fff;border:none;border-radius:8px;font-weight:600;cursor:pointer">Tạo</button></div></div>';
+  ov.onclick=function(e){if(e.target===ov)ov.remove();};
+  document.body.appendChild(ov);
+}
+
+function submitEvent(groupId,overlay){
+  var token=localStorage.getItem('token');
+  var data={group_id:groupId,title:document.getElementById('evTitle').value.trim(),description:document.getElementById('evDesc').value.trim(),location:document.getElementById('evLoc').value.trim(),event_date:document.getElementById('evDate').value};
+  if(!data.title||!data.event_date){toast('Nhập tên + ngày giờ','error');return;}
+  fetch('/api/events.php?action=create',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+(token||'')},body:JSON.stringify(data)})
+    .then(function(r){return r.json()})
+    .then(function(d){
+      toast(d.message||'Done',d.success?'success':'error');
+      if(d.success){if(overlay)overlay.remove();loadGroupEvents(groupId);}
+    });
+}
+
+function rsvpEvent(eventId,status){
+  var token=localStorage.getItem('token');
+  fetch('/api/events.php?action=rsvp',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+(token||'')},body:JSON.stringify({event_id:eventId,status:status})})
+    .then(function(r){return r.json()})
+    .then(function(d){toast(d.message||'Done',d.success?'success':'error');});
 }
