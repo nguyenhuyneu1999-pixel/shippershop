@@ -426,3 +426,12 @@ function rsvpEvent(eventId,status){
     .then(function(r){return r.json()})
     .then(function(d){toast(d.message||'Done',d.success?'success':'error');});
 }
+
+// Group cover + icon clickable (lightbox)
+function setupGroupLightbox(){
+  var cover=document.querySelector('.group-cover img,[id*="groupCover"]');
+  if(cover&&cover.tagName==='IMG'){cover.style.cursor='zoom-in';cover.onclick=function(){openLightbox(this.src);};}
+  var icon=document.querySelector('.group-icon img,[id*="groupIcon"]');
+  if(icon&&icon.tagName==='IMG'){icon.style.cursor='zoom-in';icon.onclick=function(e){e.stopPropagation();openLightbox(this.src);};}
+}
+document.addEventListener('DOMContentLoaded',function(){setTimeout(setupGroupLightbox,1000);});

@@ -280,3 +280,18 @@ function setupProfileZoom(){
   }
 }
 document.addEventListener('DOMContentLoaded',function(){setTimeout(setupProfileZoom,1500);});
+
+// Make cover photo and avatar clickable (lightbox zoom)
+function setupProfileLightbox(){
+  var cover=document.querySelector('.cover-img,.profile-cover img,[id*="cover"]');
+  if(cover){
+    cover.style.cursor='zoom-in';
+    cover.onclick=function(){if(this.src||this.style.backgroundImage){openLightbox(this.src||this.style.backgroundImage.replace(/url\(["']?/,'').replace(/["']?\)/,''));}};
+  }
+  var avatar=document.querySelector('.profile-avatar img,.avatar-lg,[id*="avatar"]');
+  if(avatar&&avatar.tagName==='IMG'){
+    avatar.style.cursor='zoom-in';
+    avatar.onclick=function(e){e.stopPropagation();openLightbox(this.src);};
+  }
+}
+document.addEventListener('DOMContentLoaded',function(){setTimeout(setupProfileLightbox,1000);});
