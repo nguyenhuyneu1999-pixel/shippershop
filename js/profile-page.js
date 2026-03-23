@@ -405,9 +405,8 @@ var tk=localStorage.getItem("token");if(!tk)return;
 var btn=document.getElementById("checkinBtn");
 btn.disabled=true;btn.textContent="⏳ Đang check-in...";
 fetch("/api/checkin.php?action=checkin",{method:"POST",headers:{"Authorization":"Bearer "+tk}}).then(function(r){return r.json();}).then(function(d){
-  if(d.success){btn.textContent="✅ "+d.data.message;btn.style.background="#00b14f";
-    var xpEl=document.getElementById("xpTotal");xpEl.textContent=parseInt(xpEl.textContent)+5;
-    document.getElementById("xpStreak").textContent=d.data.streak;
+  if(d.success){btn.textContent="✅ +1 đơn giao thành công!";btn.style.background="#00b14f";btn.style.color="#fff";
+    var todayEl=document.getElementById("xpStreak");if(todayEl)todayEl.textContent=parseInt(todayEl.textContent||0)+1;
   }else{btn.textContent="⚠️ "+d.message;btn.style.background="#ff9800";}
 }).catch(function(){btn.textContent="❌ Lỗi kết nối";});
 }
@@ -565,3 +564,5 @@ async function loadProfileDeliveries(){
     }
   }catch(e){}
 }
+
+})();
