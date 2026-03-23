@@ -31,6 +31,25 @@ var spmFiles=[],spmType="post";
     }
   },100);
 
+  // Location picker
+  setTimeout(function(){
+    var picker=document.getElementById('spmLocPicker');
+    if(!picker){
+      picker=document.createElement('div');
+      picker.id='spmLocPicker';
+      picker.style.cssText='padding:0 16px 8px;display:flex;gap:6px';
+      picker.innerHTML='<select id="spmProvince" style="flex:1;padding:6px 8px;border:1px solid #e4e6eb;border-radius:8px;font-size:12px" onchange="loadDistricts()"><option value="">📍 Tỉnh/TP</option></select><select id="spmDistrict" style="flex:1;padding:6px 8px;border:1px solid #e4e6eb;border-radius:8px;font-size:12px"><option value="">Quận/Huyện</option></select>';
+      var typePicker=document.getElementById('spmTypePicker');
+      if(typePicker)typePicker.parentNode.insertBefore(picker,typePicker.nextSibling);
+    }
+    // Load provinces
+    fetch('https://provinces.open-api.vn/api/p/').then(function(r){return r.json()}).then(function(ps){
+      var sel=document.getElementById('spmProvince');
+      if(sel)ps.forEach(function(p){var o=document.createElement('option');o.value=p.name;o.textContent=p.name;sel.appendChild(o);});
+    }).catch(function(){});
+  },200);
+
+
 var css=document.createElement("style");
 css.textContent=".spm-overlay{position:fixed;inset:0;background:#fff;z-index:9999;display:none;flex-direction:column;}"
 +".spm-overlay.open{display:flex;}"
@@ -462,3 +481,19 @@ function trapFocus(modal){
 }
 
 })();
+
+window.loadDistricts=function(){
+  var prov=document.getElementById('spmProvince');
+  var dist=document.getElementById('spmDistrict');
+  if(!prov||!dist)return;
+  dist.innerHTML='<option value="">Quận/Huyện</option>';
+  if(!prov.value)return;
+  fetch('https://provinces.open-api.vn/api/p/search/?q='+encodeURIComponent(prov.value)).then(function(r){return r.json()}).then(function(ps){
+    if(ps&&ps.length){
+      var code=ps[0].code;
+      fetch('https://provinces.open-api.vn/api/p/'+code+'?depth=2').then(function(r){return r.json()}).then(function(p){
+        if(p.districts)p.districts.forEach(function(d){var o=document.createElement('option');o.value=d.name;o.textContent=d.name;dist.appendChild(o);});
+      });
+    }
+  }).catch(function(){});
+};

@@ -22,7 +22,7 @@ let CU=null,sort='hot',type='all',prov=null,company='',page=1,totalPg=1,imgs=[],
 
 document.addEventListener('DOMContentLoaded',()=>{
   CU=JSON.parse(localStorage.getItem('user')||'null');
-  renderNav(); renderProvinces(); loadPosts(); loadTrend(); loadHashtags(); loadSuggestions(); loadAnnouncement(); loadFriendsLatest(); timeGreeting(); loadPeopleCarousel(); loadDailyQuote(); loadHashtagCloud(); loadCheckin(); loadStories(); checkPostReminder(); checkAchievementsOnLoad(); showWelcomeBanner(); showOnboarding();
+  renderNav(); renderProvinces(); loadPosts(); loadTrend(); loadHashtags(); loadSuggestions(); loadAnnouncement(); loadFriendsLatest(); timeGreeting(); loadPeopleCarousel(); loadDailyQuote(); loadHashtagCloud(); loadCheckin(); loadStories(); loadOnlineCount(); checkPostReminder(); checkAchievementsOnLoad(); showWelcomeBanner(); showOnboarding();
   // mProv populated by async province API fetch below
   document.getElementById('stM').textContent=Math.floor(Math.random()*3000+1000).toLocaleString();
   document.getElementById('stO').textContent=Math.floor(Math.random()*500+100);
@@ -674,7 +674,7 @@ async function doCheckin(){
     var d=await r.json();
     if(d.success){
       toast(d.message,'success');
-      loadCheckin(); loadStories(); checkPostReminder(); checkAchievementsOnLoad(); showWelcomeBanner(); showOnboarding();
+      loadCheckin(); loadStories(); loadOnlineCount(); checkPostReminder(); checkAchievementsOnLoad(); showWelcomeBanner(); showOnboarding();
       haptic('success');
     }else{toast(d.message||'Loi','error');}
   }catch(e){toast('Lỗi kết nối','error');}
@@ -857,10 +857,10 @@ function submitStory(overlay){
     fd.append('content',text);
     fd.append('bg_color',window._storyBg||'#7C3AED');
     fetch('/api/stories.php?action=create',{method:'POST',headers:{'Authorization':'Bearer '+(token||'')},body:fd})
-      .then(function(r){return r.json()}).then(function(d){toast(d.message||'Done',d.success?'success':'error');if(d.success){if(overlay)overlay.remove();loadStories();}});
+      .then(function(r){return r.json()}).then(function(d){toast(d.message||'Done',d.success?'success':'error');if(d.success){if(overlay)overlay.remove();loadStories(); loadOnlineCount();}});
   }else{
     fetch('/api/stories.php?action=create',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+(token||'')},body:JSON.stringify({content:text,bg_color:window._storyBg||'#7C3AED'})})
-      .then(function(r){return r.json()}).then(function(d){toast(d.message||'Done',d.success?'success':'error');if(d.success){if(overlay)overlay.remove();loadStories();}});
+      .then(function(r){return r.json()}).then(function(d){toast(d.message||'Done',d.success?'success':'error');if(d.success){if(overlay)overlay.remove();loadStories(); loadOnlineCount();}});
   }
 }
 
@@ -902,4 +902,16 @@ function viewStory(userId){
     },5000);
     ov.addEventListener('click',function(e){if(e.target===ov){clearInterval(timer);ov.remove();}});
   });
+}
+
+// Online count
+async function loadOnlineCount(){
+  try{
+    var r=await fetch('/api/analytics.php?action=overview');
+    var d=await r.json();
+    if(d.success&&d.data){
+      var el=document.getElementById('onlineCount');
+      if(el)el.innerHTML='<span style="display:inline-flex;align-items:center;gap:4px;font-size:12px;color:#00b14f"><span style="width:6px;height:6px;border-radius:50%;background:#00b14f;animation:pulse-dot 1.5s infinite"></span>'+d.data.online_now+' đang online</span>';
+    }
+  }catch(e){}
 }

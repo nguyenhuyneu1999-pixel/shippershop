@@ -64,4 +64,15 @@ try {
 } catch (Throwable $e) {
     $tasks[] = ['task' => 'marketplace_expiry', 'status' => 'error', 'msg' => $e->getMessage()];
 }
+
+
+// Clean expired stories (mark as expired)
+try {
+    $d->query("UPDATE stories SET view_count = view_count WHERE expires_at < NOW()");
+    // Delete story_views for expired stories older than 48h
+    $d->query("DELETE sv FROM story_views sv JOIN stories s ON sv.story_id = s.id WHERE s.expires_at < DATE_SUB(NOW(), INTERVAL 48 HOUR)");
+    $tasks[] = ['task' => 'story_cleanup', 'status' => 'ok'];
+} catch (Throwable $e) {
+    $tasks[] = ['task' => 'story_cleanup', 'status' => 'error', 'msg' => $e->getMessage()];
+}
 echo json_encode(['success' => true, 'results' => $results, 'timestamp' => date('c')]);

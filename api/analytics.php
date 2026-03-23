@@ -65,4 +65,17 @@ if ($action === 'user_stats') {
     success('OK', $stats);
 }
 
+
+if ($action === 'user_activity') {
+    $uid = intval($_GET['id'] ?? 0);
+    if (!$uid) { error('Missing id'); }
+    api_try_cache('analytics_activity_' . $uid, 300);
+    
+    $days = $d->fetchAll(
+        "SELECT DATE(created_at) as date, COUNT(*) as count FROM posts WHERE user_id = ? AND `status` = 'active' AND created_at >= DATE_SUB(NOW(), INTERVAL 30 DAY) GROUP BY DATE(created_at) ORDER BY date",
+        [$uid]
+    );
+    success('OK', $days ?: []);
+}
+
 echo json_encode(['success' => false, 'message' => 'Invalid action']);

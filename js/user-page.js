@@ -236,3 +236,26 @@ function uploadCover(){
   };
   input.click();
 }
+
+// Activity heatmap (last 30 days)
+function loadHeatmap(userId){
+  fetch('/api/analytics.php?action=user_activity&id='+userId)
+    .then(function(r){return r.json()})
+    .then(function(d){
+      if(!d.success)return;
+      var el=document.getElementById('pHeatmap');
+      if(!el)return;
+      var days=d.data||[];
+      var html='<div style="padding:12px 0"><div style="font-weight:600;font-size:13px;margin-bottom:8px">📊 Hoạt động 30 ngày</div><div style="display:flex;flex-wrap:wrap;gap:2px">';
+      for(var i=29;i>=0;i--){
+        var date=new Date();date.setDate(date.getDate()-i);
+        var key=date.toISOString().split('T')[0];
+        var count=0;
+        days.forEach(function(d2){if(d2.date===key)count=parseInt(d2.count);});
+        var opacity=count===0?0.1:(count<3?0.3:(count<5?0.6:1));
+        html+='<div title="'+key+': '+count+' bài" style="width:12px;height:12px;border-radius:2px;background:rgba(124,58,237,'+opacity+')"></div>';
+      }
+      html+='</div></div>';
+      el.innerHTML=html;
+    }).catch(function(){});
+}

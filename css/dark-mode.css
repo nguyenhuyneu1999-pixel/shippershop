@@ -76,3 +76,7 @@
 .dark .lb-card{background:#1e1e1e}
 .dark .ach-card,.dark .ach-item{background:#1e1e1e;border-color:#333}
 .dark .ach-name{color:#ddd}
+
+/* Stories dark mode */
+.dark #storiesCarousel{background:#1e1e1e}
+.dark #storiesCarousel div[style*="color:#333"]{color:#ddd!important}
