@@ -674,5 +674,8 @@ function doFeedCheckin(){
 </script>
 <script src="/js/perf-boost.js" defer></script>
 <script src="/js/lightbox.js"></script>
+<script>
+if('serviceWorker' in navigator){navigator.serviceWorker.register('/sw-api.js').catch(function(){});}
+</script>
 </body>
 </html>

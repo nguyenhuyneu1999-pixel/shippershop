@@ -150,6 +150,28 @@ function clearLocFilter(){document.getElementById('fProvince').value='';document
 
 
 // Infinite scroll: auto-load when reaching bottom
+
+async function _refreshPersonalized(){
+  // Silently fetch PHP API to get user_liked/user_saved status
+  var token=localStorage.getItem('token');
+  if(!token)return;
+  try{
+    var r=await fetch('/api/posts.php?limit=40&sort='+sort,{headers:{'Authorization':'Bearer '+token}});
+    var d=await r.json();
+    if(d.success&&d.data&&d.data.posts){
+      d.data.posts.forEach(function(p){
+        var card=document.getElementById('P'+p.id);
+        if(!card)return;
+        // Update like button state
+        if(p.user_liked){
+          var btn=card.querySelector('.pa3-btn');
+          if(btn&&!btn.classList.contains('pa3-active')){btn.classList.add('pa3-active','liked');}
+        }
+      });
+    }
+  }catch(e){}
+}
+
 var _infiniteObs = null;
 function setupInfiniteScroll() {
     var btn = document.getElementById('loadMoreBtn');
