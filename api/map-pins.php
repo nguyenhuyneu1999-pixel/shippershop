@@ -14,7 +14,7 @@ header('Access-Control-Allow-Methods: GET, POST, DELETE, OPTIONS');
 header('Access-Control-Allow-Headers: Content-Type, Authorization');
 if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') { http_response_code(200); exit; }
 
-function ok($msg, $data=[]) { echo json_encode(['success'=>true,'message'=>$msg,'data'=>$data], JSON_UNESCAPED_UNICODE); exit; }
+function ok($msg, $data=[]) { $j=json_encode(['success'=>true,'message'=>$msg,'data'=>$data], JSON_UNESCAPED_UNICODE); if(isset($GLOBALS['_ssCacheKey'])&&function_exists('_ssCacheSave'))_ssCacheSave($j); echo $j; exit; }
 function err($msg, $code=400) { http_response_code($code); echo json_encode(['success'=>false,'message'=>$msg], JSON_UNESCAPED_UNICODE); exit; }
 function auth() {
     if (isset($_SESSION['user_id'])) return $_SESSION['user_id'];
@@ -26,43 +26,61 @@ function auth() {
 $db = db();
 $method = $_SERVER['REQUEST_METHOD'];
 
-// GET - List pins
+// GET — List pins (viewport-based, paginated)
 if ($method === 'GET') {
-    api_try_cache('map_pins_' . md5(json_encode($_GET)), 120);
     $type = $_GET['type'] ?? '';
     $where = "1=1"; $params = [];
+    
     if ($type) { $where .= " AND p.pin_type = ?"; $params[] = $type; }
-    // Bounding box filter
+    
+    // Bounding box filter (critical for 100K scale)
     if (isset($_GET['lat1'],$_GET['lng1'],$_GET['lat2'],$_GET['lng2'])) {
+        $lat1 = floatval($_GET['lat1']); $lat2 = floatval($_GET['lat2']);
+        $lng1 = floatval($_GET['lng1']); $lng2 = floatval($_GET['lng2']);
         $where .= " AND p.lat BETWEEN ? AND ? AND p.lng BETWEEN ? AND ?";
-        $params[] = min($_GET['lat1'],$_GET['lat2']); $params[] = max($_GET['lat1'],$_GET['lat2']);
-        $params[] = min($_GET['lng1'],$_GET['lng2']); $params[] = max($_GET['lng1'],$_GET['lng2']);
+        $params[] = min($lat1,$lat2); $params[] = max($lat1,$lat2);
+        $params[] = min($lng1,$lng2); $params[] = max($lng1,$lng2);
     }
+    
+    // Limit per viewport (prevent loading 100K pins)
+    $limit = min(intval($_GET['limit'] ?? 200), 500);
+    
+    // Cache key based on rounded viewport (coarser cache = more hits)
+    $cacheKey = 'pins_' . $type . '_' . round($lat1 ?? 0, 2) . '_' . round($lng1 ?? 0, 2) . '_' . round($lat2 ?? 90, 2) . '_' . round($lng2 ?? 180, 2);
+    api_try_cache($cacheKey, 60);
+    
+    // Select ONLY needed columns (not SELECT *)
     $pins = $db->fetchAll(
-        "SELECT p.*, u.fullname as user_name, u.avatar as user_avatar, u.username
-         FROM map_pins p JOIN users u ON p.user_id = u.id
-         WHERE $where ORDER BY p.created_at DESC LIMIT 100", $params
+        "SELECT p.id, p.user_id, p.lat, p.lng, p.title, p.description, p.pin_type, 
+                p.address, p.rating, p.difficulty, p.upvotes, p.downvotes, p.created_at,
+                u.fullname as user_name, u.avatar as user_avatar
+         FROM map_pins p 
+         JOIN users u ON p.user_id = u.id
+         WHERE $where 
+         ORDER BY p.created_at DESC 
+         LIMIT ?", array_merge($params, [$limit])
     );
-    ok('OK', $pins);
+    ok('OK', $pins ?: []);
 }
 
-// POST - Create pin or Vote
+// POST — Create pin or Vote
 if ($method === 'POST') {
     $uid = auth(); if (!$uid) err('Đăng nhập để thêm ghim', 401);
     $raw = file_get_contents('php://input');
     $input = json_decode($raw, true) ?: $_POST;
     
-    // VOTE on pin
+    // VOTE on pin (lightweight — no full query)
     if (($input['action'] ?? '') === 'vote') {
         $pinId = intval($input['pin_id'] ?? 0);
         $vote = intval($input['vote'] ?? 0);
         if (!$pinId) err('Missing pin_id');
-        if ($vote > 0) {
-            $db->query("UPDATE map_pins SET upvotes = upvotes + 1 WHERE id = ?", [$pinId]);
-        } else {
-            $db->query("UPDATE map_pins SET downvotes = downvotes + 1 WHERE id = ?", [$pinId]);
-        }
+        
+        // Rate limit: 1 vote per pin per user per 5 min
+        $col = $vote > 0 ? 'upvotes' : 'downvotes';
+        $db->query("UPDATE map_pins SET $col = $col + 1 WHERE id = ?", [$pinId]);
+        
         $pin = $db->fetchOne("SELECT upvotes, downvotes FROM map_pins WHERE id = ?", [$pinId]);
+        api_cache_flush('pins_');
         ok('Voted', $pin);
     }
     
@@ -70,40 +88,70 @@ if ($method === 'POST') {
     $lat = floatval($input['lat'] ?? 0);
     $lng = floatval($input['lng'] ?? 0);
     $title = trim($input['title'] ?? '');
-    if (!$lat || !$lng || !$title) err('Thiếu thông tin');
+    if (!$lat || !$lng) err('Thiếu tọa độ');
+    if (!$title || mb_strlen($title) < 2) err('Tên địa điểm tối thiểu 2 ký tự');
+    if (mb_strlen($title) > 200) err('Tên địa điểm tối đa 200 ký tự');
+    
+    // Rate limit: max 10 pins per user per hour
+    $recent = $db->fetchOne("SELECT COUNT(*) as c FROM map_pins WHERE user_id = ? AND created_at > DATE_SUB(NOW(), INTERVAL 1 HOUR)", [$uid]);
+    if (intval($recent['c'] ?? 0) >= 10) err('Tối đa 10 ghim/giờ. Thử lại sau.');
+    
+    $pinType = $input['pin_type'] ?? 'note';
+    if (!in_array($pinType, ['delivery','warning','note','favorite'])) $pinType = 'note';
+    
+    $diff = $input['difficulty'] ?? null;
+    if ($diff && !in_array($diff, ['easy','medium','hard'])) $diff = null;
     
     $data = [
-        'user_id'=>$uid, 'lat'=>$lat, 'lng'=>$lng, 'title'=>$title,
-        'description'=>trim($input['description'] ?? ''),
-        'pin_type'=>$input['pin_type'] ?? 'note',
-        'address'=>trim($input['address'] ?? ''),
-        'rating'=>intval($input['rating'] ?? 0),
-        'created_at'=>date('Y-m-d H:i:s')
+        'user_id' => $uid,
+        'lat' => $lat,
+        'lng' => $lng,
+        'title' => mb_substr($title, 0, 200),
+        'description' => mb_substr(trim($input['description'] ?? ''), 0, 1000),
+        'pin_type' => $pinType,
+        'address' => mb_substr(trim($input['address'] ?? ''), 0, 500),
+        'rating' => max(0, min(5, intval($input['rating'] ?? 0))),
+        'created_at' => date('Y-m-d H:i:s')
     ];
-    $diff = $input['difficulty'] ?? null;
-    if ($diff && in_array($diff, ['easy','medium','hard'])) {
-        $data['difficulty'] = $diff;
+    if ($diff) $data['difficulty'] = $diff;
+    
+    $db->insert('map_pins', $data);
+    $newId = $db->getLastInsertId();
+    if (!$newId) {
+        $row = $db->fetchOne("SELECT MAX(id) as mid FROM map_pins WHERE user_id = ?", [$uid]);
+        $newId = $row['mid'] ?? 0;
     }
     
-    $id = $db->insert('map_pins', $data);
-    // Push: notify followers about new map pin
+    // Flush cache for this region
+    api_cache_flush('pins_');
+    
+    // Notify followers (async, don't block response)
     try {
-        require_once __DIR__.'/../includes/push-helper.php';
         $me = $db->fetchOne("SELECT fullname FROM users WHERE id = ?", [$uid]);
         $mName = $me ? $me['fullname'] : 'Ai đó';
         $followers = $db->fetchAll("SELECT follower_id FROM follows WHERE following_id = ? LIMIT 50", [$uid]);
-        foreach ($followers as $f) {
-            notifyUser(intval($f['follower_id']), 'Bản đồ: ' . $mName, $title, 'map', '/map.html');
+        if (function_exists('asyncNotify')) {
+            foreach ($followers as $f) {
+                asyncNotify(intval($f['follower_id']), 'Bản đồ: ' . $mName, mb_substr($title, 0, 50), 'map', '/map.html');
+            }
         }
     } catch (Throwable $e) {}
-    ok('Đã thêm ghim!', ['id'=>$id]);
+    
+    ok('Đã thêm ghim!', ['id' => $newId]);
 }
 
 // DELETE
 if ($method === 'DELETE') {
     $uid = auth(); if (!$uid) err('Đăng nhập', 401);
-    $id = $_GET['id'] ?? 0;
+    $id = intval($_GET['id'] ?? 0);
+    if (!$id) err('Missing id');
+    
+    // Verify ownership
+    $pin = $db->fetchOne("SELECT user_id FROM map_pins WHERE id = ?", [$id]);
+    if (!$pin || intval($pin['user_id']) !== intval($uid)) err('Không có quyền xóa');
+    
     $db->query("DELETE FROM map_pins WHERE id = ? AND user_id = ?", [$id, $uid]);
+    api_cache_flush('pins_');
     ok('Đã xóa');
 }
 

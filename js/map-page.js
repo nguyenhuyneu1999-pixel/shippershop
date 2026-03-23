@@ -1,4 +1,4 @@
-// ShipperShop map.html — optimized for 100K users
+// ShipperShop map.html — optimized for 100K users (v3)
 // v2: clustering, viewport loading, realtime notify
 
 var token=localStorage.getItem("token")||"";
@@ -51,13 +51,16 @@ function initMap(){
 // ========================================
 // LOCATE ME
 // ========================================
+var _myCircle=null,_myMarker=null;
 function locateMe(){
     if(!navigator.geolocation)return;
     navigator.geolocation.getCurrentPosition(function(pos){
         var lat=pos.coords.latitude,lng=pos.coords.longitude;
         map.setView([lat,lng],15);
-        L.circle([lat,lng],{radius:50,color:"#7C3AED",fillOpacity:.15,weight:2}).addTo(map);
-        L.marker([lat,lng]).addTo(map).bindPopup("<strong>\ud83d\udccd V\u1ecb tr\u00ed c\u1ee7a b\u1ea1n</strong>").openPopup();
+        if(_myCircle)map.removeLayer(_myCircle);
+        if(_myMarker)map.removeLayer(_myMarker);
+        _myCircle=L.circle([lat,lng],{radius:50,color:"#7C3AED",fillOpacity:.15,weight:2}).addTo(map);
+        _myMarker=L.marker([lat,lng]).addTo(map).bindPopup("<strong>\ud83d\udccd V\u1ecb tr\u00ed c\u1ee7a b\u1ea1n</strong>").openPopup();
     },function(){},{enableHighAccuracy:true,timeout:10000});
 }
 
@@ -469,7 +472,7 @@ function listenAskAlerts(){
 }
 
 // Cleanup
-window.addEventListener("beforeunload",function(){if(shareOn)stopSharing();});
+window.addEventListener("beforeunload",function(){if(shareOn)stopSharing();if(fbRef)try{fbRef.off();}catch(e){}});
 
 // INIT
 document.addEventListener("DOMContentLoaded",function(){
