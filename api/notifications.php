@@ -15,6 +15,27 @@ $method = $_SERVER['REQUEST_METHOD'];
 $action = $_GET['action'] ?? '';
 
 // Lightweight unread count (for polling badge)
+
+if ($method === 'GET' && $action === 'grouped') {
+    $userId = getOptionalAuthUserId();
+    if (!$userId) { echo json_encode(['success'=>true,'data'=>[]]); exit; }
+    $likeGroups = $db->fetchAll("SELECT p.id as post_id, COUNT(*) as count, GROUP_CONCAT(u.fullname ORDER BY l.created_at DESC SEPARATOR ', ') as actors, MAX(l.created_at) as latest FROM likes l JOIN users u ON l.user_id=u.id JOIN posts p ON l.post_id=p.id WHERE p.user_id=? AND l.user_id!=? AND l.created_at > DATE_SUB(NOW(), INTERVAL 7 DAY) GROUP BY p.id ORDER BY latest DESC LIMIT 20", [$userId, $userId]);
+    $cmtGroups = $db->fetchAll("SELECT p.id as post_id, COUNT(*) as count, GROUP_CONCAT(DISTINCT u.fullname ORDER BY c.created_at DESC SEPARATOR ', ') as actors, MAX(c.created_at) as latest FROM comments c JOIN users u ON c.user_id=u.id JOIN posts p ON c.post_id=p.id WHERE p.user_id=? AND c.user_id!=? AND c.`status`='active' AND c.created_at > DATE_SUB(NOW(), INTERVAL 7 DAY) GROUP BY p.id ORDER BY latest DESC LIMIT 20", [$userId, $userId]);
+    $grouped = [];
+    foreach ($likeGroups ?: [] as $g) {
+        $names = explode(', ', $g['actors']);
+        $label = count($names) > 2 ? $names[0] . ', ' . $names[1] . ' va ' . (count($names) - 2) . ' nguoi khac' : $g['actors'];
+        $grouped[] = ['type'=>'likes','post_id'=>$g['post_id'],'count'=>intval($g['count']),'actors'=>$label,'latest'=>$g['latest']];
+    }
+    foreach ($cmtGroups ?: [] as $g) {
+        $names = explode(', ', $g['actors']);
+        $label = count($names) > 2 ? $names[0] . ', ' . $names[1] . ' va ' . (count($names) - 2) . ' nguoi khac' : $g['actors'];
+        $grouped[] = ['type'=>'comments','post_id'=>$g['post_id'],'count'=>intval($g['count']),'actors'=>$label,'latest'=>$g['latest']];
+    }
+    usort($grouped, function($a, $b) { return strtotime($b['latest']) - strtotime($a['latest']); });
+    echo json_encode(['success'=>true,'data'=>array_slice($grouped, 0, 20)]); exit;
+}
+
 if ($method === 'GET' && $action === 'unread_count') {
     $userId = getOptionalAuthUserId();
     if ($userId) api_try_cache('notif_count_' . $userId, 5);
