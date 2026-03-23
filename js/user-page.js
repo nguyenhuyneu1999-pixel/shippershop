@@ -126,3 +126,13 @@ function formatJoinDate(dateStr){
   var months=['Th01','Th02','Th03','Th04','Th05','Th06','Th07','Th08','Th09','Th10','Th11','Th12'];
   return 'Tham gia ' + months[d.getMonth()] + ' ' + d.getFullYear();
 }
+
+function shareProfileQR(userId, fullname){
+  var url='https://shippershop.vn/user.html?id='+userId;
+  var qrUrl='https://api.qrserver.com/v1/create-qr-code/?size=200x200&data='+encodeURIComponent(url);
+  var ov=document.createElement('div');
+  ov.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:2000;display:flex;align-items:center;justify-content:center';
+  ov.innerHTML='<div style="background:#fff;border-radius:16px;padding:24px;max-width:300px;width:90%;text-align:center"><div style="font-size:16px;font-weight:700;margin-bottom:12px">'+esc(fullname)+'</div><img src="'+qrUrl+'" style="width:200px;height:200px;margin:8px auto;display:block;border-radius:8px"><div style="font-size:12px;color:#999;margin-top:8px">Quét mã QR để xem trang cá nhân</div><button onclick="this.closest(\'[style]\').remove()" style="margin-top:12px;padding:8px 20px;border:1px solid #ddd;border-radius:8px;background:#fff;cursor:pointer">Đóng</button></div>';
+  ov.onclick=function(e){if(e.target===ov)ov.remove();};
+  document.body.appendChild(ov);
+}

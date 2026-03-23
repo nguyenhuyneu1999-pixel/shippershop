@@ -22,7 +22,7 @@ let CU=null,sort='hot',type='all',prov=null,company='',page=1,totalPg=1,imgs=[],
 
 document.addEventListener('DOMContentLoaded',()=>{
   CU=JSON.parse(localStorage.getItem('user')||'null');
-  renderNav(); renderProvinces(); loadPosts(); loadTrend(); loadHashtags(); loadSuggestions(); loadAnnouncement(); loadFriendsLatest(); timeGreeting(); loadPeopleCarousel(); loadDailyQuote();
+  renderNav(); renderProvinces(); loadPosts(); loadTrend(); loadHashtags(); loadSuggestions(); loadAnnouncement(); loadFriendsLatest(); timeGreeting(); loadPeopleCarousel(); loadDailyQuote(); loadCheckin(); checkPostReminder();
   // mProv populated by async province API fetch below
   document.getElementById('stM').textContent=Math.floor(Math.random()*3000+1000).toLocaleString();
   document.getElementById('stO').textContent=Math.floor(Math.random()*500+100);
@@ -647,4 +647,58 @@ async function loadDailyQuote(){
       }
     }
   }catch(e){}
+}
+
+// Daily check-in widget
+async function loadCheckin(){
+  var token=localStorage.getItem('token');
+  if(!token)return;
+  try{
+    var r=await fetch('/api/checkin.php?action=status',{headers:{'Authorization':'Bearer '+token}});
+    var d=await r.json();
+    if(!d.success)return;
+    var ci=d.data;
+    var box=document.getElementById('checkinWidget');
+    if(!box)return;
+    if(ci.checked_in){
+      box.innerHTML='<div style="padding:12px 16px;background:#f0fdf4;border-radius:12px;text-align:center;margin:8px 0"><div style="font-size:13px;color:#00b14f;font-weight:600">✅ Đã điểm danh hôm nay!</div><div style="font-size:12px;color:#666;margin-top:4px">🔥 Streak: '+ci.streak+' ngày liên tiếp</div></div>';
+    }else{
+      box.innerHTML='<div style="padding:14px 16px;background:linear-gradient(135deg,#FEF3C7,#FDE68A);border-radius:12px;text-align:center;margin:8px 0;cursor:pointer" onclick="doCheckin()"><div style="font-size:15px;font-weight:700;color:#92400E">📅 Điểm danh hôm nay</div><div style="font-size:12px;color:#A16207;margin-top:4px">Nhận +'+ci.xp_reward+' XP'+(ci.streak>0?' · 🔥 Streak '+ci.streak+' ngày':'')+'</div></div>';
+    }
+  }catch(e){}
+}
+async function doCheckin(){
+  var token=localStorage.getItem('token');
+  try{
+    var r=await fetch('/api/checkin.php?action=checkin',{method:'POST',headers:{'Authorization':'Bearer '+token}});
+    var d=await r.json();
+    if(d.success){
+      toast(d.message,'success');
+      loadCheckin(); checkPostReminder();
+      haptic('success');
+    }else{toast(d.message||'Loi','error');}
+  }catch(e){toast('Lỗi kết nối','error');}
+}
+
+// Post reminder (show after 5s if user hasn't posted today)
+function checkPostReminder(){
+  var token=localStorage.getItem('token');
+  if(!token||sessionStorage.getItem('ss_post_reminded'))return;
+  setTimeout(function(){
+    fetch('/api/posts.php?limit=1&sort=new',{headers:{'Authorization':'Bearer '+token}})
+      .then(function(r){return r.json()})
+      .then(function(d){
+        var user=JSON.parse(localStorage.getItem('user')||'{}');
+        if(!user.id)return;
+        var posts=d.data&&d.data.posts?d.data.posts:[];
+        var myPost=posts.find(function(p){return p.user_id==user.id;});
+        if(!myPost){
+          var el=document.getElementById('postReminder');
+          if(el){
+            el.innerHTML='<div style="padding:12px 16px;background:#fff;border-radius:12px;margin:8px 0;display:flex;align-items:center;gap:10px;border:1px dashed #7C3AED"><div style="font-size:24px">✏️</div><div style="flex:1"><div style="font-size:13px;font-weight:600;color:#333">Hôm nay bạn đã đăng bài chưa?</div><div style="font-size:12px;color:#65676B">Chia sẻ kinh nghiệm với cộng đồng!</div></div><button onclick="if(typeof openSPM===\'function\')openSPM();this.closest(\'[style]\').parentNode.innerHTML=\'\'" style="padding:6px 14px;background:#7C3AED;color:#fff;border:none;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;white-space:nowrap">Đăng ngay</button></div>';
+            sessionStorage.setItem('ss_post_reminded','1');
+          }
+        }
+      }).catch(function(){});
+  },5000);
 }
