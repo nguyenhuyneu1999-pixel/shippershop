@@ -375,3 +375,8 @@ video{width:100%;max-height:600px;display:block;background:#000;}
 .pa3-btn.liked{transition:color .2s,background .2s}
 .pa3-btn.like-bounce{animation:likeBounce .3s}
 @keyframes likeBounce{0%{transform:scale(1)}50%{transform:scale(1.15)}100%{transform:scale(1)}}
+
+/* Keyboard focus */
+:focus-visible{outline:2px solid #7C3AED;outline-offset:2px;border-radius:4px}
+button:focus:not(:focus-visible){outline:none}
+a:focus:not(:focus-visible){outline:none}
