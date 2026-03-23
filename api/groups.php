@@ -472,6 +472,38 @@ if ($method === 'POST') {
         gOk('Uploaded', ['url' => $url]);
     }
 
+
+    // Invite friend to group
+    if ($action === 'invite') {
+        $uid = getAuthUserId(); if (!$uid) gErr('Auth required', 401);
+        $input = json_decode(file_get_contents('php://input'), true);
+        $groupId = intval($input['group_id'] ?? 0);
+        $targetId = intval($input['user_id'] ?? 0);
+        if (!$groupId || !$targetId) gErr('Missing params');
+        
+        // Check caller is member
+        $member = $d->fetchOne("SELECT id FROM group_members WHERE group_id = ? AND user_id = ?", [$groupId, $uid]);
+        if (!$member) gErr('Bạn chưa tham gia nhóm');
+        
+        // Check target not already member
+        $existing = $d->fetchOne("SELECT id FROM group_members WHERE group_id = ? AND user_id = ?", [$groupId, $targetId]);
+        if ($existing) gErr('Người này đã là thành viên');
+        
+        // Add as member
+        $d->query("INSERT INTO group_members (group_id, user_id, role, joined_at) VALUES (?, ?, 'member', NOW())", [$groupId, $targetId]);
+        $d->query("UPDATE `groups` SET member_count = member_count + 1 WHERE id = ?", [$groupId]);
+        
+        // Notify
+        try {
+            $group = $d->fetchOne("SELECT name FROM `groups` WHERE id = ?", [$groupId]);
+            $inviter = $d->fetchOne("SELECT fullname FROM users WHERE id = ?", [$uid]);
+            asyncNotify($targetId, ($inviter['fullname'] ?? 'Ai đó') . ' đã mời bạn vào nhóm ' . ($group['name'] ?? ''), 'Tham gia nhóm', 'group', '/group.html?id=' . $groupId);
+        } catch (Throwable $e) {}
+        
+        api_cache_flush('grp_');
+        gOk('Đã mời thành công');
+    }
+
 echo json_encode(['success'=>false,'message'=>'Missing comment_id']); exit; }
         $exists = $d->fetchOne("SELECT id FROM group_post_comment_likes WHERE comment_id = ? AND user_id = ?", [$cid, $uid]);
         if ($exists) {

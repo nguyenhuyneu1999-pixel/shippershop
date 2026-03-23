@@ -61,4 +61,20 @@ if ($action === 'topics') {
     success('OK', $posts ?: []);
 }
 
+
+
+if ($action === 'hot_posts') {
+    api_try_cache('trending_hot', 120); // 2 min cache
+    
+    $posts = $d->fetchAll(
+        "SELECT p.id, p.content, p.likes_count, p.comments_count, p.views_count,
+                u.fullname, u.avatar, u.shipping_company
+         FROM posts p JOIN users u ON p.user_id = u.id
+         WHERE p.`status` = 'active' AND p.created_at > DATE_SUB(NOW(), INTERVAL 6 HOUR)
+         ORDER BY (p.likes_count * 3 + p.comments_count * 5 + p.views_count) DESC
+         LIMIT 5", []
+    );
+    
+    success('OK', $posts ?: []);
+}
 echo json_encode(['success' => false, 'message' => 'Invalid action']);

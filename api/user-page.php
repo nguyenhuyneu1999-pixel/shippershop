@@ -31,6 +31,13 @@ if($method==='GET'){
     $created=new DateTime($user['created_at']);$now=new DateTime();
     // Badges
     $badges=$d->fetchAll("SELECT ub.badge_id, ub.earned_at FROM user_badges ub WHERE ub.user_id=? ORDER BY ub.earned_at DESC LIMIT 10",[$targetId]);
+    // Shipping stats
+    $totalDeliveries = intval($d->fetchOne("SELECT SUM(likes_count) as c FROM posts WHERE user_id = ? AND `status` = 'active'", [$targetId])['c'] ?? 0);
+    $user['shipping_stats'] = [
+        'total_deliveries' => $totalDeliveries,
+        'total_posts' => intval($user['post_count']),
+        'avg_per_post' => $user['post_count'] > 0 ? round($totalDeliveries / $user['post_count'], 1) : 0,
+    ];
     $user['badges']=$badges?:[];
     $user['account_age_days']=$now->diff($created)->days;
     // Subscription badge

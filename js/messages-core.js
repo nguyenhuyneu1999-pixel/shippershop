@@ -38,7 +38,7 @@ if(mn<60)status=mn+"p";else if(mn<1440)status=Math.floor(mn/60)+"h";else status=
 return "<div class='conv-item"+(unread?" unread":"")+"'onclick='openConv("+c.id+","+c.other_id+",\""+esc(c.other_name)+"\",\""+esc(c.other_avatar||"")+"\","+c.other_online+",\""+esc(c.other_ship||"")+"\")'>"+
 "<div class=cv-av-wrap>"+av+dot+"</div>"+
 "<div class=cv-info><div class=cv-name>"+esc(c.other_name)+" "+ship+"</div><div class=cv-last>"+esc((c.last_message||"").substring(0,40))+"</div></div>"+
-"<div class=cv-right><div class=cv-time>"+ago(c.last_message_at)+"</div>"+(unread?"<div class=cv-unread></div>":"")+"</div></div>";
+"<div class=cv-right><div class=cv-time>"+ago(c.last_message_at)+"</div>"+(unread?"<div class=cv-unread></div>":"")+seen+"</div></div>";
 }).join("");}catch(e){list.innerHTML="<div class=empty><p>Lỗi kết nối</p></div>";}}
 
 async function loadOnline(){try{var tkO=localStorage.getItem("token");var hO={};if(tkO)hO["Authorization"]="Bearer "+tkO;var r=await fetch("/api/messages-api.php?action=online_friends",{credentials:"include",headers:hO});
@@ -102,7 +102,8 @@ var mine=parseInt(m.sender_id)===parseInt(CU.id);
 var av="";
 if(!mine){av=m.sender_avatar?"<img class=msg-av src='"+m.sender_avatar+"'onerror='this.className=\"msg-av-ph\";this.textContent=\""+(m.sender_name||"U").charAt(0)+"\"' loading=\"lazy\">":"<div class=msg-av-ph>"+(m.sender_name||"U").charAt(0)+"</div>";}
 var senderLabel="";if(!mine&&isGroupChat){senderLabel="<div style='font-size:11px;font-weight:700;color:#65676B;margin-bottom:2px'>"+esc(m.sender_name||"")+"</div>";}
-var bubble="";if(m.type==="image"&&m.file_url){bubble="<img class=msg-img src='"+m.file_url+"' onclick='viewImg(this.src)' loading=lazy>";}else if(m.type==="video"&&m.file_url){bubble="<video class=msg-img controls playsinline preload=metadata style='max-width:240px;border-radius:12px'><source src='"+m.file_url+"'>Video</video>";}else if(m.type==="file"&&m.file_url){bubble="<a class=msg-file href='"+m.file_url+"' target=_blank download><i class='fas fa-file-alt'></i><span>"+esc(m.file_name||m.content||"File")+"</span></a>";}else if(m.type==="location"&&m.file_url){bubble="<a class=msg-loc href='"+m.file_url+"' target=_blank><span>📍 Xem vị trí trên bản đồ</span></a>";}else{bubble="<div class=msg-bubble>"+esc(m.content)+"</div>";}html+="<div class='msg-row "+(mine?"mine":"other")+"'>"+av+"<div>"+senderLabel+bubble+"</div></div>";});
+var bubble="";if(m.type==="image"&&m.file_url){bubble="<img class=msg-img src='"+m.file_url+"' onclick='viewImg(this.src)' loading=lazy>";}else if(m.type==="video"&&m.file_url){bubble="<video class=msg-img controls playsinline preload=metadata style='max-width:240px;border-radius:12px'><source src='"+m.file_url+"'>Video</video>";}else if(m.type==="file"&&m.file_url){bubble="<a class=msg-file href='"+m.file_url+"' target=_blank download><i class='fas fa-file-alt'></i><span>"+esc(m.file_name||m.content||"File")+"</span></a>";}else if(m.type==="location"&&m.file_url){bubble="<a class=msg-loc href='"+m.file_url+"' target=_blank><span>📍 Xem vị trí trên bản đồ</span></a>";}else{bubble="<div class=msg-bubble>"+esc(m.content)+"</div>";}var seen=mine&&m.is_read?'<div style="font-size:10px;color:#7C3AED;text-align:right;margin-top:1px">Đã xem</div>':'';
+    html+="<div class='msg-row "+(mine?"mine":"other")+"'>"+av+"<div>"+senderLabel+bubble+"</div></div>";});
 c.innerHTML=html;c.scrollTop=c.scrollHeight;}catch(e){c.innerHTML="<div class=empty><p>Lỗi tải</p></div>";}}
 
 async function sendMsg(){var inp=document.getElementById("msgInput");var ct=inp.value.trim();if(!ct)return;
