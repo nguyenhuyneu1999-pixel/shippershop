@@ -87,3 +87,47 @@ body{font-family:'Be Vietnam Pro',-apple-system,BlinkMacSystemFont,'Segoe UI',Ro
 .ask-submit{width:100%;padding:12px;background:#1976d2;color:#fff;border:none;border-radius:10px;font-size:15px;font-weight:700;cursor:pointer}
 .ask-submit:disabled{opacity:.5}
 .ask-info{background:#e3f2fd;border-radius:10px;padding:10px 12px;margin-bottom:14px;font-size:12px;color:#1565c0;line-height:1.5}
+
+/* === DESKTOP OVERRIDE — show map controls on desktop === */
+@media (min-width: 769px) {
+  .map-bnav { display: flex !important; }
+  .map-fab { display: flex !important; }
+  .ask-fab { display: flex !important; }
+  .map-locate { display: flex !important; }
+  body { background: #f0f2f5 !important; padding-bottom: 0 !important; }
+}
+
+/* === DARK MODE === */
+.dark .map-hd { background: rgba(30,30,30,.95); }
+.dark .map-hd h1 { color: #ddd; }
+.dark .map-search input { background: #333; border-color: #444; color: #ddd; }
+.dark .map-search i { color: #999; }
+.dark .map-btn { background: #2a2a2a; border-color: #444; color: #ddd; }
+.dark .map-filter { background: rgba(40,40,40,.9); border-color: #444; color: #bbb; }
+.dark .map-filter.active { background: var(--primary); color: #fff; border-color: var(--primary); }
+.dark .map-bnav { background: rgba(30,30,30,.95); border-top-color: #333; }
+.dark .map-bnav a { color: #999; }
+.dark .map-bnav a.active { color: #9C5FFF; }
+.dark .map-bnav .fab-center { background: #7C3AED; }
+.dark .pin-modal { background: #1e1e1e; }
+.dark .pin-modal-hd { border-bottom-color: #333; }
+.dark .pin-modal-hd h3 { color: #ddd; }
+.dark .pin-modal-close { background: #333; color: #ddd; }
+.dark .pin-modal-bd { color: #ddd; }
+.dark .pin-modal-ft { border-top-color: #333; }
+.dark .pf label { color: #aaa; }
+.dark .pf input, .dark .pf textarea, .dark .pf select { background: #333; border-color: #444; color: #ddd; }
+.dark .share-toggle { background: #2a2a2a; border-color: #444; color: #ddd; }
+.dark .share-toggle.active { background: #1b5e20; border-color: #4caf50; color: #81c784; }
+.dark .map-legend { background: rgba(30,30,30,.95); color: #ddd; }
+.dark .map-locate { background: #2a2a2a; border-color: #444; }
+.dark #pinCoords { background: #333; color: #bbb; }
+.dark .ask-overlay .ask-modal { background: #1e1e1e; }
+.dark .ask-head { border-bottom-color: #333; }
+.dark .ask-head h3 { color: #ddd; }
+.dark .ask-close { background: #333; color: #ddd; }
+.dark .ask-body { color: #ddd; }
+.dark .ask-field label { color: #aaa; }
+.dark .ask-field input, .dark .ask-field select, .dark .ask-field textarea { background: #333; border-color: #444; color: #ddd; }
+.dark .ask-foot { border-top-color: #333; }
+.dark .ask-info { background: #1a237e; color: #82b1ff; }
