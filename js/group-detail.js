@@ -94,10 +94,7 @@ function loadPosts(){
   var tp=document.getElementById("tabPosts");
   if(!tp)return;
   var h="";
-  if(GROUP.is_member&&CU){
-    var av=CU.avatar?"<img src='"+CU.avatar+"' style='width:36px;height:36px;border-radius:50%;object-fit:cover;flex-shrink:0' loading=\"lazy\">":"<div style='width:36px;height:36px;border-radius:50%;background:var(--primary);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:14px;flex-shrink:0'>"+esc((CU.fullname||"?")[0])+"</div>";
-    // create-area removed
-  }
+  // create-box removed
   h+="<div class='sort-bar'><div class='sort-btn"+(curSort==="hot"?" active":"")+"' onclick='changeSort(\"hot\",this)'>\ud83d\udd25 N\u1ed5i b\u1eadt</div><div class='sort-btn"+(curSort==="new"?" active":"")+"' onclick='changeSort(\"new\",this)'>\ud83c\udd95 M\u1edbi nh\u1ea5t</div><div class='sort-btn"+(curSort==="top"?" active":"")+"' onclick='changeSort(\"top\",this)'>\u2b06 Nhi\u1ec1u th\u00edch</div></div>";
   h+="<div id='postsArea'></div>";
   h+="<button id='grpLoadMore' onclick='grpPage++;fetchPosts(true)' style='display:none;width:100%;padding:12px;background:#e4e6eb;border:none;font-size:14px;font-weight:700;cursor:pointer;margin-top:4px'>T\u1ea3i th\u00eam b\u00e0i vi\u1ebft</button>";

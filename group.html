@@ -79,47 +79,8 @@
 <script src="js/mobile.js"></script>
 <script src="/js/ss-error-tracker.js"></script>
 <script src="/js/analytics.js"></script>
-<script src="/js/pages/group-detail.js"></script>
 <!-- SS v2 Core + Components -->
-<script src="/js/core/utils.js"></script>
-<script src="/js/core/store.js"></script>
-<script src="/js/core/ui.js"></script>
-<script src="/js/core/api.js"></script>
-<script src="/js/components/notification-bell.js"></script>
-<script src="/js/components/scroll-heartbeat.js"></script>
-<script src="/js/components/notif-sound.js"></script>
-<script src="/js/components/image-optimizer.js"></script>
-<script src="/js/components/connection-status.js"></script>
-<script src="/js/components/shortcuts.js"></script>
-<script src="/js/components/a11y.js"></script>
-<script src="/js/components/post-types.js"></script>
-<script src="/js/components/qr-share.js"></script>
-<script src="/js/components/lazy-img.js"></script>
-<script src="/js/components/error-boundary.js"></script>
-<script src="/js/components/report-dialog.js"></script>
-<script src="/js/components/payment.js"></script>
-<script src="/js/components/notif-poll.js"></script>
-<script src="/js/components/pwa-install.js"></script>
-<script src="/js/components/dark-mode.js"></script>
-<script src="/js/components/search-overlay.js"></script>
-<script src="/js/components/image-viewer.js"></script>
-<script src="/js/components/post-create.js"></script>
-<script src="/js/components/emoji-picker.js"></script>
-<script src="/js/components/post-card.js"></script>
-<script src="/js/components/comment-sheet.js"></script>
-<script src="/js/components/video-player.js"></script>
 
-<script>
-(function(){
-  if(typeof SS!=='undefined'&&SS.store&&SS.store.isLoggedIn()&&SS.NotifBell){
-    var nb=document.getElementById('ss-notif-bell');
-    if(nb)SS.NotifBell.init('ss-notif-bell');
-  }
-  if(typeof window.toast==='undefined'&&typeof SS!=='undefined'&&SS.ui){
-    window.toast=function(m,dur){SS.ui.toast(m,'info',dur||3000);};
-  }
-})();
-</script>
 <script src="/js/perf-boost.js" defer></script>
 <script src="/js/lightbox.js"></script>
 <script src="/js/image-zoom.js"></script>
