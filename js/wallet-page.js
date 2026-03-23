@@ -1,3 +1,7 @@
+
+function formatVND(amount){
+  return Number(amount||0).toLocaleString('vi-VN')+'đ';
+}
 // ShipperShop wallet.html — extracted for browser caching
 
 // --- block 11401B ---

@@ -102,7 +102,7 @@ if ($method === 'GET') {
             if ($m) { $group['is_member'] = true; $group['member_role'] = $m['role']; }
         }
         $group['rules'] = $d->fetchAll("SELECT * FROM group_rules WHERE group_id = ? ORDER BY rule_order", [$group['id']]) ?: [];
-        $group['moderators'] = $d->fetchAll("SELECT u.id, u.fullname, u.avatar, u.username, gm.role FROM group_members gm JOIN users u ON gm.user_id = u.id WHERE gm.group_id = ? AND gm.role IN ('admin','moderator') ORDER BY FIELD(gm.role,'admin','moderator')", [$group['id']]) ?: [];
+        $group['moderators'] = $d->fetchAll("SELECT u.id, u.fullname, u.avatar, u.username, gm.role ,(SELECT COUNT(*) FROM group_posts WHERE user_id = gm.user_id AND group_id = gm.group_id AND `status` = 'active') as member_post_count FROM group_members gm JOIN users u ON gm.user_id = u.id WHERE gm.group_id = ? AND gm.role IN ('admin','moderator') ORDER BY FIELD(gm.role,'admin','moderator')", [$group['id']]) ?: [];
         gOk('OK', $group);
     }
 

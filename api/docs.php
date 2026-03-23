@@ -41,6 +41,10 @@ echo json_encode([
             ['POST /groups.php?action=share_post', 'Share to group', '{post_id, group_id}']
         ,
             ['POST /groups.php?action=invite', 'Invite friend', '{group_id, user_id}']
+        ,
+            ['POST /groups.php?action=approve_post', 'Approve post', '{post_id, approve} (admin/mod)']
+        ,
+            ['GET /groups.php?action=pending_posts', 'Pending posts', '?group_id=X (admin/mod)']
         ],
             ['GET /groups.php?action=posts&group_id=X', 'Group posts', '?page=1&sort=new|hot|top&cursor=X'],
             ['GET /groups.php?action=members&group_id=X', 'Members', ''],

@@ -1,3 +1,12 @@
+
+function sortListings(sort){
+  currentSort=sort||'';
+  currentPage=1;
+  loadListings();
+  document.querySelectorAll('#sortChips .chip').forEach(function(c){c.classList.remove('active');});
+  event.target.classList.add('active');
+}
+var currentSort='';
 // ShipperShop Marketplace Page
 
 var currentCat = '', currentSearch = '', currentPage = 1, totalPages = 1;

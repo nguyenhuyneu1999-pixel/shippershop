@@ -109,6 +109,11 @@ function markdownLite(text){
 
 
 
+
+function engScore(p){
+  return (parseInt(p.likes_count||0)*3)+(parseInt(p.comments_count||0)*5)+(parseInt(p.views_count||0));
+}
+
 function isNew(dateStr){
   if(!dateStr)return false;
   var d=new Date(dateStr.replace(' ','T'));
