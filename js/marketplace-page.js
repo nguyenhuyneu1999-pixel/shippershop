@@ -332,3 +332,18 @@ function showRecentlyViewed(){
   html+='</div></div>';
   el.innerHTML=html;
 }
+
+var _mpSearchTimer;
+function searchListings(q){
+  clearTimeout(_mpSearchTimer);
+  _mpSearchTimer=setTimeout(function(){
+    if(q.length<2&&q.length>0)return;
+    var grid=document.getElementById('listingsGrid');
+    if(!grid)return;
+    var cards=grid.querySelectorAll('[data-title]');
+    cards.forEach(function(c){
+      if(!q||c.dataset.title.toLowerCase().indexOf(q.toLowerCase())>-1){c.style.display='';}
+      else{c.style.display='none';}
+    });
+  },300);
+}

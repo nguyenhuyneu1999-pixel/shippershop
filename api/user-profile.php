@@ -105,4 +105,33 @@ if ($authUid) {
     }
 }
 
+
+
+// Upload cover photo
+if ($action === 'upload_cover') {
+    $uid = getAuthUserId();
+    if (!$uid) { error('Auth required', 401); }
+    
+    if (empty($_FILES['cover'])) { error('No file uploaded'); }
+    
+    $file = $_FILES['cover'];
+    $maxSize = 5 * 1024 * 1024; // 5MB
+    if ($file['size'] > $maxSize) { error('File quá lớn (tối đa 5MB)'); }
+    
+    $allowed = ['image/jpeg', 'image/png', 'image/webp'];
+    if (!in_array($file['type'], $allowed)) { error('Chỉ chấp nhận JPEG, PNG, WebP'); }
+    
+    $ext = pathinfo($file['name'], PATHINFO_EXTENSION);
+    $filename = 'cover_' . $uid . '_' . time() . '.' . $ext;
+    $path = __DIR__ . '/../uploads/avatars/' . $filename;
+    
+    if (!move_uploaded_file($file['tmp_name'], $path)) { error('Upload failed'); }
+    
+    $coverUrl = '/uploads/avatars/' . $filename;
+    $d->query("UPDATE users SET cover_image = ? WHERE id = ?", [$coverUrl, $uid]);
+    
+    // Update localStorage hint
+    success('Đã cập nhật ảnh bìa!', ['cover_image' => $coverUrl]);
+}
+
 echo json_encode(['success' => true, 'data' => ['user' => $user, 'items' => $items, 'tab' => $tab]]);

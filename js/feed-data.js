@@ -22,7 +22,7 @@ let CU=null,sort='hot',type='all',prov=null,company='',page=1,totalPg=1,imgs=[],
 
 document.addEventListener('DOMContentLoaded',()=>{
   CU=JSON.parse(localStorage.getItem('user')||'null');
-  renderNav(); renderProvinces(); loadPosts(); loadTrend(); loadHashtags(); loadSuggestions(); loadAnnouncement(); loadFriendsLatest(); timeGreeting(); loadPeopleCarousel(); loadDailyQuote(); loadCheckin(); checkPostReminder(); checkAchievementsOnLoad(); showWelcomeBanner(); showOnboarding();
+  renderNav(); renderProvinces(); loadPosts(); loadTrend(); loadHashtags(); loadSuggestions(); loadAnnouncement(); loadFriendsLatest(); timeGreeting(); loadPeopleCarousel(); loadDailyQuote(); loadHashtagCloud(); loadCheckin(); checkPostReminder(); checkAchievementsOnLoad(); showWelcomeBanner(); showOnboarding();
   // mProv populated by async province API fetch below
   document.getElementById('stM').textContent=Math.floor(Math.random()*3000+1000).toLocaleString();
   document.getElementById('stO').textContent=Math.floor(Math.random()*500+100);
@@ -777,3 +777,23 @@ function checkNewPosts(){
   }).catch(function(){});
 }
 setInterval(function(){if(document.visibilityState==='visible'&&window.scrollY>300)checkNewPosts();},60000);
+
+// Hashtag cloud widget
+async function loadHashtagCloud(){
+  try{
+    var r=await fetch('/api/trending.php?action=hashtags');
+    var d=await r.json();
+    if(!d.success||!d.data||!d.data.length)return;
+    var el=document.getElementById('hashtagCloud');
+    if(!el)return;
+    var max=Math.max.apply(null,d.data.map(function(h){return h.count||1;}));
+    var html='<div style="padding:10px 12px;font-weight:700;font-size:14px;color:#333">#️⃣ Hashtag nổi bật</div><div style="padding:0 12px 12px;display:flex;flex-wrap:wrap;gap:6px">';
+    d.data.slice(0,15).forEach(function(h){
+      var size=Math.max(12,Math.min(18,12+Math.round((h.count/max)*6)));
+      var opacity=0.6+0.4*(h.count/max);
+      html+='<a href="search.html?q=%23'+encodeURIComponent(h.tag)+'" style="font-size:'+size+'px;color:#7C3AED;opacity:'+opacity.toFixed(2)+';text-decoration:none;font-weight:600;padding:2px 6px;background:#f5f3ff;border-radius:6px;white-space:nowrap">#'+h.tag+'</a>';
+    });
+    html+='</div>';
+    el.innerHTML=html;
+  }catch(e){}
+}

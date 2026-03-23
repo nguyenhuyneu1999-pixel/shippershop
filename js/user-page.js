@@ -213,3 +213,26 @@ function blockUser(userId){
       if(d.success&&d.data&&d.data.blocked)location.reload();
     });
 }
+
+function uploadCover(){
+  var input=document.createElement('input');
+  input.type='file';input.accept='image/jpeg,image/png,image/webp';
+  input.onchange=function(){
+    if(!input.files[0])return;
+    if(input.files[0].size>5*1024*1024){toast('File quá lớn (max 5MB)','error');return;}
+    var fd=new FormData();
+    fd.append('cover',input.files[0]);
+    var token=localStorage.getItem('token');
+    toast('Đang tải lên...','info');
+    fetch('/api/user-profile.php?action=upload_cover',{method:'POST',headers:{'Authorization':'Bearer '+(token||'')},body:fd})
+      .then(function(r){return r.json()})
+      .then(function(d){
+        if(d.success){
+          toast('Đã cập nhật!','success');
+          var coverEl=document.getElementById('pCover');
+          if(coverEl&&d.data&&d.data.cover_image)coverEl.style.backgroundImage='url('+d.data.cover_image+')';
+        }else{toast(d.message||'Lỗi','error');}
+      });
+  };
+  input.click();
+}
