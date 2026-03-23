@@ -132,3 +132,38 @@
   var mo=new MutationObserver(function(){observeImages();});
   mo.observe(document.body,{childList:true,subtree:true});
 })();
+
+// Post impression tracking (posts seen in viewport)
+(function(){
+  if(!('IntersectionObserver' in window))return;
+  var tracked={};
+  var impObs=new IntersectionObserver(function(entries){
+    entries.forEach(function(entry){
+      if(entry.isIntersecting&&entry.intersectionRatio>0.5){
+        var pid=entry.target.id;
+        if(pid&&pid.startsWith('P')&&!tracked[pid]){
+          tracked[pid]=true;
+          // Send view after 2s (user actually read it)
+          setTimeout(function(){
+            if(tracked[pid]){
+              var token=localStorage.getItem('token');
+              fetch('/api/posts.php?action=view',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+(token||'')},body:JSON.stringify({post_id:parseInt(pid.substring(1))})}).catch(function(){});
+            }
+          },2000);
+        }
+      }
+    });
+  },{threshold:0.5});
+  
+  // Observe post cards
+  var mo=new MutationObserver(function(){
+    document.querySelectorAll('.post-card[id^="P"]').forEach(function(el){
+      if(!el._impTracked){el._impTracked=true;impObs.observe(el);}
+    });
+  });
+  mo.observe(document.body,{childList:true,subtree:true});
+  // Initial
+  document.querySelectorAll('.post-card[id^="P"]').forEach(function(el){
+    if(!el._impTracked){el._impTracked=true;impObs.observe(el);}
+  });
+})();

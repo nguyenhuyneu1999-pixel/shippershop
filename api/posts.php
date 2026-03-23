@@ -321,7 +321,16 @@ if ($method === 'POST') {
         $userId = getAuthUserId();
         $input = json_decode(file_get_contents("php://input"), true);
         lscache_purge('feed');
-        if (    $action === "vote") {
+        if (    
+    if ($action === 'view') {
+        $input = json_decode(file_get_contents('php://input'), true);
+        $pid = intval($input['post_id'] ?? 0);
+        if ($pid) {
+            try { $db->query("UPDATE posts SET views_count = views_count + 1 WHERE id = ?", [$pid]); } catch (Throwable $e) {}
+        }
+        success('OK');
+    }
+    $action === "vote") {
             $postId = intval($input["post_id"] ?? 0);
             $voteType = $input["vote_type"] ?? "";
             // OPTIMIZED: toggle like in 1 check + 1 write + 1 update
