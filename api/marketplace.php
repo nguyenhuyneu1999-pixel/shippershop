@@ -100,6 +100,16 @@ $id = $_GET['id'] ?? null;
 // ==========================================
 // GET - List / Detail
 // ==========================================
+
+// Get marketplace categories
+if ($method === 'GET' && $action === 'categories') {
+    api_try_cache('mk_cats', 3600);
+    $cats = $db->fetchAll(
+        "SELECT category, COUNT(*) as count FROM marketplace_listings WHERE `status` = 'active' GROUP BY category ORDER BY count DESC", []
+    );
+    mSuccess('OK', ['categories' => $cats ?: []]);
+}
+
 if ($method === 'GET' && empty($action)) {
     if ($id) {
         // Single listing
@@ -113,15 +123,6 @@ if ($method === 'GET' && empty($action)) {
         mSuccess('OK', $item);
     }
     
-
-// Get marketplace categories
-if ($method === 'GET' && $action === 'categories') {
-    api_try_cache('mk_cats', 3600);
-    $cats = $db->fetchAll(
-        "SELECT category, COUNT(*) as count FROM marketplace_listings WHERE `status` = 'active' GROUP BY category ORDER BY count DESC", []
-    );
-    mSuccess('OK', ['categories' => $cats ?: []]);
-}
 
 // List
     $cat = $_GET['category'] ?? '';
