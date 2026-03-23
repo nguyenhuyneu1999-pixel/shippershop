@@ -60,6 +60,19 @@ if ($method === 'GET') {
          ORDER BY p.created_at DESC 
          LIMIT ?", array_merge($params, [$limit])
     );
+    // Add user vote status
+    $uid = auth();
+    if ($uid && $pins) {
+        $pinIds = array_map(function($p) { return $p['id']; }, $pins);
+        if ($pinIds) {
+            $ph = implode(',', array_fill(0, count($pinIds), '?'));
+            $votes = $db->fetchAll("SELECT pin_id, vote FROM pin_votes WHERE user_id = ? AND pin_id IN ($ph)", array_merge([$uid], $pinIds));
+            $voteMap = [];
+            foreach ($votes ?: [] as $v) { $voteMap[$v['pin_id']] = intval($v['vote']); }
+            foreach ($pins as &$p) { $p['user_vote'] = $voteMap[$p['id']] ?? 0; }
+            unset($p);
+        }
+    }
     ok('OK', $pins ?: []);
 }
 
@@ -69,15 +82,29 @@ if ($method === 'POST') {
     $raw = file_get_contents('php://input');
     $input = json_decode($raw, true) ?: $_POST;
     
-    // VOTE on pin (lightweight — no full query)
+    // VOTE on pin (dupe-protected via pin_votes)
     if (($input['action'] ?? '') === 'vote') {
         $pinId = intval($input['pin_id'] ?? 0);
         $vote = intval($input['vote'] ?? 0);
         if (!$pinId) err('Missing pin_id');
+        $voteVal = $vote > 0 ? 1 : -1;
         
-        // Rate limit: 1 vote per pin per user per 5 min
-        $col = $vote > 0 ? 'upvotes' : 'downvotes';
-        $db->query("UPDATE map_pins SET $col = $col + 1 WHERE id = ?", [$pinId]);
+        $existing = $db->fetchOne("SELECT id, vote FROM pin_votes WHERE pin_id = ? AND user_id = ?", [$pinId, $uid]);
+        if ($existing) {
+            if (intval($existing['vote']) === $voteVal) {
+                $db->hardDelete('pin_votes', 'id = ?', [$existing['id']]);
+                $col = $voteVal > 0 ? 'upvotes' : 'downvotes';
+                $db->query("UPDATE map_pins SET $col = GREATEST(0, $col - 1) WHERE id = ?", [$pinId]);
+            } else {
+                $db->query("UPDATE pin_votes SET vote = ? WHERE id = ?", [$voteVal, $existing['id']]);
+                if ($voteVal > 0) { $db->query("UPDATE map_pins SET upvotes = upvotes + 1, downvotes = GREATEST(0, downvotes - 1) WHERE id = ?", [$pinId]); }
+                else { $db->query("UPDATE map_pins SET downvotes = downvotes + 1, upvotes = GREATEST(0, upvotes - 1) WHERE id = ?", [$pinId]); }
+            }
+        } else {
+            $db->insert('pin_votes', ['pin_id' => $pinId, 'user_id' => $uid, 'vote' => $voteVal]);
+            $col = $voteVal > 0 ? 'upvotes' : 'downvotes';
+            $db->query("UPDATE map_pins SET $col = $col + 1 WHERE id = ?", [$pinId]);
+        }
         
         $pin = $db->fetchOne("SELECT upvotes, downvotes FROM map_pins WHERE id = ?", [$pinId]);
         api_cache_flush('pins_');
