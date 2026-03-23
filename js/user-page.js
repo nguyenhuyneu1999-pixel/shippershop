@@ -119,3 +119,10 @@ function animateFollowBtn(btn, isFollowing){
 // Tab memory
 function rememberTab(tab){sessionStorage.setItem('ss_user_tab_'+userData.id,tab);}
 function getLastTab(){return sessionStorage.getItem('ss_user_tab_'+(userData||{}).id)||'posts';}
+
+function formatJoinDate(dateStr){
+  if(!dateStr)return '';
+  var d=new Date(dateStr);
+  var months=['Th01','Th02','Th03','Th04','Th05','Th06','Th07','Th08','Th09','Th10','Th11','Th12'];
+  return 'Tham gia ' + months[d.getMonth()] + ' ' + d.getFullYear();
+}

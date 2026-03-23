@@ -125,3 +125,10 @@ body{background:var(--bg);font-family:'Be Vietnam Pro',-apple-system,BlinkMacSys
   .tf-bnav{display:none!important;}
   body{padding-bottom:0!important;}
 }
+
+/* Severity dots */
+.severity-low{color:#00b14f}
+.severity-medium{color:#F59E0B}
+.severity-high{color:#e74c3c}
+.severity-critical{color:#e74c3c;animation:pulse-dot 1s infinite}
+@keyframes pulse-dot{0%,100%{opacity:1}50%{opacity:.4}}
