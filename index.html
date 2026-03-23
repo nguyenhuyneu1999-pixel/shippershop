@@ -5,6 +5,12 @@
 <link rel="dns-prefetch" href="https://cdnjs.cloudflare.com">
 
 <style id="critical-css">
+.tab-bar{margin-bottom:0!important}
+.create-box{margin:0!important;border-bottom:1px solid #f0f0f0}
+.feed-header{margin-top:0!important;border-bottom:1px solid #f0f0f0}
+.loc-filter{margin-top:0!important}
+main{padding-top:0!important}
+
 /* Critical above-fold CSS — inline for instant render */
 body{margin:0;font-family:'Be Vietnam Pro',sans-serif;background:#f0f2f5;color:#1C1C1C;-webkit-tap-highlight-color:transparent}
 .top-header{position:fixed;top:0;left:0;right:0;z-index:100;background:#fff;border-bottom:1px solid #e4e6eb}
@@ -544,11 +550,7 @@ function sendSubToServer(sub){
 })();
 </script><script src="/js/ss-error-tracker.js"></script>
 <script src="/js/analytics.js"></script><script src="/js/image-viewer.js"></script>
-<!-- Daily Check-in Banner -->
-<div id="checkinBanner" style="display:none;position:fixed;bottom:70px;left:50%;transform:translateX(-50%);z-index:999;background:linear-gradient(135deg,#7C3AED,#5B21B6);color:#fff;padding:10px 20px;border-radius:12px;box-shadow:0 4px 20px rgba(124,58,237,.4);font-size:13px;display:flex;align-items:center;gap:10px;max-width:360px;width:90%;cursor:pointer" onclick="doFeedCheckin()">
-  <span style="font-size:22px">🔥</span>
-  <div style="flex:1"><b>Check-in hôm nay!</b><br><span style="font-size:11px;opacity:.8">+5 XP · Giữ streak liên tục</span></div>
-  <span style="font-size:18px">→</span>
+<span style="font-size:18px">→</span>
 </div>
 
 <img src="/api/auto-cron.php" style="display:none" width="1" height="1" alt="">
@@ -557,24 +559,7 @@ function sendSubToServer(sub){
 (function(){
   if(!CU)return;
   var today=new Date().toISOString().split("T")[0];
-  if(localStorage.getItem("ss_checkin")===today)return;
-  setTimeout(function(){document.getElementById("checkinBanner").style.display="flex";},3000);
-})();
-function doFeedCheckin(){
-  var tk=localStorage.getItem("token");if(!tk)return;
-  var b=document.getElementById("checkinBanner");
-  b.innerHTML="<span style='font-size:22px'>⏳</span><div>Đang check-in...</div>";
-  fetch("/api/gamification.php?action=checkin",{method:"POST",headers:{"Authorization":"Bearer "+tk}}).then(function(r){return r.json();}).then(function(d){
-    if(d.success){
-      b.innerHTML="<span style='font-size:22px'>✅</span><div><b>"+d.data.message+"</b></div>";
-      b.style.background="linear-gradient(135deg,#00b14f,#009a43)";
-      localStorage.setItem("ss_checkin",new Date().toISOString().split("T")[0]);
-      setTimeout(function(){b.style.display="none";},3000);
-    }else{
-      b.innerHTML="<span style='font-size:22px'>⚠️</span><div>"+d.message+"</div>";
-      localStorage.setItem("ss_checkin",new Date().toISOString().split("T")[0]);
-      setTimeout(function(){b.style.display="none";},2000);
-    }
+  })();
   }).catch(function(){b.style.display="none";});
 }
 </script>
