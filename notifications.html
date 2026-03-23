@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Thông báo - ShipperShop</title>
+<meta name="theme-color" content="#7C3AED">
+<link rel="icon" href="/favicon.ico">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="stylesheet" href="/css/dark-mode.css">
+<script src="/js/dark-mode.js"></script>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Be Vietnam Pro',sans-serif;background:#f0f2f5;min-height:100vh}
+.nt-header{background:#fff;padding:12px 16px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid #e4e6eb;position:sticky;top:0;z-index:100}
+.nt-body{max-width:600px;margin:0 auto}
+.nt-item{display:flex;gap:12px;padding:12px 16px;background:#fff;border-bottom:1px solid #f5f5f5;cursor:pointer}
+.nt-item.unread{background:#f5f3ff}
+.nt-av{width:44px;height:44px;border-radius:50%;object-fit:cover;flex-shrink:0}
+.nt-text{font-size:14px;line-height:1.4;color:#333}
+.nt-time{font-size:12px;color:#7C3AED;margin-top:4px;font-weight:600}
+.nt-empty{text-align:center;padding:60px 20px;color:#999}
+</style>
+</head>
+<body>
+<div class="nt-header">
+  <div style="display:flex;align-items:center;gap:12px">
+    <a href="javascript:history.back()" style="color:#333;text-decoration:none"><i class="fas fa-arrow-left"></i></a>
+    <h1 style="font-size:17px">Thông báo</h1>
+  </div>
+  <button onclick="markAllRead()" style="background:none;border:none;color:#7C3AED;font-size:13px;font-weight:600;cursor:pointer">Đọc tất cả</button>
+</div>
+<div class="nt-body" id="ntList"><div style="text-align:center;padding:40px"><i class="fas fa-spinner fa-spin" style="font-size:24px;color:#7C3AED"></i></div></div>
+
+<script>
+function esc(s){var d=document.createElement('div');d.textContent=s;return d.innerHTML;}
+function ago(d){if(!d)return '';var s=Math.floor((Date.now()-new Date(d.replace(' ','T')).getTime())/1000);if(s<60)return 'Vừa xong';if(s<3600)return Math.floor(s/60)+' phút';if(s<86400)return Math.floor(s/3600)+' giờ';return Math.floor(s/86400)+' ngày';}
+
+var token=localStorage.getItem('token');
+if(!token)location.href='login.html';
+
+function loadNotifs(){
+  fetch('/api/notifications.php',{headers:{'Authorization':'Bearer '+token}})
+    .then(function(r){return r.json()})
+    .then(function(d){
+      var list=document.getElementById('ntList');
+      var notifs=d.data||d.notifications||[];
+      if(!notifs.length){list.innerHTML='<div class="nt-empty"><div style="font-size:48px;margin-bottom:12px">🔔</div><div style="font-size:16px;font-weight:600;color:#333">Không có thông báo mới</div></div>';return;}
+      list.innerHTML=notifs.map(function(n){
+        var av=n.actor_avatar?'<img class="nt-av" src="'+n.actor_avatar+'" loading="lazy">':'<div class="nt-av" style="background:#7C3AED;color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700">'+(n.actor_name||'?')[0]+'</div>';
+        var cls=n.is_read?'':'unread';
+        return '<div class="nt-item '+cls+'" onclick="goNotif(\''+n.type+'\','+n.post_id+',\''+n.notif_key+'\')">'+av+'<div><div class="nt-text"><b>'+esc(n.actor_name||'')+'</b> '+esc(n.message||n.title||'')+'</div><div class="nt-time">'+ago(n.created_at)+'</div></div></div>';
+      }).join('');
+    }).catch(function(){document.getElementById('ntList').innerHTML='<div class="nt-empty">Lỗi tải</div>';});
+}
+
+function goNotif(type,postId,key){
+  // Mark read
+  fetch('/api/notifications.php',{method:'POST',headers:{'Authorization':'Bearer '+token,'Content-Type':'application/json'},body:JSON.stringify({notif_key:key})}).catch(function(){});
+  if(postId)location.href='post-detail.html?id='+postId;
+}
+
+function markAllRead(){
+  fetch('/api/notifications.php?action=mark_all_read',{method:'POST',headers:{'Authorization':'Bearer '+token}})
+    .then(function(){document.querySelectorAll('.nt-item.unread').forEach(function(el){el.classList.remove('unread');});});
+}
+
+loadNotifs();
+</script>
+</body>
+</html>

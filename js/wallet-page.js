@@ -177,3 +177,14 @@ function compareSubscriptions(plans){
   ov.onclick=function(e){if(e.target===ov)ov.remove();};
   document.body.appendChild(ov);
 }
+
+function showTxnDetail(txn){
+  var ov=document.createElement('div');
+  ov.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:2000;display:flex;align-items:center;justify-content:center';
+  var typeLabel={deposit:'Nạp tiền',withdraw:'Rút tiền',subscribe:'Đăng ký gói',transfer:'Chuyển tiền',refund:'Hoàn tiền'};
+  var statusLabel={completed:'Hoàn thành',pending:'Đang chờ',failed:'Thất bại',rejected:'Từ chối'};
+  var statusColor={completed:'#00b14f',pending:'#F59E0B',failed:'#e74c3c',rejected:'#e74c3c'};
+  ov.innerHTML='<div style="background:#fff;border-radius:16px;padding:24px;max-width:340px;width:90%"><div style="text-align:center;margin-bottom:16px"><div style="font-size:36px;font-weight:700;color:#7C3AED">'+formatVND(txn.amount)+'</div><div style="font-size:13px;color:'+(statusColor[txn.status]||'#666')+'";font-weight:600;margin-top:4px">'+(statusLabel[txn.status]||txn.status)+'</div></div><div style="border-top:1px solid #f0f0f0;padding-top:12px"><div style="display:flex;justify-content:space-between;padding:6px 0;font-size:13px"><span style="color:#999">Loại</span><span style="font-weight:600">'+(typeLabel[txn.type]||txn.type)+'</span></div><div style="display:flex;justify-content:space-between;padding:6px 0;font-size:13px"><span style="color:#999">Số dư trước</span><span>'+formatVND(txn.balance_before)+'</span></div><div style="display:flex;justify-content:space-between;padding:6px 0;font-size:13px"><span style="color:#999">Số dư sau</span><span>'+formatVND(txn.balance_after)+'</span></div><div style="display:flex;justify-content:space-between;padding:6px 0;font-size:13px"><span style="color:#999">Mô tả</span><span style="max-width:180px;text-align:right">'+(txn.description||'—')+'</span></div><div style="display:flex;justify-content:space-between;padding:6px 0;font-size:13px"><span style="color:#999">Thời gian</span><span>'+txn.created_at+'</span></div></div><button onclick="this.closest(\'[style]\').remove()" style="width:100%;padding:10px;margin-top:12px;border:1px solid #ddd;border-radius:8px;background:#fff;cursor:pointer;font-size:14px">Đóng</button></div>';
+  ov.onclick=function(e){if(e.target===ov)ov.remove();};
+  document.body.appendChild(ov);
+}
