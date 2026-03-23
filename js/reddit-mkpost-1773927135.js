@@ -91,6 +91,39 @@ function showAchievementToast(badgeId){
   setTimeout(function(){div.style.opacity='0';div.style.transition='opacity .5s';setTimeout(function(){div.remove();},500);},4000);
 }
 
+
+function editPost(pid){
+  var card=document.getElementById('P'+pid);
+  if(!card)return;
+  var contentEl=card.querySelector('.post-content');
+  if(!contentEl)return;
+  var oldText=contentEl.textContent.trim();
+  
+  var ov=document.createElement('div');
+  ov.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:2000;display:flex;align-items:center;justify-content:center';
+  ov.innerHTML='<div style="background:#fff;border-radius:16px;padding:20px;max-width:400px;width:90%"><h3 style="margin:0 0 12px;font-size:16px">✏️ Chỉnh sửa bài viết</h3><textarea id="editTA" style="width:100%;min-height:120px;padding:10px;border:1px solid #ddd;border-radius:8px;font-size:14px;resize:vertical;box-sizing:border-box;font-family:inherit">'+oldText.replace(/</g,"&lt;")+'</textarea><div style="display:flex;gap:8px;justify-content:flex-end;margin-top:12px"><button onclick="this.closest(\'[style]\').remove()" style="padding:8px 16px;border:1px solid #ddd;border-radius:8px;background:#fff;cursor:pointer">Hủy</button><button onclick="submitEdit('+pid+',this.closest(\'[style]\'))" style="padding:8px 16px;background:#7C3AED;color:#fff;border:none;border-radius:8px;font-weight:600;cursor:pointer">Lưu</button></div></div>';
+  ov.onclick=function(e){if(e.target===ov)ov.remove();};
+  document.body.appendChild(ov);
+  setTimeout(function(){var ta=document.getElementById('editTA');if(ta){ta.focus();ta.selectionStart=ta.value.length;}},100);
+}
+function submitEdit(pid,overlay){
+  var ta=document.getElementById('editTA');
+  if(!ta)return;
+  var newContent=ta.value.trim();
+  if(newContent.length<5){toast('Tối thiểu 5 ký tự','error');return;}
+  var token=localStorage.getItem('token');
+  fetch('/api/posts.php?action=edit',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+(token||'')},body:JSON.stringify({post_id:pid,content:newContent})})
+    .then(function(r){return r.json()})
+    .then(function(d){
+      if(d.success){
+        toast('Đã cập nhật!','success');
+        if(overlay)overlay.remove();
+        var card=document.getElementById('P'+pid);
+        if(card){var ce=card.querySelector('.post-content');if(ce)ce.textContent=newContent;}
+      }else{toast(d.message||'Lỗi','error');}
+    });
+}
+
 function updateCommentCount(postId, delta){
   var card=document.getElementById('P'+postId);
   if(!card)return;
@@ -246,7 +279,7 @@ function mkPost(p){
   var canDel=CU&&parseInt(p.user_id)===parseInt(CU.id);
   return '<div class="post-card" id="P'+p.id+'">'
   +'<div class="post-body">'
-  +'<div class="post-meta">'+av+'<div style="flex:1;min-width:0"><div style="display:flex;align-items:center;justify-content:space-between">'+authorLink+'<button class="post-dots" onclick="event.stopPropagation();togMenu('+p.id+')"><i class="fas fa-ellipsis"></i></button></div><div style="font-size:12px;color:#999;display:flex;align-items:center;gap:4px">'+shipBadge+lvlBadge+'<span>·</span><span>'+ago(p.created_at)+(isNew(p.created_at)?'<span style="margin-left:4px;padding:1px 5px;border-radius:3px;background:#00b14f;color:#fff;font-size:9px;font-weight:700">MỚI</span>':'')+typeBadge(p.type)+'</span>'+badge+pvBadge+anonBadge+subBadge+'</div></div></div>'
+  +'<div class="post-meta">'+av+'<div style="flex:1;min-width:0"><div style="display:flex;align-items:center;justify-content:space-between">'+authorLink+'<button class="post-dots" onclick="event.stopPropagation();togMenu('+p.id+')"><i class="fas fa-ellipsis"></i></button></div><div style="font-size:12px;color:#999;display:flex;align-items:center;gap:4px">'+shipBadge+lvlBadge+'<span>·</span><span>'+ago(p.created_at)+(p.edited_at?' · <span style="font-size:11px;color:#999">đã chỉnh sửa</span>':'')+(isNew(p.created_at)?'<span style="margin-left:4px;padding:1px 5px;border-radius:3px;background:#00b14f;color:#fff;font-size:9px;font-weight:700">MỚI</span>':'')+typeBadge(p.type)+'</span>'+badge+pvBadge+anonBadge+subBadge+'</div></div></div>'
   +title+'<div class="post-menu" id="pm'+p.id+'" style="display:none"><div id="sv'+p.id+'" onclick="togSave('+p.id+')"><i class="'+(isSaved?'fas':'far')+' fa-bookmark" style="color:'+(isSaved?'#7C3AED':'inherit')+'"></i> '+(isSaved?'Bỏ lưu':'Lưu bài viết')+'</div>'+(canDel?'<div onclick="editP('+p.id+')"><i class="fas fa-pen"></i> Sửa bài</div><div onclick="delP('+p.id+')"><i class="far fa-trash-can"></i> Xóa bài</div>':'')+'<div onclick="reportP('+p.id+')"><i class="fas fa-flag"></i> Báo cáo</div>'+(canDel?'':'<div onclick="muteUser('+p.user_id+')"><i class="fas fa-volume-mute"></i> Tắt tiếng</div><div onclick="blockUser('+p.user_id+')"><i class="fas fa-ban"></i> Chặn</div>')+'<div onclick="copyLink('+p.id+')"><i class="fas fa-link"></i> Sao chép liên kết</div><div onclick="shareToGroup('+p.id+')"><i class="fas fa-share-from-square"></i> Chia sẻ vào nhóm</div><div onclick="togMenu('+p.id+')"><i class="fas fa-times"></i> Đóng</div></div>'+contentH+addSpoilerBlur(imgH+vidH,p)
   +'</div>'
   +'<div class="poll-container" id="poll'+p.id+'"></div><div class="pa3-stats"><span>'+(likes>0?fN(likes)+' đơn giao thành công':'')+'</span><span>'+(parseInt(p.comments_count||0)>0?fN(p.comments_count||0)+' ghi chú':'')+'</span><span>'+(parseInt(p.views_count||0)>0?fN(p.views_count)+' lượt xem':'')+'</span></div>'
