@@ -384,3 +384,5 @@ a:focus:not(:focus-visible){outline:none}
 [id]{scroll-margin-top:60px}
 /* Prevent overscroll bounce */
 body{overscroll-behavior-y:contain}
+/* Typography optimization */
+body{text-rendering:optimizeSpeed;-webkit-font-smoothing:antialiased}
