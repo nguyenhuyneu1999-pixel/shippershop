@@ -149,7 +149,7 @@ if ($action === 'login') {
 
     // Tìm user bằng username HOẶC email (tương thích ngược)
     $user = $db->fetchOne(
-        "SELECT * FROM users WHERE (username = ? OR email = ?) AND status = 'active'",
+        "SELECT * FROM users WHERE (username = ? OR email = ?) AND `status` = 'active'",
         [$loginId, $loginId]
     );
 
@@ -206,7 +206,7 @@ if ($action === 'me') {
     if (!$userId) apiError('Chưa đăng nhập', 401);
 
     $user = $db->fetchOne(
-        "SELECT id, username, email, fullname, phone, avatar, bio, address, role, shipping_company, created_at FROM users WHERE id = ? AND status = 'active'",
+        "SELECT id, username, email, fullname, phone, avatar, bio, address, role, shipping_company, created_at FROM users WHERE id = ? AND `status` = 'active'",
         [$userId]
     );
     if (!$user) apiError('Tài khoản không tồn tại', 404);
@@ -216,7 +216,7 @@ if ($action === 'me') {
     $user['stats'] = [
         'total_orders' => $db->fetchOne("SELECT COUNT(*) as c FROM orders WHERE user_id = ?", [$userId])['c'],
         'cart_items'   => $db->fetchOne("SELECT COUNT(*) as c FROM cart WHERE user_id = ?", [$userId])['c'],
-        'total_posts'  => $db->fetchOne("SELECT COUNT(*) as c FROM posts WHERE user_id = ? AND status = 'active'", [$userId])['c'],
+        'total_posts'  => $db->fetchOne("SELECT COUNT(*) as c FROM posts WHERE user_id = ? AND `status` = 'active'", [$userId])['c'],
     ];
     apiSuccess('OK', $user);
 }
