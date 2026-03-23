@@ -5,7 +5,7 @@ let CU=null,sort='hot',type='all',prov=null,company='',page=1,totalPg=1,imgs=[],
 
 document.addEventListener('DOMContentLoaded',()=>{
   CU=JSON.parse(localStorage.getItem('user')||'null');
-  renderNav(); renderProvinces(); loadPosts(); loadTrend(); loadHashtags(); loadSuggestions(); loadAnnouncement(); loadFriendsLatest();
+  renderNav(); renderProvinces(); loadPosts(); loadTrend(); loadHashtags(); loadSuggestions(); loadAnnouncement(); loadFriendsLatest(); timeGreeting();
   // mProv populated by async province API fetch below
   document.getElementById('stM').textContent=Math.floor(Math.random()*3000+1000).toLocaleString();
   document.getElementById('stO').textContent=Math.floor(Math.random()*500+100);
@@ -532,3 +532,23 @@ async function loadFriendsLatest(){
     }
   }catch(e){}
 }
+
+// Time-based greeting
+function timeGreeting(){
+  var h=new Date().getHours();
+  var user=JSON.parse(localStorage.getItem('user')||'{}');
+  var name=user.fullname?user.fullname.split(' ').pop():'';
+  var greet=h<12?'Chào buổi sáng':(h<18?'Chào buổi chiều':'Chào buổi tối');
+  var el=document.getElementById('feedGreeting');
+  if(el&&name)el.textContent=greet+', '+name+'! 👋';
+}
+
+// Keyboard shortcuts (desktop)
+document.addEventListener('keydown',function(e){
+  if(e.target.tagName==='INPUT'||e.target.tagName==='TEXTAREA')return;
+  if(e.key==='n'||e.key==='N'){e.preventDefault();if(typeof openSPM==='function')openSPM();else if(typeof openModal==='function')openModal();}
+  if(e.key==='/'||e.key==='s'){e.preventDefault();var si=document.getElementById('sInput');if(si){si.focus();var so=document.getElementById('searchOverlay');if(so)so.style.display='flex';}}
+  if(e.key==='g'){location.href='groups.html';}
+  if(e.key==='m'){location.href='messages.html';}
+  if(e.key==='t'){window.scrollTo({top:0,behavior:'smooth'});}
+});
