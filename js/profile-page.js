@@ -508,3 +508,22 @@ function saveNotifPrefs(overlay){
       else toast(d.message||'Lỗi','error');
     });
 }
+
+function showReferral(){
+  var token=localStorage.getItem('token');
+  if(!token)return;
+  fetch('/api/social.php?action=get_referral',{headers:{'Authorization':'Bearer '+token}})
+    .then(function(r){return r.json()})
+    .then(function(d){
+      if(!d.success)return;
+      var data=d.data;
+      var ov=document.createElement('div');
+      ov.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:2000;display:flex;align-items:center;justify-content:center';
+      ov.innerHTML='<div style="background:#fff;border-radius:16px;padding:24px;max-width:340px;width:90%;text-align:center"><div style="font-size:24px;margin-bottom:8px">🎁</div><h3 style="margin:0 0 8px;font-size:17px">Mời bạn bè</h3><div style="font-size:13px;color:#65676B;margin-bottom:16px">Chia sẻ mã giới thiệu để nhận XP!</div><div style="background:#f5f3ff;border-radius:12px;padding:12px;margin-bottom:12px"><div style="font-size:24px;font-weight:700;color:#7C3AED;letter-spacing:3px">'+data.code+'</div></div><div style="font-size:12px;color:#999;margin-bottom:12px">'+data.referrals+' lượt giới thiệu thành công</div><button onclick="copyRef(\''+data.url+'\')" style="width:100%;padding:10px;background:#7C3AED;color:#fff;border:none;border-radius:8px;font-size:14px;font-weight:600;cursor:pointer"><i class="fas fa-copy"></i> Sao chép link giới thiệu</button><div onclick="this.closest(\'[style]\').remove()" style="padding:10px;color:#999;cursor:pointer;font-size:14px;margin-top:4px">Đóng</div></div>';
+      ov.onclick=function(e){if(e.target===ov)ov.remove();};
+      document.body.appendChild(ov);
+    });
+}
+function copyRef(url){
+  if(navigator.clipboard){navigator.clipboard.writeText(url).then(function(){toast('Đã sao chép!','success');});}
+}

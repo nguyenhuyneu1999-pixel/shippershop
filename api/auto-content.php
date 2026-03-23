@@ -15,7 +15,26 @@ header('Content-Type: application/json; charset=utf-8');
 
 define('MKT_KEY', 'ss_mkt_' . substr(md5(JWT_SECRET . 'marketing'), 0, 16));
 $key = $_GET['key'] ?? '';
-if ($key !== MKT_KEY) { echo json_encode(['success' => false, 'message' => 'Unauthorized']); exit; }
+if ($key !== MKT_KEY) { 
+
+// Daily shipper quote
+if ($action === 'daily_quote') {
+    $quotes = [
+        'Mỗi đơn hàng là một niềm vui, mỗi nụ cười khách hàng là động lực!',
+        'Shipper giỏi không chỉ giao hàng nhanh mà còn giao cả tâm huyết.',
+        'Đường xa không sợ, mưa nắng không ngại, shipper Việt Nam tự hào!',
+        'Thành công đến từ sự kiên trì — mỗi ngày một chặng đường mới.',
+        'Kết nối người mua — người bán, shipper là cầu nối tin cậy.',
+        'Hôm nay giao bao nhiêu đơn? Mục tiêu là vượt qua hôm qua!',
+        'An toàn là trên hết — về nhà nguyên vẹn mỗi ngày.',
+    ];
+    $today = date('z'); // Day of year
+    $quote = $quotes[$today % count($quotes)];
+    echo json_encode(['success' => true, 'data' => ['quote' => $quote, 'day' => date('Y-m-d')]]);
+    exit;
+}
+
+echo json_encode(['success' => false, 'message' => 'Unauthorized']); exit; }
 
 $d = db();
 $action = $_GET['action'] ?? 'run';

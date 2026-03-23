@@ -22,7 +22,7 @@ let CU=null,sort='hot',type='all',prov=null,company='',page=1,totalPg=1,imgs=[],
 
 document.addEventListener('DOMContentLoaded',()=>{
   CU=JSON.parse(localStorage.getItem('user')||'null');
-  renderNav(); renderProvinces(); loadPosts(); loadTrend(); loadHashtags(); loadSuggestions(); loadAnnouncement(); loadFriendsLatest(); timeGreeting(); loadPeopleCarousel();
+  renderNav(); renderProvinces(); loadPosts(); loadTrend(); loadHashtags(); loadSuggestions(); loadAnnouncement(); loadFriendsLatest(); timeGreeting(); loadPeopleCarousel(); loadDailyQuote();
   // mProv populated by async province API fetch below
   document.getElementById('stM').textContent=Math.floor(Math.random()*3000+1000).toLocaleString();
   document.getElementById('stO').textContent=Math.floor(Math.random()*500+100);
@@ -631,6 +631,20 @@ async function loadPeopleCarousel(){
       });
       html+='</div>';
       box.innerHTML=html;
+    }
+  }catch(e){}
+}
+
+// Daily quote
+async function loadDailyQuote(){
+  try{
+    var r=await fetch('/api/auto-content.php?action=daily_quote');
+    var d=await r.json();
+    if(d.success&&d.data&&d.data.quote){
+      var box=document.getElementById('dailyQuote');
+      if(box){
+        box.innerHTML='<div style="padding:14px 16px;background:linear-gradient(135deg,#7C3AED,#5B21B6);border-radius:12px;color:#fff;margin:8px 0"><div style="font-size:13px;opacity:.8;margin-bottom:6px">💬 Châm ngôn hôm nay</div><div style="font-size:14px;line-height:1.5;font-weight:500">'+d.data.quote+'</div></div>';
+      }
     }
   }catch(e){}
 }
