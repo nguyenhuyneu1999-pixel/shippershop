@@ -152,3 +152,28 @@ function showDepositGuide(){
   ov.onclick=function(e){if(e.target===ov)ov.remove();};
   document.body.appendChild(ov);
 }
+
+function compareSubscriptions(plans){
+  var features=['Số bài/ngày','Badge hiển thị','Ưu tiên feed','Hỗ trợ nhanh','Thống kê chi tiết'];
+  var ov=document.createElement('div');
+  ov.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:2000;display:flex;align-items:center;justify-content:center';
+  var html='<div style="background:#fff;border-radius:16px;padding:16px;max-width:400px;width:95%;max-height:80vh;overflow-y:auto"><h3 style="margin:0 0 12px;text-align:center;font-size:16px">So sánh gói</h3><table style="width:100%;border-collapse:collapse;font-size:12px"><thead><tr><th style="text-align:left;padding:6px;border-bottom:2px solid #7C3AED">Tính năng</th>';
+  plans.forEach(function(p){html+='<th style="text-align:center;padding:6px;border-bottom:2px solid #7C3AED;color:#7C3AED">'+p.name+'</th>';});
+  html+='</tr></thead><tbody>';
+  var data=[
+    plans.map(function(p){return p.daily_post_limit>=999?'∞':p.daily_post_limit;}),
+    plans.map(function(p){return p.badge||'—';}),
+    plans.map(function(p){return p.price>0?'✅':'—';}),
+    plans.map(function(p){return p.price>=99000?'✅':'—';}),
+    plans.map(function(p){return p.price>=49000?'✅':'—';}),
+  ];
+  features.forEach(function(f,i){
+    html+='<tr><td style="padding:6px;border-bottom:1px solid #f0f0f0;font-weight:500">'+f+'</td>';
+    data[i].forEach(function(v){html+='<td style="text-align:center;padding:6px;border-bottom:1px solid #f0f0f0">'+v+'</td>';});
+    html+='</tr>';
+  });
+  html+='</tbody></table><div style="text-align:center;margin-top:12px"><button onclick="this.closest(\'[style]\').remove()" style="padding:8px 20px;border:1px solid #ddd;border-radius:8px;background:#fff;cursor:pointer">Đóng</button></div></div>';
+  ov.innerHTML=html;
+  ov.onclick=function(e){if(e.target===ov)ov.remove();};
+  document.body.appendChild(ov);
+}

@@ -139,3 +139,18 @@ function shareProfileQR(userId, fullname){
   ov.onclick=function(e){if(e.target===ov)ov.remove();};
   document.body.appendChild(ov);
 }
+
+// Check-in streak display
+function loadStreak(userId){
+  fetch('/api/checkin.php?action=status')
+    .then(function(r){return r.json()})
+    .then(function(d){
+      if(!d.success)return;
+      var el=document.getElementById('pStreak');
+      if(!el||!d.data)return;
+      var s=d.data;
+      if(s.streak>0){
+        el.innerHTML='<div style="display:inline-flex;align-items:center;gap:4px;padding:3px 10px;background:#FEF3C7;border-radius:8px;font-size:12px;color:#92400E;font-weight:600">🔥 '+s.streak+' ngày liên tiếp</div>';
+      }
+    }).catch(function(){});
+}

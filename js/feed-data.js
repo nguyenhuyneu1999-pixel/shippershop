@@ -702,3 +702,13 @@ function checkPostReminder(){
       }).catch(function(){});
   },5000);
 }
+
+// Track recently viewed posts
+function trackPostView(postId){
+  var key='ss_recent_posts';
+  var recent=JSON.parse(localStorage.getItem(key)||'[]');
+  recent=recent.filter(function(id){return id!==postId;});
+  recent.unshift(postId);
+  if(recent.length>20)recent=recent.slice(0,20);
+  localStorage.setItem(key,JSON.stringify(recent));
+}
