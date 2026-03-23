@@ -6,6 +6,7 @@ if (microCacheServe('mc_groups.php' . md5($_SERVER['QUERY_STRING'] ?? ''), 20)) 
 define('APP_ACCESS', true);
 require_once __DIR__ . '/../includes/config.php';
 require_once __DIR__ . '/../includes/db.php';
+require_once __DIR__ . '/../includes/lscache.php';
 require_once __DIR__ . '/../includes/functions.php';
 require_once __DIR__ . '/../includes/api-cache.php';
 require_once __DIR__ . '/../includes/async-notify.php';

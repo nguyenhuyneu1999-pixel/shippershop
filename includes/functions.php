@@ -273,6 +273,16 @@ function deleteFile($path) {
 /**
  * Send JSON response
  */
+
+function trimNulls(&$data) {
+    if (is_array($data)) {
+        foreach ($data as $k => &$v) {
+            if ($v === null || $v === '') unset($data[$k]);
+            elseif (is_array($v)) trimNulls($v);
+        }
+    }
+}
+
 function jsonResponse($data, $statusCode = 200) {
     http_response_code($statusCode);
     header('Content-Type: application/json; charset=utf-8');

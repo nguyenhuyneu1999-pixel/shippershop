@@ -4,6 +4,7 @@ require_once __DIR__ . '/../includes/micro-cache.php';
 $_mcKey = 'feed_' . md5(($_SERVER['QUERY_STRING'] ?? '') . ($_SERVER['HTTP_AUTHORIZATION'] ?? ''));
 if (microCacheServe($_mcKey, 20)) exit;
 session_start();
+require_once __DIR__ . '/../includes/lscache.php';
 /**
  * ============================================
  * POSTS API
@@ -256,7 +257,7 @@ $whereClause = implode(' AND ', $where);
             LEFT JOIN user_subscriptions us2 ON us2.user_id = p.user_id AND us2.`status` = 'active' AND us2.expires_at > NOW()
             LEFT JOIN subscription_plans sp ON sp.id = us2.plan_id AND sp.price > 0
             WHERE $whereClause
-            ORDER BY " . ($sort === 'hot' ? '(p.likes_count*3+p.comments_count*5+p.shares_count*2) DESC,p.created_at DESC' : ($sort === 'trending' ? '(p.likes_count*3+p.comments_count*5)/POW(TIMESTAMPDIFF(HOUR,p.created_at,NOW())+2,1.5) DESC' : ($sort === 'top' ? 'p.likes_count DESC,p.created_at DESC' : 'p.created_at DESC'))) . "
+            ORDER BY " . ($sort === 'hot' ? 'p.hot_score DESC, p.created_at DESC' : ($sort === 'trending' ? 'p.hot_score/(POW(TIMESTAMPDIFF(HOUR,p.created_at,NOW())+2,1.5)+1) DESC' : ($sort === 'top' ? 'p.likes_count DESC,p.created_at DESC' : 'p.created_at DESC'))) . "
             LIMIT {$pagination['per_page']} OFFSET {$pagination['offset']}";
     
     $posts = $db->fetchAll($sql, $params);
@@ -319,7 +320,8 @@ if ($method === 'POST') {
         require_once __DIR__ . "/auth-check.php";
         $userId = getAuthUserId();
         $input = json_decode(file_get_contents("php://input"), true);
-        if ($action === "vote") {
+        if (lscache_purge('feed');
+    $action === "vote") {
             $postId = intval($input["post_id"] ?? 0);
             $voteType = $input["vote_type"] ?? "";
             // OPTIMIZED: toggle like in 1 check + 1 write + 1 update
@@ -336,9 +338,13 @@ if ($method === 'POST') {
             $score = intval($db->fetchOne("SELECT likes_count FROM posts WHERE id = ?", [$postId])['likes_count'] ?? 0);
             // Push: notify post owner on like (not unlike)
             if ($uv) { try { $post=$db->fetchOne("SELECT user_id FROM posts WHERE id=?",[$postId]); if($post&&intval($post['user_id'])!==$userId){ $me=$db->fetchOne("SELECT fullname FROM users WHERE id=?",[$userId]); asyncNotify(intval($post['user_id']),($me?$me['fullname']:'Ai đó').' đã thành công bài viết','Bài viết của bạn được thành công','post','/post-detail.html?id='.$postId); } } catch(Throwable $e){} }
+            $db->query("UPDATE posts SET hot_score = likes_count*3+comments_count*5+shares_count*2 WHERE id=?", [$postId]);
+            lscache_purge("feed");
             api_cache_flush("feed_"); success("OK", ["score" => intval($score), "user_vote" => $uv ? "up" : null]);
         }
-        if ($action === "comment") { $pid = intval($input["post_id"] ?? 0); $ct = sanitize($input["content"] ?? ""); $par = $input["parent_id"] ?? null; if (empty($ct)) error("Nội dung trống"); $db->insert("comments", ["post_id" => $pid, "user_id" => $userId, "parent_id" => $par, "content" => $ct]); $db->query("UPDATE posts SET comments_count = comments_count + 1 WHERE id = ?", [$pid]); try{$post=$db->fetchOne("SELECT user_id FROM posts WHERE id=?",[$pid]);if($post&&intval($post['user_id'])!==$userId){$me=$db->fetchOne("SELECT fullname FROM users WHERE id=?",[$userId]);asyncNotify(intval($post['user_id']),($me?$me['fullname']:'Ai đó').' đã ghi chú',mb_substr($ct,0,50),'post','/post-detail.html?id='.$pid);}}catch(Throwable $e){} try{awardXP($userId,"comment",5,"Ghi chú bài #".$pid);}catch(Throwable$e){} api_cache_flush("feed_"); success("Đã ghi chú!"); }
+        if ($action === "comment") { $pid = intval($input["post_id"] ?? 0); $ct = sanitize($input["content"] ?? ""); $par = $input["parent_id"] ?? null; if (empty($ct)) error("Nội dung trống"); $db->insert("comments", ["post_id" => $pid, "user_id" => $userId, "parent_id" => $par, "content" => $ct]); $db->query("UPDATE posts SET comments_count = comments_count + 1 WHERE id = ?", [$pid]); try{$post=$db->fetchOne("SELECT user_id FROM posts WHERE id=?",[$pid]);if($post&&intval($post['user_id'])!==$userId){$me=$db->fetchOne("SELECT fullname FROM users WHERE id=?",[$userId]);asyncNotify(intval($post['user_id']),($me?$me['fullname']:'Ai đó').' đã ghi chú',mb_substr($ct,0,50),'post','/post-detail.html?id='.$pid);}}catch(Throwable $e){} try{awardXP($userId,"comment",5,"Ghi chú bài #".$pid);}catch(Throwable$e){} $db->query("UPDATE posts SET hot_score = likes_count*3+comments_count*5+shares_count*2 WHERE id=?", [$pid]);
+        lscache_purge("feed");
+        api_cache_flush("feed_"); success("Đã ghi chú!"); }
         if ($action === "save") { $pid = intval($input["post_id"] ?? 0); $ex = $db->fetchOne("SELECT id FROM saved_posts WHERE post_id = ? AND user_id = ?", [$pid, $userId]); if ($ex) { $db->hardDelete("saved_posts", "post_id = ? AND user_id = ?", [$pid, $userId]); success("OK", ["saved" => false]); } else { $db->insert("saved_posts", ["post_id" => $pid, "user_id" => $userId]); success("OK", ["saved" => true]); } }
         if ($action === "share") { $pid = intval($input["post_id"] ?? 0); if ($pid) { $db->query("UPDATE posts SET shares_count = shares_count + 1 WHERE id = ?", [$pid]); $cnt = $db->fetchOne("SELECT shares_count FROM posts WHERE id = ?", [$pid]); try{$post=$db->fetchOne("SELECT user_id FROM posts WHERE id=?",[$pid]);if($post&&intval($post['user_id'])!==$userId){$me=$db->fetchOne("SELECT fullname FROM users WHERE id=?",[$userId]);asyncNotify(intval($post['user_id']),($me?$me['fullname']:'Ai đó').' đã chuyển tiếp','Bài viết được chia sẻ','post','/post-detail.html?id='.$pid);}}catch(Throwable $e){} api_cache_flush("feed_"); success("OK", ["shares_count" => intval($cnt['shares_count'] ?? 0)]); } else { success("OK"); } }
         if ($action === "delete") { $pid = intval($input["post_id"] ?? 0); $po = $db->fetchOne("SELECT user_id FROM posts WHERE id = ?", [$pid]); if (!$po || intval($po["user_id"]) !== $userId) error("Không có quyền"); $db->update("posts", ["status" => "deleted"], "id = ?", [$pid]); api_cache_flush("feed_"); success("Đã xóa"); }
