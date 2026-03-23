@@ -115,3 +115,7 @@ function animateFollowBtn(btn, isFollowing){
   },100);
   btn.style.transition='transform .15s ease';
 }
+
+// Tab memory
+function rememberTab(tab){sessionStorage.setItem('ss_user_tab_'+userData.id,tab);}
+function getLastTab(){return sessionStorage.getItem('ss_user_tab_'+(userData||{}).id)||'posts';}

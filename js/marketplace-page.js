@@ -1,3 +1,4 @@
+function formatPrice(p){return p?Number(p).toLocaleString('vi-VN')+'đ':'Liên hệ';}
 
 function sortListings(sort){
   currentSort=sort||'';

@@ -364,3 +364,9 @@ video{width:100%;max-height:600px;display:block;background:#000;}
 .sort-bar::-webkit-scrollbar{display:none}
 
 @keyframes bounceIn{0%{transform:scale(0)}50%{transform:scale(1.2)}100%{transform:scale(1)}}
+
+/* Long comment collapse */
+.cmt-text-long{max-height:80px;overflow:hidden;position:relative}
+.cmt-text-long::after{content:'...Xem thêm';position:absolute;bottom:0;right:0;background:linear-gradient(90deg,transparent,#fff 40%);padding:0 8px;color:#7C3AED;font-weight:600;font-size:12px;cursor:pointer}
+.cmt-text-long.expanded{max-height:none}
+.cmt-text-long.expanded::after{display:none}

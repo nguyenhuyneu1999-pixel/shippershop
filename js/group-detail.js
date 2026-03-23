@@ -327,3 +327,14 @@ function expandDesc(el){
     el.dataset.expanded='1';
   }
 }
+
+function sortGroupPosts(mode){
+  var posts=document.querySelectorAll('#groupFeed .post-card');
+  if(!posts.length)return;
+  var arr=Array.from(posts);
+  if(mode==='popular'){
+    arr.sort(function(a,b){return (parseInt(b.dataset.likes||0))-(parseInt(a.dataset.likes||0));});
+  }
+  var parent=posts[0].parentNode;
+  arr.forEach(function(el){parent.appendChild(el);});
+}
