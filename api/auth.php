@@ -440,3 +440,22 @@ if ($action === 'delete_account') {
 
 
 apiError('Action không hợp lệ: ' . $action, 400);
+
+if ($action === 'upload_cover') {
+    require_once __DIR__ . '/auth-check.php';
+    $uid = getAuthUserId();
+    if (!$uid) { echo json_encode(['success'=>false,'message'=>'Auth required']); exit; }
+    if (empty($_FILES['cover'])) { echo json_encode(['success'=>false,'message'=>'No file']); exit; }
+    $file = $_FILES['cover'];
+    if ($file['size'] > 5*1024*1024) { echo json_encode(['success'=>false,'message'=>'Max 5MB']); exit; }
+    $ext = strtolower(pathinfo($file['name'], PATHINFO_EXTENSION));
+    if (!in_array($ext, ['jpg','jpeg','png','webp'])) { echo json_encode(['success'=>false,'message'=>'JPG/PNG/WebP only']); exit; }
+    $filename = 'cover_' . $uid . '_' . time() . '.' . $ext;
+    $path = __DIR__ . '/../uploads/avatars/' . $filename;
+    if (move_uploaded_file($file['tmp_name'], $path)) {
+        $url = '/uploads/avatars/' . $filename;
+        $d->query("UPDATE users SET cover_image = ? WHERE id = ?", [$url, $uid]);
+        echo json_encode(['success'=>true,'data'=>['cover_image'=>$url]]);
+    } else { echo json_encode(['success'=>false,'message'=>'Upload failed']); }
+    exit;
+}
