@@ -4,6 +4,33 @@ var CU=JSON.parse(localStorage.getItem("user")||"null");
 var SC={"GHTK":"#00b14f","J&T":"#d32f2f","GHN":"#ff6600","Viettel Post":"#e21a1a","SPX":"#EE4D2D","Grab":"#00b14f","Be":"#5bc500","Gojek":"#00aa13"};
 var spmFiles=[],spmType="post";
 
+  // Type selector
+  setTimeout(function(){
+    var picker=document.getElementById('spmTypePicker');
+    if(!picker){
+      picker=document.createElement('div');
+      picker.id='spmTypePicker';
+      picker.style.cssText='display:flex;gap:6px;padding:0 16px 8px;flex-wrap:wrap';
+      var types=[['post','📝 Bài viết'],['confession','🎭 Confession'],['review','⭐ Review'],['tip','💡 Mẹo hay'],['question','❓ Hỏi đáp'],['discussion','💬 Thảo luận']];
+      types.forEach(function(t){
+        var btn=document.createElement('button');
+        btn.type='button';
+        btn.textContent=t[1];
+        btn.dataset.type=t[0];
+        btn.style.cssText='padding:4px 10px;border:1px solid #e4e6eb;border-radius:16px;background:#fff;font-size:11px;cursor:pointer;white-space:nowrap';
+        if(t[0]==='post')btn.style.cssText+='background:#7C3AED;color:#fff;border-color:#7C3AED';
+        btn.onclick=function(){
+          spmType=t[0];
+          picker.querySelectorAll('button').forEach(function(b){b.style.background='#fff';b.style.color='#333';b.style.borderColor='#e4e6eb';});
+          btn.style.background='#7C3AED';btn.style.color='#fff';btn.style.borderColor='#7C3AED';
+        };
+        picker.appendChild(btn);
+      });
+      var ta=document.getElementById('spmText');
+      if(ta&&ta.parentNode)ta.parentNode.insertBefore(picker,ta);
+    }
+  },100);
+
 var css=document.createElement("style");
 css.textContent=".spm-overlay{position:fixed;inset:0;background:#fff;z-index:9999;display:none;flex-direction:column;}"
 +".spm-overlay.open{display:flex;}"

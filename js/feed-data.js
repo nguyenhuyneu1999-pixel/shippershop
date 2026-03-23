@@ -22,7 +22,7 @@ let CU=null,sort='hot',type='all',prov=null,company='',page=1,totalPg=1,imgs=[],
 
 document.addEventListener('DOMContentLoaded',()=>{
   CU=JSON.parse(localStorage.getItem('user')||'null');
-  renderNav(); renderProvinces(); loadPosts(); loadTrend(); loadHashtags(); loadSuggestions(); loadAnnouncement(); loadFriendsLatest(); timeGreeting();
+  renderNav(); renderProvinces(); loadPosts(); loadTrend(); loadHashtags(); loadSuggestions(); loadAnnouncement(); loadFriendsLatest(); timeGreeting(); loadPeopleCarousel();
   // mProv populated by async province API fetch below
   document.getElementById('stM').textContent=Math.floor(Math.random()*3000+1000).toLocaleString();
   document.getElementById('stO').textContent=Math.floor(Math.random()*500+100);
@@ -613,3 +613,24 @@ function setupImpressionTracking(){
 setInterval(function(){
   if(document.visibilityState==='visible'){loadTrend();loadHashtags();}
 },300000);
+
+// People you may know (horizontal carousel)
+async function loadPeopleCarousel(){
+  var token=localStorage.getItem('token');
+  if(!token)return;
+  try{
+    var r=await fetch('/api/friends.php?action=suggestions&limit=8',{headers:{'Authorization':'Bearer '+token}});
+    var d=await r.json();
+    if(d.success&&d.data&&d.data.length>3){
+      var box=document.getElementById('peopleCarousel');
+      if(!box)return;
+      var html='<div style="padding:10px 12px;font-weight:700;font-size:14px">👥 Bạn có thể biết</div><div style="display:flex;gap:10px;padding:0 12px 12px;overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none">';
+      d.data.forEach(function(u){
+        var av=u.avatar?'<img src="'+u.avatar+'" style="width:56px;height:56px;border-radius:50%;object-fit:cover">':'<div style="width:56px;height:56px;border-radius:50%;background:#7C3AED;color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:20px">'+(u.fullname||'U')[0]+'</div>';
+        html+='<div style="min-width:100px;text-align:center;flex-shrink:0"><a href="user.html?id='+u.id+'" style="text-decoration:none">'+av+'<div style="font-size:12px;font-weight:600;color:#333;margin-top:4px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:100px">'+esc(u.fullname)+'</div></a><button onclick="quickFollow('+u.id+',this)" style="margin-top:4px;padding:3px 10px;border:1px solid #7C3AED;border-radius:6px;background:#fff;color:#7C3AED;font-size:11px;font-weight:600;cursor:pointer">Theo dõi</button></div>';
+      });
+      html+='</div>';
+      box.innerHTML=html;
+    }
+  }catch(e){}
+}

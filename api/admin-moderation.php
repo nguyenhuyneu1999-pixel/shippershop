@@ -427,4 +427,21 @@ if ($method === 'GET' && $action === 'announcement') {
     echo json_encode(['success'=>true,'data'=>null]); exit;
 }
 
+
+
+// === GET: Quick stats (lightweight, cached) ===
+if ($method === 'GET' && $action === 'quick_stats') {
+    $uid = adminAuth();
+    api_try_cache('admin_quick_stats', 60);
+    
+    $stats = [
+        'users_today' => intval($d->fetchOne("SELECT COUNT(*) as c FROM users WHERE DATE(created_at) = CURDATE()")['c']),
+        'posts_today' => intval($d->fetchOne("SELECT COUNT(*) as c FROM posts WHERE DATE(created_at) = CURDATE() AND `status` = 'active'")['c']),
+        'online_now' => intval($d->fetchOne("SELECT COUNT(*) as c FROM users WHERE is_online = 1")['c']),
+        'pending_reports' => intval($d->fetchOne("SELECT COUNT(*) as c FROM post_reports WHERE `status` = 'pending'")['c']),
+    ];
+    
+    echo json_encode(['success' => true, 'data' => $stats]); exit;
+}
+
 echo json_encode(['success' => false, 'message' => 'Invalid action']);

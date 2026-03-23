@@ -316,3 +316,14 @@ function delGrpPost(pid){
     else{toast(d.message||'Loi','error');}
   });
 }
+
+function expandDesc(el){
+  var full=el.dataset.full;
+  if(el.dataset.expanded==='1'){
+    el.innerHTML=full.substring(0,150)+'... <a onclick="expandDesc(this.parentNode)" style="color:#7C3AED;cursor:pointer;font-weight:600">Xem thêm</a>';
+    el.dataset.expanded='0';
+  }else{
+    el.innerHTML=full+' <a onclick="expandDesc(this.parentNode)" style="color:#7C3AED;cursor:pointer;font-weight:600">Thu gọn</a>';
+    el.dataset.expanded='1';
+  }
+}

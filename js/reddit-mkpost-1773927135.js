@@ -59,6 +59,18 @@ function dblTapLike(pid,el){
   }
 }
 
+
+function updateCommentCount(postId, delta){
+  var card=document.getElementById('P'+postId);
+  if(!card)return;
+  var stats=card.querySelectorAll('.pa3-stats span');
+  if(stats&&stats[1]){
+    var current=parseInt(stats[1].textContent)||0;
+    var newCount=current+delta;
+    stats[1].textContent=newCount>0?fN(newCount)+' ghi chú':'';
+  }
+}
+
 function expandPost(pid){
   var short=document.getElementById('pc'+pid);
   var full=document.getElementById('pf'+pid);

@@ -223,3 +223,19 @@ function shareViaFB(listingId){
   var url=location.origin+'/listing.html?id='+listingId;
   window.open('https://www.facebook.com/sharer.php?u='+encodeURIComponent(url),'_blank');
 }
+
+// Track recently viewed listings
+function trackRecentView(listingId, title, image, price){
+  var key='ss_recent_listings';
+  var recent=JSON.parse(localStorage.getItem(key)||'[]');
+  // Remove if exists
+  recent=recent.filter(function(r){return r.id!==listingId;});
+  // Add to front
+  recent.unshift({id:listingId,title:title||'',image:image||'',price:price||0,ts:Date.now()});
+  // Keep max 10
+  if(recent.length>10)recent=recent.slice(0,10);
+  localStorage.setItem(key,JSON.stringify(recent));
+}
+function getRecentViewed(){
+  return JSON.parse(localStorage.getItem('ss_recent_listings')||'[]');
+}
