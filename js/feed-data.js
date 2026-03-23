@@ -608,3 +608,8 @@ function setupImpressionTracking(){
   },{threshold:0.5});
   document.querySelectorAll('.post-card[id]').forEach(function(el){_impObs.observe(el);});
 }
+
+// Auto-refresh trending every 5 minutes
+setInterval(function(){
+  if(document.visibilityState==='visible'){loadTrend();loadHashtags();}
+},300000);

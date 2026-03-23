@@ -205,3 +205,38 @@ function markUnreadConvs(){
     }
   });
 }
+
+// Simple emoji picker
+function toggleEmojiPicker(inputId){
+  var existing=document.getElementById('emojiPicker');
+  if(existing){existing.remove();return;}
+  var emojis=['😀','😂','😍','🥰','😎','🤔','😢','😡','👍','👎','❤️','🔥','💯','🎉','🙏','💪','👋','🤝','📦','🚚','🏍️','⭐','✅','❌','📍','💰'];
+  var picker=document.createElement('div');
+  picker.id='emojiPicker';
+  picker.style.cssText='position:fixed;bottom:60px;left:8px;right:8px;background:#fff;border-radius:12px;box-shadow:0 -4px 20px rgba(0,0,0,.15);padding:12px;display:grid;grid-template-columns:repeat(8,1fr);gap:4px;z-index:2000;max-width:360px';
+  emojis.forEach(function(em){
+    var btn=document.createElement('button');
+    btn.textContent=em;
+    btn.style.cssText='font-size:22px;padding:6px;border:none;background:none;cursor:pointer;border-radius:8px';
+    btn.onmouseover=function(){this.style.background='#f0f0f0';};
+    btn.onmouseout=function(){this.style.background='none';};
+    btn.onclick=function(){
+      var input=document.getElementById(inputId);
+      if(input){
+        var pos=input.selectionStart||input.value.length;
+        input.value=input.value.substring(0,pos)+em+input.value.substring(pos);
+        input.focus();
+        input.selectionStart=input.selectionEnd=pos+em.length;
+      }
+      picker.remove();
+    };
+    picker.appendChild(btn);
+  });
+  document.body.appendChild(picker);
+  // Close on outside click
+  setTimeout(function(){
+    document.addEventListener('click',function handler(e){
+      if(!picker.contains(e.target)){picker.remove();document.removeEventListener('click',handler);}
+    });
+  },100);
+}

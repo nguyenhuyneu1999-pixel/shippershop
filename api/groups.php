@@ -504,6 +504,43 @@ if ($method === 'POST') {
         gOk('Đã mời thành công');
     }
 
+
+    // Approve/reject pending group post (admin/mod)
+    if ($action === 'approve_post') {
+        $uid = getAuthUserId(); if (!$uid) gErr('Auth required', 401);
+        $input = json_decode(file_get_contents('php://input'), true);
+        $postId = intval($input['post_id'] ?? 0);
+        $approve = $input['approve'] ?? true;
+        if (!$postId) gErr('Missing post_id');
+        
+        $post = $d->fetchOne("SELECT gp.group_id, gm.role FROM group_posts gp JOIN group_members gm ON gm.group_id = gp.group_id AND gm.user_id = ? WHERE gp.id = ?", [$uid, $postId]);
+        if (!$post || !in_array($post['role'], ['admin', 'moderator'])) gErr('Permission denied');
+        
+        $newStatus = $approve ? 'active' : 'rejected';
+        $d->query("UPDATE group_posts SET `status` = ? WHERE id = ?", [$newStatus, $postId]);
+        if ($approve) {
+            $d->query("UPDATE `groups` SET post_count = post_count + 1 WHERE id = ?", [$post['group_id']]);
+        }
+        api_cache_flush('grp_');
+        gOk($approve ? 'Đã duyệt bài viết' : 'Đã từ chối', ['status' => $newStatus]);
+    }
+
+    // Get pending posts for approval
+    if ($action === 'pending_posts') {
+        $uid = getAuthUserId(); if (!$uid) gErr('Auth required', 401);
+        $gid = intval($_GET['group_id'] ?? $input['group_id'] ?? 0);
+        if (!$gid) gErr('Missing group_id');
+        
+        $member = $d->fetchOne("SELECT role FROM group_members WHERE group_id = ? AND user_id = ?", [$gid, $uid]);
+        if (!$member || !in_array($member['role'], ['admin', 'moderator'])) gErr('Permission denied');
+        
+        $posts = $d->fetchAll(
+            "SELECT gp.*, u.fullname as user_name, u.avatar as user_avatar FROM group_posts gp JOIN users u ON gp.user_id = u.id WHERE gp.group_id = ? AND gp.`status` = 'pending' ORDER BY gp.created_at DESC LIMIT 50",
+            [$gid]
+        );
+        gOk('OK', ['posts' => $posts ?: []]);
+    }
+
 echo json_encode(['success'=>false,'message'=>'Missing comment_id']); exit; }
         $exists = $d->fetchOne("SELECT id FROM group_post_comment_likes WHERE comment_id = ? AND user_id = ?", [$cid, $uid]);
         if ($exists) {

@@ -234,7 +234,13 @@ window.submitSPM=function(){
     return fetch(url,{method:"POST",headers:hdrs,credentials:"include",body:fd});
   })()
   .then(function(r){return r.json();})
-  .then(function(d){if(d.success){closeSPM();if(typeof loadPosts==="function")loadPosts();else clearDraft();location.reload();}else{if(typeof handleApiError==="function"&&handleApiError(d)){}else if(typeof toast==="function")toast(d.message||"L\u1ed7i","error");}})
+  .then(function(d){if(d.success){closeSPM();if(typeof loadPosts==="function")loadPosts();else clearDraft();
+      // Success animation
+      var suc=document.createElement('div');
+      suc.style.cssText='position:fixed;inset:0;background:rgba(255,255,255,.9);z-index:3000;display:flex;flex-direction:column;align-items:center;justify-content:center';
+      suc.innerHTML='<div style="font-size:60px;animation:bounceIn .5s">✅</div><div style="font-size:18px;font-weight:700;color:#00b14f;margin-top:12px">Đã đăng thành công!</div>';
+      document.body.appendChild(suc);
+      setTimeout(function(){suc.remove();location.reload();},1500);}else{if(typeof handleApiError==="function"&&handleApiError(d)){}else if(typeof toast==="function")toast(d.message||"L\u1ed7i","error");}})
   .catch(function(){if(typeof toast==="function")toast("L\u1ed7i k\u1ebft n\u1ed1i","error");})
   .finally(function(){btn.disabled=false;btn.textContent="\u0110\u0103ng";});
 };

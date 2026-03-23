@@ -473,3 +473,38 @@ function saveShippingCompany(company,overlay){
       }else{toast(d.message||'Lỗi','error');}
     });
 }
+
+function openNotifPrefs(){
+  var token=localStorage.getItem('token');
+  if(!token)return;
+  fetch('/api/auth.php?action=get_preferences',{headers:{'Authorization':'Bearer '+token}})
+    .then(function(r){return r.json()})
+    .then(function(d){
+      var p=d.data||{};
+      var ov=document.createElement('div');
+      ov.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:2000;display:flex;align-items:center;justify-content:center';
+      ov.innerHTML='<div style="background:#fff;border-radius:12px;padding:20px;max-width:340px;width:90%"><h3 style="margin:0 0 16px;font-size:17px">Cài đặt thông báo</h3>'
+        +'<label style="display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px solid #f0f0f0"><span>Thông báo email</span><input type="checkbox" id="pref_email" '+(p.notification_email?'checked':'')+' style="width:18px;height:18px"></label>'
+        +'<label style="display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px solid #f0f0f0"><span>Thông báo đẩy</span><input type="checkbox" id="pref_push" '+(p.notification_push?'checked':'')+' style="width:18px;height:18px"></label>'
+        +'<label style="display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px solid #f0f0f0"><span>Hiển thị online</span><input type="checkbox" id="pref_online" '+(p.privacy_online?'checked':'')+' style="width:18px;height:18px"></label>'
+        +'<label style="display:flex;align-items:center;justify-content:space-between;padding:10px 0"><span>Hồ sơ</span><select id="pref_profile" style="padding:4px 8px;border:1px solid #ddd;border-radius:6px"><option value="public"'+(p.privacy_profile==='public'?' selected':'')+'>Công khai</option><option value="private"'+(p.privacy_profile==='private'?' selected':'')+'>Riêng tư</option></select></label>'
+        +'<div style="display:flex;gap:8px;justify-content:flex-end;margin-top:16px"><button onclick="this.closest(\'[style]\').remove()" style="padding:8px 16px;border:1px solid #ddd;border-radius:8px;background:#fff;cursor:pointer">Hủy</button><button onclick="saveNotifPrefs(this.closest(\'[style]\'))" style="padding:8px 16px;border:none;border-radius:8px;background:#7C3AED;color:#fff;cursor:pointer;font-weight:600">Lưu</button></div></div>';
+      ov.onclick=function(e){if(e.target===ov)ov.remove();};
+      document.body.appendChild(ov);
+    });
+}
+function saveNotifPrefs(overlay){
+  var token=localStorage.getItem('token');
+  var data={
+    notification_email:document.getElementById('pref_email').checked?1:0,
+    notification_push:document.getElementById('pref_push').checked?1:0,
+    privacy_online:document.getElementById('pref_online').checked?1:0,
+    privacy_profile:document.getElementById('pref_profile').value
+  };
+  fetch('/api/auth.php?action=update_preferences',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+(token||'')},body:JSON.stringify(data)})
+    .then(function(r){return r.json()})
+    .then(function(d){
+      if(d.success){if(overlay)overlay.remove();toast('Đã lưu!','success');}
+      else toast(d.message||'Lỗi','error');
+    });
+}
