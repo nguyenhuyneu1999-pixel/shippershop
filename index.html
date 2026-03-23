@@ -9,8 +9,8 @@
 body{margin:0;font-family:'Be Vietnam Pro',sans-serif;background:#f0f2f5;color:#1C1C1C;-webkit-tap-highlight-color:transparent}
 .top-header{position:fixed;top:0;left:0;right:0;z-index:100;background:#fff;border-bottom:1px solid #e4e6eb}
 .tab-bar{display:flex;background:#fff;border-bottom:1px solid #f0f0f0;overflow-x:auto}
-.tab-bar button{flex:1;padding:8px 4px;border:none;background:none;font-size:12px;cursor:pointer}
-.post-card{background:#fff;margin-bottom:8px;overflow:hidden}
+.tab-bar button{flex:1;padding:6px 4px;border:none;background:none;font-size:12px;cursor:pointer}
+.post-card{background:#fff;margin-bottom:6px;overflow:hidden}
 .skeleton{background:linear-gradient(90deg,#f0f0f0 25%,#e0e0e0 50%,#f0f0f0 75%);background-size:200% 100%;animation:shimmer 1.5s infinite;border-radius:4px}
 @keyframes shimmer{0%{background-position:200% 0}100%{background-position:-200% 0}}
 </style>
@@ -222,13 +222,7 @@ if("serviceWorker" in navigator){
     <select id="fWard" onchange="loadPosts()" style="display:none"><option value="">Xã/Phường</option></select>
     <button class="loc-clear" id="locClear" onclick="clearLocFilter()" style="display:none"><i class="fas fa-times"></i> Xóa</button>
   </div>
-  <div id="ss-story-bar"></div>
-  <div id="welcomeBanner"></div>
-<div id="siteBanner"></div>
-<div id="feedGreeting" style="padding:8px 16px;font-size:15px;font-weight:600;color:#333"></div>
-<div id="postReminder"></div>
-<div id="hashtagCloud" class="post-card" style="margin:8px 0"></div>
-<div id="feed" style="background:#f0f2f5"><div class="empty"><i class="fas fa-spinner spin"></i><p>Đang tải...</p></div></div>
+  <div id="feed" style="background:#f0f2f5"><div class="empty"><i class="fas fa-spinner spin"></i><p>Đang tải...</p></div></div>
   <button class="load-more" id="loadMoreBtn" onclick="loadMore()" style="display:none">⬇ Tải thêm bài viết</button>
 </main>
 
@@ -612,7 +606,6 @@ function doFeedCheckin(){
 <script src="/js/components/online-widget.js"></script>
 <script src="/js/components/hashtags.js"></script>
 <script src="/js/components/share-sheet.js"></script>
-<script src="/js/components/pwa-install.js"></script>
 <script src="/js/components/dark-mode.js"></script>
 <script src="/js/components/search-overlay.js"></script>
 <script src="/js/components/video-player.js"></script>
