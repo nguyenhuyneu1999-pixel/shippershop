@@ -261,7 +261,7 @@ window.submitSPM=function(){
     return fetch(url,{method:"POST",headers:hdrs,credentials:"include",body:fd});
   })()
   .then(function(r){return r.json();})
-  .then(function(d){if(d.success){closeSPM();if(typeof loadPosts==="function")loadPosts();else clearDraft();
+  .then(function(d){if(d.success){closeSPM();if(typeof loadPosts==="function")loadPosts();else clearDraft();if(typeof checkAchievements==='function')checkAchievements();
       // Success animation
       var suc=document.createElement('div');
       suc.style.cssText='position:fixed;inset:0;background:rgba(255,255,255,.9);z-index:3000;display:flex;flex-direction:column;align-items:center;justify-content:center';

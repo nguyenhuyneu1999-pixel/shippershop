@@ -138,3 +138,17 @@ function setDepositAmount(amount){
   var qrBtn=document.querySelector('[onclick*="showQR"]');
   if(qrBtn)qrBtn.onclick=function(){showQR(amount);};
 }
+
+function showDepositGuide(){
+  var ov=document.createElement('div');
+  ov.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:2000;display:flex;align-items:center;justify-content:center';
+  ov.innerHTML='<div style="background:#fff;border-radius:16px;padding:20px;max-width:360px;width:90%;max-height:80vh;overflow-y:auto"><h3 style="margin:0 0 12px;font-size:17px;text-align:center">💰 Hướng dẫn nạp tiền</h3>'
+    +'<div style="padding:10px;background:#f5f3ff;border-radius:8px;margin-bottom:12px"><div style="font-weight:600;font-size:14px;color:#7C3AED;margin-bottom:6px">Bước 1: Chuyển khoản</div><div style="font-size:13px;color:#333">Chuyển tiền đến tài khoản ngân hàng bên dưới với nội dung: <b>SS[Mã user]NAP</b></div></div>'
+    +'<div style="padding:10px;background:#f0f0f0;border-radius:8px;margin-bottom:8px"><div style="font-weight:600">Vietcombank</div><div style="font-size:13px">STK: 1234567890 · SHIPPERSHOP</div></div>'
+    +'<div style="padding:10px;background:#f0f0f0;border-radius:8px;margin-bottom:8px"><div style="font-weight:600">Techcombank</div><div style="font-size:13px">STK: 0987654321 · SHIPPERSHOP</div></div>'
+    +'<div style="padding:10px;background:#f0f0f0;border-radius:8px;margin-bottom:12px"><div style="font-weight:600">MBBank</div><div style="font-size:13px">STK: 1122334455 · SHIPPERSHOP</div></div>'
+    +'<div style="padding:10px;background:#f5f3ff;border-radius:8px;margin-bottom:12px"><div style="font-weight:600;font-size:14px;color:#7C3AED;margin-bottom:6px">Bước 2: Xác nhận</div><div style="font-size:13px">Bấm "Yêu cầu nạp tiền" và nhập số tiền. Admin sẽ duyệt trong 1-24h.</div></div>'
+    +'<div style="text-align:center"><button onclick="showQR()" style="padding:10px 24px;background:#7C3AED;color:#fff;border:none;border-radius:8px;font-weight:600;cursor:pointer;margin-right:8px"><i class="fas fa-qrcode"></i> Quét QR</button><button onclick="this.closest(\'[style]\').remove()" style="padding:10px 24px;border:1px solid #ddd;border-radius:8px;background:#fff;cursor:pointer">Đóng</button></div></div>';
+  ov.onclick=function(e){if(e.target===ov)ov.remove();};
+  document.body.appendChild(ov);
+}

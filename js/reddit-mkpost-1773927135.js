@@ -60,6 +60,37 @@ function dblTapLike(pid,el){
 }
 
 
+
+// Check achievements after actions (debounced)
+var _achTimer=null;
+function checkAchievements(){
+  if(_achTimer)return;
+  _achTimer=setTimeout(function(){
+    _achTimer=null;
+    var token=localStorage.getItem('token');
+    if(!token)return;
+    fetch('/api/achievements.php?action=check',{method:'POST',headers:{'Authorization':'Bearer '+token}})
+      .then(function(r){return r.json()})
+      .then(function(d){
+        if(d.success&&d.data.new_badges&&d.data.new_badges.length){
+          d.data.new_badges.forEach(function(id){
+            showAchievementToast(id);
+          });
+        }
+      }).catch(function(){});
+  },3000);
+}
+function showAchievementToast(badgeId){
+  var badges={first_post:'📝 Bài viết đầu tiên',post_10:'✍️ Người viết tích cực',post_50:'🏆 Cây viết vàng',like_100:'❤️ Được yêu thích',streak_7:'🔥 7 ngày liên tiếp',streak_30:'💪 Shipper kiên trì',comment_50:'💬 Người giúp đỡ',group_join:'👥 Thành viên cộng đồng',follower_10:'⭐ Influencer nhí',follower_100:'🌟 Shipper nổi tiếng'};
+  var name=badges[badgeId]||badgeId;
+  var div=document.createElement('div');
+  div.style.cssText='position:fixed;top:80px;left:50%;transform:translateX(-50%);background:linear-gradient(135deg,#7C3AED,#5B21B6);color:#fff;padding:14px 24px;border-radius:16px;z-index:3000;text-align:center;box-shadow:0 8px 30px rgba(124,58,237,.4);animation:bounceIn .5s';
+  div.innerHTML='<div style="font-size:11px;opacity:.8;margin-bottom:4px">🎉 THÀNH TỰU MỚI!</div><div style="font-size:16px;font-weight:700">'+name+'</div>';
+  document.body.appendChild(div);
+  haptic('success');
+  setTimeout(function(){div.style.opacity='0';div.style.transition='opacity .5s';setTimeout(function(){div.remove();},500);},4000);
+}
+
 function updateCommentCount(postId, delta){
   var card=document.getElementById('P'+postId);
   if(!card)return;

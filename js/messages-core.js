@@ -240,3 +240,23 @@ function toggleEmojiPicker(inputId){
     });
   },100);
 }
+
+// Quick reply suggestions
+function showQuickReplies(convId){
+  var replies=['👍 OK!','Cảm ơn bạn!','Đang trên đường','Đã nhận đơn','Giao thành công!','Xin lỗi, đang bận'];
+  var el=document.getElementById('quickReplies');
+  if(!el){
+    el=document.createElement('div');
+    el.id='quickReplies';
+    el.style.cssText='display:flex;gap:6px;padding:4px 12px;overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none';
+    var input=document.getElementById('msgInput')||document.querySelector('.msg-input');
+    if(input)input.parentNode.insertBefore(el,input);
+  }
+  el.innerHTML=replies.map(function(r){
+    return '<button onclick="sendQuickReply(\''+r.replace(/'/g,"\\'")+'\','+convId+')" style="padding:4px 12px;border:1px solid #e4e6eb;border-radius:16px;background:#fff;font-size:12px;white-space:nowrap;cursor:pointer;flex-shrink:0">'+r+'</button>';
+  }).join('');
+}
+function sendQuickReply(text,convId){
+  var input=document.getElementById('msgInput')||document.querySelector('.msg-input input');
+  if(input){input.value=text;var btn=document.querySelector('.msg-send')||document.querySelector('[onclick*="sendMsg"]');if(btn)btn.click();}
+}
