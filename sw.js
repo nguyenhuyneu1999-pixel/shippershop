@@ -4,8 +4,7 @@ var CACHE = 'shippershop-v20';
 var STATIC_ASSETS = [
   '/',
   '/index.html',
-  '/css/design-system.min.css',
-  '/css/design-system.css',
+    '/css/design-system.css',
   '/css/style-v2.css',
   '/js/admin-deposits.js',
   '/css/dark-mode.css',

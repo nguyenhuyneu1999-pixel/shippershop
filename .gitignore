@@ -37,3 +37,10 @@ api/fx.php
 api/test-*.php
 
 api/test-real-error.php
+
+# Removed unused bundles
+js/ss-bundle.min.js
+js/ss-critical.min.js
+js/ss-lazy.min.js
+js/ss-loader.js
+css/design-system.min.css
