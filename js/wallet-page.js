@@ -188,3 +188,12 @@ function showTxnDetail(txn){
   ov.onclick=function(e){if(e.target===ov)ov.remove();};
   document.body.appendChild(ov);
 }
+
+function filterTransactions(type){
+  document.querySelectorAll('.txn-item').forEach(function(el){
+    if(!type||el.dataset.type===type){el.style.display='';}
+    else{el.style.display='none';}
+  });
+  document.querySelectorAll('.txn-filter').forEach(function(b){b.classList.remove('active');});
+  event.target.classList.add('active');
+}

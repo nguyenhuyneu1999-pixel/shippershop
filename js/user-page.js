@@ -202,3 +202,14 @@ function followWithAnim(userId, btn){
       btn.disabled=false;
     }).catch(function(){btn.disabled=false;btn.innerHTML='Theo dõi';});
 }
+
+function blockUser(userId){
+  if(!confirm('Chặn người dùng này? Bạn sẽ không thấy bài viết của họ.'))return;
+  var token=localStorage.getItem('token');
+  fetch('/api/social.php?action=block',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+(token||'')},body:JSON.stringify({user_id:userId})})
+    .then(function(r){return r.json()})
+    .then(function(d){
+      toast(d.message||'Done',d.success?'success':'error');
+      if(d.success&&d.data&&d.data.blocked)location.reload();
+    });
+}

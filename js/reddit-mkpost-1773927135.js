@@ -93,6 +93,16 @@ function showAchievementToast(badgeId){
 
 
 
+
+function pinPost(pid){
+  var token=localStorage.getItem('token');
+  fetch('/api/posts.php?action=pin',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+(token||'')},body:JSON.stringify({post_id:pid})})
+    .then(function(r){return r.json()})
+    .then(function(d){
+      toast(d.message||'Done',d.success?'success':'error');
+    });
+}
+
 function reportPost(pid){
   var reasons=['Spam hoặc lừa đảo','Nội dung không phù hợp','Quấy rối, bắt nạt','Thông tin sai lệch','Vi phạm quyền riêng tư','Khác'];
   var ov=document.createElement('div');

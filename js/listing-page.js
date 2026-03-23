@@ -245,3 +245,33 @@ function trackRecentView(listingId, title, image, price){
 function getRecentViewed(){
   return JSON.parse(localStorage.getItem('ss_recent_listings')||'[]');
 }
+
+// Listing image carousel
+function initListingCarousel(images){
+  if(!images||images.length<2)return;
+  var el=document.getElementById('listingImages');
+  if(!el)return;
+  var idx=0;
+  var html='<div style="position:relative;overflow:hidden;border-radius:8px"><div id="lcTrack" style="display:flex;transition:transform .3s;width:'+images.length+'00%">';
+  images.forEach(function(img){
+    html+='<img src="'+img+'" style="width:'+(100/images.length)+'%;object-fit:cover;max-height:300px" loading="lazy">';
+  });
+  html+='</div>';
+  if(images.length>1){
+    html+='<button onclick="slideLC(-1)" style="position:absolute;left:8px;top:50%;transform:translateY(-50%);background:rgba(0,0,0,.4);color:#fff;border:none;width:32px;height:32px;border-radius:50%;cursor:pointer;font-size:14px">&lt;</button>';
+    html+='<button onclick="slideLC(1)" style="position:absolute;right:8px;top:50%;transform:translateY(-50%);background:rgba(0,0,0,.4);color:#fff;border:none;width:32px;height:32px;border-radius:50%;cursor:pointer;font-size:14px">&gt;</button>';
+    html+='<div id="lcDots" style="position:absolute;bottom:8px;left:50%;transform:translateX(-50%);display:flex;gap:4px">';
+    images.forEach(function(_,i){html+='<div class="lc-dot" style="width:8px;height:8px;border-radius:50%;background:'+(i===0?'#fff':'rgba(255,255,255,.5)')+'"></div>';});
+    html+='</div>';
+  }
+  html+='</div>';
+  el.innerHTML=html;
+  
+  window._lcIdx=0;window._lcLen=images.length;
+}
+function slideLC(dir){
+  window._lcIdx=(window._lcIdx+dir+window._lcLen)%window._lcLen;
+  var track=document.getElementById('lcTrack');
+  if(track)track.style.transform='translateX(-'+(window._lcIdx*(100/window._lcLen))+'%)';
+  document.querySelectorAll('.lc-dot').forEach(function(d,i){d.style.background=i===window._lcIdx?'#fff':'rgba(255,255,255,.5)';});
+}

@@ -757,3 +757,23 @@ function showOnboarding(){
   ov.innerHTML=html;
   document.body.appendChild(ov);
 }
+
+// Check for new posts periodically
+var _lastPostCheck=Date.now();
+function checkNewPosts(){
+  fetch('/api/posts.php?limit=1&sort=new').then(function(r){return r.json()}).then(function(d){
+    var posts=d.data&&d.data.posts?d.data.posts:[];
+    if(posts.length&&new Date(posts[0].created_at.replace(' ','T')).getTime()>_lastPostCheck){
+      var badge=document.getElementById('newPostsBadge');
+      if(!badge){
+        badge=document.createElement('div');
+        badge.id='newPostsBadge';
+        badge.style.cssText='position:fixed;top:110px;left:50%;transform:translateX(-50%);background:#7C3AED;color:#fff;padding:8px 20px;border-radius:20px;font-size:13px;font-weight:600;cursor:pointer;z-index:500;box-shadow:0 4px 12px rgba(124,58,237,.4);animation:bounceIn .3s';
+        badge.textContent='⬆️ Bài viết mới';
+        badge.onclick=function(){window.scrollTo({top:0,behavior:'smooth'});badge.remove();_lastPostCheck=Date.now();loadFeed();};
+        document.body.appendChild(badge);
+      }
+    }
+  }).catch(function(){});
+}
+setInterval(function(){if(document.visibilityState==='visible'&&window.scrollY>300)checkNewPosts();},60000);
