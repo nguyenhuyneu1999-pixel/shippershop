@@ -611,7 +611,7 @@ function setupImpressionTracking(){
 
 // Auto-refresh trending every 5 minutes
 setInterval(function(){
-  if(document.visibilityState==='visible'){loadTrend();// // loadHashtags(); // moved/removed}
+  if(document.visibilityState==='visible'){loadTrend();}
 },300000);
 
 // People you may know (horizontal carousel)
