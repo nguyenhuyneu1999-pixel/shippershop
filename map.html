@@ -10,6 +10,16 @@
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700&display=swap" rel="stylesheet">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Bản đồ Giao hàng - ShipperShop</title>
+<style>
+/* Critical map layout — must be inline to avoid FOUC */
+body{height:100vh!important;display:flex!important;flex-direction:column!important;overflow:hidden!important;padding:0!important;margin:0!important;padding-bottom:0!important}
+#map{flex:1!important;z-index:1;min-height:0}
+.map-hd{position:absolute;top:0;left:0;right:0;z-index:1000;background:rgba(255,255,255,.95);padding:8px 12px;display:flex;align-items:center;gap:8px;backdrop-filter:blur(8px);box-shadow:0 2px 8px rgba(0,0,0,.1)}
+.map-filters{position:absolute;top:52px;left:0;right:0;z-index:1000;display:flex;gap:6px;padding:4px 12px;overflow-x:auto;scrollbar-width:none}
+.map-filters::-webkit-scrollbar{display:none}
+.map-bnav{position:absolute;bottom:0;left:0;right:0;z-index:1000;background:rgba(255,255,255,.95);display:flex!important;align-items:center;border-top:1px solid #e4e6eb;padding:4px 0 max(4px,env(safe-area-inset-bottom));height:56px;backdrop-filter:blur(8px)}
+.map-fab,.ask-fab,.map-locate{display:flex!important}
+</style>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
@@ -18,7 +28,7 @@
 <link rel="stylesheet" href="mobile.css">
 <link rel="stylesheet" href="css/style-v2.css">
 <script src="/js/network-handler.js" defer></script>
-<link rel="stylesheet" href="/css/map-page.css?v=20260323">
+<link rel="stylesheet" href="/css/map-page.css?v=1774259710">
 <meta name="theme-color" content="#7C3AED">
 <link rel="stylesheet" href="/css/dark-mode.css?v=1774228696">
 <script src="/js/dark-mode.js"></script>
