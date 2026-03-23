@@ -185,7 +185,7 @@ if ($method === 'GET') {
 
     // VietQR code for bank transfer
     if ($action === 'qr_code') {
-        $uid = getAuthUserId();
+        $uid = wAuth();
         if (!$uid) wErr('Auth required', 401);
         $amount = intval($_GET['amount'] ?? 0);
         $bank = $_GET['bank'] ?? 'Vietcombank';

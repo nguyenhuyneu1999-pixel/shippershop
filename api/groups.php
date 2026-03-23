@@ -193,7 +193,7 @@ if ($method === 'GET') {
         $gid = intval($_GET['group_id'] ?? 0);
         if (!$gid) gErr('Missing group_id');
         api_try_cache('grp_rules_' . $gid, 300);
-        $rules = $d->fetchAll("SELECT * FROM group_rules WHERE group_id = ? ORDER BY sort_order", [$gid]);
+        $rules = $d->fetchAll("SELECT * FROM group_rules WHERE group_id = ? ORDER BY rule_order", [$gid]);
         gOk('OK', ['rules' => $rules ?: []]);
     }
 
