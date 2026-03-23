@@ -260,3 +260,23 @@ function loadHeatmap(userId){
       el.innerHTML=html;
     }).catch(function(){});
 }
+
+// Make profile avatar/cover clickable for zoom
+function setupProfileZoom(){
+  // Avatar
+  var av=document.querySelector('.profile-avatar,.user-avatar,img[id*="avatar"],img[id*="Avatar"]');
+  if(av&&av.src){av.style.cursor='pointer';av.onclick=function(){zoomImage(this.src);};}
+  // Cover
+  var cv=document.querySelector('.cover-img,.profile-cover img,div[id*="cover"] img');
+  if(cv&&cv.src){cv.style.cursor='pointer';cv.onclick=function(){zoomImage(this.src);};}
+  // Also look for background-image covers
+  var cvDiv=document.querySelector('.cover,.profile-cover,[id*="cover"]');
+  if(cvDiv){
+    var bg=cvDiv.style.backgroundImage;
+    if(bg&&bg.indexOf('url')>-1){
+      cvDiv.style.cursor='pointer';
+      cvDiv.onclick=function(){var u=this.style.backgroundImage.replace(/url\(['"]?/,'').replace(/['"]?\)/,'');if(u&&u!=='none')zoomImage(u);};
+    }
+  }
+}
+document.addEventListener('DOMContentLoaded',function(){setTimeout(setupProfileZoom,1500);});

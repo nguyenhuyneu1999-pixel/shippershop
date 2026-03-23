@@ -46,7 +46,7 @@ function renderHeader(){
   var jb=document.getElementById("ghJoin");
   if(g.is_member){jb.className="gh-join joined";jb.textContent="\u0110\u00e3 tham gia";}
   else{jb.className="gh-join join";jb.textContent="Tham gia";}
-  var icon=g.icon_image?"<img src='"+esc(g.icon_image)+"' style='width:100%;height:100%;object-fit:cover;border-radius:16px'>":"<span>"+esc(g.name[0])+"</span>";
+  var icon=g.icon_image?"<img src='"+esc(g.icon_image)+"' style='width:100%;height:100%;object-fit:cover;border-radius:16px' onclick=\"zoomImage(this.src)\">":"<span>"+esc(g.name[0])+"</span>";
   var isAdmin=g.member_role==="admin";
   var bannerBg=g.banner_image?"background:url("+esc(g.banner_image)+") center/cover no-repeat":"background:"+(g.banner_color||"var(--primary)");
   var editBtns="";
@@ -54,9 +54,9 @@ function renderHeader(){
   var iconEdit="";
   if(isAdmin){iconEdit="<label style='position:absolute;bottom:-2px;right:-2px;width:20px;height:20px;border-radius:50%;background:var(--primary);display:flex;align-items:center;justify-content:center;cursor:pointer;border:2px solid #fff'><i class='fas fa-camera' style='color:#fff;font-size:8px'></i><input type='file' accept='image/*' style='display:none' onchange='uploadGroupImg(\"icon\",this)'></label>";}
   document.getElementById("gBanner").innerHTML=
-    "<div style='"+bannerBg+";height:140px;position:relative'>"+editBtns+"</div>"+
+    "<div style='"+bannerBg+";height:140px;position:relative;cursor:pointer' onclick=\"if(GROUP.banner_image)zoomImage(GROUP.banner_image)\">"+editBtns+"</div>"+
     "<div class='g-banner-info' style='margin-top:-32px;padding:0 16px 16px;align-items:flex-end'>"+
-    "<div class='g-banner-icon' style='background:"+(g.banner_color||"var(--primary)")+";position:relative;border:3px solid #fff;border-radius:16px;box-shadow:0 2px 8px rgba(0,0,0,.15)'>"+icon+iconEdit+"</div>"+
+    "<div class='g-banner-icon' style='cursor:pointer;background:"+(g.banner_color||"var(--primary)")+";position:relative;border:3px solid #fff;border-radius:16px;box-shadow:0 2px 8px rgba(0,0,0,.15)'>"+icon+iconEdit+"</div>"+
     "<div class='g-banner-text' style='padding-bottom:4px'><h1>"+esc(g.name)+"</h1><div class='gm'>"+fN(g.member_count)+' thành viên'+(g.online_count?' · <span style="color:#00b14f">'+g.online_count+' online</span>':'')+" th\u00e0nh vi\u00ean \u00b7 "+fN(g.post_count||0)+" b\u00e0i vi\u1ebft"+(g.cat_name?" \u00b7 "+esc(g.cat_name):"")+"</div></div></div>";
 }
 
@@ -95,7 +95,7 @@ function loadPosts(){
   var h="";
   if(GROUP.is_member&&CU){
     var av=CU.avatar?"<img src='"+CU.avatar+"' style='width:36px;height:36px;border-radius:50%;object-fit:cover;flex-shrink:0' loading=\"lazy\">":"<div style='width:36px;height:36px;border-radius:50%;background:var(--primary);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:14px;flex-shrink:0'>"+esc((CU.fullname||"?")[0])+"</div>";
-    h+="<div class='create-area'>"+av+"<input class='create-input' type='text' placeholder='B\u1ea1n \u0111ang ngh\u0129 g\u00ec? Click \u0111\u1ec3 \u0111\u0103ng b\u00e0i...' readonly onclick='openPM()'><button class='icon-btn' title='\u0110\u0103ng \u1ea3nh/video' onclick='openPM()'><i class='fas fa-image'></i></button><button class='icon-btn' title='Confession' onclick='openPM()'><i class='fas fa-mask'></i></button><button class='icon-btn' title='H\u1ecfi \u0111\u00e1p' onclick='openPM()'><i class='fas fa-question'></i></button></div>";
+    // create-area removed
   }
   h+="<div class='sort-bar'><div class='sort-btn"+(curSort==="hot"?" active":"")+"' onclick='changeSort(\"hot\",this)'>\ud83d\udd25 N\u1ed5i b\u1eadt</div><div class='sort-btn"+(curSort==="new"?" active":"")+"' onclick='changeSort(\"new\",this)'>\ud83c\udd95 M\u1edbi nh\u1ea5t</div><div class='sort-btn"+(curSort==="top"?" active":"")+"' onclick='changeSort(\"top\",this)'>\u2b06 Nhi\u1ec1u th\u00edch</div></div>";
   h+="<div id='postsArea'></div>";
