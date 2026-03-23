@@ -114,3 +114,23 @@ function showQR(amount){
       }
     }).catch(function(){document.getElementById('qrLoading').innerHTML='<div style="color:#e74c3c">Lỗi kết nối</div>';});
 }
+
+// Quick deposit amounts
+function renderQuickAmounts(){
+  var el=document.getElementById('quickAmounts');
+  if(!el)return;
+  var amounts=[20000,50000,100000,200000,500000,1000000];
+  var html='<div style="display:flex;flex-wrap:wrap;gap:6px;margin:8px 0">';
+  amounts.forEach(function(a){
+    html+='<button onclick="setDepositAmount('+a+')" style="padding:6px 12px;border:1px solid #e4e6eb;border-radius:8px;background:#fff;font-size:12px;cursor:pointer;font-weight:500">'+Number(a).toLocaleString("vi-VN")+'đ</button>';
+  });
+  html+='</div>';
+  el.innerHTML=html;
+}
+function setDepositAmount(amount){
+  var input=document.getElementById('depositAmount');
+  if(input)input.value=amount;
+  // Update QR if visible
+  var qrBtn=document.querySelector('[onclick*="showQR"]');
+  if(qrBtn)qrBtn.onclick=function(){showQR(amount);};
+}

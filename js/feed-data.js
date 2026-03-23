@@ -51,6 +51,7 @@ async function loadPosts(append=false){
       document.getElementById('stP').textContent=d.data.total||0;
       document.getElementById('stT').textContent=Math.floor((d.data.total||0)*0.15+Math.random()*20);
       document.getElementById('loadMoreBtn').style.display=page<totalPg?'block':'none'; if(d.data&&d.data.next_cursor)_feedCursor=d.data.next_cursor; _feedLoading=false; if(!_infiniteObs)setupInfiniteScroll();
+    setupImpressionTracking();
     // Check for polls
     document.querySelectorAll('.poll-container').forEach(function(el){
       var pid=el.id.replace('poll','');
@@ -558,4 +559,35 @@ function showEmptyFeed(){
   if(feed&&feed.children.length===0){
     feed.innerHTML='<div style="text-align:center;padding:60px 20px"><div style="font-size:48px;margin-bottom:12px">📭</div><div style="font-size:18px;font-weight:700;color:#333;margin-bottom:8px">Chưa có bài viết nào</div><div style="font-size:14px;color:#65676B;margin-bottom:16px">Hãy là người đầu tiên chia sẻ!</div><button onclick="if(typeof openSPM===\'function\')openSPM()" style="padding:10px 24px;background:#7C3AED;color:#fff;border:none;border-radius:8px;font-size:14px;font-weight:600;cursor:pointer">Tạo bài viết</button></div>';
   }
+}
+
+// Track post impressions (lightweight, batched)
+var _impressionQueue=[];
+var _impressionTimer=null;
+function trackImpression(postId){
+  if(_impressionQueue.indexOf(postId)<0)_impressionQueue.push(postId);
+  if(!_impressionTimer){
+    _impressionTimer=setTimeout(function(){
+      if(_impressionQueue.length){
+        var ids=_impressionQueue.splice(0,20);
+        navigator.sendBeacon('/api/posts.php?action=impressions',JSON.stringify({post_ids:ids}));
+      }
+      _impressionTimer=null;
+    },5000);
+  }
+}
+// Observe post cards for impressions
+var _impObs=null;
+function setupImpressionTracking(){
+  if(!('IntersectionObserver' in window))return;
+  _impObs=new IntersectionObserver(function(entries){
+    entries.forEach(function(e){
+      if(e.isIntersecting&&e.target.id){
+        var pid=parseInt(e.target.id.replace('P',''));
+        if(pid)trackImpression(pid);
+        _impObs.unobserve(e.target);
+      }
+    });
+  },{threshold:0.5});
+  document.querySelectorAll('.post-card[id]').forEach(function(el){_impObs.observe(el);});
 }

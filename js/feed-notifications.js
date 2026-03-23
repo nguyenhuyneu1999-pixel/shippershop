@@ -110,7 +110,12 @@ function clickNotif(el){
     var badge=document.getElementById("tabNotifBadge");
     if(badge){if(items.length>0){badge.style.display="flex";badge.textContent=items.length>99?"99+":items.length;}else{badge.style.display="none";}}
   }
-  if(pid){closeNotifPage();var cmtId=null;var nk=el.dataset.key||"";if(nk.indexOf("cmt_")===0)cmtId=nk.replace("cmt_","");var url="post-detail.html?id="+pid;if(cmtId)url+="&comment="+cmtId;window.location.href=url;}
+  if(pid){closeNotifPage();var cmtId=null;var nk=el.dataset.key||"";if(nk.indexOf("cmt_")===0)cmtId=nk.replace("cmt_","");var url;
+    var nType=(el.dataset.type||'').toLowerCase();
+    if(nType==='group')url='group.html?id='+(el.dataset.groupid||pid);
+    else if(nType==='message')url='messages.html?conv='+(el.dataset.convid||'');
+    else if(nType==='follow')url='user.html?id='+(el.dataset.actorid||'');
+    else url="post-detail.html?id="+pid;if(cmtId)url+="&comment="+cmtId;window.location.href=url;}
 }
 function markAllRead(){
   var items=document.querySelectorAll("#notifPageList [data-read=\"0\"]");
