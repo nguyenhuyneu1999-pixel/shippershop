@@ -326,6 +326,35 @@ if ($method === 'POST') {
             if ($pid) { try { $db->query("UPDATE posts SET views_count = views_count + 1 WHERE id = ?", [$pid]); } catch (Throwable $e) {} }
             success('OK');
         }
+        if ($action === 'edit') {
+            $postId = intval($input['post_id'] ?? 0);
+            $newContent = trim($input['content'] ?? '');
+            if (!$postId || strlen($newContent) < 5) { error('Nội dung tối thiểu 5 ký tự'); }
+            $post = $db->fetchOne("SELECT user_id FROM posts WHERE id = ? AND `status` = 'active'", [$postId]);
+            if (!$post || intval($post['user_id']) !== $userId) { error('Không có quyền chỉnh sửa'); }
+            $db->query("UPDATE posts SET content = ?, edited_at = NOW() WHERE id = ?", [$newContent, $postId]);
+            api_cache_flush('feed');
+            success('Đã cập nhật bài viết', ['post_id' => $postId]);
+        }
+        if ($action === 'pin') {
+            $postId = intval($input['post_id'] ?? 0);
+            if (!$postId) { error('Missing post_id'); }
+            $post = $db->fetchOne("SELECT user_id, is_pinned FROM posts WHERE id = ? AND `status` = 'active'", [$postId]);
+            if (!$post || intval($post['user_id']) !== $userId) { error('Không có quyền'); }
+            $db->query("UPDATE posts SET is_pinned = 0 WHERE user_id = ? AND is_pinned = 1", [$userId]);
+            $newPin = intval($post['is_pinned']) ? 0 : 1;
+            $db->query("UPDATE posts SET is_pinned = ? WHERE id = ?", [$newPin, $postId]);
+            success($newPin ? 'Đã ghim' : 'Đã bỏ ghim', ['is_pinned' => $newPin]);
+        }
+        if ($action === 'report') {
+            $postId = intval($input['post_id'] ?? 0);
+            $reason = trim($input['reason'] ?? '');
+            if (!$postId || !$reason) { error('Thiếu thông tin'); }
+            $existing = $db->fetchOne("SELECT id FROM post_reports WHERE post_id = ? AND reporter_id = ?", [$postId, $userId]);
+            if ($existing) { error('Bạn đã báo cáo bài này rồi'); }
+            $db->query("INSERT INTO post_reports (post_id, reporter_id, reason, `status`, created_at) VALUES (?, ?, ?, 'pending', NOW())", [$postId, $userId, $reason]);
+            success('Đã báo cáo! Admin sẽ xem xét.');
+        }
         if ($action === "vote") {
             $postId = intval($input["post_id"] ?? 0);
             $voteType = $input["vote_type"] ?? "";
