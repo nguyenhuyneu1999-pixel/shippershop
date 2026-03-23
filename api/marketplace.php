@@ -112,7 +112,18 @@ if ($method === 'GET' && empty($action)) {
         $db->query("UPDATE marketplace_listings SET views_count = views_count + 1 WHERE id = ?", [$id]);
         mSuccess('OK', $item);
     }
-    // List
+    
+
+// Get marketplace categories
+if ($method === 'GET' && $action === 'categories') {
+    api_try_cache('mk_cats', 3600);
+    $cats = $db->fetchAll(
+        "SELECT category, COUNT(*) as count FROM marketplace_listings WHERE `status` = 'active' GROUP BY category ORDER BY count DESC", []
+    );
+    mSuccess('OK', ['categories' => $cats ?: []]);
+}
+
+// List
     $cat = $_GET['category'] ?? '';
     $search = $_GET['search'] ?? '';
     $page = max(1, intval($_GET['page'] ?? 1));

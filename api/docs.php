@@ -39,6 +39,8 @@ echo json_encode([
             ['POST /groups.php?action=upload_cover', 'Group cover', 'multipart {group_id, image}']
         ,
             ['POST /groups.php?action=share_post', 'Share to group', '{post_id, group_id}']
+        ,
+            ['POST /groups.php?action=invite', 'Invite friend', '{group_id, user_id}']
         ],
             ['GET /groups.php?action=posts&group_id=X', 'Group posts', '?page=1&sort=new|hot|top&cursor=X'],
             ['GET /groups.php?action=members&group_id=X', 'Members', ''],
@@ -86,6 +88,10 @@ echo json_encode([
         'Marketplace' => [
             ['GET /marketplace.php', 'Listings', '?category=X&search=X&page=1',
             ['GET /marketplace.php?sort=price_asc', 'Sort by price', '?price_min=X&price_max=Y&condition=new|used']
+        ,
+            ['POST /marketplace.php?action=mark_sold', 'Mark sold', '{listing_id} — toggle']
+        ,
+            ['GET /marketplace.php?action=categories', 'Categories', 'With listing counts']
         ],
             ['GET /marketplace.php?id=X', 'Single listing', ''],
             ['POST /marketplace.php', 'Create listing', '{title, price, category, images[]}'],

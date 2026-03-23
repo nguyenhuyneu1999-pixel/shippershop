@@ -57,7 +57,7 @@ function renderHeader(){
     "<div style='"+bannerBg+";height:140px;position:relative'>"+editBtns+"</div>"+
     "<div class='g-banner-info' style='margin-top:-32px;padding:0 16px 16px;align-items:flex-end'>"+
     "<div class='g-banner-icon' style='background:"+(g.banner_color||"var(--primary)")+";position:relative;border:3px solid #fff;border-radius:16px;box-shadow:0 2px 8px rgba(0,0,0,.15)'>"+icon+iconEdit+"</div>"+
-    "<div class='g-banner-text' style='padding-bottom:4px'><h1>"+esc(g.name)+"</h1><div class='gm'>"+fN(g.member_count)+" th\u00e0nh vi\u00ean \u00b7 "+fN(g.post_count||0)+" b\u00e0i vi\u1ebft"+(g.cat_name?" \u00b7 "+esc(g.cat_name):"")+"</div></div></div>";
+    "<div class='g-banner-text' style='padding-bottom:4px'><h1>"+esc(g.name)+"</h1><div class='gm'>"+fN(g.member_count)+' thành viên'+(g.online_count?' · <span style="color:#00b14f">'+g.online_count+' online</span>':'')+" th\u00e0nh vi\u00ean \u00b7 "+fN(g.post_count||0)+" b\u00e0i vi\u1ebft"+(g.cat_name?" \u00b7 "+esc(g.cat_name):"")+"</div></div></div>";
 }
 
 /* ========== TABS ========== */
