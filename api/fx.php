@@ -4,5 +4,6 @@ require_once __DIR__ . '/../includes/config.php';
 require_once __DIR__ . '/../includes/db.php';
 header('Content-Type: application/json');
 $d = db();
-$u = $d->fetchOne("SELECT id, username, email, `status`, LEFT(password,20) as pw_prefix FROM users WHERE id = 2");
-echo json_encode($u);
+$ip = $_SERVER['HTTP_X_FORWARDED_FOR'] ?? $_SERVER['REMOTE_ADDR'] ?? '?';
+$attempts = $d->fetchAll("SELECT * FROM login_attempts WHERE created_at > DATE_SUB(NOW(), INTERVAL 15 MINUTE) ORDER BY created_at DESC LIMIT 10");
+echo json_encode(['ip' => $ip, 'recent_attempts' => count($attempts ?: []), 'attempts' => $attempts]);
