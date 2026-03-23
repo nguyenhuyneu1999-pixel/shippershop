@@ -446,6 +446,32 @@ if ($method === 'POST') {
         gOk('Đã chia sẻ vào nhóm');
     }
 
+
+    // Upload group cover
+    if ($action === 'upload_cover') {
+        $uid = getAuthUserId(); if (!$uid) gErr('Auth required', 401);
+        $gid = intval($_POST['group_id'] ?? 0);
+        if (!$gid) gErr('Missing group_id');
+        
+        $member = $d->fetchOne("SELECT role FROM group_members WHERE group_id = ? AND user_id = ?", [$gid, $uid]);
+        if (!$member || $member['role'] !== 'admin') gErr('Admin only');
+        
+        if (empty($_FILES['image'])) gErr('No file');
+        $file = $_FILES['image'];
+        if ($file['size'] > 5 * 1024 * 1024) gErr('Max 5MB');
+        
+        $ext = pathinfo($file['name'], PATHINFO_EXTENSION) ?: 'jpg';
+        $dir = __DIR__ . '/../uploads/groups';
+        if (!is_dir($dir)) mkdir($dir, 0755, true);
+        $fname = 'cover_' . $gid . '_' . time() . '.' . $ext;
+        move_uploaded_file($file['tmp_name'], $dir . '/' . $fname);
+        
+        $url = '/uploads/groups/' . $fname;
+        $d->query("UPDATE `groups` SET cover_image = ? WHERE id = ?", [$url, $gid]);
+        api_cache_flush('grp_');
+        gOk('Uploaded', ['url' => $url]);
+    }
+
 echo json_encode(['success'=>false,'message'=>'Missing comment_id']); exit; }
         $exists = $d->fetchOne("SELECT id FROM group_post_comment_likes WHERE comment_id = ? AND user_id = ?", [$cid, $uid]);
         if ($exists) {
