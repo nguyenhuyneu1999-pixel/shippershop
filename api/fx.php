@@ -4,19 +4,32 @@ require_once __DIR__ . '/../includes/config.php';
 require_once __DIR__ . '/../includes/db.php';
 header('Content-Type: application/json');
 $d = db();
-$cols = $d->fetchAll("SHOW COLUMNS FROM `groups`");
-$colNames = array_map(function($c){return $c['Field'];}, $cols);
 
-// Check users table for cover
-$ucols = $d->fetchAll("SHOW COLUMNS FROM users");
-$ucolNames = array_map(function($c){return $c['Field'];}, $ucols);
+// Set cover for groups without one
+$groups = $d->fetchAll("SELECT id, name, cover_image FROM `groups`");
+$covers = [
+    '/uploads/posts/seed_v2_1.jpg', '/uploads/posts/seed_v2_2.jpg',
+    '/uploads/posts/seed_v2_3.jpg', '/uploads/posts/seed_v2_4.jpg',
+    '/uploads/posts/seed_v2_5.jpg', '/uploads/posts/seed_v2_6.jpg',
+];
+$updated = 0;
+foreach ($groups as $g) {
+    if (empty($g['cover_image'])) {
+        $cover = $covers[$g['id'] % count($covers)];
+        $d->query("UPDATE `groups` SET cover_image = ? WHERE id = ?", [$cover, $g['id']]);
+        $updated++;
+    }
+}
 
-// Sample group
-$g = $d->fetchOne("SELECT id, name, cover_image, icon_image FROM `groups` LIMIT 1");
+// Seed cover for users without one
+$d->query("UPDATE users SET cover_image = '/uploads/posts/seed_v2_1.jpg' WHERE cover_image IS NULL OR cover_image = '' LIMIT 100");
+$d->query("UPDATE users SET cover_image = '/uploads/posts/seed_v2_2.jpg' WHERE (cover_image IS NULL OR cover_image = '') AND id % 6 = 0 LIMIT 100");
+$d->query("UPDATE users SET cover_image = '/uploads/posts/seed_v2_3.jpg' WHERE (cover_image IS NULL OR cover_image = '') AND id % 6 = 1 LIMIT 100");
+$d->query("UPDATE users SET cover_image = '/uploads/posts/seed_v2_4.jpg' WHERE (cover_image IS NULL OR cover_image = '') AND id % 6 = 2 LIMIT 100");
+$d->query("UPDATE users SET cover_image = '/uploads/posts/seed_v2_5.jpg' WHERE (cover_image IS NULL OR cover_image = '') AND id % 6 = 3 LIMIT 100");
+$d->query("UPDATE users SET cover_image = '/uploads/posts/seed_v2_6.jpg' WHERE (cover_image IS NULL OR cover_image = '') AND id % 6 = 4 LIMIT 100");
 
-echo json_encode([
-    'group_cols' => $colNames,
-    'has_cover' => in_array('cover_image', $colNames),
-    'user_cols_cover' => in_array('cover_image', $ucolNames),
-    'sample_group' => $g
-]);
+$nocover_users = $d->fetchOne("SELECT COUNT(*) as c FROM users WHERE cover_image IS NULL OR cover_image = ''");
+$nocover_groups = $d->fetchOne("SELECT COUNT(*) as c FROM `groups` WHERE cover_image IS NULL OR cover_image = ''");
+
+echo json_encode(['groups_updated' => $updated, 'users_no_cover' => $nocover_users['c'], 'groups_no_cover' => $nocover_groups['c']]);
