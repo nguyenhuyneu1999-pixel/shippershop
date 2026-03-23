@@ -120,7 +120,7 @@ function mkPost(p){
   +'<div class="post-meta">'+av+'<div style="flex:1;min-width:0"><div style="display:flex;align-items:center;justify-content:space-between">'+authorLink+'<button class="post-dots" onclick="event.stopPropagation();togMenu('+p.id+')"><i class="fas fa-ellipsis"></i></button></div><div style="font-size:12px;color:#999;display:flex;align-items:center;gap:4px">'+shipBadge+lvlBadge+'<span>·</span><span>'+ago(p.created_at)+'</span>'+badge+pvBadge+anonBadge+subBadge+'</div></div></div>'
   +title+'<div class="post-menu" id="pm'+p.id+'" style="display:none"><div id="sv'+p.id+'" onclick="togSave('+p.id+')"><i class="'+(isSaved?'fas':'far')+' fa-bookmark" style="color:'+(isSaved?'#7C3AED':'inherit')+'"></i> '+(isSaved?'Bỏ lưu':'Lưu bài viết')+'</div>'+(canDel?'<div onclick="editP('+p.id+')"><i class="fas fa-pen"></i> Sửa bài</div><div onclick="delP('+p.id+')"><i class="far fa-trash-can"></i> Xóa bài</div>':'')+'<div onclick="reportP('+p.id+')"><i class="fas fa-flag"></i> Báo cáo</div>'+(canDel?'':'<div onclick="muteUser('+p.user_id+')"><i class="fas fa-volume-mute"></i> Tắt tiếng</div><div onclick="blockUser('+p.user_id+')"><i class="fas fa-ban"></i> Chặn</div>')+'<div onclick="shareToGroup('+p.id+')"><i class="fas fa-share-from-square"></i> Chia sẻ vào nhóm</div><div onclick="togMenu('+p.id+')"><i class="fas fa-times"></i> Đóng</div></div>'+contentH+addSpoilerBlur(imgH+vidH,p)
   +'</div>'
-  +'<div class="pa3-stats"><span>'+(likes>0?fN(likes)+' đơn giao thành công':'')+'</span><span>'+(parseInt(p.comments_count||0)>0?fN(p.comments_count||0)+' ghi chú':'')+'</span><span>'+(parseInt(p.views_count||0)>0?fN(p.views_count)+' lượt xem':'')+'</span></div>'
+  +'<div class="poll-container" id="poll'+p.id+'"></div><div class="pa3-stats"><span>'+(likes>0?fN(likes)+' đơn giao thành công':'')+'</span><span>'+(parseInt(p.comments_count||0)>0?fN(p.comments_count||0)+' ghi chú':'')+'</span><span>'+(parseInt(p.views_count||0)>0?fN(p.views_count)+' lượt xem':'')+'</span></div>'
   +'<div class="post-actions-3">'
   +'<button class="pa3-btn'+(isLiked?' pa3-active':'')+'" id="lk'+p.id+'" onclick="likePost('+p.id+',this)"><span>Thành công</span></button>'
   +'<button class="pa3-btn" onclick="openGhiChu('+p.id+')"><span id="nc'+p.id+'">Ghi chú</span></button>'
@@ -287,6 +287,37 @@ function doShareToGroup(pid,gid,overlay){
     .then(function(d){
       if(overlay)overlay.remove();
       toast(d.success?'Đã chia sẻ!':'Lỗi: '+(d.message||''),'success');
+    });
+}
+
+
+function loadPoll(postId, container){
+  fetch('/api/polls.php?action=results&post_id='+postId)
+    .then(function(r){return r.json()})
+    .then(function(d){
+      if(!d.success||!d.data||!d.data.options)return;
+      var p=d.data;
+      var total=p.total_votes||0;
+      var html='<div class="poll-box" style="padding:8px 12px;border-top:1px solid #f0f0f0"><div style="font-weight:600;font-size:14px;margin-bottom:8px">'+esc(p.question||'Khảo sát')+'</div>';
+      p.options.forEach(function(opt){
+        var pct=total>0?Math.round(opt.vote_count/total*100):0;
+        var isVoted=p.user_vote===opt.id;
+        html+='<div onclick="votePoll('+p.poll_id+','+opt.id+','+postId+')" style="position:relative;padding:8px 12px;margin:4px 0;border-radius:8px;cursor:pointer;border:1px solid '+(isVoted?'#7C3AED':'#e4e6eb')+';overflow:hidden"><div style="position:absolute;left:0;top:0;bottom:0;width:'+pct+'%;background:'+(isVoted?'rgba(124,58,237,.12)':'#f5f5f5')+';border-radius:8px;transition:width .3s"></div><div style="position:relative;display:flex;justify-content:space-between;align-items:center"><span style="font-size:13px;'+(isVoted?'font-weight:600;color:#7C3AED':'')+'">'+esc(opt.text)+'</span><span style="font-size:12px;color:#65676B">'+pct+'%</span></div></div>';
+      });
+      html+='<div style="font-size:11px;color:#999;margin-top:6px">'+total+' phiếu'+(p.expired?' · Đã kết thúc':'')+'</div></div>';
+      container.innerHTML=html;
+    }).catch(function(){});
+}
+function votePoll(pollId,optId,postId){
+  var token=localStorage.getItem('token');
+  if(!token){toast('Đăng nhập!');return;}
+  fetch('/api/polls.php?action=vote',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+token},body:JSON.stringify({poll_id:pollId,option_id:optId})})
+    .then(function(r){return r.json()})
+    .then(function(d){
+      if(d.success){
+        var card=document.getElementById('P'+postId);
+        if(card){var pb=card.querySelector('.poll-box');if(pb)loadPoll(postId,pb.parentNode);}
+      }else{toast(d.message||'Lỗi','error');}
     });
 }
 
