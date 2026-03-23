@@ -43,19 +43,21 @@ $MONTHLY_TARGET = 1300;
 $MONTHLY_REWARD = 100000;   // 100.000đ
 
 /**
- * ANTI-FRAUD: Đếm đơn giao thành công hợp lệ
+ * ANTI-FRAUD v2: Đếm đơn giao thành công hợp lệ
  * 
  * Rules:
- * 1. 1 user tối đa 2 like/ngày cho cùng 1 người (chống like chéo)
- * 2. Tài khoản liker < 3 ngày → không tính
- * 3. Mutual like ratio > 60% → không tính cặp đó
- * 4. Self-like → không tính
+ * 1. Max 2 like/ngày từ cùng 1 user
+ * 2. Account < 3 ngày → skip
+ * 3. Mutual like > 60% → skip pair
+ * 4. Self-like → skip
+ * 5. CLUSTER DETECTION: nếu > 70% likes đến từ cùng 1 nhóm ≤20 users → giảm 50%
+ * 6. BURST DETECTION: > 10 likes trong 5 phút → chỉ tính 3
+ * 7. DIVERSITY SCORE: cần ≥ 10 unique users mới tính đủ 50 đơn
  */
 function countValidDeliveries($d, $uid, $since) {
-    // Get all likes on my posts since $since
     $likes = $d->fetchAll(
         "SELECT pl.user_id as liker_id, pl.post_id, DATE(pl.created_at) as like_date,
-                u.created_at as liker_joined
+                pl.created_at as like_time, u.created_at as liker_joined
          FROM post_likes pl 
          JOIN posts p ON pl.post_id = p.id 
          JOIN users u ON pl.user_id = u.id
@@ -67,33 +69,80 @@ function countValidDeliveries($d, $uid, $since) {
     if (!$likes) return 0;
     
     $validCount = 0;
-    $likerDailyCount = [];  // [liker_id][date] => count
-    $mutualCache = [];      // cache mutual check results
+    $likerDailyCount = [];   // [liker_id_date] => count
+    $mutualCache = [];       // cache mutual check
+    $uniqueUsers = [];       // track unique valid likers
+    $burstWindow = [];       // timestamp tracking for burst detection
     
     foreach ($likes as $like) {
         $likerId = intval($like['liker_id']);
         $likeDate = $like['like_date'];
+        $likeTime = strtotime($like['like_time']);
         
-        // Rule: Self-like không tính
+        // Rule 4: Self-like
         if ($likerId === $uid) continue;
         
-        // Rule: Tài khoản < 3 ngày không tính
+        // Rule 2: Account < 3 ngày
         $joinedDays = (time() - strtotime($like['liker_joined'])) / 86400;
         if ($joinedDays < 3) continue;
         
-        // Rule: 1 user tối đa 2 like/ngày cho cùng 1 người
+        // Rule 1: Max 2 like/ngày từ cùng 1 user
         $key = $likerId . '_' . $likeDate;
         if (!isset($likerDailyCount[$key])) $likerDailyCount[$key] = 0;
         $likerDailyCount[$key]++;
         if ($likerDailyCount[$key] > 2) continue;
         
-        // Rule: Mutual like ratio > 60% → không tính
+        // Rule 3: Mutual like > 60%
         if (!isset($mutualCache[$likerId])) {
             $mutualCache[$likerId] = checkMutualLike($d, $uid, $likerId);
         }
         if ($mutualCache[$likerId]) continue;
         
+        // Rule 6: BURST — > 10 likes trong 5 phút → chỉ tính 3
+        $burstWindow[] = $likeTime;
+        // Remove likes older than 5 min from window
+        $burstWindow = array_filter($burstWindow, function($t) use ($likeTime) {
+            return ($likeTime - $t) <= 300;
+        });
+        $burstWindow = array_values($burstWindow);
+        if (count($burstWindow) > 10) {
+            // Burst detected — only count if among first 3 in window
+            static $burstDateCounted = [];
+            $burstKey = $likeDate . '_burst';
+            if (!isset($burstDateCounted[$burstKey])) $burstDateCounted[$burstKey] = 0;
+            $burstDateCounted[$burstKey]++;
+            if ($burstDateCounted[$burstKey] > 3) continue;
+        }
+        
         $validCount++;
+        $uniqueUsers[$likerId] = true;
+    }
+    
+    // Rule 5: CLUSTER — nếu > 70% likes từ ≤ 20 users → giảm 50%
+    $uniqueCount = count($uniqueUsers);
+    if ($validCount > 20 && $uniqueCount <= 20) {
+        // Check concentration: top 20 users chiếm bao nhiêu %
+        $userCounts = [];
+        foreach ($likes as $like) {
+            $lid = intval($like['liker_id']);
+            if ($lid === $uid) continue;
+            if (!isset($userCounts[$lid])) $userCounts[$lid] = 0;
+            $userCounts[$lid]++;
+        }
+        arsort($userCounts);
+        $top20 = array_slice($userCounts, 0, 20, true);
+        $top20Total = array_sum($top20);
+        $allTotal = array_sum($userCounts);
+        
+        if ($allTotal > 0 && ($top20Total / $allTotal) > 0.7) {
+            $validCount = intval($validCount * 0.5); // Giảm 50%
+        }
+    }
+    
+    // Rule 7: DIVERSITY — cần ≥ 10 unique users cho 50 đơn
+    // Nếu < 10 unique users → cap tại (uniqueUsers * 3)
+    if ($uniqueCount < 10 && $validCount > ($uniqueCount * 3)) {
+        $validCount = $uniqueCount * 3;
     }
     
     return $validCount;
