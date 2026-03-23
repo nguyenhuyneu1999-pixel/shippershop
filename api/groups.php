@@ -1,5 +1,8 @@
 <?php
 session_start();
+require_once __DIR__ . '/../includes/micro-cache.php';
+if (microCacheServe('mc_groups.php' . md5($_SERVER['QUERY_STRING'] ?? ''), 20)) exit;
+
 define('APP_ACCESS', true);
 require_once __DIR__ . '/../includes/config.php';
 require_once __DIR__ . '/../includes/db.php';

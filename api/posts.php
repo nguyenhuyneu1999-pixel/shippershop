@@ -1,4 +1,8 @@
 <?php
+// Ultra-fast cache: respond in <5ms for cached GET requests
+require_once __DIR__ . '/../includes/micro-cache.php';
+$_mcKey = 'feed_' . md5(($_SERVER['QUERY_STRING'] ?? '') . ($_SERVER['HTTP_AUTHORIZATION'] ?? ''));
+if (microCacheServe($_mcKey, 20)) exit;
 session_start();
 /**
  * ============================================
@@ -291,6 +295,7 @@ $whereClause = implode(' AND ', $where);
     // Save to cache
     api_save_cache($_cacheKey, $feedResponse, 30);
     $json = json_encode($feedResponse, JSON_UNESCAPED_UNICODE);
+    microCacheSave($_mcKey, $json, 20);
     // ETag for 304
     $etag = '"' . md5($json) . '"';
     header('Content-Type: application/json; charset=utf-8');
