@@ -30,7 +30,7 @@ if($method==='GET'){
     }
     $created=new DateTime($user['created_at']);$now=new DateTime();
     // Badges
-    $badges=$d->fetchAll("SELECT badge_name, badge_icon, earned_at FROM user_badges WHERE user_id=? ORDER BY earned_at DESC LIMIT 10",[$targetId]);
+    $badges=$d->fetchAll("SELECT ub.badge_id, ub.earned_at FROM user_badges ub WHERE ub.user_id=? ORDER BY ub.earned_at DESC LIMIT 10",[$targetId]);
     $user['badges']=$badges?:[];
     $user['account_age_days']=$now->diff($created)->days;
     // Subscription badge
