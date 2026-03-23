@@ -1,33 +1,50 @@
-# ShipperShop - .htaccess Configuration
+# ShipperShop .htaccess — Optimized for 100K+ users
+# Last updated: 2026-03-23
 
-# Enable Rewrite Engine
 RewriteEngine On
 
-# Pass Authorization header to PHP (cPanel/LiteSpeed fix)
+# Pass Authorization header to PHP
 RewriteCond %{HTTP:Authorization} ^(.*)
 RewriteRule .* - [e=HTTP_AUTHORIZATION:%1]
 
-# Referral deep link: /r/CODE → register with ref code
+# Referral deep link
 RewriteRule ^r/([A-Za-z0-9_-]+)$ /register.html?ref=$1 [R=302,L]
 
-# DirectoryIndex
 DirectoryIndex index.html index.php
-
-# Prevent directory listing
 Options -Indexes
 
-# Block access to sensitive folders/files
+# Block sensitive files
 RewriteRule ^includes/ - [F,L]
 RewriteRule ^\.git - [F,L]
 RewriteRule ^\.env - [F,L]
 
-# Landing page SEO URL
+# SEO URL
 RewriteRule ^gioi-thieu/?$ /gioi-thieu.html [L]
 
-# Allow direct access to files/folders
+# Allow direct file access
 RewriteCond %{REQUEST_FILENAME} -f [OR]
 RewriteCond %{REQUEST_FILENAME} -d
 RewriteRule ^ - [L]
+
+# ============================================
+# LITESPEED CACHE — serves from RAM, 0ms
+# ============================================
+<IfModule LiteSpeed>
+    # Enable LSCache for GET API (short TTL, public only)
+    CacheEnable public /api/
+    
+    # Pages: cache 5 minutes (HTML with no-vary)
+    CacheLookup on
+    
+    # API: controlled per-endpoint via X-LiteSpeed headers in PHP
+    # Default: 15s for API GET, 0 for POST
+    
+    # DO NOT cache these (auth-sensitive)
+    RewriteRule ^api/auth\.php - [E=cache-control:no-cache]
+    RewriteRule ^api/wallet-api\.php - [E=cache-control:no-cache]
+    RewriteRule ^api/admin - [E=cache-control:no-cache]
+    RewriteRule ^api/messages-api\.php - [E=cache-control:no-cache]
+</IfModule>
 
 # ============================================
 # SECURITY HEADERS
@@ -39,13 +56,10 @@ RewriteRule ^ - [L]
     Header always set Referrer-Policy "strict-origin-when-cross-origin"
     Header always set Permissions-Policy "camera=self, microphone=self, geolocation=self"
     Header always set Strict-Transport-Security "max-age=31536000; includeSubDomains; preload"
-    # CSP - allow inline styles/scripts (needed for current architecture), restrict sources
     Header always set Content-Security-Policy "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' cdnjs.cloudflare.com fonts.googleapis.com provinces.open-api.vn www.gstatic.com *.firebaseio.com *.googleapis.com; style-src 'self' 'unsafe-inline' cdnjs.cloudflare.com fonts.googleapis.com; font-src 'self' fonts.gstatic.com cdnjs.cloudflare.com; img-src 'self' data: blob: https:; connect-src 'self' https: wss:; media-src 'self' blob: https:; frame-src 'self' https:"
 </IfModule>
 
-# ============================================
 # CORS for fonts
-# ============================================
 <FilesMatch "\.(ttf|otf|eot|woff|woff2)$">
     <IfModule mod_headers.c>
         Header set Access-Control-Allow-Origin "*"
@@ -53,28 +67,14 @@ RewriteRule ^ - [L]
 </FilesMatch>
 
 # ============================================
-# CACHING
+# CACHING — Aggressive for static, smart for API
 # ============================================
-<FilesMatch "\.(html|htm)$">
-    <IfModule mod_headers.c>
-        Header set Cache-Control "no-cache, no-store, must-revalidate"
-        Header set Pragma "no-cache"
-        Header set Expires "0"
-    </IfModule>
-</FilesMatch>
-
-<FilesMatch "\.php$">
-    <IfModule mod_headers.c>
-        Header set Cache-Control "no-store, no-cache, must-revalidate, max-age=0"
-    </IfModule>
-</FilesMatch>
-
 <IfModule mod_expires.c>
     ExpiresActive On
     ExpiresDefault "access plus 1 week"
-    ExpiresByType text/css "access plus 1 week"
-    ExpiresByType application/javascript "access plus 1 week"
-    ExpiresByType text/javascript "access plus 1 week"
+    ExpiresByType text/css "access plus 4 weeks"
+    ExpiresByType application/javascript "access plus 4 weeks"
+    ExpiresByType text/javascript "access plus 4 weeks"
     ExpiresByType image/gif "access plus 1 year"
     ExpiresByType image/jpeg "access plus 1 year"
     ExpiresByType image/png "access plus 1 year"
@@ -86,70 +86,32 @@ RewriteRule ^ - [L]
     ExpiresByType application/json "access plus 0 seconds"
 </IfModule>
 
-# ETag for cache validation
+# Cache headers per file type
+<IfModule mod_headers.c>
+    # CSS/JS: 4 weeks (versioned filenames)
+    <FilesMatch "\.(css|js)$">
+        Header set Cache-Control "public, max-age=2592000, immutable"
+    </FilesMatch>
+    # Images/fonts: 1 year
+    <FilesMatch "\.(jpg|jpeg|png|gif|webp|svg|ico|woff|woff2)$">
+        Header set Cache-Control "public, max-age=31536000, immutable"
+    </FilesMatch>
+    # HTML: revalidate always
+    <FilesMatch "\.html$">
+        Header set Cache-Control "no-cache, must-revalidate"
+    </FilesMatch>
+</IfModule>
+
 FileETag MTime Size
-
-# Immutable cache for versioned assets (bundle, minified CSS)
-<FilesMatch "ss-bundle\.min\.js|design-system\.min\.css">
-    <IfModule mod_headers.c>
-        Header set Cache-Control "public, max-age=604800, immutable"
-    </IfModule>
-</FilesMatch>
-
-# Short cache for SVG assets
-<FilesMatch "\.(svg)$">
-    <IfModule mod_headers.c>
-        Header set Cache-Control "public, max-age=2592000"
-    </IfModule>
-</FilesMatch>
 
 # ============================================
 # GZIP COMPRESSION
 # ============================================
 <IfModule mod_deflate.c>
-    AddOutputFilterByType DEFLATE text/html text/plain text/xml
-    AddOutputFilterByType DEFLATE text/css text/javascript
-    AddOutputFilterByType DEFLATE application/javascript application/json
+    AddOutputFilterByType DEFLATE text/html text/plain text/xml text/css
+    AddOutputFilterByType DEFLATE text/javascript application/javascript application/json
     AddOutputFilterByType DEFLATE application/xml application/xhtml+xml
-    AddOutputFilterByType DEFLATE image/svg+xml
-    AddOutputFilterByType DEFLATE font/woff font/woff2
-</IfModule>
-
-<IfModule LiteSpeed>
-    CacheDisable public /api/
-</IfModule>
-
-# === PERFORMANCE OPTIMIZATIONS (added Session 105) ===
-
-# GZIP Compression
-<IfModule mod_deflate.c>
-    AddOutputFilterByType DEFLATE text/html text/css application/javascript application/json text/plain
-</IfModule>
-
-# Browser Cache
-<IfModule mod_expires.c>
-    ExpiresActive On
-    ExpiresByType text/css "access plus 7 days"
-    ExpiresByType application/javascript "access plus 7 days"
-    ExpiresByType image/jpeg "access plus 30 days"
-    ExpiresByType image/png "access plus 30 days"
-    ExpiresByType image/webp "access plus 30 days"
-    ExpiresByType font/woff2 "access plus 30 days"
-</IfModule>
-
-# Cache Headers
-<IfModule mod_headers.c>
-    <FilesMatch "\.(css|js)$">
-        Header set Cache-Control "public, max-age=604800"
-    </FilesMatch>
-    <FilesMatch "\.(jpg|jpeg|png|gif|webp|svg|ico)$">
-        Header set Cache-Control "public, max-age=2592000"
-    </FilesMatch>
-    <FilesMatch "\.html$">
-        Header set Cache-Control "no-cache, must-revalidate"
-    </FilesMatch>
-    Header always set X-Content-Type-Options "nosniff"
-    Header always set X-Frame-Options "SAMEORIGIN"
+    AddOutputFilterByType DEFLATE image/svg+xml font/woff font/woff2
 </IfModule>
 
 # Custom error pages

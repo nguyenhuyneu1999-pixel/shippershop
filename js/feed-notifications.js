@@ -1,4 +1,21 @@
 
+// Notification sound (Web Audio API)
+var _notifSoundCtx=null;
+function playNotifSound(){
+  try{
+    if(!_notifSoundCtx)_notifSoundCtx=new(window.AudioContext||window.webkitAudioContext)();
+    var osc=_notifSoundCtx.createOscillator();
+    var gain=_notifSoundCtx.createGain();
+    osc.connect(gain);gain.connect(_notifSoundCtx.destination);
+    osc.frequency.setValueAtTime(800,_notifSoundCtx.currentTime);
+    osc.frequency.setValueAtTime(600,_notifSoundCtx.currentTime+0.1);
+    gain.gain.setValueAtTime(0.1,_notifSoundCtx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.01,_notifSoundCtx.currentTime+0.3);
+    osc.start(_notifSoundCtx.currentTime);
+    osc.stop(_notifSoundCtx.currentTime+0.3);
+  }catch(e){}
+}
+
 function groupNotifs(notifs){
   var grouped={};
   notifs.forEach(function(n){
