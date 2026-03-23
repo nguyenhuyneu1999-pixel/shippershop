@@ -49,6 +49,7 @@ function renderHeader(){
   var icon=g.icon_image?"<img src='"+esc(g.icon_image)+"' style='width:100%;height:100%;object-fit:cover;border-radius:16px' onclick=\"zoomImage(this.src)\">":"<span>"+esc(g.name[0])+"</span>";
   var isAdmin=g.member_role==="admin";
   var bannerBg=g.banner_image?"background:url("+esc(g.banner_image)+") center/cover no-repeat":"background:"+(g.banner_color||"var(--primary)");
+  var bannerClick=g.banner_image?" onclick=\"zoomImage('"+esc(g.banner_image)+"')\" style=\"cursor:pointer\"":"";
   var editBtns="";
   if(isAdmin){editBtns="<div style='position:absolute;bottom:8px;right:8px;display:flex;gap:6px'><label style='width:32px;height:32px;border-radius:50%;background:rgba(0,0,0,.5);display:flex;align-items:center;justify-content:center;cursor:pointer'><i class='fas fa-camera' style='color:#fff;font-size:12px'></i><input type='file' accept='image/*' style='display:none' onchange='uploadGroupImg(\"banner\",this)'></label></div>";}
   var iconEdit="";
