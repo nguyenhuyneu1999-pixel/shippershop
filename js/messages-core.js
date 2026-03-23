@@ -153,3 +153,11 @@ function showTyping(name){
     clearTimeout(el._hide);
     el._hide=setTimeout(function(){el.style.display='none';},4000);
 }
+
+// Voice note (placeholder — needs MediaRecorder support check)
+function startVoiceNote(convId){
+  if(!navigator.mediaDevices||!navigator.mediaDevices.getUserMedia){
+    toast('Trình duyệt không hỗ trợ ghi âm');return;
+  }
+  toast('Đang phát triển tính năng ghi âm...','info');
+}

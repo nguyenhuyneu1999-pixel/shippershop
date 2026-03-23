@@ -35,6 +35,10 @@ echo json_encode([
             ['POST /groups.php?action=kick_member', 'Kick member', '{group_id, user_id} (admin/mod)']
         ,
             ['POST /groups.php?action=update_settings', 'Group settings', '{group_id, name, description, privacy}']
+        ,
+            ['POST /groups.php?action=upload_cover', 'Group cover', 'multipart {group_id, image}']
+        ,
+            ['POST /groups.php?action=share_post', 'Share to group', '{post_id, group_id}']
         ],
             ['GET /groups.php?action=posts&group_id=X', 'Group posts', '?page=1&sort=new|hot|top&cursor=X'],
             ['GET /groups.php?action=members&group_id=X', 'Members', ''],
