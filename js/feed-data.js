@@ -22,7 +22,7 @@ let CU=null,sort='hot',type='all',prov=null,company='',page=1,totalPg=1,imgs=[],
 
 document.addEventListener('DOMContentLoaded',()=>{
   CU=JSON.parse(localStorage.getItem('user')||'null');
-  renderNav(); renderProvinces(); loadPosts(); loadTrend(); loadHashtags(); loadSuggestions(); loadAnnouncement(); loadFriendsLatest(); timeGreeting(); loadPeopleCarousel(); loadDailyQuote(); loadHashtagCloud(); loadCheckin(); loadDeliveryCounter(); loadStories(); loadOnlineCount(); checkPostReminder(); checkAchievementsOnLoad(); showWelcomeBanner(); showOnboarding();
+  renderNav(); renderProvinces(); loadPosts(); loadTrend(); loadHashtags(); loadSuggestions(); loadAnnouncement(); loadFriendsLatest(); timeGreeting(); loadPeopleCarousel(); loadDailyQuote(); loadHashtagCloud(); loadCheckin(); loadStories(); loadOnlineCount(); checkPostReminder(); checkAchievementsOnLoad(); showWelcomeBanner(); showOnboarding();
   // mProv populated by async province API fetch below
   document.getElementById('stM').textContent=Math.floor(Math.random()*3000+1000).toLocaleString();
   document.getElementById('stO').textContent=Math.floor(Math.random()*500+100);
@@ -674,7 +674,7 @@ async function doCheckin(){
     var d=await r.json();
     if(d.success){
       toast(d.message,'success');
-      loadCheckin(); loadDeliveryCounter(); loadStories(); loadOnlineCount(); checkPostReminder(); checkAchievementsOnLoad(); showWelcomeBanner(); showOnboarding();
+      loadCheckin(); loadStories(); loadOnlineCount(); checkPostReminder(); checkAchievementsOnLoad(); showWelcomeBanner(); showOnboarding();
       haptic('success');
     }else{toast(d.message||'Loi','error');}
   }catch(e){toast('Lỗi kết nối','error');}

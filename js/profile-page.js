@@ -566,3 +566,86 @@ async function loadProfileDeliveries(){
 }
 
 })();
+
+// Load delivery counter on profile page
+if(document.getElementById('deliveryWidget')){
+  if(typeof loadDeliveryCounter==='function'){loadDeliveryCounter();}
+  else{
+    // Load from feed-data.js functions
+    var token=localStorage.getItem('token');
+    if(token){
+      fetch('/api/deliveries.php?action=today',{headers:{'Authorization':'Bearer '+token}})
+      .then(function(r){return r.json();})
+      .then(function(d){
+        if(!d.success)return;
+        var data=d.data;
+        var box=document.getElementById('deliveryWidget');
+        if(!box)return;
+        
+        function fmtM(n){return n?n.toString().replace(/\B(?=(\d{3})+(?!\d))/g,'.')+'\u0111':'0\u0111';}
+        function fmtN(n){return n?n.toString().replace(/\B(?=(\d{3})+(?!\d))/g,'.'):'0';}
+        
+        var html='<div style="padding:14px 16px;background:linear-gradient(135deg,#7C3AED,#5B21B6);border-radius:12px;margin:8px 0;color:#fff">';
+        html+='<div style="display:flex;justify-content:space-between;align-items:center">';
+        html+='<div><div style="font-size:11px;opacity:.8">\u0110\u01a1n giao th\u00e0nh c\u00f4ng h\u00f4m nay</div>';
+        html+='<div style="font-size:36px;font-weight:800;line-height:1.1">'+data.today+'<span style="font-size:14px;opacity:.6">/'+data.today_target+'</span></div></div>';
+        html+='<div style="text-align:right"><div style="font-size:11px;opacity:.8">S\u1ed1 d\u01b0 v\u00ed</div>';
+        html+='<div style="font-size:16px;font-weight:700">'+fmtM(data.balance)+'</div></div></div>';
+        
+        html+='<div style="margin-top:10px"><div style="display:flex;justify-content:space-between;font-size:10px;opacity:.8"><span>'+data.today_progress+'%</span><span>\ud83c\udfaf '+fmtM(data.today_reward)+' th\u01b0\u1edfng</span></div>';
+        html+='<div style="background:rgba(255,255,255,.2);border-radius:4px;height:8px;margin-top:3px"><div style="background:#FBBF24;border-radius:4px;height:8px;width:'+data.today_progress+'%;transition:width .5s"></div></div></div>';
+        
+        if(data.can_claim_daily){
+          html+='<button onclick="claimDailyReward(this)" style="width:100%;padding:12px;margin-top:10px;background:#FBBF24;color:#92400E;border:none;border-radius:10px;font-weight:700;font-size:14px;cursor:pointer">\ud83c\udf81 Nh\u1eadn '+fmtM(data.today_reward)+' v\u00e0o v\u00ed!</button>';
+        }else if(data.today_claimed){
+          html+='<div style="text-align:center;margin-top:8px;padding:8px;background:rgba(255,255,255,.15);border-radius:8px;font-size:12px">\u2705 \u0110\u00e3 nh\u1eadn th\u01b0\u1edfng ng\u00e0y \u00b7 Quay l\u1ea1i 00:00</div>';
+        }
+        
+        html+='<div style="margin-top:12px;padding-top:10px;border-top:1px solid rgba(255,255,255,.2)">';
+        html+='<div style="display:flex;justify-content:space-between;align-items:center">';
+        html+='<div style="font-size:11px;opacity:.8">Th\u00e1ng '+data.month_label+': '+data.month+'/'+fmtN(data.month_target)+' \u0111\u01a1n</div>';
+        html+='<div style="font-size:11px;font-weight:600">'+fmtM(data.month_reward)+' th\u01b0\u1edfng</div></div>';
+        html+='<div style="background:rgba(255,255,255,.2);border-radius:3px;height:5px;margin-top:4px"><div style="background:#34D399;border-radius:3px;height:5px;width:'+data.month_progress+'%"></div></div>';
+        
+        if(data.can_claim_monthly){
+          html+='<button onclick="claimMonthlyReward(this)" style="width:100%;padding:10px;margin-top:8px;background:#34D399;color:#064E3B;border:none;border-radius:8px;font-weight:700;font-size:13px;cursor:pointer">\ud83c\udfc6 Nh\u1eadn '+fmtM(data.month_reward)+' th\u01b0\u1edfng th\u00e1ng!</button>';
+        }else if(data.month_claimed){
+          html+='<div style="text-align:center;margin-top:6px;font-size:11px;opacity:.7">\u2705 \u0110\u00e3 nh\u1eadn th\u01b0\u1edfng th\u00e1ng '+data.month_label+'</div>';
+        }else{
+          html+='<div style="text-align:center;margin-top:4px;font-size:10px;opacity:.6">C\u00f2n '+data.days_left+' ng\u00e0y</div>';
+        }
+        html+='</div>';
+        
+        html+='<div style="display:flex;gap:6px;margin-top:10px">';
+        html+='<div style="flex:1;background:rgba(255,255,255,.12);border-radius:8px;padding:6px;text-align:center"><div style="font-size:15px;font-weight:700">'+fmtN(data.all_time)+'</div><div style="font-size:9px;opacity:.6">T\u1ed5ng \u0111\u01a1n</div></div>';
+        html+='<div style="flex:1;background:rgba(255,255,255,.12);border-radius:8px;padding:6px;text-align:center"><div style="font-size:15px;font-weight:700">'+data.best_day+'</div><div style="font-size:9px;opacity:.6">K\u1ef7 l\u1ee5c/ng\u00e0y</div></div>';
+        html+='<div style="flex:1;background:rgba(255,255,255,.12);border-radius:8px;padding:6px;text-align:center"><div style="font-size:15px;font-weight:700">'+data.streak+'</div><div style="font-size:9px;opacity:.6">\ud83d\udd25 Streak</div></div>';
+        html+='</div>';
+        
+        html+='</div>';
+        box.innerHTML=html;
+        box.style.display='block';
+      }).catch(function(){});
+    }
+  }
+}
+
+function claimDailyReward(btn){
+  var token=localStorage.getItem('token');
+  btn.disabled=true;btn.textContent='\u0110ang nh\u1eadn...';
+  fetch('/api/deliveries.php?action=claim_daily',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+token}})
+  .then(function(r){return r.json();}).then(function(d){
+    if(typeof toast==='function')toast(d.message||'Done',d.success?'success':'error');
+    if(d.success)location.reload();
+  }).catch(function(){});
+}
+
+function claimMonthlyReward(btn){
+  var token=localStorage.getItem('token');
+  btn.disabled=true;btn.textContent='\u0110ang nh\u1eadn...';
+  fetch('/api/deliveries.php?action=claim_monthly',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+token}})
+  .then(function(r){return r.json();}).then(function(d){
+    if(typeof toast==='function')toast(d.message||'Done',d.success?'success':'error');
+    if(d.success)location.reload();
+  }).catch(function(){});
+}
