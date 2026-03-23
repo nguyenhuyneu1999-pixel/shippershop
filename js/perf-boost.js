@@ -108,3 +108,27 @@
             }
         });
     }
+
+// Enhanced lazy loading with IntersectionObserver
+(function(){
+  if(!('IntersectionObserver' in window))return;
+  var observer=new IntersectionObserver(function(entries){
+    entries.forEach(function(entry){
+      if(entry.isIntersecting){
+        var img=entry.target;
+        if(img.dataset.src){img.src=img.dataset.src;img.removeAttribute('data-src');}
+        observer.unobserve(img);
+      }
+    });
+  },{rootMargin:'200px'});
+  
+  // Observe existing and future images
+  function observeImages(){
+    document.querySelectorAll('img[data-src]:not([src])').forEach(function(img){observer.observe(img);});
+  }
+  observeImages();
+  
+  // MutationObserver for dynamically added images
+  var mo=new MutationObserver(function(){observeImages();});
+  mo.observe(document.body,{childList:true,subtree:true});
+})();

@@ -98,3 +98,31 @@
         }
     }
 })();
+// Offline action queue — saves POST actions when offline, replays when back online
+var _offlineQueue=JSON.parse(localStorage.getItem('ss_offline_queue')||'[]');
+
+function queueOfflineAction(url, options){
+  _offlineQueue.push({url:url,options:options,ts:Date.now()});
+  localStorage.setItem('ss_offline_queue',JSON.stringify(_offlineQueue));
+  toast('Đã lưu, sẽ gửi khi có mạng','info');
+}
+
+function replayOfflineQueue(){
+  if(!_offlineQueue.length||!navigator.onLine)return;
+  var queue=_offlineQueue.slice();
+  _offlineQueue=[];
+  localStorage.removeItem('ss_offline_queue');
+  var count=0;
+  queue.forEach(function(item){
+    if(Date.now()-item.ts>86400000)return; // Skip > 24h old
+    fetch(item.url,item.options).then(function(){count++;}).catch(function(){
+      _offlineQueue.push(item);
+      localStorage.setItem('ss_offline_queue',JSON.stringify(_offlineQueue));
+    });
+  });
+  if(count)toast(count+' hành động đã gửi','success');
+}
+
+window.addEventListener('online',function(){
+  setTimeout(replayOfflineQueue,2000);
+});

@@ -146,7 +146,7 @@ window.closeSPM=function(){window._spmGroupId=null;
   document.getElementById("spmCount").textContent="0";
   document.getElementById("spmSend").disabled=true;
   spmFiles=[];spmType="post";
-  setTimeout(function(){var ta=document.getElementById('spmText');if(ta)setupMention(ta);},200);
+  setTimeout(function(){var ta=document.getElementById('spmText');if(ta){setupMention(ta);ta.focus();}var md=document.getElementById('spmModal');if(md)trapFocus(md);},200);
   loadDraft();startDraftSave();
   createFormatToolbar();
   document.querySelectorAll(".spm-tag").forEach(function(t){t.classList.remove("sel");});
@@ -410,6 +410,22 @@ function createFormatToolbar(){
     +'<button type="button" onclick="toggleSchedule()" style="width:28px;height:28px;border:1px solid #ddd;border-radius:6px;background:#fff;cursor:pointer;font-size:13px" title="Hẹn giờ">⏰</button>';
   var ta=document.getElementById('spmText');
   if(ta)ta.parentNode.insertBefore(bar,ta);
+}
+
+
+// Focus trap for modal
+function trapFocus(modal){
+  var focusable=modal.querySelectorAll('button,input,textarea,select,a,[tabindex]');
+  if(!focusable.length)return;
+  var first=focusable[0],last=focusable[focusable.length-1];
+  modal.addEventListener('keydown',function(e){
+    if(e.key==='Tab'){
+      if(e.shiftKey){if(document.activeElement===first){e.preventDefault();last.focus();}}
+      else{if(document.activeElement===last){e.preventDefault();first.focus();}}
+    }
+    if(e.key==='Escape'){closeSPM();}
+  });
+  first.focus();
 }
 
 })();
