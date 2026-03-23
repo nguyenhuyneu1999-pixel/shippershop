@@ -112,7 +112,8 @@ if ($method === 'GET') {
                     u.avatar as user_avatar,
                     u.username as user_username,
                     u.shipping_company as shipping_company
-                FROM posts p
+                , p.views_count, p.is_pinned, p.edited_at
+            FROM posts p
                 LEFT JOIN users u ON p.user_id = u.id
                 WHERE p.id = ? AND p.status = 'active'";
         
