@@ -22,7 +22,7 @@
                 var text = await r.text();
                 var data;
                 try { data = JSON.parse(text); } catch(e) {
-                    console.error('JSON parse error:', text.substring(0,200));
+                    // console.error('JSON parse error:', text.substring(0,200));
                     var user = JSON.parse(localStorage.getItem('user'));
                     displayUserInfo(user);
                     return;
@@ -37,7 +37,7 @@
                     window.location.href = 'login.html';
                 }
             } catch (error) {
-                console.error('Load profile error:', error);
+                // console.error('Load profile error:', error);
                 var user = JSON.parse(localStorage.getItem('user'));
                 if (user) displayUserInfo(user);
             }
@@ -159,7 +159,7 @@
                     feed.innerHTML = '<div style="text-align:center;padding:50px 20px"><div style="font-size:48px;margin-bottom:12px">' + (emptyIcons[tab]||'📄') + '</div><p style="color:#999;font-size:14px">' + (emptyMsgs[tab]||'Không có dữ liệu') + '</p></div>';
                 }
             } catch(e) {
-                console.error('Activity load error:', e);
+                // console.error('Activity load error:', e);
                 feed.innerHTML = '<p style="text-align:center;color:#f44;padding:40px">Lỗi kết nối: ' + e.message + '</p>';
             }
         }

@@ -35,3 +35,5 @@ fix-*.sh
 *.bak
 api/fx.php
 api/test-*.php
+
+api/test-real-error.php

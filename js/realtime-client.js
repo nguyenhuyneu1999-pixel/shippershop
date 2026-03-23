@@ -26,7 +26,7 @@ var SSRealtime = (function() {
                 useWS = true;
                 connected = true;
                 ws.send(JSON.stringify({type: 'auth', token: getToken()}));
-                console.log('[RT] WebSocket connected');
+                // console.log('[RT] WebSocket connected');
             };
             ws.onmessage = function(e) {
                 var data = JSON.parse(e.data);
@@ -35,7 +35,7 @@ var SSRealtime = (function() {
             ws.onclose = function() {
                 connected = false;
                 useWS = false;
-                console.log('[RT] WebSocket closed, falling back to polling');
+                // console.log('[RT] WebSocket closed, falling back to polling');
                 startPolling();
             };
             ws.onerror = function() {
@@ -58,7 +58,7 @@ var SSRealtime = (function() {
     // Polling fallback (shared hosting)
     function startPolling() {
         if (pollTimer) return;
-        console.log('[RT] Using polling (3s interval)');
+        // console.log('[RT] Using polling (3s interval)');
         pollTimer = setInterval(poll, 3000);
     }
 

@@ -11,7 +11,7 @@ if(!firebase.apps.length)firebase.initializeApp(FB_CFG);
 db=firebase.database();
 try{var t=localStorage.getItem("token");if(t){var p=JSON.parse(atob(t.split(".")[1]));myId=p.user_id||p.id||p.sub;}
 if(!myId){var u=localStorage.getItem("user");if(u){var uo=JSON.parse(u);myId=uo.id||uo.user_id;}}}catch(e){}
-console.log("[SSCall] myId=",myId);
+// console.log("[SSCall] myId=",myId);
 if(myId)listenIncoming();
 }
 function getMyName(){try{var u=JSON.parse(localStorage.getItem("user"));return u.fullname||u.name||"Nguoi dung";}catch(e){return "Nguoi dung";}}
@@ -35,7 +35,7 @@ h+="<button onclick=\"SSCall.rejectCall()\" style=\"width:64px;height:64px;borde
 h+="<button onclick=\"SSCall.acceptCall()\" style=\"width:64px;height:64px;border-radius:50%;border:none;background:#2ecc71;color:#fff;font-size:24px;cursor:pointer\"><i class=\"fas fa-phone\"></i></button>";
 h+="</div></div>";
 var d=document.createElement("div");d.innerHTML=h;document.body.insertBefore(d.firstChild,document.body.firstChild);
-console.log("[SSCall] UI created");
+// console.log("[SSCall] UI created");
 }
 function showCall(name,avatar,status,incoming){
 createCallUI();
@@ -55,7 +55,7 @@ var rv=document.getElementById("remoteVideo");if(rv)rv.style.display="none";
 var lv=document.getElementById("localVideo");if(lv)lv.style.display="none";
 }
 async function startCall(userId,userName,userAvatar,isVideo){
-console.log("[SSCall] startCall",userId,userName,isVideo);
+// console.log("[SSCall] startCall",userId,userName,isVideo);
 if(isCallActive)return;
 if(!myId){alert("Dang nhap de goi!");return;}
 isCallActive=true;isCaller=true;

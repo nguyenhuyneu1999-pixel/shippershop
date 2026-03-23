@@ -50,7 +50,7 @@ function locateMe(){
         L.circle([pos.coords.latitude,pos.coords.longitude],{radius:50,color:"#7C3AED",fillOpacity:.15,weight:2}).addTo(map);
         L.marker([pos.coords.latitude,pos.coords.longitude]).addTo(map).bindPopup("<strong>📍 Vị trí của bạn</strong>").openPopup();
     },function(err){
-        console.log("GPS error:",err.message);
+        // console.log("GPS error:",err.message);
     },{enableHighAccuracy:true,timeout:10000});
 }
 
