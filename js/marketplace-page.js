@@ -318,3 +318,17 @@ function validateListing(form){
   if(!desc||desc.value.trim().length<10){toast('Mô tả tối thiểu 10 ký tự','error');return false;}
   return true;
 }
+
+// Show recently viewed listings
+function showRecentlyViewed(){
+  var recent=JSON.parse(localStorage.getItem('ss_recent_listings')||'[]');
+  if(!recent.length)return;
+  var el=document.getElementById('recentListings');
+  if(!el)return;
+  var html='<div style="padding:10px 0"><div style="font-weight:700;font-size:14px;margin-bottom:8px">👀 Đã xem gần đây</div><div style="display:flex;gap:8px;overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none;padding-bottom:4px">';
+  recent.slice(0,6).forEach(function(r){
+    html+='<a href="listing.html?id='+r.id+'" style="flex-shrink:0;width:120px;text-decoration:none;color:#333"><div style="width:120px;height:80px;background:#f0f0f0;border-radius:8px;overflow:hidden">'+(r.image?'<img src="'+r.image+'" style="width:100%;height:100%;object-fit:cover" loading="lazy">':'')+'</div><div style="font-size:12px;font-weight:600;margin-top:4px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+r.title+'</div>'+(r.price?'<div style="font-size:11px;color:#7C3AED;font-weight:600">'+Number(r.price).toLocaleString("vi-VN")+'đ</div>':'')+'</a>';
+  });
+  html+='</div></div>';
+  el.innerHTML=html;
+}

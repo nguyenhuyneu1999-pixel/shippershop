@@ -367,3 +367,14 @@ function loadChallenge(groupId){
       el.innerHTML=html;
     }).catch(function(){});
 }
+
+function inviteFriend(groupId){
+  var token=localStorage.getItem('token');
+  if(!token){toast('Đăng nhập!');return;}
+  var userId=prompt('Nhập ID người dùng muốn mời:');
+  if(!userId||isNaN(userId))return;
+  fetch('/api/groups.php?action=invite',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+token},body:JSON.stringify({group_id:groupId,user_id:parseInt(userId)})})
+    .then(function(r){return r.json()})
+    .then(function(d){toast(d.message||'Done',d.success?'success':'error');})
+    .catch(function(){toast('Lỗi','error');});
+}

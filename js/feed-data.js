@@ -22,7 +22,7 @@ let CU=null,sort='hot',type='all',prov=null,company='',page=1,totalPg=1,imgs=[],
 
 document.addEventListener('DOMContentLoaded',()=>{
   CU=JSON.parse(localStorage.getItem('user')||'null');
-  renderNav(); renderProvinces(); loadPosts(); loadTrend(); loadHashtags(); loadSuggestions(); loadAnnouncement(); loadFriendsLatest(); timeGreeting(); loadPeopleCarousel(); loadDailyQuote(); loadCheckin(); checkPostReminder(); checkAchievementsOnLoad();
+  renderNav(); renderProvinces(); loadPosts(); loadTrend(); loadHashtags(); loadSuggestions(); loadAnnouncement(); loadFriendsLatest(); timeGreeting(); loadPeopleCarousel(); loadDailyQuote(); loadCheckin(); checkPostReminder(); checkAchievementsOnLoad(); showWelcomeBanner();
   // mProv populated by async province API fetch below
   document.getElementById('stM').textContent=Math.floor(Math.random()*3000+1000).toLocaleString();
   document.getElementById('stO').textContent=Math.floor(Math.random()*500+100);
@@ -674,7 +674,7 @@ async function doCheckin(){
     var d=await r.json();
     if(d.success){
       toast(d.message,'success');
-      loadCheckin(); checkPostReminder(); checkAchievementsOnLoad();
+      loadCheckin(); checkPostReminder(); checkAchievementsOnLoad(); showWelcomeBanner();
       haptic('success');
     }else{toast(d.message||'Loi','error');}
   }catch(e){toast('Lỗi kết nối','error');}
@@ -723,4 +723,14 @@ function checkAchievementsOnLoad(){
   setTimeout(function(){
     if(typeof checkAchievements==='function')checkAchievements();
   },8000);
+}
+
+// Welcome banner for new users
+function showWelcomeBanner(){
+  var user=JSON.parse(localStorage.getItem('user')||'{}');
+  if(!user.id||localStorage.getItem('ss_welcomed'))return;
+  var el=document.getElementById('welcomeBanner');
+  if(!el)return;
+  el.innerHTML='<div style="padding:16px;background:linear-gradient(135deg,#7C3AED,#5B21B6);border-radius:12px;color:#fff;margin:8px 0;position:relative"><button onclick="this.parentNode.remove();localStorage.setItem(\'ss_welcomed\',\'1\')" style="position:absolute;top:8px;right:12px;background:none;border:none;color:#fff;font-size:18px;cursor:pointer">&times;</button><div style="font-size:18px;font-weight:700;margin-bottom:6px">Chào mừng '+esc(user.fullname||'bạn')+'! 🎉</div><div style="font-size:13px;opacity:.9;margin-bottom:12px">Cộng đồng shipper lớn nhất Việt Nam. Chia sẻ kinh nghiệm, mẹo giao hàng!</div><div style="display:flex;gap:8px"><a href="groups.html" style="padding:6px 14px;background:rgba(255,255,255,.2);border-radius:8px;color:#fff;text-decoration:none;font-size:12px;font-weight:600">Tham gia nhóm</a><a href="leaderboard.html" style="padding:6px 14px;background:rgba(255,255,255,.2);border-radius:8px;color:#fff;text-decoration:none;font-size:12px;font-weight:600">Bảng xếp hạng</a></div></div>';
+  localStorage.setItem('ss_welcomed','1');
 }
