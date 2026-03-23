@@ -175,3 +175,15 @@ function searchConvs(query){
     }
   });
 }
+
+// Last seen display
+function formatLastSeen(lastActive){
+  if(!lastActive)return '';
+  var d=new Date(lastActive);
+  var now=new Date();
+  var diff=Math.floor((now-d)/1000);
+  if(diff<60)return 'Vừa xong';
+  if(diff<3600)return Math.floor(diff/60)+' phút trước';
+  if(diff<86400)return Math.floor(diff/3600)+' giờ trước';
+  return Math.floor(diff/86400)+' ngày trước';
+}

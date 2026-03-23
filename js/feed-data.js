@@ -552,3 +552,10 @@ document.addEventListener('keydown',function(e){
   if(e.key==='m'){location.href='messages.html';}
   if(e.key==='t'){window.scrollTo({top:0,behavior:'smooth'});}
 });
+
+function showEmptyFeed(){
+  var feed=document.getElementById('feed');
+  if(feed&&feed.children.length===0){
+    feed.innerHTML='<div style="text-align:center;padding:60px 20px"><div style="font-size:48px;margin-bottom:12px">📭</div><div style="font-size:18px;font-weight:700;color:#333;margin-bottom:8px">Chưa có bài viết nào</div><div style="font-size:14px;color:#65676B;margin-bottom:16px">Hãy là người đầu tiên chia sẻ!</div><button onclick="if(typeof openSPM===\'function\')openSPM()" style="padding:10px 24px;background:#7C3AED;color:#fff;border:none;border-radius:8px;font-size:14px;font-weight:600;cursor:pointer">Tạo bài viết</button></div>';
+  }
+}

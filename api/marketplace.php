@@ -53,6 +53,25 @@ if ($method === 'GET' && $action === 'wishlist') {
     mSuccess('OK', ['items' => $items ?: []]);
 }
 
+
+
+// Mark listing as sold
+if ($method === 'POST' && $action === 'mark_sold') {
+    $userId = getAuthUserId();
+    if (!$userId) { mErr('Auth required', 401); }
+    $input = json_decode(file_get_contents('php://input'), true);
+    $listingId = intval($input['listing_id'] ?? 0);
+    if (!$listingId) mErr('Missing listing_id');
+    
+    $listing = $db->fetchOne("SELECT user_id, `status` FROM marketplace_listings WHERE id = ?", [$listingId]);
+    if (!$listing || intval($listing['user_id']) !== $userId) mErr('No permission');
+    
+    $newStatus = $listing['status'] === 'sold' ? 'active' : 'sold';
+    $db->query("UPDATE marketplace_listings SET `status` = ? WHERE id = ?", [$newStatus, $listingId]);
+    
+    mSuccess('OK', ['status' => $newStatus]);
+}
+
 echo json_encode(['success'=>false,'message'=>$msg], JSON_UNESCAPED_UNICODE); exit; }
 function mAuth() {
     if (isset($_SESSION['user_id'])) return intval($_SESSION['user_id']);
